@@ -63,6 +63,24 @@
             "command": "bash .claude/hooks/check-tests.sh",
             "timeout": 180,
             "statusMessage": "Тесты (если есть и что-то менялось)…"
+          },
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/check-upstream.sh stop",
+            "timeout": 30,
+            "statusMessage": "Чужие коммиты в origin/main против текущей работы…"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/check-upstream.sh post",
+            "timeout": 30
           }
         ]
       }

@@ -93,4 +93,49 @@ git worktree add -q .claude/worktrees/wt-test -b worktree-wt-test 2>/dev/null
 (cd .claude/worktrees/wt-test && expect_out lacks "worktree — без предупреждения" "основной копии")
 (cd .claude/worktrees/wt-test && expect_out has   "worktree — видна ветка"        "worktree-wt-test")
 
+# --- check-upstream.sh: чужие коммиты в origin/main против моей работы
+cd "$TMP" && git init -q --bare -b main remote.git
+git clone -q remote.git mate 2>/dev/null
+mate_push() { # mate_push <файл> <сообщение>
+  (cd "$TMP/mate" && echo "$2" >> "$1" && git add "$1" &&
+   git -c user.name=mate -c user.email=m@m commit -q -m "$2" && git push -q origin HEAD:main)
+}
+mate_push README.md "init"
+git clone -q remote.git me && cd me && git checkout -q -b worktree-me origin/main
+expect_up() { # expect_up <block|pass> <описание> [шаблон]
+  local out
+  out="$(echo '{}' | bash "$HOOKS/check-upstream.sh" stop 2>&1)"
+  if [ "$1" = block ] && ! { printf '%s' "$out" | grep -q '"decision": *"block"' &&
+                            printf '%s' "$out" | grep -q -- "$3"; }; then
+    echo "FAIL: $2 — ожидалась блокировка с «$3», вывод: $out"; FAIL=1
+  elif [ "$1" = pass ] && [ -n "$out" ]; then
+    echo "FAIL: $2 — ожидался пустой вывод, вывод: $out"; FAIL=1
+  else
+    echo "ok:   $2"
+  fi
+}
+expect_up pass  "upstream: новых коммитов нет"
+mate_push other.txt "bot: чужой файл"
+expect_up pass  "upstream: чужой коммит не пересекается с моими файлами"
+echo mine > shared.txt
+mate_push shared.txt "api: тот же файл"
+expect_up block "upstream: пересечение с незакоммиченным файлом" "shared.txt"
+expect_up pass  "upstream: то же состояние origin/main второй раз не блокирует"
+echo mine > new.txt && git add new.txt && git -c user.name=me -c user.email=me@me commit -q -m wip
+mate_push new.txt "app: тот же новый файл"
+expect_up block "upstream: пересечение с закоммиченным в ветке файлом" "new.txt"
+mate_push HANDOFF.md "docs: взял задачу"
+expect_up block "upstream: изменился HANDOFF — показать всегда" "HANDOFF.md"
+mate_push shared.txt "api: ещё правка"
+out="$(echo '{}' | bash "$HOOKS/check-upstream.sh" post 2>&1)"
+if printf '%s' "$out" | jq -e '.hookSpecificOutput.additionalContext | contains("shared.txt")' >/dev/null 2>&1; then
+  echo "ok:   upstream post: факты в additionalContext без блокировки"
+else echo "FAIL: upstream post: нет additionalContext, вывод: $out"; FAIL=1; fi
+mate_push shared.txt "api: третья правка"
+out="$(echo '{}' | bash "$HOOKS/check-upstream.sh" post 2>&1)"
+if [ -z "$out" ]; then echo "ok:   upstream post: не чаще раза в 5 минут"
+else echo "FAIL: upstream post: сработал раньше 5 минут, вывод: $out"; FAIL=1; fi
+git remote set-url origin "$TMP/nope.git"
+expect_up pass  "upstream: сеть недоступна — молчит"
+
 exit $FAIL
