@@ -51,6 +51,11 @@ git worktree add .claude/worktrees/<поток>-<тема> -b worktree-<пото
 (список — `.worktreeinclude`; проверено 15.09). При `git worktree add` руками `.env`
 копировать самому. `node_modules` и `.venv` в новом worktree нет — поставить заново.
 
+То же и в обратную сторону: **после `pull`, который принёс новые или изменённые
+зависимости, в основной копии нужен `npm install`** — иначе Stop-хук `check-tests.sh`
+покажет `vitest: command not found` и красные тесты на ровном месте. `node_modules`
+не коммитится и между копиями не переносится.
+
 Финиш — в `main` вливаем **из worktree, не переключая основную копию**:
 
 ```bash
