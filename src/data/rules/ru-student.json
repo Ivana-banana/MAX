@@ -1,0 +1,120 @@
+{
+  "$comment": [
+    "Нормативные сроки для иностранного студента, въехавшего в РФ на срок свыше 90 дней.",
+    "ВСЕ правила здесь имеют legal.status = draft: юридической вычитки человеком ещё не было.",
+    "Продукт обязан показывать такие сроки как предварительные (PlanItem.provisional).",
+    "Задача на вычитку — HANDOFF.md, она блокирует релиз.",
+    "Миграционный учёт сюда сознательно не включён: проверенного источника по сроку для",
+    "студентов у нас нет, а выдуманный срок здесь опаснее отсутствующего."
+  ],
+  "version": "2026-09-16",
+  "rules": [
+    {
+      "id": "medical-examination",
+      "title": {
+        "ru": "Медицинское освидетельствование",
+        "en": "Medical examination"
+      },
+      "action": {
+        "ru": "Пройти медосвидетельствование в уполномоченной медорганизации. Результаты в МВД передаёт сама клиника.",
+        "en": "Undergo the medical examination at an authorised clinic. The clinic itself submits the results to the Ministry of Internal Affairs."
+      },
+      "term": { "event": "entry", "days": 30, "counting": "dayAfterEvent" },
+      "repeat": { "months": 12 },
+      "appliesIf": [
+        { "field": "citizenship", "op": "notIn", "values": ["BY"] },
+        { "field": "purpose", "op": "eq", "value": "study" },
+        { "field": "entryDate", "op": "onOrAfter", "value": "2026-09-01" }
+      ],
+      "documents": [
+        { "id": "passport", "title": { "ru": "Паспорт", "en": "Passport" } },
+        {
+          "id": "passport-translation",
+          "title": {
+            "ru": "Нотариальный перевод паспорта",
+            "en": "Notarised translation of the passport"
+          }
+        },
+        {
+          "id": "migration-card",
+          "title": { "ru": "Миграционная карта", "en": "Migration card" }
+        }
+      ],
+      "legal": {
+        "act": "Федеральный закон от 25.07.2002 № 115-ФЗ",
+        "article": "ст. 5, п. 18",
+        "url": "https://www.consultant.ru/document/cons_doc_LAW_37868/e9d581e7e11d7901295efd89c869ae044dd3d20f/",
+        "edition": "ред. от 26.06.2026 (изм. ФЗ от 10.06.2026 № 162-ФЗ)",
+        "checkedAt": "2026-09-16",
+        "status": "draft"
+      }
+    },
+    {
+      "id": "medical-examination-transitional",
+      "title": {
+        "ru": "Медицинское освидетельствование (въезд до 01.09.2026)",
+        "en": "Medical examination (entry before 1 Sep 2026)"
+      },
+      "action": {
+        "ru": "Пройти медосвидетельствование в уполномоченной медорганизации. Для въехавших до 01.09.2026 действует прежний срок.",
+        "en": "Undergo the medical examination at an authorised clinic. Those who entered before 1 Sep 2026 keep the earlier term."
+      },
+      "term": { "event": "entry", "days": 90, "counting": "dayAfterEvent" },
+      "repeat": { "months": 12 },
+      "appliesIf": [
+        { "field": "citizenship", "op": "notIn", "values": ["BY"] },
+        { "field": "purpose", "op": "eq", "value": "study" },
+        { "field": "entryDate", "op": "before", "value": "2026-09-01" }
+      ],
+      "documents": [
+        { "id": "passport", "title": { "ru": "Паспорт", "en": "Passport" } },
+        {
+          "id": "passport-translation",
+          "title": {
+            "ru": "Нотариальный перевод паспорта",
+            "en": "Notarised translation of the passport"
+          }
+        }
+      ],
+      "legal": {
+        "act": "Федеральный закон от 25.07.2002 № 115-ФЗ",
+        "article": "ст. 5, п. 18; переходные положения ФЗ от 10.06.2026 № 162-ФЗ",
+        "url": "https://ivisa.hse.ru/news/1163728680.html",
+        "edition": "ред. от 26.06.2026",
+        "checkedAt": "2026-09-16",
+        "status": "draft"
+      }
+    },
+    {
+      "id": "fingerprinting",
+      "title": {
+        "ru": "Дактилоскопия и фотографирование",
+        "en": "Fingerprinting and photographing"
+      },
+      "action": {
+        "ru": "Пройти обязательную государственную дактилоскопическую регистрацию и фотографирование в подразделении МВД. Процедура однократная.",
+        "en": "Complete the mandatory state fingerprint registration and photographing at a Ministry of Internal Affairs office. One time only."
+      },
+      "term": { "event": "entry", "days": 90, "counting": "dayAfterEvent" },
+      "appliesIf": [
+        { "field": "citizenship", "op": "notIn", "values": ["BY"] },
+        { "field": "purpose", "op": "eq", "value": "study" }
+      ],
+      "documents": [
+        { "id": "passport", "title": { "ru": "Паспорт", "en": "Passport" } },
+        {
+          "id": "migration-card",
+          "title": { "ru": "Миграционная карта", "en": "Migration card" }
+        }
+      ],
+      "legal": {
+        "act": "Федеральный закон от 25.07.2002 № 115-ФЗ",
+        "article": "ст. 5.1",
+        "url": "https://www.consultant.ru/document/cons_doc_LAW_37868/e9d581e7e11d7901295efd89c869ae044dd3d20f/",
+        "edition": "ред. от 26.06.2026",
+        "checkedAt": "2026-09-16",
+        "status": "draft"
+      }
+    }
+  ]
+}
