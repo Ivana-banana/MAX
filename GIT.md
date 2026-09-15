@@ -45,8 +45,9 @@ git fetch --prune
 git worktree add .claude/worktrees/<поток>-<тема> -b worktree-<поток>-<тема> origin/main
 ```
 
-`.claude/worktrees/` в `.gitignore`. В новом worktree нет `node_modules`, `.venv` и
-`.env` — поставить зависимости и скопировать `.env` из основной копии руками.
+`.claude/worktrees/` в `.gitignore`. `claude -w` сам копирует `.env` из основной копии
+(список — `.worktreeinclude`; проверено 15.09). При `git worktree add` руками `.env`
+копировать самому. `node_modules` и `.venv` в новом worktree нет — поставить заново.
 
 Финиш — в `main` вливаем **из worktree, не переключая основную копию**:
 
