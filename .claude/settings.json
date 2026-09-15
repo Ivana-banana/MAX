@@ -12,7 +12,12 @@
       "Bash(git push)",
       "Bash(git push origin main)",
       "Bash(git pull --ff-only:*)",
-      "Bash(git ls-remote:*)"
+      "Bash(git ls-remote:*)",
+      "Bash(git worktree add:*)",
+      "Bash(git worktree list:*)",
+      "Bash(git merge origin/main)",
+      "Bash(git push -u origin HEAD)",
+      "Bash(git push origin HEAD:main)"
     ],
     "deny": [
       "Bash(git push --force:*)",
