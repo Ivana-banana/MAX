@@ -19,6 +19,10 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 
+# IDE
+.idea/
+.vscode/
+
 # Логи и служебное
 *.log
 .DS_Store
