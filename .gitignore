@@ -26,6 +26,6 @@ __pycache__/
 # Логи и служебное
 *.log
 .DS_Store
-.claude/.last-green-test-run
-.claude/settings.local.json
-.claude/worktrees/
+
+# Конфигурация агентов: живёт локально, в репозиторий не попадает
+.claude/
