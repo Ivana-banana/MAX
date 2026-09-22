@@ -1,0 +1,33 @@
+# Proposed configuration based on task page 10; evaluator schema is still TBD.
+# Public HTTPS URL must be supplied before submission.
+version: 1
+name: first-90-days-demo
+base_url: http://127.0.0.1:3000
+checks:
+  - name: health
+    method: GET
+    path: /health
+    role: anonymous
+    expected_status: [200]
+    expected_content_type: application/json
+    required_fields: [status, mode, queue]
+  - name: reject_unauthenticated_webhook
+    method: POST
+    path: /webhook
+    role: anonymous
+    headers: {Content-Type: application/json}
+    body: {update_type: bot_started, timestamp: 1790210400000, user: {user_id: 1001}}
+    expected_status: [401]
+    expected_content_type: application/json
+    required_fields: [error]
+  - name: synthetic_start
+    method: POST
+    path: /webhook
+    role: demo-webhook
+    headers:
+      Content-Type: application/json
+      X-Max-Bot-Api-Secret: local-demo-only-not-for-deployment # secret-scan: allow — public local demonstration
+    body: {update_type: bot_started, timestamp: 1790210400000, user: {user_id: 1001}}
+    expected_status: [200]
+    expected_content_type: application/json
+    required_fields: [success]

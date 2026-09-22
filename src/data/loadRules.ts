@@ -123,8 +123,8 @@ function asRule(value: unknown, path: string): DeadlineRule {
   const term = asRecord(record.term, `${path}.term`);
 
   const event = asString(term.event, `${path}.term.event`);
-  if (event !== "entry" && event !== "completion") {
-    throw new RuleValidationError(`${path}.term.event`, "ожидается entry или completion");
+  if (event !== "entry") {
+    throw new RuleValidationError(`${path}.term.event`, "поддерживается только entry");
   }
 
   const days = term.days;
@@ -144,7 +144,11 @@ function asRule(value: unknown, path: string): DeadlineRule {
     if (typeof months !== "number" || !Number.isInteger(months) || months <= 0) {
       throw new RuleValidationError(`${path}.repeat.months`, "ожидается целое число больше нуля");
     }
-    repeat = { months };
+    const graceDays = raw.graceDays ?? 0;
+    if (typeof graceDays !== "number" || !Number.isInteger(graceDays) || graceDays < 0 || graceDays > 366) {
+      throw new RuleValidationError(`${path}.repeat.graceDays`, "ожидается целое число от 0 до 366");
+    }
+    repeat = { months, graceDays };
   }
 
   const appliesIfRaw = record.appliesIf;

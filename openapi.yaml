@@ -1,0 +1,64 @@
+openapi: 3.1.0
+info:
+  title: First 90 days — bot delivery boundary
+  version: 0.2.0-demo
+  description: Local demo contract. Public HTTPS URL and real MAX verification are pending.
+servers:
+  - url: http://127.0.0.1:3000
+    description: Local demonstration only
+paths:
+  /health:
+    get:
+      summary: Storage availability and queue counters
+      responses:
+        '200':
+          description: Process and database available; this does not prove MAX delivery
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, mode, queue]
+                properties:
+                  status: {type: string, const: ok}
+                  mode: {type: string, enum: [demo, live]}
+                  queue: {type: object, additionalProperties: {type: integer}}
+        '503': {description: Storage unavailable}
+  /webhook:
+    post:
+      summary: Persist a MAX event and enqueue the response atomically
+      security: [{WebhookSecret: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [update_type]
+              properties:
+                update_type: {type: string}
+              additionalProperties: true
+            example:
+              update_type: bot_started
+              timestamp: 1790210400000
+              user: {user_id: 1001}
+      responses:
+        '200':
+          description: Stored, duplicate, or intentionally ignored event
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success]
+                properties:
+                  success: {type: boolean, const: true}
+        '400': {description: Invalid JSON or supported event payload}
+        '401': {description: Missing or incorrect webhook secret}
+        '413': {description: Body exceeds 65536 bytes}
+        '415': {description: Content type must be application/json}
+        '503': {description: Storage or processing failure; retry}
+components:
+  securitySchemes:
+    WebhookSecret:
+      type: apiKey
+      in: header
+      name: X-Max-Bot-Api-Secret

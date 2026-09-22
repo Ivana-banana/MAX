@@ -6,17 +6,24 @@
   "description": "Бот в MAX: персональные сроки обязательных процедур для иностранных первокурсников",
   "license": "MIT",
   "engines": {
-    "node": ">=22"
+    "node": ">=24"
   },
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
-    "build": "tsc -p tsconfig.build.json"
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node --env-file-if-exists=.env dist/main.js",
+    "demo": "node dist/demo.js",
+    "demo:check": "node dist/demo.js --script",
+    "subscribe": "node --env-file-if-exists=.env dist/subscribe.js"
   },
   "devDependencies": {
     "@types/node": "24.3.0",
     "typescript": "5.9.2",
     "vitest": "3.2.4"
+  },
+  "dependencies": {
+    "@maxhub/max-bot-api": "0.3.1"
   }
 }

@@ -1,0 +1,13 @@
+.git
+.claude
+.env
+.env.*
+!.env.example
+node_modules
+dist
+data
+tests
+docs
+images
+*.pdf
+*.log
