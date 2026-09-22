@@ -15,7 +15,7 @@
 | Визуальная проверка | ✅ | Все 14 страниц отрендерены Poppler и просмотрены; изменённые 1 и 12 проверены повторно |
 | Проверки бота | ✅ | Независимый jury: 80/80 tests, typecheck exit 0. src/ не менялся |
 | Секреты и пробелы | ✅ | check-secrets.sh — пустой вывод; git diff --check — exit 0 |
-| Чистый клон / Docker / CI ветки | ⚠️ | Финальный прогон после публикации будет записан ниже |
+| Чистый клон / Docker / CI ветки | ✅ | 8b26aa0: fresh npm + venv, transcript и PDF-check; Docker no-cache 13,48 с; GitHub Actions success |
 | Готовность к сдаче | ⚠️ | PDF не заменяет токен, HTTPS, реальный прогон, нормативные эталоны и финальную фиксацию |
 
 ## Что именно проверено
@@ -66,3 +66,24 @@ commit SHA. Теги и `runs.using: node24` проверены по GitHub API 
 ReportLab 5.0.1, Pillow 12.3.0, charset-normalizer 3.5.1 установлены и записаны
 в requirements.txt. Лицензии сверены по метаданным установленных пакетов.
 Шрифты неизменённые, SIL OFL 1.1, с текстом лицензии и уведомлениями в fonts/.
+
+## Финальный прогон опубликованной ветки
+
+Проверен commit `8b26aa0b63dab3ec3d748b19ef66366d6e634fe2`, полученный через
+`git clone --single-branch --branch worktree-pitch-afk` с GitHub.
+В чистом клоне выполнены `npm ci --ignore-scripts`, `npm run demo:export:check`,
+создание нового venv, установка requirements и `build-presentation.py --check`.
+Все команды завершились с exit 0. Исходные сцены и PDF воспроизвелись без правок.
+
+`docker compose -p max-pitch-clean build --no-cache` — **13,48 секунды** по
+монотонным часам; базовый закреплённый образ уже загружен. До и после проверок
+`git status --porcelain` пуст. Сервис MAX не запускался, подписки не создавались.
+На слайдах сохранён предыдущий, явно атрибутированный замер 16,45 с на cf6c32e;
+новый замер относится к этой вехе подготовки материалов.
+
+[GitHub Actions на 8b26aa0](https://github.com/M1hairu/MAX_GOATed_messenger/actions/runs/35779864726)
+— success: 80 тестов, typecheck, build, demo, экспорт с проверкой происхождения,
+PDF-check в Python 3.14, secrets, Docker и чистота tracked-файлов.
+Повторное read-only ревью jury подтвердило закрытие всех пяти замечаний;
+новых блокеров к завершению PDF-вехи не обнаружено. Ограничения реального запуска
+MAX и финальные служебные поля остались явно обозначенными.
