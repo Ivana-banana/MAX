@@ -14,7 +14,7 @@ export type Lang = "ru" | "en";
 export type Localized = Record<Lang, string>;
 
 /** Personal event a deadline is counted from. */
-export type BaseEventId = "entry" | "completion";
+export type BaseEventId = "entry";
 
 /**
  * Whether the day of the base event itself counts as the first day of the term.
@@ -76,6 +76,8 @@ export interface DeadlineRule {
   /** Optional recurrence, counted from the completion of the previous round. */
   repeat?: {
     months: number;
+    /** Additional window after the anniversary, distinct from the recommended date. */
+    graceDays?: number;
   };
   /** Rule applies only if every condition holds. Empty means "always". */
   appliesIf: Condition[];
@@ -100,6 +102,8 @@ export interface PlanItem {
   title: Localized;
   action: Localized;
   dueDate: PlainDate;
+  /** Earlier planning target; never labelled as a legal deadline. */
+  recommendedDate?: PlainDate;
   /** Negative when the deadline has passed. */
   daysLeft: number;
   status: PlanItemStatus;

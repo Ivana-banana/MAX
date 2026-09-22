@@ -85,8 +85,9 @@ export function buildPlan(
     const completedAt = completions[rule.id];
     const isRepeat = completedAt !== undefined && rule.repeat !== undefined;
 
+    const recommendedDate = isRepeat ? addMonths(completedAt, rule.repeat!.months) : undefined;
     const dueDate = isRepeat
-      ? addMonths(completedAt, rule.repeat!.months)
+      ? addDays(recommendedDate!, rule.repeat!.graceDays ?? 0)
       : computeDueDate(rule, profile);
 
     const done = completedAt !== undefined && !isRepeat;
@@ -96,6 +97,7 @@ export function buildPlan(
       title: rule.title,
       action: rule.action,
       dueDate,
+      ...(recommendedDate === undefined ? {} : { recommendedDate }),
       daysLeft: daysBetween(today, dueDate),
       status: statusFor(dueDate, today, done),
       documents: rule.documents,

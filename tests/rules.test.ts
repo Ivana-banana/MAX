@@ -45,10 +45,10 @@ describe("переходное правило по дате въезда", () =>
     expect(ids).not.toContain("medical-examination-transitional");
   });
 
-  it("въехавшему до 01.09.2026 — по прежнему сроку", () => {
+  it("въехавшему до 01.09.2026 не выдаёт неподтверждённый план", () => {
     const plan = buildPlan(ruleSet.rules, { ...base, entryDate: "2026-08-15" }, {}, "2026-09-16");
     const ids = plan.map((i) => i.ruleId);
-    expect(ids).toContain("medical-examination-transitional");
+    expect(ids).not.toContain("medical-examination-transitional");
     expect(ids).not.toContain("medical-examination");
   });
 
@@ -56,7 +56,7 @@ describe("переходное правило по дате въезда", () =>
     for (const entryDate of ["2026-07-01", "2026-08-31", "2026-09-01", "2026-10-15"]) {
       const ids = buildPlan(ruleSet.rules, { ...base, entryDate }, {}, "2026-09-16").map((i) => i.ruleId);
       const applied = ids.filter((id) => id.startsWith("medical-examination"));
-      expect(applied, entryDate).toHaveLength(1);
+      expect(applied, entryDate).toHaveLength(entryDate >= "2026-09-01" ? 1 : 0);
     }
   });
 
