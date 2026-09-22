@@ -1,0 +1,23 @@
+services:
+  bot:
+    build: .
+    init: true
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${BOT_PORT:-3000}:3000"
+    environment:
+      APP_MODE: ${APP_MODE:-demo}
+      TRANSPORT: ${TRANSPORT:-console}
+      MAX_BOT_TOKEN: ${MAX_BOT_TOKEN:-}
+      WEBHOOK_SECRET: ${WEBHOOK_SECRET:-local-demo-only-not-for-deployment}
+    volumes:
+      - bot-data:/app/data
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+volumes:
+  bot-data:
