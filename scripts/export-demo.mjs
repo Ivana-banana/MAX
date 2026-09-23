@@ -27,7 +27,8 @@ async function input(text, callback = false) {
   await service.flush();
 }
 async function click(action) {
-  const button = last.buttons.flat().find(b => b.action.endsWith(`|${action}`));
+  // link and clipboard buttons carry no callback action
+  const button = last.buttons.flat().find(b => 'action' in b && b.action.endsWith(`|${action}`));
   assert.ok(button, `Expected current screen button: ${action}`);
   await input(button.action, true);
 }
