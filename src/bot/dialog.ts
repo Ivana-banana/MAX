@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { buildPlan } from "../core/deadlines.js";
 import { compareDates, isValidDate } from "../core/dates.js";
 import type { Completions, DeadlineRule, Lang, PlanItem, UserProfile } from "../core/types.js";
+import type { University } from "../data/loadUniversities.js";
 import { CALENDAR_FILE, planToIcs } from "./calendar.js";
 
 // callback buttons come back to the bot; link and clipboard buttons are handled by MAX itself
@@ -12,6 +13,7 @@ export interface Session {
   revision: number;
   lang: Lang;
   step: "language" | "consent" | "scope" | "citizenship" | "entry" | "plan" | "completion" | "delete";
+  university?: string;
   citizenship?: string;
   entryDate?: string;
   selected?: string;
@@ -20,11 +22,26 @@ export interface Session {
   reminders: boolean;
   ruleVersion: string;
 }
-export interface DialogueContext { rules: DeadlineRule[]; version: string; today: string; demo: boolean }
-export interface Input { text: string; callback: boolean }
+export interface DialogueContext { rules: DeadlineRule[]; universities: University[]; version: string; today: string; demo: boolean }
+// locale comes only with bot_started (MAX client language); a ?start= payload arrives as "/start <payload>"
+export interface Input { text: string; callback: boolean; locale?: string }
 export interface Transition { session: Session | null; reply: Reply }
-const CONTACT = "https://admissions.kpfu.ru/adaptacziya-inostrannyh-grazhdan/viza-i-migraczionnyj-uchyot/";
 const t = (s: Session, ru: string, en: string) => s.lang === "ru" ? ru : en;
+// Sessions created before university profiles existed have no id and fall back to the default one.
+const uni = (s: Session, ctx: DialogueContext) => ctx.universities.find(u => u.id === s.university) ?? ctx.universities[0]!;
+function days(s: Session, n: number): string {
+  if (s.lang === "en") return `${n} day${n === 1 ? "" : "s"}`;
+  const d = n % 10, h = n % 100;
+  return `${n} ${d === 1 && h !== 11 ? "день" : d >= 2 && d <= 4 && (h < 12 || h > 14) ? "дня" : "дней"}`;
+}
+function countdown(s: Session, item: PlanItem): string {
+  if (item.status === "done") return t(s, "отмечено вами", "marked by you");
+  if (item.daysLeft < 0) return t(s, `расчётный срок прошёл ${days(s, -item.daysLeft)} назад`, `calculated date passed ${days(s, -item.daysLeft)} ago`);
+  if (item.daysLeft === 0) return t(s, "сегодня последний день", "last day today");
+  const left = days(s, item.daysLeft);
+  return (item.status === "dueSoon" ? t(s, "скоро", "due soon") : t(s, "есть время", "upcoming")) + ", " +
+    t(s, (left.endsWith(" день") ? "остался " : "осталось ") + left, left + " left");
+}
 export function initialSession(version: string): Session {
   return { nonce: randomUUID().replaceAll("-", "").slice(0, 16), revision: 0, lang: "ru",
     step: "language", completions: {}, documents: {}, reminders: false, ruleVersion: version };
@@ -43,15 +60,14 @@ function reply(s: Session, ctx: DialogueContext, text: string, rows: Button[][] 
   } : b)) };
 }
 const button = (text: string, action: string): Button => ({ text, action });
+const rows = <T>(list: T[], size: number): T[][] => list.flatMap((_, i) => i % size ? [] : [list.slice(i, i + size)]);
 const link = (text: string, url: string): Button => ({ text, url });
 // Read-only screens: a stale button to them (e.g. in a reminder sent days ago) is still safe to follow.
 const navigation = (action: string) => action === "plan" || action === "help" || action === "calendar" ||
   action.startsWith("card:") || action.startsWith("help:");
 function home(s: Session, ctx: DialogueContext, prefix = ""): Reply {
   const items = plan(s, ctx);
-  const status = { done: t(s, "отмечено вами", "marked by you"), overdue: t(s, "расчётный срок прошёл", "calculated date passed"),
-    dueSoon: t(s, "скоро", "due soon"), ok: t(s, "есть время", "upcoming") };
-  const lines = items.map(i => `• ${i.title[s.lang]}: ${i.dueDate} — ${status[i.status]}`);
+  const lines = items.map(i => `• ${i.title[s.lang]}: ${i.dueDate} — ${countdown(s, i)}`);
   return reply(s, ctx, prefix + t(s, "Ваш план подготовки\n", "Your preparation plan\n") + lines.join("\n") +
     t(s, "\n\nПокрыты только две процедуры. Миграционный учёт оформляется отдельно через вуз. Отметки — с ваших слов, не решение МВД.",
       "\n\nOnly two procedures are covered. Arrange migration registration separately with your university. Marks are self-reported, not an official decision.") +
@@ -68,15 +84,22 @@ function card(s: Session, ctx: DialogueContext, id: string): Reply {
   const key = `${item.ruleId}:${item.dueDate}`;
   const docs = item.documents.map(d => `${s.documents[`${key}:${d.id}`] ? "✓" : "□"} ${d.title[s.lang]}`);
   const target = item.recommendedDate ? t(s, "\nРекомендуемая дата: ", "\nRecommended date: ") + item.recommendedDate : "";
+  const u = uni(s, ctx), overdue = item.status === "overdue";
+  // No consequences or fines here: the law text on liability is not reviewed (docs/legal-review.md).
+  const late = overdue ? t(s,
+    `\n\nРасчётный срок прошёл. Процедуру всё равно нужно пройти — не откладывайте. Последствия пропуска бот не оценивает: напишите в ${u.name.ru}, как поступить, — готовый вопрос по кнопке ниже.`,
+    `\n\nThe calculated date has passed. You still need to complete the procedure — do not put it off. The bot does not assess the consequences: ask ${u.name.en} what to do — a ready question is behind the button below.`) : "";
   return reply(s, ctx, `${item.title[s.lang]}\n${item.action[s.lang]}\n` +
-    t(s, "Расчётный предельный срок: ", "Calculated deadline: ") + item.dueDate + target +
+    t(s, "Расчётный предельный срок: ", "Calculated deadline: ") + item.dueDate +
+    (item.status === "done" ? "" : ` (${countdown(s, item)})`) + target + late +
     "\n\n" + docs.join("\n") + "\n\n" + item.legal.act + ", " + item.legal.article +
     "\n" + item.legal.url + t(s, "\nСверка источника: ", "\nSource checked: ") + item.legal.checkedAt +
-    t(s, "\nМесто и комплект уточните у КФУ: ", "\nConfirm location and checklist with KFU: ") + CONTACT,
+    t(s, `\nМесто и комплект уточните у ${u.name.ru}: `, `\nConfirm location and checklist with ${u.name.en}: `) + u.contactUrl,
     [...item.documents.map(d => [button((s.documents[`${key}:${d.id}`] ? "✓ " : "□ ") + d.title[s.lang], `doc:${id}:${d.id}`)]),
       ...(item.status === "done" ? [] : [[button(t(s, "Процедура пройдена", "Completed the procedure"), `done:${id}`)]]),
       [link(t(s, "Открыть норму", "Open the law"), item.legal.url)],
-      [button(t(s, "Не получилось", "I couldn't complete it"), `help:${id}`), button(t(s, "К плану", "Back to plan"), "plan")]]);
+      [button(overdue ? t(s, "Срок прошёл — что делать", "Date passed — what now") : t(s, "Не получилось", "I couldn't complete it"), `help:${id}`),
+        button(t(s, "К плану", "Back to plan"), "plan")]]);
 }
 function calendar(s: Session, ctx: DialogueContext): Reply {
   const items = plan(s, ctx).filter(i => i.status !== "done");
@@ -90,24 +113,30 @@ function calendar(s: Session, ctx: DialogueContext): Reply {
 function help(s: Session, ctx: DialogueContext, ruleId?: string): Reply {
   const item = ruleId ? plan(s, ctx).find(i => i.ruleId === ruleId) : undefined;
   const back = profile(s) ? [[button(t(s, "К плану", "Back to plan"), "plan")]] : [];
+  const u = uni(s, ctx);
   const actions = (draft: string): Button[][] => [[{ text: t(s, "Скопировать вопрос", "Copy the question"), copy: draft }],
-    [link(t(s, "Открыть страницу КФУ", "Open the KFU page"), CONTACT)], ...back];
+    [link(t(s, `Открыть страницу ${u.name.ru}`, `Open the ${u.name.en} page`), u.contactUrl)], ...back];
   if (!item) {
-    const draft = t(s, "Я учусь в КФУ, нужна помощь с процедурой __. Сейчас препятствие __. Подскажите следующий шаг и комплект документов.",
-      "I study at KFU and need help with __. My obstacle is __. Please explain the next step and required documents.");
+    const draft = t(s, `Я учусь в ${u.name.ru}, нужна помощь с процедурой __. Сейчас препятствие __. Подскажите следующий шаг и комплект документов.`,
+      `I study at ${u.name.en} and need help with __. My obstacle is __. Please explain the next step and required documents.`);
     return reply(s, ctx, t(s,
-      "Для неподдержанного случая расчёт не выполняем. Что мешает: нет документа, нет записи или непонятен следующий шаг? Подготовьте вопрос: «" + draft + "» Отправьте его сами в подразделение КФУ:\n",
-      "We do not calculate unsupported cases. Is a document missing, is booking unavailable, or is the next step unclear? Draft: “" + draft + "” Send it yourself to the KFU office:\n") + CONTACT +
+      "Для неподдержанного случая расчёт не выполняем. Что мешает: нет документа, нет записи или непонятен следующий шаг? Подготовьте вопрос: «" + draft + `» Отправьте его сами в подразделение ${u.name.ru}:\n`,
+      "We do not calculate unsupported cases. Is a document missing, is booking unavailable, or is the next step unclear? Draft: “" + draft + `” Send it yourself to the ${u.name.en} office:\n`) + u.contactUrl +
       t(s, "\n/start — продолжить; /delete — удалить данные.", "\n/start to continue; /delete to remove data."), actions(draft));
   }
   const who = t(s, `гражданство ${s.citizenship}, въезд ${s.entryDate}`, `citizenship ${s.citizenship}, entry ${s.entryDate}`);
-  const draft = t(s,
-    `Здравствуйте! Я иностранный студент КФУ (${who}). Мне нужно пройти процедуру «${item.title.ru}», расчётный срок — до ${item.dueDate}. Не получается: ___. Подскажите, пожалуйста, следующий шаг и комплект документов.`,
-    `Hello! I am an international KFU student (${who}). I need to complete “${item.title.en}”, calculated deadline ${item.dueDate}. The problem: ___. Could you tell me the next step and the documents I need?`);
-  return reply(s, ctx, t(s,
-    "Что мешает: нет документа, нет записи или непонятен следующий шаг? Готовый вопрос для КФУ — скопируйте кнопкой, впишите вместо ___ своё препятствие и отправьте сами:\n\n",
-    "What is in the way: a missing document, no booking, or an unclear next step? Here is a ready question for KFU: copy it, replace ___ with your obstacle and send it yourself:\n\n") + draft +
-    t(s, "\n\nКонтакты КФУ: ", "\n\nKFU contacts: ") + CONTACT,
+  const overdue = item.status === "overdue";
+  const draft = overdue ? t(s,
+    `Здравствуйте! Я иностранный студент ${u.name.ru} (${who}). Мне нужно пройти процедуру «${item.title.ru}», расчётный срок был до ${item.dueDate} и уже прошёл. Причина: ___. Подскажите, пожалуйста, как пройти процедуру сейчас и какие документы нужны.`,
+    `Hello! I am an international ${u.name.en} student (${who}). I need to complete “${item.title.en}”; the calculated deadline was ${item.dueDate} and has passed. The reason: ___. Could you tell me how to complete it now and which documents I need?`) : t(s,
+    `Здравствуйте! Я иностранный студент ${u.name.ru} (${who}). Мне нужно пройти процедуру «${item.title.ru}», расчётный срок — до ${item.dueDate}. Не получается: ___. Подскажите, пожалуйста, следующий шаг и комплект документов.`,
+    `Hello! I am an international ${u.name.en} student (${who}). I need to complete “${item.title.en}”, calculated deadline ${item.dueDate}. The problem: ___. Could you tell me the next step and the documents I need?`);
+  return reply(s, ctx, (overdue ? t(s,
+    `Расчётный срок прошёл. Не откладывайте: сообщите в ${u.name.ru} и спросите, как пройти процедуру сейчас. Бот не оценивает последствия пропуска и не заменяет консультацию. Готовый вопрос — скопируйте кнопкой, впишите вместо ___ причину и отправьте сами:\n\n`,
+    `The calculated date has passed. Do not put it off: tell ${u.name.en} and ask how to complete the procedure now. The bot does not assess the consequences and is not legal advice. A ready question: copy it, replace ___ with the reason and send it yourself:\n\n`) : t(s,
+    `Что мешает: нет документа, нет записи или непонятен следующий шаг? Готовый вопрос для ${u.name.ru} — скопируйте кнопкой, впишите вместо ___ своё препятствие и отправьте сами:\n\n`,
+    `What is in the way: a missing document, no booking, or an unclear next step? Here is a ready question for ${u.name.en}: copy it, replace ___ with your obstacle and send it yourself:\n\n`)) + draft +
+    t(s, `\n\nКонтакты ${u.name.ru}: `, `\n\n${u.name.en} contacts: `) + u.contactUrl,
     actions(draft));
 }
 function prompt(s: Session, ctx: DialogueContext): Reply {
@@ -116,13 +145,14 @@ function prompt(s: Session, ctx: DialogueContext): Reply {
     case "consent": return reply(s, ctx, t(s,
       "Бот хранит MAX ID, язык, даты и ваши отметки в локальной базе сервиса до удаления или 400 дней без действий. Паспорт и меддокументы не присылайте. /delete удаляет профиль и задания; технические отпечатки событий хранятся до 7 дней. Это помощь в подготовке, не юридическое заключение. Продолжить?",
       "The bot stores your MAX ID, language, dates and checkmarks in its database until deletion or 400 days of inactivity. Do not send passports or medical files. /delete removes your profile and queued jobs; event fingerprints expire within 7 days. This is preparation support, not legal advice. Continue?"),
-      [[button(t(s, "Продолжить", "Continue"), "accept")], [button(t(s, "Удалить / выйти", "Delete / leave"), "delete")]]);
+      [[button(t(s, "Продолжить", "Continue"), "accept")], [button(t(s, "English", "Русский"), t(s, "en", "ru"))],
+        [button(t(s, "Удалить / выйти", "Delete / leave"), "delete")]]);
     case "scope": return reply(s, ctx, t(s,
-      "Сценарий: вам 18+, первый въезд для учёбы более чем на 90 дней, общежитие КФУ, нет РВП/РВПО/ВНЖ и ранее пройденных процедур. Въезд с 01.09.2026. Всё совпадает? В демо отвечайте за учебного персонажа.",
-      "Scope: age 18+, first entry for study longer than 90 days, KFU dormitory, no residence permit and no previously completed procedures. Entry from 2026-09-01. Does everything match? In demo, answer for a fictional student."),
+      `Сценарий: вам 18+, первый въезд для учёбы более чем на 90 дней, общежитие ${uni(s, ctx).name.ru}, нет РВП/РВПО/ВНЖ и ранее пройденных процедур. Въезд с 01.09.2026. Всё совпадает? В демо отвечайте за учебного персонажа.`,
+      `Scope: age 18+, first entry for study longer than 90 days, ${uni(s, ctx).name.en} dormitory, no residence permit and no previously completed procedures. Entry from 2026-09-01. Does everything match? In demo, answer for a fictional student.`),
       [[button(t(s, "Да, совпадает", "Yes"), "yes"), button(t(s, "Нет / не уверен", "No / unsure"), "no")]]);
     case "citizenship": return reply(s, ctx, t(s, "Выберите гражданство учебного профиля.", "Choose the profile's citizenship."),
-      [["KZ", "UZ", "TJ", "KG"], ["CN", "IN", "EG", "TR"], ["BY", "OTHER"]].map(row => row.map(x => button(x, x))));
+      [...rows(uni(s, ctx).citizenships, 4), ["BY", "OTHER"]].map(row => row.map(x => button(x, x))));
     case "entry": return reply(s, ctx, t(s, "Дата въезда в формате ГГГГ-ММ-ДД (с 2026-09-01 по сегодня).", "Entry date YYYY-MM-DD (from 2026-09-01 through today)."));
     case "completion": return reply(s, ctx, t(s,
       "Введите фактическую дату прохождения ГГГГ-ММ-ДД или /today. Это самоотметка, не подтверждение МВД.",
@@ -156,13 +186,22 @@ export function transition(previous: Session | null, input: Input, ctx: Dialogue
     s.reminders = false;
     return { session: s, reply: reply(s, ctx, t(s, "Правила изменились. Расчёт остановлен. Удалите старый профиль через /delete и начните снова.", "Rules changed. Calculations are paused. Use /delete and start again.")) };
   }
-  if (action === "/start") return { session: s, reply: prompt(s, ctx) };
+  const start = /^\/start(?:\s+(\S+))?$/.exec(action);
+  if (start) {
+    // A university's QR code opens max.ru/<bot>?start=<id>; the choice is fixed once the plan exists.
+    const id = start[1]?.toLowerCase();
+    if (id && !profile(s) && ctx.universities.some(u => u.id === id)) s.university = id;
+    const lang = input.locale?.slice(0, 2).toLowerCase();
+    if (s.step === "language" && (lang === "ru" || lang === "en")) { s.lang = lang; s.step = "consent"; }
+    return { session: s, reply: prompt(s, ctx) };
+  }
   if (action === "/help" || action === "help" || action === "no" || action === "OTHER" || action === "BY") return { session: s, reply: help(s, ctx) };
   if (action.startsWith("help:")) return { session: s, reply: help(s, ctx, action.slice(5)) };
   if (s.step === "language" && ["ru", "en"].includes(action)) { s.lang = action as Lang; s.step = "consent"; }
+  else if (s.step === "consent" && ["ru", "en"].includes(action)) s.lang = action as Lang;
   else if (s.step === "consent" && action === "accept") s.step = "scope";
   else if (s.step === "scope" && action === "yes") s.step = "citizenship";
-  else if (s.step === "citizenship" && ["KZ", "UZ", "TJ", "KG", "CN", "IN", "EG", "TR"].includes(action)) { s.citizenship = action; s.step = "entry"; }
+  else if (s.step === "citizenship" && uni(s, ctx).citizenships.includes(action)) { s.citizenship = action; s.step = "entry"; }
   else if (s.step === "entry") {
     if (!isValidDate(action) || action < "2026-09-01" || action > ctx.today) {
       return { session: s, reply: reply(s, ctx, t(s, "Дата вне сценария или неверный формат. Введите ГГГГ-ММ-ДД с 2026-09-01 по сегодня; /help — помощь.", "Invalid or unsupported date. Enter YYYY-MM-DD from 2026-09-01 through today; /help for support.")) };
@@ -195,6 +234,6 @@ export function transition(previous: Session | null, input: Input, ctx: Dialogue
   return { session: s, reply: prompt(s, ctx) };
 }
 export function reminderReply(s: Session, ctx: DialogueContext, item: PlanItem): Reply {
-  return reply(s, ctx, t(s, "Напоминание: ", "Reminder: ") + item.title[s.lang] + " — " + item.dueDate,
+  return reply(s, ctx, t(s, "Напоминание: ", "Reminder: ") + item.title[s.lang] + " — " + item.dueDate + ` (${countdown(s, item)})`,
     [[button(t(s, "Подробнее", "Details"), `card:${item.ruleId}`)], [button(t(s, "К плану", "Plan"), "plan")]]);
 }

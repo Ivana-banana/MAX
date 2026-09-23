@@ -9,9 +9,12 @@ const object = (v: unknown): Record<string, unknown> | undefined => v !== null &
 export function parseUpdate(raw: unknown): Incoming | null {
   const u = object(raw);
   if (!u || typeof u.update_type !== "string") throw new Error("invalid update");
-  let user: unknown, text: unknown, id: unknown, callbackId: string | undefined;
+  let user: unknown, text: unknown, id: unknown, callbackId: string | undefined, locale: string | undefined;
   if (u.update_type === "bot_started") {
-    user = object(u.user)?.user_id; text = "/start"; id = u.timestamp;
+    // ?start=<payload> (up to 128 characters) selects the university; anything else starts as usual.
+    const payload = typeof u.payload === "string" && /^[A-Za-z0-9_-]{1,128}$/.test(u.payload) ? u.payload : undefined;
+    user = object(u.user)?.user_id; text = payload ? `/start ${payload}` : "/start"; id = u.timestamp;
+    if (typeof u.user_locale === "string" && /^[A-Za-z_-]{2,16}$/.test(u.user_locale)) locale = u.user_locale;
   } else if (u.update_type === "message_created" || u.update_type === "message_callback") {
     const m = object(u.message), recipient = object(m?.recipient);
     if (recipient?.chat_type !== "dialog") return null;
@@ -30,7 +33,7 @@ export function parseUpdate(raw: unknown): Incoming | null {
     throw new Error("invalid update");
   }
   const digest = createHash("sha256").update(JSON.stringify([u.update_type, user, id])).digest("hex");
-  return { id: digest, user: Number(user), input: { text, callback: u.update_type === "message_callback" },
+  return { id: digest, user: Number(user), input: { text, callback: u.update_type === "message_callback", ...(locale ? { locale } : {}) },
     ...(callbackId === undefined ? {} : { callbackId }) };
 }
 export function moscowDate(now: number): string {
