@@ -16,7 +16,6 @@ export interface SqliteSnapshot {
 }
 
 type Row = Record<string, unknown>;
-type CloseableStatement = ReturnType<DatabaseSync["prepare"]> & { close(): void };
 
 export function readSqliteSnapshot(path: string): SqliteSnapshot {
   const db = new DatabaseSync(path, { readOnly: true });
@@ -47,17 +46,12 @@ export function readSqliteSnapshot(path: string): SqliteSnapshot {
 }
 
 function readRows(db: DatabaseSync, table: string, sql: string): unknown[] {
-  let statement: ReturnType<DatabaseSync["prepare"]> | undefined;
-
   try {
-    statement = db.prepare(sql);
+    const statement = db.prepare(sql);
     statement.setReadBigInts(true);
     return statement.all();
   } catch {
     throw new Error(`Не удалось прочитать таблицу SQLite ${table}`);
-  } finally {
-    // Node 24 exposes StatementSync.close(); @types/node 24.3 does not declare it.
-    if (statement) (statement as CloseableStatement).close();
   }
 }
 
