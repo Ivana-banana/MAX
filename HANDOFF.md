@@ -26,7 +26,8 @@
   [`docs/max-manual-check.md`](docs/max-manual-check.md), около 10 минут на версию.
 - **Слито 23.09**: PR #3 (календарь, кнопки, ускорение; выкачен, сервер на `19f1a7c`) и PR #5
   (презентация, заменяет черновик #2). PR #4 (день въезда в сроке, D-016) слит, **не выкачен**;
-  выкатить и перевыгрузить сцены презентации. **В PDF нет состава команды** — `manifest.json` → `team`.
+  PR #6 (вуз как данные, диплинк `?start=<вуз>`, язык из MAX, «осталось N дней», просрочка; D-018)
+  слит 24.09, **не выкачен**. Выкатить main и перевыгрузить сцены презентации. **В PDF нет состава команды** — `manifest.json` → `team`.
 - **Блокирует релиз**: юридическая вычитка норм (`live` заблокирован до неё).
 - **CI не обязателен**: `main` не защищена, checks не требуются перед merge; включить
   может только администратор репозитория (M1hairu).
@@ -63,7 +64,6 @@ end-to-end в MAX, потом сдача, потом презентация.
 | Иван (Claude Code) | — | Деплой: HTTPS на 443, webhook-подписка с секретом, мониторинг `/health` и подписки | ВМ `81.26.178.75`, см. «Деплой» ниже | бот отвечает весь период проверки; после 8 ч без доставки подписка снимается | HTTPS и подписка готовы 23.09; **нет**: прохода сценария в MAX, внешнего мониторинга, deploy key |
 | — | — | Проверить CI после push и обязательность checks перед merge | `.github/workflows/check.yml` | зелёный GitHub Actions на опубликованном commit | 23.09: checks зелёные на каждом push и PR; защита `main` выключена (`protected: false`) — включить «Require status checks» может только M1hairu |
 | Иван (Claude Code) | `worktree-pitch-finish` | Презентация: PDF, первый слайд технический (`docs/tz-compliance.md`, С7–С8); ветка Codex `worktree-pitch-afk` слита с main и дополнена | `docs/presentation/`, `scripts/build-presentation.py` | скилл `submission-checklist`, п. 7; `build-presentation.py --check` в CI | [PR #5](https://github.com/M1hairu/MAX_GOATed_messenger/pull/5); PDF по 19f1a7c; **нужен состав команды** (`manifest.json` → `team`); пересобрать на теге сдачи и после слияния PR #4 |
-| Claude Code (Chichetin) | `worktree-university-data`, [PR #6](https://github.com/M1hairu/MAX_GOATed_messenger/pull/6) | Вуз как данные (`src/data/universities/*.json`, второй демо-профиль ИТМО), диплинк `?start=<вуз>`, язык из `user_locale`, «осталось N дней», ветка просроченного срока (`D-018`) | `src/bot/`, `src/data/universities/`, `tests/university.test.ts`, `compose.yaml` | 108 тестов, typecheck, build, demo:check, Docker 38,5 с | **на ревью**; после слияния — выкатка, шаги 16–17 чек-листа в MAX (доходит ли `payload`), перевыгрузка сцен и PDF |
 | — | — | Исследование барьера B: 8–12 интервью с первокурсниками, 2–3 с кураторами, наблюдаемое задание | `docs/product/problem.md` «Условие продолжения», `hypothesis.md` | пороги из протокола, рубрика утверждена до сессий | свободно; барьер A от него не зависит |
 
 Локальный демонстратор подготовлен в `worktree-bot-afk-mvp`; отчёт —
@@ -133,6 +133,7 @@ end-to-end в MAX, потом сдача, потом презентация.
 
 | Дата | Кто | Что | Commit | Проверка |
 |---|---|---|---|---|
+| 2026-09-24 | Claude Code (Chichetin) | PR #6 слит (решение человека): профили вузов в `src/data/universities/*.json` (КФУ по умолчанию, демо-профиль ИТМО), диплинк `?start=<вуз>`, язык из `user_locale`, «осталось N дней», ветка просроченного срока (`D-018`). **Не выкачен**: выкатка (Иван), шаги 16–17 `docs/max-manual-check.md` в MAX, перевыгрузка сцен и PDF | `a3efe02` | 108 тестов, typecheck, build, demo:check, `build-presentation.py --check`; CI PR #6 зелёный |
 | 2026-09-23 | Claude Code (Chichetin) | PR #4 слит (решение человека): до ответа юриста день въезда входит в срок (`D-016`), KZ с въездом 01.09 — 30.09 и 29.11. **Не выкачен**: нужна выкатка (Иван), перевыгрузка сцен и PDF, у ранее прошедших — /delete | ветка `worktree-legal-norms-review` → main | 98 тестов, typecheck, build, demo:check; CI PR #4 зелёный |
 | 2026-09-23 | Иван (Claude Code) | PR #3 слит (решение человека: без ревью, чтобы разблокировать PostgreSQL и PR #4) и выкачен вместе с нормами `2026-09-23-draft`: календарь `.ics`, кнопки MAX, навигация из старых напоминаний, ускорение очереди | `19f1a7c` | 97 тестов, CI зелёный; на сервере `/health` 200, `GET /me` и подписка 200. Старые профили увидят «Правила изменились» — нужен /delete и новый проход |
 | 2026-09-23 | Claude Code (Chichetin) | Проверка по «Формату сдачи» (`submission-checklist`) на `df225e4` | — | чистый клон: `docker compose build --no-cache` **21,8 с** (базовый образ загружен заранее), `up` → `/health` 200, `demo:check` в контейнере прошёл; `check-secrets.sh` чисто, `.env` и токены в истории не найдены; README покрывает пункты формата. Открыто: запись прогона в MAX, PDF (PR #2 — черновик), первый слайд |
