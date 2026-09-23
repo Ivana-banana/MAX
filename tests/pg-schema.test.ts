@@ -5,7 +5,7 @@ import { migrate } from "../src/db/migrate.js";
 
 const testDatabaseUrl = process.env.TEST_DATABASE_URL;
 const postgresDescribe = testDatabaseUrl ? describe : describe.skip;
-const schemaName = `pg_schema_test_${process.pid}_${randomUUID().replaceAll("-", "")}`;
+const schemaName = `test_pg_schema_${process.pid}_${randomUUID().replaceAll("-", "")}`;
 
 postgresDescribe("PostgreSQL v1 schema migration", () => {
   let adminPool: Pool | undefined;
