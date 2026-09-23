@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { reminderDates } from "../core/deadlines.js";
 import { plan, reminderReply, transition, type DialogueContext, type Input, type Reply } from "./dialog.js";
+import { funnelEvents, funnelUniversity } from "./funnel.js";
 import { Store } from "./store.js";
 
 export interface Incoming { id: string; user: number; input: Input; callbackId?: string }
@@ -47,7 +48,10 @@ export class Service {
     const now = this.clock();
     this.store.transaction(() => {
       if (this.store.seen(update.id, now)) return;
-      const outcome = transition(this.store.get(update.user), update.input, this.ctx());
+      const before = this.store.get(update.user), ctx = this.ctx();
+      const outcome = transition(before, update.input, ctx);
+      const university = funnelUniversity(outcome.session ?? before, ctx);
+      for (const event of funnelEvents(before, outcome.session, update.input, ctx)) this.store.count(ctx.today, university, event);
       this.store.supersedeReplies(update.user);
       this.store.cancelReminders(update.user);
       if (outcome.session) this.store.save(update.user, outcome.session, now);
@@ -93,7 +97,12 @@ export class Service {
           if (message.ruleVersion !== this.context.version) { this.store.cancel(job.id); continue; }
         }
         try { await this.transport.send(job.user_id, message); this.store.finish(job.id); }
-        catch { this.store.retry(job, this.clock()); }
+        catch { this.store.retry(job, this.clock()); continue; }
+        // Outside the send block: a failed counter must not resend the reminder.
+        if (job.kind === "reminder") {
+          try { this.store.count(this.ctx().today, funnelUniversity(this.store.get(job.user_id), this.context), "reminder_sent"); }
+          catch { console.error("Funnel counter failed; the reminder was delivered."); }
+        }
       }
     } finally { this.sending = false; }
   }

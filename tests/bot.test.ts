@@ -236,7 +236,7 @@ describe("calendar export, MAX link/clipboard buttons and reminder navigation", 
     // The 7-day reminder for the 30.09 deadline falls on 23.09.
     const f=fixture(); f.time("2026-09-23T10:00:00+03:00"); f.onboard(); f.click("reminders"); await f.service.flush();
     const reminder=f.sent.find(x=>x.reply.text.includes("Напоминание:"))!.reply;
-    const details=flat(reminder).find(b=>"action" in b && b.action.endsWith("|card:medical-examination")) as {action:string};
+    const details=flat(reminder).find(b=>"action" in b && b.action.endsWith("|card:medical-examination:reminder")) as {action:string};
     f.click("doc:medical-examination:passport"); f.click("done:fingerprinting");
     expect(f.store.get(1)?.step).toBe("completion");
     f.input(details.action,1,"old-reminder",true); await f.service.flush();

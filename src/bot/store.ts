@@ -2,6 +2,7 @@ import { DatabaseSync, type StatementSync } from "node:sqlite";
 import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import type { Reply, Session } from "./dialog.js";
+import type { FunnelCount, FunnelEvent } from "./funnel.js";
 
 export interface Job { id: string; user_id: number; payload: string; kind: string; attempts: number; next_attempt: number }
 export class Store {
@@ -23,6 +24,9 @@ export class Store {
       );
       CREATE INDEX IF NOT EXISTS pending_jobs ON outbox(status, next_attempt);
       CREATE INDEX IF NOT EXISTS user_jobs ON outbox(user_id, kind, status);
+      -- Anonymous per-day totals (funnel.ts): no user id, so /delete has nothing to remove here.
+      CREATE TABLE IF NOT EXISTS funnel (day TEXT NOT NULL, university TEXT NOT NULL, event TEXT NOT NULL, n INTEGER NOT NULL,
+        PRIMARY KEY (day, university, event));
     `);
   }
   private sql(text: string): StatementSync {
@@ -74,6 +78,12 @@ export class Store {
     this.sql("UPDATE outbox SET attempts=?,next_attempt=?,status=? WHERE id=?")
       .run(attempts, now + Math.min(3_600_000, 5000 * 2 ** attempts), attempts >= 8 ? "failed" : "pending", job.id);
   }
+  count(day: string, university: string, event: FunnelEvent): void {
+    this.sql("INSERT INTO funnel VALUES(?,?,?,1) ON CONFLICT(day,university,event) DO UPDATE SET n=n+1").run(day, university, event);
+  }
+  funnel(): FunnelCount[] {
+    return this.sql("SELECT day,university,event,n FROM funnel ORDER BY day,university,event").all() as unknown as FunnelCount[];
+  }
   counts(): Record<string, number> {
     return Object.fromEntries((this.sql("SELECT status,COUNT(*) AS n FROM outbox GROUP BY status").all() as {status:string;n:number}[])
       .map(x => [x.status, x.n]));
@@ -82,6 +92,7 @@ export class Store {
     const expired = this.sql("SELECT user_id FROM sessions WHERE updated_at<?").all(now - 400 * 86400000) as {user_id:number}[];
     for (const row of expired) this.remove(row.user_id);
     this.sql("DELETE FROM events WHERE created_at<?").run(now - 7 * 86400000);
+    this.sql("DELETE FROM funnel WHERE day<?").run(new Date(now - 400 * 86400000).toISOString().slice(0, 10));
     this.sql("DELETE FROM outbox WHERE status!='pending' AND MAX(created_at,next_attempt)<?").run(now - 7 * 86400000);
   }
   close(): void { this.db.close(); }

@@ -17,6 +17,7 @@
     "demo": "node dist/demo.js",
     "demo:check": "node dist/demo.js --script",
     "subscribe": "node --env-file-if-exists=.env dist/subscribe.js",
+    "funnel": "node --env-file-if-exists=.env dist/report.js",
     "demo:export": "npm run build && node scripts/export-demo.mjs",
     "demo:export:check": "npm run build && node scripts/export-demo.mjs --check"
   },

@@ -60,6 +60,8 @@ function reply(s: Session, ctx: DialogueContext, text: string, rows: Button[][] 
   } : b)) };
 }
 const button = (text: string, action: string): Button => ({ text, action });
+/** Suffix of the reminder's "Details" button: tells a return from a reminder apart from a card opened in the plan (funnel.ts). */
+export const FROM_REMINDER = ":reminder";
 const rows = <T>(list: T[], size: number): T[][] => list.flatMap((_, i) => i % size ? [] : [list.slice(i, i + size)]);
 const link = (text: string, url: string): Button => ({ text, url });
 // Read-only screens: a stale button to them (e.g. in a reminder sent days ago) is still safe to follow.
@@ -143,8 +145,8 @@ function prompt(s: Session, ctx: DialogueContext): Reply {
   switch (s.step) {
     case "language": return reply(s, ctx, "Выберите язык / Choose your language", [[button("Русский", "ru"), button("English", "en")]]);
     case "consent": return reply(s, ctx, t(s,
-      "Бот хранит MAX ID, язык, даты и ваши отметки в локальной базе сервиса до удаления или 400 дней без действий. Паспорт и меддокументы не присылайте. /delete удаляет профиль и задания; технические отпечатки событий хранятся до 7 дней. Это помощь в подготовке, не юридическое заключение. Продолжить?",
-      "The bot stores your MAX ID, language, dates and checkmarks in its database until deletion or 400 days of inactivity. Do not send passports or medical files. /delete removes your profile and queued jobs; event fingerprints expire within 7 days. This is preparation support, not legal advice. Continue?"),
+      "Бот хранит MAX ID, язык, даты и ваши отметки в локальной базе сервиса до удаления или 400 дней без действий. Для оценки пользы считаются только суммы действий по дням, без MAX ID. Паспорт и меддокументы не присылайте. /delete удаляет профиль и задания; технические отпечатки событий хранятся до 7 дней. Это помощь в подготовке, не юридическое заключение. Продолжить?",
+      "The bot stores your MAX ID, language, dates and checkmarks in its database until deletion or 400 days of inactivity. To measure usefulness it only counts daily totals of actions, without your MAX ID. Do not send passports or medical files. /delete removes your profile and queued jobs; event fingerprints expire within 7 days. This is preparation support, not legal advice. Continue?"),
       [[button(t(s, "Продолжить", "Continue"), "accept")], [button(t(s, "English", "Русский"), t(s, "en", "ru"))],
         [button(t(s, "Удалить / выйти", "Delete / leave"), "delete")]]);
     case "scope": return reply(s, ctx, t(s,
@@ -217,7 +219,7 @@ export function transition(previous: Session | null, input: Input, ctx: Dialogue
     s.completions[s.selected] = date; s.step = "plan"; delete s.selected;
   } else if (s.step === "plan") {
     if (action === "reminders") { s.reminders = !s.reminders; }
-    else if (action.startsWith("card:")) return { session: s, reply: card(s, ctx, action.slice(5)) };
+    else if (action.startsWith("card:")) return { session: s, reply: card(s, ctx, action.slice(5).replace(FROM_REMINDER, "")) };
     else if (action === "calendar") return { session: s, reply: calendar(s, ctx) };
     else if (action.startsWith("doc:")) {
       const [, id, doc] = action.split(":");
@@ -235,5 +237,5 @@ export function transition(previous: Session | null, input: Input, ctx: Dialogue
 }
 export function reminderReply(s: Session, ctx: DialogueContext, item: PlanItem): Reply {
   return reply(s, ctx, t(s, "Напоминание: ", "Reminder: ") + item.title[s.lang] + " — " + item.dueDate + ` (${countdown(s, item)})`,
-    [[button(t(s, "Подробнее", "Details"), `card:${item.ruleId}`)], [button(t(s, "К плану", "Plan"), "plan")]]);
+    [[button(t(s, "Подробнее", "Details"), `card:${item.ruleId}${FROM_REMINDER}`)], [button(t(s, "К плану", "Plan"), "plan")]]);
 }
