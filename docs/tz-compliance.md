@@ -47,7 +47,7 @@
 
 | # | Требование | Чем закрываем | Проверка | Статус |
 |---|---|---|---|---|
-| С1 | Ссылка на работающее решение в MAX | README, первый слайд | ссылка открывает бота (1) | ⚠️ [max.ru/t149_hakaton_max_bot](https://max.ru/t149_hakaton_max_bot) в README; прогона в MAX нет |
+| С1 | Ссылка на работающее решение в MAX | README, первый слайд | ссылка открывает бота (1) | ⚠️ [max.ru/t149_hakaton_max_bot](https://max.ru/t149_hakaton_max_bot) в README; 23.09 мобильная — основной путь пройден руками, веб — нет (`docs/verification-2026-09-23.md`) |
 | С2 | Commit hash зафиксирован | тег `submit-online` | (0, 2) | — |
 | С3 | README: все 15 пунктов + внешние сервисы вне Docker | `README.md` | (3) | ✅ README.md: запуск, данные, окружение, ограничения и проверка |
 | С4 | Файл зависимостей | lock-файл | (4) | ✅ package.json + package-lock.json; npm ci |
