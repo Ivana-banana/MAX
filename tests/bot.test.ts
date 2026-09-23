@@ -261,3 +261,13 @@ describe("calendar export, MAX link/clipboard buttons and reminder navigation", 
     } finally { vi.unstubAllGlobals(); }
   });
 });
+describe("queue storage performance guards", () => {
+  it("finds a user's queued jobs through an index, not a full scan of the outbox", () => {
+    const store=new Store(":memory:"); cleanups.push(() => store.close());
+    for (const sql of ["DELETE FROM outbox WHERE user_id=1 AND kind='reminder' AND status='pending'",
+      "DELETE FROM outbox WHERE user_id=1 AND kind='reply' AND status='pending'", "DELETE FROM outbox WHERE user_id=1"]) {
+      const plan=(store.db.prepare("EXPLAIN QUERY PLAN "+sql).all() as {detail:string}[]).map(r=>r.detail).join(" ");
+      expect(plan).toMatch(/SEARCH outbox USING (COVERING )?INDEX user_jobs/);
+    }
+  });
+});
