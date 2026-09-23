@@ -81,6 +81,15 @@ end-to-end в MAX, потом сдача, потом презентация.
 с нуля, обновление и частые поломки — [`docs/deploy.md`](docs/deploy.md). Вне Git только
 `~/max-bot/.env` на ВМ. `docker compose down -v` не делать — удалит БД.
 
+Для первого слайда презентации (`docs/presentation/manifest.json` в ветке
+`worktree-pitch-afk`, сейчас `TBD`): `botUrl` — `https://max.ru/t149_hakaton_max_bot`,
+`publicBaseUrl` — `https://81-26-178-75.sslip.io`, режим — `APP_MODE=demo`,
+`TRANSPORT=max`. Ветку правит её автор.
+
+Образ с сертификатом внутри (`86a78a7`) проверен на ВМ отдельной сборкой, но на рабочий
+экземпляр ещё не выкачен: там `f6e2e9c` + `compose.override.yaml` с тем же сертификатом.
+Выкатить при следующем обновлении кода и удалить override.
+
 ## Блокеры и вопросы
 
 | Дата | Владелец | Блокер | Что проверено | Что нужно |
