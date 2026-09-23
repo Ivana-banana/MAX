@@ -42,7 +42,7 @@ describe("student dialogue and durable processing", () => {
   it("completes onboarding, shows sources and saves document checkmarks", async () => {
     const f=fixture(); f.onboard(); f.click("card:medical-examination");
     f.click("doc:medical-examination:passport");
-    expect(f.store.get(1)?.documents["medical-examination:2026-10-01:passport"]).toBe(true);
+    expect(f.store.get(1)?.documents["medical-examination:2026-09-30:passport"]).toBe(true);
     await f.service.flush();
     expect(f.sent.at(-1)?.reply.text).toContain("consultant.ru");
     expect(f.sent.at(-1)?.reply.text).toContain("ДЕМО");
@@ -84,11 +84,12 @@ describe("student dialogue and durable processing", () => {
     expect(f.store.get(1)?.step).toBe("completion");
   });
   it("sends a scheduled reminder once and cancels remaining reminders on completion", async () => {
-    const f=fixture(); f.onboard(); f.click("reminders");
+    // Due 2026-09-30, first reminder 7 days earlier: the clock is set to that day.
+    const f=fixture(); f.time("2026-09-23T10:00:00+03:00"); f.onboard(); f.click("reminders");
     await f.service.flush(); const count=f.sent.length;
     f.service.maintain(); await f.service.flush(); expect(f.sent.length).toBe(count);
     expect(f.sent.some(x=>x.reply.text.includes("Напоминание:"))).toBe(true);
-    f.click("done:medical-examination"); f.input("2026-09-24"); await f.service.flush();
+    f.click("done:medical-examination"); f.input("2026-09-23"); await f.service.flush();
     f.time("2026-09-28T10:00:00+03:00"); await f.service.flush();
     expect(f.sent.filter(x=>x.reply.text.includes("Напоминание:"))).toHaveLength(1);
   });

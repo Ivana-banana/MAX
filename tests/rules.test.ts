@@ -64,9 +64,17 @@ describe("переходное правило по дате въезда", () =>
     const plan = buildPlan(ruleSet.rules, { ...base, entryDate: "2026-09-01" }, {}, "2026-09-16");
     const medical = plan.find((i) => i.ruleId === "medical-examination");
     const fingerprints = plan.find((i) => i.ruleId === "fingerprinting");
-    expect(medical?.dueDate).toBe("2026-10-01");
-    expect(fingerprints?.dueDate).toBe("2026-11-30");
+    expect(medical?.dueDate).toBe("2026-09-30");
+    expect(fingerprints?.dueDate).toBe("2026-11-29");
     expect(medical?.dueDate).not.toBe(fingerprints?.dueDate);
+  });
+
+  it("пока юрист не ответил, день въезда входит в срок — показываем более раннюю дату", () => {
+    // docs/legal-review.md, вопрос 1; D-016. Ранняя дата безопасна при любом
+    // толковании «со дня въезда»; после ответа юриста тест меняют вместе с JSON.
+    for (const rule of ruleSet.rules) {
+      expect(rule.term.counting, rule.id).toBe("eventDay");
+    }
   });
 });
 

@@ -28,7 +28,8 @@ async function act(text: string, callback = false) {
 try {
   if (scripted) {
     console.log("[MOCKED: clock frozen at 2026-09-24 for repeatable demonstration]");
-    const entry = addDays(moscowDate(clock()), -23);
+    // Entry day counts toward the 30-day term, so the 7-day reminder falls on the frozen day.
+    const entry = addDays(moscowDate(clock()), -22);
     if (entry < "2026-09-01") throw new Error("Demo date must fall within the supported period");
     for (const text of ["/start", "ru", "accept", "yes", "KZ", entry, "card:medical-examination",
       "doc:medical-examination:passport", "plan", "reminders"]) await act(text);

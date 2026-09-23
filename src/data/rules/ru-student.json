@@ -23,7 +23,7 @@
       "term": {
         "event": "entry",
         "days": 30,
-        "counting": "dayAfterEvent"
+        "counting": "eventDay"
       },
       "repeat": {
         "months": 12,
@@ -100,7 +100,7 @@
       "term": {
         "event": "entry",
         "days": 90,
-        "counting": "dayAfterEvent"
+        "counting": "eventDay"
       },
       "appliesIf": [
         {
