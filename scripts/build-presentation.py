@@ -91,7 +91,7 @@ text('Путь в MAX: /start · Русский · Продолжить · Да 
 rect(638, 212, 588, 268, WHITE)
 text('ВЕРСИЯ И ИСХОДНИКИ', 662, 233, 530, 15, TEAL, True)
 link('github.com/M1hairu/MAX_GOATed_messenger', M['repository'], 662, 267, 530, 19)
-text('Развёрнутый и проверенный код: ' + M['checkedCodeCommit'][:12] + '\nСдаваемый commit — тег submit-online', 662, 303, 530, 16, max_h=48)
+text('Проверенный код: ' + M['checkedCodeCommit'][:12] + '\nСдаваемый commit — тег submit-online', 662, 303, 530, 16, max_h=48)
 link('Протокол проверок 23.09', M['sources'][7]['url'], 662, 363, 530, 17)
 link('Успешный GitHub Actions', M['ciUrl'], 662, 392, 530, 17)
 text('Локально: WEBHOOK_SECRET=local-demo-only-not-for-deployment, MAX_BOT_TOKEN пуст', 662, 426, 530, 14, MUTED, max_h=44)  # secret-scan: allow — public local demo value from .env.example
