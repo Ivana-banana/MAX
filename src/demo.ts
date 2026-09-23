@@ -18,7 +18,9 @@ const service = new Service(store, { rules: rules.rules, version: rules.version,
     last = reply;
     if (reply.text.includes("Напоминание:")) reminderCount++;
     console.log("\n[MOCKED: MAX transport] " + reply.text);
-    reply.buttons.flat().forEach((b, i) => console.log(`${i + 1}. ${b.text}`));
+    if (reply.file) console.log(`[MOCKED: MAX file upload] ${reply.file.name}, ${reply.file.content.length} bytes`);
+    reply.buttons.flat().forEach((b, i) => console.log(`${i + 1}. ${b.text}` +
+      ("url" in b ? ` → ${b.url}` : "copy" in b ? " → [MOCKED: copied to clipboard]" : "")));
   },
 }, clock);
 async function act(text: string, callback = false) {
@@ -46,6 +48,7 @@ try {
         const text = await terminal.question("> ");
         if (text === "/exit") break;
         const option = /^\d+$/.test(text) ? last!.buttons.flat()[Number(text) - 1] : undefined;
+        if (option && !("action" in option)) { console.log("url" in option ? option.url : option.copy); continue; }
         await act(option?.action ?? text, option !== undefined);
       }
     } finally { terminal.close(); }
