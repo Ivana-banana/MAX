@@ -13,7 +13,7 @@
 ## Global Constraints
 
 - UI, `src/bot/dialog.ts`, `src/core/`, `src/data/rules/`, MAX webhook-подписку и токен не менять.
-- PR #3 владеет `src/bot/store.ts`, `src/bot/service.ts`, `src/demo.ts`, `tests/bot.test.ts`, README и `docs/decisions.md` до слияния/передачи. Ветку UI считать неизвестной и перепроверять `git branch -r` перед интеграцией.
+- PR #3 уже влита в `main`; её изменения — базовый контракт для PostgreSQL. PR #4 пока владеет `src/demo.ts` и `tests/bot.test.ts`, PR #5 — `.github/workflows/check.yml` и `package.json`. Эти пути не править до слияния/передачи. Ветку UI считать неизвестной и перепроверять `git branch -r` перед интеграцией.
 - Все агенты работают в отдельных `.claude/worktrees/` от опубликованной ветки плана, коммитят только свои пути и запускают `bash .claude/hooks/check-upstream.sh` перед коммитом.
 - Пароль PostgreSQL хранить только в `.env`; в `.env.example` оставлять плейсхолдер. Данные тестов синтетические. Исходный SQLite volume не удалять.
 - Ни один шаг не переключает действующую ВМ. Крупный переход остаётся в ветке на ревью; реальный MAX mobile/web проверяется после согласованного развёртывания.
@@ -85,9 +85,9 @@ expect(snapshot.outbox.map(job => job.status)).toEqual(["pending", "sent"]);
 
 ### Task 4: Перевести бот на асинхронное PostgreSQL хранилище
 
-**Предусловие:** PR #3 влита либо владелец явно передал перечисленные в Global Constraints файлы; сначала `git fetch --prune`, diff PR и `git merge origin/main`.
+**Предусловие:** PR #3 влита; актуальный `origin/main` уже интегрирован в ветку плана. Сначала создать отдельный PostgreSQL-модуль и тесты без файлов PR #4. После слияния PR #4 либо явной передачи этих файлов интегрировать модуль с ботом, `src/demo.ts` и `tests/bot.test.ts`; каждый раз перед этим `git fetch --prune`, diff PR и `git merge origin/main`.
 
-**Files:** Modify `src/bot/store.ts`, `src/bot/service.ts`, `src/bot/server.ts`, `src/main.ts`, `src/demo.ts`, `tests/bot.test.ts`.
+**Files:** Create `src/db/postgres-store.ts`, `tests/pg-store.test.ts`; then modify `src/bot/store.ts`, `src/bot/service.ts`, `src/bot/server.ts`, `src/bot/config.ts`, `src/main.ts`, `src/demo.ts`, `tests/bot.test.ts` after clearing ownership.
 
 **Interfaces:** `Store.open(pool: Pool): Promise<Store>`, `store.transaction<T>(userId:number, fn:(tx:StoreTx)=>Promise<T>):Promise<T>`, `store.claim(now:number, leaseToken:string):Promise<Job|undefined>`, `store.finish(id:string, leaseToken:string):Promise<boolean>`, `store.retry(job:Job, now:number):Promise<void>`, `store.close():Promise<void>`. `Service.receive`, `Service.maintain`, `Service.scheduleUser` становятся `async`; HTTP ждёт `receive` перед `200`.
 
@@ -111,11 +111,11 @@ expect(state?.revision).toBe(2);
 **Files:** Modify `compose.yaml`, `Dockerfile`, `.env.example`, `.github/workflows/check.yml`, `README.md`, `docs/deploy.md`, `docs/decisions.md`, `HANDOFF.md`.
 
 - [ ] Добавить PostgreSQL 16+ с отдельным volume и healthcheck; `bot` ждёт healthy DB. Пароль обязателен через `.env`, никаких рабочих значений в Git. Образ включает только runtime-зависимости и нужные миграции.
-- [ ] CI запускает реальный PostgreSQL service и все интеграционные тесты; `demo:check` работает на тестовой БД. Ветка UI и PR #3 сверены по новым коммитам до правок общих документов.
+- [ ] CI запускает реальный PostgreSQL service и все интеграционные тесты; `demo:check` работает на тестовой БД. Ветка UI и PR #4/#5 сверены по новым коммитам до правок общих документов и CI.
 - [ ] README и deploy runbook описывают backup (`pg_dump`), проверку восстановления в отдельной БД, остановку старого бота, snapshot SQLite с WAL, импорт, сверку counts, запуск и сценарий отказа. Не запускать `docker compose down -v`.
 - [ ] Записать решение о PostgreSQL отдельной строкой в `docs/decisions.md`, обновить `HANDOFF.md` с commit, проверками и ограничениями. При необходимости обновить `docs/tz-compliance.md` в том же коммите, что и артефакт.
 - [ ] Запустить `npm test`, `npm run typecheck`, `npm run build`, `npm run demo:check`, `docker compose build`; проверить GitHub Actions и отсутствие секретов. Крупная ветка идёт на ревью до слияния в `main`.
 
 ## Порядок передачи
 
-Сразу после публикации этого плана параллельно стартуют агенты A и B в отдельных worktree; их файлы не пересекаются с PR #3 или будущим UI. После двух коммитов интегратор сводит их в ветку плана и берёт Task 3. Task 4 начинается только после устранения пересечения с PR #3; Task 5 — после работающего runtime. Переключение рабочей ВМ и проверка в MAX остаются отдельным этапом после ревью.
+После публикации плана агенты A и B сделали схему и чтение SQLite в отдельных worktree; Task 3 с импортом также прошёл ревью и реальный PostgreSQL. PR #3 влита, поэтому Task 4 начинается с изолированного PostgreSQL-модуля, а подключение к demo/общим тестам ждёт PR #4. Task 5 — после работающего runtime и освобождения CI из PR #5. Переключение рабочей ВМ и проверка в MAX остаются отдельным этапом после ревью.
