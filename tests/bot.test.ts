@@ -196,3 +196,79 @@ describe("webhook boundary and release guards", () => {
     } finally { server.closeAllConnections(); await new Promise<void>(resolve=>server.close(()=>resolve())); }
   });
 });
+describe("calendar export, MAX link/clipboard buttons and reminder navigation", () => {
+  const flat = (r?: Reply) => r?.buttons.flat() ?? [];
+  it("sends the plan as an .ics file from the plan screen", async () => {
+    const f=fixture(); f.onboard(); f.click("calendar"); await f.service.flush();
+    const r=f.sent.at(-1)?.reply;
+    expect(r?.file?.name).toBe("first-90-days.ics");
+    expect(r?.file?.content.match(/BEGIN:VEVENT/g)).toHaveLength(2);
+    expect(r?.text).toContain("не решение МВД");
+  });
+  it("hides the calendar button when nothing is left to do", async () => {
+    const f=fixture(); f.onboard(); await f.service.flush();
+    expect(flat(f.sent.at(-1)?.reply).some(b=>"action" in b && b.action.endsWith("|calendar"))).toBe(true);
+    f.click("done:fingerprinting"); f.input("2026-09-10");
+    f.store.save(1,{...f.store.get(1)!,completions:{fingerprinting:"2026-09-10"},step:"plan"},0);
+    const s=f.store.get(1)!;
+    const alldone=transition(s,{text:`${s.nonce}.${s.revision}|plan`,callback:true},{...ctx,rules:ctx.rules.filter(r=>r.id==="fingerprinting")});
+    expect(flat(alldone.reply).some(b=>"action" in b && b.action.endsWith("|calendar"))).toBe(false);
+  });
+  it("links the card to the law and turns 'help' into a ready question to copy", async () => {
+    const f=fixture(); f.onboard(); f.click("card:medical-examination"); await f.service.flush();
+    expect(flat(f.sent.at(-1)?.reply)).toContainEqual({ text:"Открыть норму", url:expect.stringContaining("consultant.ru") });
+    f.click("help:medical-examination"); await f.service.flush();
+    const copy=flat(f.sent.at(-1)?.reply).find(b=>"copy" in b) as {copy:string}|undefined;
+    expect(copy?.copy).toContain("«Медицинское освидетельствование», расчётный срок — до 2026-10-01");
+    expect(copy?.copy).toContain("гражданство KZ, въезд 2026-09-01");
+    expect(flat(f.sent.at(-1)?.reply).some(b=>"url" in b && b.url.includes("kpfu.ru"))).toBe(true);
+    expect(f.sent.at(-1)?.reply.text).toContain("kpfu.ru");
+  });
+  it("keeps the generic help reachable before onboarding, with copy and link buttons", () => {
+    const r=transition(null,{text:"/help",callback:false},ctx).reply;
+    expect(flat(r).map(b=>Object.keys(b).sort().join())).toEqual(["copy,text","text,url"]);
+  });
+  it("opens the card from an old reminder even after other actions", async () => {
+    const f=fixture(); f.onboard(); f.click("reminders"); await f.service.flush();
+    const reminder=f.sent.find(x=>x.reply.text.includes("Напоминание:"))!.reply;
+    const details=flat(reminder).find(b=>"action" in b && b.action.endsWith("|card:medical-examination")) as {action:string};
+    f.click("doc:medical-examination:passport"); f.click("done:fingerprinting");
+    expect(f.store.get(1)?.step).toBe("completion");
+    f.input(details.action,1,"old-reminder",true); await f.service.flush();
+    expect(f.store.get(1)?.step).toBe("plan");
+    expect(f.sent.at(-1)?.reply.text).toContain("Расчётный предельный срок");
+  });
+  it("still rejects stale buttons that change state", () => {
+    const f=fixture(); f.onboard(); const s=f.store.get(1)!;
+    f.click("card:fingerprinting");
+    f.input(`${s.nonce}.${s.revision}|reminders`,1,"stale-toggle",true);
+    expect(f.store.get(1)?.reminders).toBe(false);
+    f.input(`${s.nonce}.${s.revision}|done:fingerprinting`,1,"stale-done",true);
+    expect(f.store.get(1)?.step).toBe("plan");
+  });
+  it("maps link and clipboard buttons for MAX and retries attachment.not.ready", async () => {
+    let calls=0;
+    const mocked = vi.fn(async () => ++calls===1
+      ? new Response(JSON.stringify({code:"attachment.not.ready",message:"not ready"}),{status:400})
+      : new Response(JSON.stringify({message:{body:{mid:"fake"}}}),{status:200}));
+    vi.stubGlobal("fetch",mocked);
+    try {
+      const transport=createTransport(readConfig({TRANSPORT:"max",MAX_BOT_TOKEN:"test-token",
+        WEBHOOK_SECRET:"your-demo-secret-change-before-deploy"}));
+      await transport.send(123,{text:"DEMO",ruleVersion:"test",buttons:[[{text:"Law",url:"https://example.org/law"}],[{text:"Copy",copy:"question"}]]});
+      expect(mocked).toHaveBeenCalledTimes(2);
+      const body=JSON.parse((mocked.mock.calls[1] as unknown as [string,RequestInit])[1].body as string);
+      expect(body.attachments[0].payload.buttons).toEqual([[{type:"link",text:"Law",url:"https://example.org/law"}],[{type:"clipboard",text:"Copy",payload:"question"}]]);
+    } finally { vi.unstubAllGlobals(); }
+  });
+});
+describe("queue storage performance guards", () => {
+  it("finds a user's queued jobs through an index, not a full scan of the outbox", () => {
+    const store=new Store(":memory:"); cleanups.push(() => store.close());
+    for (const sql of ["DELETE FROM outbox WHERE user_id=1 AND kind='reminder' AND status='pending'",
+      "DELETE FROM outbox WHERE user_id=1 AND kind='reply' AND status='pending'", "DELETE FROM outbox WHERE user_id=1"]) {
+      const plan=(store.db.prepare("EXPLAIN QUERY PLAN "+sql).all() as {detail:string}[]).map(r=>r.detail).join(" ");
+      expect(plan).toMatch(/SEARCH outbox USING (COVERING )?INDEX user_jobs/);
+    }
+  });
+});
