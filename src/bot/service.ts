@@ -53,8 +53,8 @@ export class Service {
       this.scheduleUser(update.user);
     });
   }
-  scheduleUser(user: number): void {
-    const state = this.store.get(user), now = this.clock(), ctx = this.ctx();
+  scheduleUser(user: number, state = this.store.get(user)): void {
+    const now = this.clock(), ctx = this.ctx();
     if (!state?.reminders || state.ruleVersion !== ctx.version) return;
     for (const item of plan(state, ctx)) {
       for (const day of reminderDates(item, ctx.today)) {
@@ -67,7 +67,7 @@ export class Service {
   maintain(): void {
     this.store.transaction(() => {
       this.store.prune(this.clock());
-      for (const { user } of this.store.sessions()) this.scheduleUser(user);
+      for (const { user, state } of this.store.sessions()) this.scheduleUser(user, state);
     });
   }
   async flush(limit = 20): Promise<void> {
