@@ -222,6 +222,7 @@ describe("calendar export, MAX link/clipboard buttons and reminder navigation", 
     expect(copy?.copy).toContain("«Медицинское освидетельствование», расчётный срок — до 2026-10-01");
     expect(copy?.copy).toContain("гражданство KZ, въезд 2026-09-01");
     expect(flat(f.sent.at(-1)?.reply).some(b=>"url" in b && b.url.includes("kpfu.ru"))).toBe(true);
+    expect(f.sent.at(-1)?.reply.text).toContain("kpfu.ru");
   });
   it("keeps the generic help reachable before onboarding, with copy and link buttons", () => {
     const r=transition(null,{text:"/help",callback:false},ctx).reply;

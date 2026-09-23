@@ -106,7 +106,8 @@ function help(s: Session, ctx: DialogueContext, ruleId?: string): Reply {
     `Hello! I am an international KFU student (${who}). I need to complete “${item.title.en}”, calculated deadline ${item.dueDate}. The problem: ___. Could you tell me the next step and the documents I need?`);
   return reply(s, ctx, t(s,
     "Что мешает: нет документа, нет записи или непонятен следующий шаг? Готовый вопрос для КФУ — скопируйте кнопкой, впишите вместо ___ своё препятствие и отправьте сами:\n\n",
-    "What is in the way: a missing document, no booking, or an unclear next step? Here is a ready question for KFU: copy it, replace ___ with your obstacle and send it yourself:\n\n") + draft,
+    "What is in the way: a missing document, no booking, or an unclear next step? Here is a ready question for KFU: copy it, replace ___ with your obstacle and send it yourself:\n\n") + draft +
+    t(s, "\n\nКонтакты КФУ: ", "\n\nKFU contacts: ") + CONTACT,
     actions(draft));
 }
 function prompt(s: Session, ctx: DialogueContext): Reply {
