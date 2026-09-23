@@ -76,21 +76,10 @@ end-to-end в MAX, потом сдача, потом презентация.
 
 ## Деплой
 
-- ВМ Yandex Cloud: Ubuntu 24.04, 2 vCPU (50%), 4 ГБ, SSD 30 ГБ, не прерываемая,
-  IP `81.26.178.75` статический. Вход: `ssh deploy@81.26.178.75` (ключ — у Ивана).
-- Caddy (HTTPS, Let's Encrypt, автопродление) → `127.0.0.1:3000` → контейнер из `compose.yaml`.
-- Код в `~/max-bot` — снимок `origin/main` через `git archive` (репозиторий приватный,
-  deploy key не добавлен); задеплоенный коммит — в `~/max-bot/DEPLOYED_COMMIT`
-  (сейчас `f6e2e9c`).
-- Вне Git только на ВМ: `.env` (права 600, токен и `WEBHOOK_SECRET`) и
-  `compose.override.yaml` с `NODE_EXTRA_CA_CERTS` — сертификат API MAX выпущен
-  Russian Trusted Root CA (Минцифры), без него бот не сможет отправлять ответы.
-  Корневой сертификат — `~/max-bot/certs/`, источник `gu-st.ru`.
-- Обновление: с локальной копии
-  `git archive origin/main | ssh deploy@81.26.178.75 "tar -x -C ~/max-bot"`, затем на ВМ
-  `docker compose up --build -d` и обновить `DEPLOYED_COMMIT`. `down -v` не делать — там БД.
-- Проверка: `curl https://81-26-178-75.sslip.io/health` → 200; `POST /webhook` без
-  секрета → 401.
+Бот работает на ВМ Yandex Cloud `81.26.178.75` (`ssh deploy@…`, ключ — у Ивана), webhook
+`https://81-26-178-75.sslip.io/webhook`, живость — `/health`. Устройство, развёртывание
+с нуля, обновление и частые поломки — [`docs/deploy.md`](docs/deploy.md). Вне Git только
+`~/max-bot/.env` на ВМ. `docker compose down -v` не делать — удалит БД.
 
 ## Блокеры и вопросы
 

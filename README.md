@@ -4,9 +4,11 @@
 иностранный первокурсник, первый въезд с 01.09.2026 для учёбы более чем на 90 дней,
 общежитие КФУ, без РВП/РВПО/ВНЖ и ранее пройденных процедур. КФУ — кандидат, не партнёр.
 
-**Статус:** локальный демонстратор и подготовленный транспорт MAX. Все нормативные
-правила — draft. Токен, HTTPS-домен и прогон mobile/web не предоставлены. Ссылка на
-бота: **TBD**. Версия не готова к сдаче. APP_MODE=live блокирует черновые правила.
+**Статус:** бот развёрнут в MAX в демо-режиме (APP_MODE=demo, все сообщения помечены
+ДЕМО): [max.ru/t149_hakaton_max_bot](https://max.ru/t149_hakaton_max_bot), проверка
+живости — https://81-26-178-75.sslip.io/health. Прогон сценария в мобильном и веб-MAX
+ещё не записан. Все нормативные правила — draft; APP_MODE=live их блокирует.
+Версия не готова к сдаче. Развёртывание — [docs/deploy.md](docs/deploy.md).
 
 **Запуск одной командой**
 
@@ -82,13 +84,19 @@ DEBUG при max запрещён: SDK-диагностика может сод�
 2. Установить в .env TRANSPORT=max, токен, собственный WEBHOOK_SECRET и WEBHOOK_URL.
    APP_MODE=demo подходит только для явно обозначенного учебного показа.
 3. Запустить сервис, настроить HTTPS и проверить /health извне.
-4. После сборки вручную выполнить `npm run subscribe`. Это отдельное действие
-   создаёт подписку MAX; скрипт отказывается заменять существующие подписки.
+4. После запуска вручную создать подписку MAX: в Docker —
+   `docker compose run --rm --no-deps bot node dist/subscribe.js`, без Docker —
+   `npm run subscribe`. Скрипт отказывается заменять существующие подписки.
 5. Пройти путь в мобильном и веб-MAX и записать коммит, дату, результат.
 
 Используется официальный @maxhub/max-bot-api 0.3.1, домен platform-api2.max.ru,
-Authorization header. При необходимости добавлять доверенный CA штатным способом
-(NODE_EXTRA_CA_CERTS); TLS-проверку не отключать.
+Authorization header. Сертификат platform-api2.max.ru выпущен Russian Trusted Root CA
+(Минцифры), которого нет в хранилище Node: без него бот принимает webhook, но не может
+ответить (UNABLE_TO_GET_ISSUER_CERT_LOCALLY). Корневой сертификат лежит в
+certs/russian_trusted_root_ca.pem (SHA-256 D2:6D:…:CF:31, проверяется тестом), Docker-образ
+подключает его через NODE_EXTRA_CA_CERTS. Без Docker переменную задают в окружении
+процесса: `NODE_EXTRA_CA_CERTS=certs/russian_trusted_root_ca.pem npm start` — из .env
+(--env-file) Node её не читает. TLS-проверку не отключать.
 [Документация API](https://dev.max.ru/docs/chatbots/bots-coding/prepare),
 [требования webhook](https://dev.max.ru/docs-api/methods/POST/subscriptions).
 
