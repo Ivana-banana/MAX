@@ -63,7 +63,8 @@ try {
   };
   const serialized = JSON.stringify(artifact, null, 2) + '\n';
   if (process.argv.includes('--check')) {
-    assert.equal(readFileSync(path, 'utf8'), serialized, 'Demo transcript is stale; run npm run demo:export');
+    // A Windows checkout with core.autocrlf has CRLF; the committed file and the export use LF.
+    assert.equal(readFileSync(path, 'utf8').replaceAll('\r\n', '\n'), serialized, 'Demo transcript is stale; run npm run demo:export');
     console.log('Demo transcript matches the code; one reminder, completion, stop and deletion verified.');
   } else {
     writeFileSync(path, serialized);
