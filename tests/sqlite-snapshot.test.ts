@@ -3,6 +3,7 @@ import { DatabaseSync } from "node:sqlite";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
+import type { SqliteSnapshot } from "../src/db/sqlite-snapshot.js";
 
 const tempDirectories: string[] = [];
 
@@ -37,7 +38,12 @@ describe("readSqliteSnapshot", () => {
     const readSqliteSnapshot = await snapshotReader();
 
     expect(readSqliteSnapshot(path)).toEqual({
-      sessions: [{ userId: 42, data: { step: "plan", reminders: true }, updatedAt: 1_760_000_000_123 }],
+      sessions: [{
+        userId: 42,
+        data: { step: "plan", reminders: true },
+        rawDataJson: '{"step":"plan","reminders":true}',
+        updatedAt: 1_760_000_000_123,
+      }],
       events: [
         { id: "event-1", createdAt: 1_760_000_000_456 },
         { id: "event-2", createdAt: 1_760_000_000_789 },
@@ -47,6 +53,7 @@ describe("readSqliteSnapshot", () => {
           id: "job-pending",
           userId: 42,
           payload: { text: "synthetic reminder" },
+          rawPayloadJson: '{"text":"synthetic reminder"}',
           kind: "reminder",
           attempts: 2,
           nextAttempt: 1_760_000_001_001,
@@ -57,6 +64,7 @@ describe("readSqliteSnapshot", () => {
           id: "job-sent",
           userId: 42,
           payload: { text: "synthetic reply" },
+          rawPayloadJson: '{"text":"synthetic reply"}',
           kind: "reply",
           attempts: 1,
           nextAttempt: 1_760_000_001_234,
@@ -64,6 +72,30 @@ describe("readSqliteSnapshot", () => {
           createdAt: 1_760_000_000_002,
         },
       ],
+    });
+  });
+
+  it("retains original JSON text for integers beyond JavaScript safe precision", async () => {
+    const path = createLegacyDatabase();
+    const sessionJson = '{"value":9007199254740993}';
+    const payloadJson = '{"value":9007199254740993}';
+    write(path, db => {
+      db.prepare("INSERT INTO sessions (user_id, data, updated_at) VALUES (?, ?, ?)")
+        .run(42, sessionJson, 1_760_000_000_123);
+      db.prepare(`INSERT INTO outbox
+        (id, user_id, payload, kind, attempts, next_attempt, status, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`)
+        .run("job-large-number", 42, payloadJson, "reply", 0,
+          1_760_000_001_234, "pending", 1_760_000_000_001);
+    });
+
+    const readSqliteSnapshot = await snapshotReader();
+    const snapshot = readSqliteSnapshot(path);
+
+    expect(snapshot.sessions[0]?.data).toEqual({ value: 9007199254740992 });
+    expect(snapshot).toMatchObject({
+      sessions: [{ rawDataJson: sessionJson }],
+      outbox: [{ rawPayloadJson: payloadJson }],
     });
   });
 
@@ -169,7 +201,7 @@ function createTempDirectory(): string {
   return directory;
 }
 
-async function snapshotReader(): Promise<(path: string) => unknown> {
+async function snapshotReader(): Promise<(path: string) => SqliteSnapshot> {
   const module = await import("../src/db/sqlite-snapshot.js");
   return module.readSqliteSnapshot;
 }

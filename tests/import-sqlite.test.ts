@@ -33,16 +33,16 @@ describe("importSqlite transaction contract", () => {
       .toBeGreaterThan(pool.queries.indexOf("COMMIT"));
     expect(pool.clients.every((client) => client.released)).toBe(true);
     expect(pool.state.sessions).toEqual([
-      [42, JSON.stringify(snapshot.sessions[0]?.data), 1_760_000_000_123],
+      [42, '{"step":"plan","nested":{"reminders":true}}', 1_760_000_000_123],
     ]);
     expect(pool.state.events).toEqual([
       ["synthetic-event-1", 1_760_000_000_456],
       ["synthetic-event-2", 1_760_000_000_789],
     ]);
     expect(pool.state.outbox).toEqual([
-      ["synthetic-job-1", 42, JSON.stringify(snapshot.outbox[0]?.payload), "reminder", 2,
+      ["synthetic-job-1", 42, '{"text":"synthetic reminder","extra":{"day":7}}', "reminder", 2,
         1_760_000_001_001, "pending", 1_760_000_000_001],
-      ["synthetic-job-2", 42, JSON.stringify(snapshot.outbox[1]?.payload), "reply", 1,
+      ["synthetic-job-2", 42, '{"text":"synthetic reply","buttons":["open","copy"]}', "reply", 1,
         1_760_000_001_234, "sent", 1_760_000_000_002],
     ]);
 
@@ -50,6 +50,17 @@ describe("importSqlite transaction contract", () => {
     expect(insertQueries).toHaveLength(5);
     expect(insertQueries.every((query) => query.text.includes("$1"))).toBe(true);
     expect(insertQueries.every((query) => query.values.length > 0)).toBe(true);
+  });
+
+  it("passes original JSON text to PostgreSQL for integers beyond JavaScript safe precision", async () => {
+    const pool = new RecordingPool();
+    const snapshot = readSqliteSnapshot(createSqliteSourceWithLargeNumbers());
+
+    await importSqlite(pool.asPool(), snapshot);
+
+    expect(snapshot.sessions[0]?.data).toEqual({ value: 9007199254740992 });
+    expect(pool.state.sessions[0]?.[1]).toBe('{"value":9007199254740993}');
+    expect(pool.state.outbox[0]?.[2]).toBe('{"value":9007199254740993}');
   });
 
   it("rejects non-empty target tables before inserting any rows", async () => {
@@ -112,7 +123,7 @@ postgresDescribe("importSqlite PostgreSQL integration", () => {
       throw new Error("TEST_DATABASE_URL is required to create an isolated test schema");
     }
 
-    schemaName = `pg_import_test_${process.pid}_${randomUUID().replaceAll("-", "")}`;
+    schemaName = `import_test_${process.pid}_${randomUUID().replaceAll("-", "")}`;
     adminPool = new Pool({ connectionString: testDatabaseUrl });
     await adminPool.query(`CREATE SCHEMA "${schemaName}"`);
     pool = new Pool({
@@ -196,6 +207,23 @@ postgresDescribe("importSqlite PostgreSQL integration", () => {
     )).toMatchObject({ rows: rowsBeforeRepeat.outbox });
     expect(existsSync(sourcePath)).toBe(true);
     expect(readFileSync(sourcePath)).toEqual(sourceBefore);
+  });
+
+  it("preserves JSON numbers beyond JavaScript safe precision in JSONB", async () => {
+    if (!pool) throw new Error("PostgreSQL test pool was not initialized");
+    const snapshot = readSqliteSnapshot(createSqliteSourceWithLargeNumbers());
+
+    await importSqlite(pool, snapshot);
+
+    const values = await pool.query<{ session_value: string; outbox_value: string }>(`
+      SELECT
+        (SELECT data #>> '{value}' FROM sessions WHERE user_id = 42) AS session_value,
+        (SELECT payload #>> '{value}' FROM outbox WHERE id = 'job-large-number') AS outbox_value
+    `);
+    expect(values.rows[0]).toEqual({
+      session_value: "9007199254740993",
+      outbox_value: "9007199254740993",
+    });
   });
 
   it("rolls back the three target tables when an invalid outbox row follows valid rows", async () => {
@@ -341,7 +369,12 @@ function queryResult<Row extends QueryResultRow>(rows: Row[]): QueryResult<Row> 
 function syntheticSnapshot(): SqliteSnapshot {
   return {
     sessions: [
-      { userId: 42, data: { step: "plan", nested: { reminders: true } }, updatedAt: 1_760_000_000_123 },
+      {
+        userId: 42,
+        data: { step: "plan", nested: { reminders: true } },
+        rawDataJson: '{"step":"plan","nested":{"reminders":true}}',
+        updatedAt: 1_760_000_000_123,
+      },
     ],
     events: [
       { id: "synthetic-event-1", createdAt: 1_760_000_000_456 },
@@ -352,6 +385,7 @@ function syntheticSnapshot(): SqliteSnapshot {
         id: "synthetic-job-1",
         userId: 42,
         payload: { text: "synthetic reminder", extra: { day: 7 } },
+        rawPayloadJson: '{"text":"synthetic reminder","extra":{"day":7}}',
         kind: "reminder",
         attempts: 2,
         nextAttempt: 1_760_000_001_001,
@@ -362,6 +396,7 @@ function syntheticSnapshot(): SqliteSnapshot {
         id: "synthetic-job-2",
         userId: 42,
         payload: { text: "synthetic reply", buttons: ["open", "copy"] },
+        rawPayloadJson: '{"text":"synthetic reply","buttons":["open","copy"]}',
         kind: "reply",
         attempts: 1,
         nextAttempt: 1_760_000_001_234,
@@ -390,7 +425,7 @@ function createSqliteSource(snapshot: SqliteSnapshot): string {
     `);
     for (const session of snapshot.sessions) {
       db.prepare("INSERT INTO sessions (user_id, data, updated_at) VALUES (?, ?, ?)")
-        .run(session.userId, JSON.stringify(session.data), session.updatedAt);
+        .run(session.userId, session.rawDataJson, session.updatedAt);
     }
     for (const event of snapshot.events) {
       db.prepare("INSERT INTO events (id, created_at) VALUES (?, ?)")
@@ -400,9 +435,39 @@ function createSqliteSource(snapshot: SqliteSnapshot): string {
       db.prepare(`INSERT INTO outbox
         (id, user_id, payload, kind, attempts, next_attempt, status, created_at)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`)
-        .run(job.id, job.userId, JSON.stringify(job.payload), job.kind, job.attempts,
+        .run(job.id, job.userId, job.rawPayloadJson, job.kind, job.attempts,
           job.nextAttempt, job.status, job.createdAt);
     }
+  } finally {
+    db.close();
+  }
+
+  return sourcePath;
+}
+
+function createSqliteSourceWithLargeNumbers(): string {
+  const directory = mkdtempSync(join(tmpdir(), "sqlite-import-precision-test-"));
+  temporaryDirectories.push(directory);
+  const sourcePath = join(directory, "legacy.sqlite");
+  const db = new DatabaseSync(sourcePath);
+
+  try {
+    db.exec(`
+      CREATE TABLE sessions (user_id INTEGER PRIMARY KEY, data TEXT NOT NULL, updated_at INTEGER NOT NULL);
+      CREATE TABLE events (id TEXT PRIMARY KEY, created_at INTEGER NOT NULL);
+      CREATE TABLE outbox (
+        id TEXT PRIMARY KEY, user_id INTEGER NOT NULL, payload TEXT NOT NULL, kind TEXT NOT NULL,
+        attempts INTEGER NOT NULL DEFAULT 0, next_attempt INTEGER NOT NULL,
+        status TEXT NOT NULL DEFAULT 'pending', created_at INTEGER NOT NULL
+      );
+    `);
+    db.prepare("INSERT INTO sessions (user_id, data, updated_at) VALUES (?, ?, ?)")
+      .run(42, '{"value":9007199254740993}', 1_760_000_000_123);
+    db.prepare(`INSERT INTO outbox
+      (id, user_id, payload, kind, attempts, next_attempt, status, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`)
+      .run("job-large-number", 42, '{"value":9007199254740993}', "reply", 0,
+        1_760_000_001_234, "pending", 1_760_000_000_001);
   } finally {
     db.close();
   }

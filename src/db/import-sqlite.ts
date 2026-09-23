@@ -92,7 +92,7 @@ async function insertSessions(
     await client.query(
       `INSERT INTO sessions (user_id, data, updated_at)
        VALUES ($1, $2::jsonb, $3)`,
-      [session.userId, JSON.stringify(session.data), session.updatedAt],
+      [session.userId, session.rawDataJson, session.updatedAt],
     );
   }
 }
@@ -115,7 +115,7 @@ async function insertOutbox(client: PoolClient, outbox: SqliteSnapshot["outbox"]
       [
         job.id,
         job.userId,
-        JSON.stringify(job.payload),
+        job.rawPayloadJson,
         job.kind,
         job.attempts,
         job.nextAttempt,
