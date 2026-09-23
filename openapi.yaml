@@ -2,10 +2,12 @@ openapi: 3.1.0
 info:
   title: First 90 days — bot delivery boundary
   version: 0.2.0-demo
-  description: Local demo contract. Public HTTPS URL and real MAX verification are pending.
+  description: Bot delivery boundary. The public server runs APP_MODE=demo; its webhook secret is not published, so only /health and the 401 check are reproducible there.
 servers:
+  - url: https://81-26-178-75.sslip.io
+    description: Public demo deployment in MAX (docs/deploy.md)
   - url: http://127.0.0.1:3000
-    description: Local demonstration only
+    description: Local demonstration (docker compose up)
 paths:
   /health:
     get:
