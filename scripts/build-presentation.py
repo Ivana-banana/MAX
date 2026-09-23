@@ -220,5 +220,5 @@ if args.check:
     print(f'PDF matches its sources: {page} pages, {len(result)} bytes; text fits all declared boxes.')
 else:
     output.write_bytes(result)
-    (ASSETS / 'outline.md').write_text('# Содержание презентации\n\n' + '\n\n'.join(f'{n}. **{title}** ({section})\n\n   {subtitle}' for n, section, title, subtitle in outline) + '\n')
+    (ASSETS / 'outline.md').write_text('# Содержание презентации\n\n' + '\n\n'.join(f'{n}. **{title}** ({section})\n\n   {subtitle}' for n, section, title, subtitle in outline) + '\n', encoding='utf-8')
     print(f'Built {output.relative_to(ROOT)}: {page} pages, {len(result)} bytes; text fits all declared boxes.')
