@@ -1,12 +1,13 @@
 import { DatabaseSync } from "node:sqlite";
 
 export interface SqliteSnapshot {
-  sessions: { userId: number; data: unknown; updatedAt: number }[];
+  sessions: { userId: number; data: unknown; rawDataJson: string; updatedAt: number }[];
   events: { id: string; createdAt: number }[];
   outbox: {
     id: string;
     userId: number;
     payload: unknown;
+    rawPayloadJson: string;
     kind: "reply" | "reminder";
     attempts: number;
     nextAttempt: number;
@@ -57,9 +58,11 @@ function readRows(db: DatabaseSync, table: string, sql: string): unknown[] {
 
 function readSession(value: unknown): SqliteSnapshot["sessions"][number] {
   const row = asRow(value, "sessions");
+  const data = parseJson(row.data, "sessions.data");
   return {
     userId: safeInteger(row.user_id, "sessions.user_id", 1),
-    data: parseJson(row.data, "sessions.data"),
+    data: data.value,
+    rawDataJson: data.rawJson,
     updatedAt: safeInteger(row.updated_at, "sessions.updated_at"),
   };
 }
@@ -74,10 +77,12 @@ function readEvent(value: unknown): SqliteSnapshot["events"][number] {
 
 function readOutboxJob(value: unknown): SqliteSnapshot["outbox"][number] {
   const row = asRow(value, "outbox");
+  const payload = parseJson(row.payload, "outbox.payload");
   return {
     id: nonEmptyString(row.id, "outbox.id"),
     userId: safeInteger(row.user_id, "outbox.user_id", 1),
-    payload: parseJson(row.payload, "outbox.payload"),
+    payload: payload.value,
+    rawPayloadJson: payload.rawJson,
     kind: outboxKind(row.kind),
     attempts: safeInteger(row.attempts, "outbox.attempts"),
     nextAttempt: safeInteger(row.next_attempt, "outbox.next_attempt"),
@@ -112,10 +117,10 @@ function nonEmptyString(value: unknown, field: string): string {
   return value;
 }
 
-function parseJson(value: unknown, field: string): unknown {
+function parseJson(value: unknown, field: string): { value: unknown; rawJson: string } {
   if (typeof value !== "string") throw invalidValue(field);
   try {
-    return JSON.parse(value) as unknown;
+    return { value: JSON.parse(value) as unknown, rawJson: value };
   } catch {
     throw invalidValue(field);
   }
