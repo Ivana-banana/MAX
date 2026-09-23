@@ -1,9 +1,19 @@
-import { Bot, Keyboard } from "@maxhub/max-bot-api";
+import { Bot, Keyboard, MaxError } from "@maxhub/max-bot-api";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import type { Transport } from "./service.js";
 import type { Config } from "./config.js";
+import type { Button } from "./dialog.js";
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const toButton = (b: Button) => "url" in b ? Keyboard.button.link(b.text, b.url)
+  : "copy" in b ? Keyboard.button.clipboard(b.text, b.copy) : Keyboard.button.callback(b.text, b.action);
 export function createTransport(config: Config): Transport {
   if (config.transport === "console") return {
-    async send(_user, reply) { console.log("[MOCKED: MAX delivery; synthetic demo only]", JSON.stringify(reply)); },
+    async send(_user, reply) {
+      const { file, ...rest } = reply;
+      console.log("[MOCKED: MAX delivery; synthetic demo only]", JSON.stringify(file ? { ...rest, file: file.name } : rest));
+    },
   };
   const bot = new Bot(config.token, { clientOptions: {
     fetch: (input, init) => fetch(input, { ...init, signal: AbortSignal.timeout(10000) }),
@@ -12,14 +22,32 @@ export function createTransport(config: Config): Transport {
   async function pace(): Promise<void> {
     const delay = Math.max(0, lastRequest + 100 - Date.now());
     lastRequest = Date.now() + delay;
-    if (delay) await new Promise(resolve => setTimeout(resolve, delay));
+    if (delay) await sleep(delay);
+  }
+  // The SDK names a Buffer upload with a random UUID; a path keeps the .ics extension phones need.
+  async function upload(file: { name: string; content: string }) {
+    const dir = await mkdtemp(join(tmpdir(), "max-file-"));
+    try {
+      await writeFile(join(dir, file.name), file.content, "utf8");
+      await pace();
+      return (await bot.api.uploadFile({ source: join(dir, file.name) })).toJson();
+    } finally { await rm(dir, { recursive: true, force: true }); }
   }
   return {
     async send(user, reply) {
-      await pace();
-      await bot.api.sendMessageToUser(user, reply.text, reply.buttons.length ? {
-        attachments: [Keyboard.inlineKeyboard(reply.buttons.map(row => row.map(b => Keyboard.button.callback(b.text, b.action))))],
-      } : {});
+      const attachments = [
+        ...(reply.file ? [await upload(reply.file)] : []),
+        ...(reply.buttons.length ? [Keyboard.inlineKeyboard(reply.buttons.map(row => row.map(toButton)))] : []),
+      ];
+      // MAX processes uploads asynchronously and rejects early sends with attachment.not.ready.
+      for (let attempt = 1; ; attempt++) {
+        await pace();
+        try { await bot.api.sendMessageToUser(user, reply.text, attachments.length ? { attachments } : {}); return; }
+        catch (e) {
+          if (!(e instanceof MaxError && e.code === "attachment.not.ready") || attempt >= 5) throw e;
+          await sleep(500 * attempt);
+        }
+      }
     },
     async answer(id) { await pace(); await bot.api.answerOnCallback(id); },
   };
