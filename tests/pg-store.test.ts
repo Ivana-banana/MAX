@@ -27,8 +27,27 @@ function getStore(store: PostgresStore | undefined): PostgresStore {
   return store;
 }
 
+function uniqueUserId(): number {
+  return 1 + (Number.parseInt(randomUUID().slice(0, 8), 16) % 2_000_000_000);
+}
+
 function pause(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function waitForAdvisoryWaiter(pool: Pool, userId: number): Promise<void> {
+  const deadline = Date.now() + 5_000;
+  while (Date.now() < deadline) {
+    const result = await pool.query(
+      `SELECT pid FROM pg_locks
+       WHERE locktype = 'advisory' AND classid = 0::oid AND objid = $1::oid
+         AND objsubid = 1 AND NOT granted`,
+      [userId],
+    );
+    if (result.rows.length > 0) return;
+    await pause(10);
+  }
+  throw new Error(`Timed out waiting for user ${userId} advisory-lock waiter`);
 }
 
 postgresDescribe("PostgreSQL storage", () => {
@@ -74,6 +93,28 @@ postgresDescribe("PostgreSQL storage", () => {
       "SELECT version FROM schema_migrations WHERE version = 1",
     );
     expect(migration.rows).toHaveLength(1);
+  });
+
+  it("closes the owned pool when migration fails and preserves the migration error", async () => {
+    const failingPool = new Pool({
+      connectionString: testDatabaseUrl,
+      options: `-c search_path=${schemaName}_missing_migration`,
+    });
+    let migrationError: unknown;
+
+    try {
+      await PostgresStore.open(failingPool);
+    } catch (error) {
+      migrationError = error;
+    }
+
+    try {
+      expect(migrationError).toBeInstanceOf(Error);
+      expect((migrationError as Error).message).toMatch(/schema/i);
+      await expect(failingPool.query("SELECT 1")).rejects.toThrow();
+    } finally {
+      if (!failingPool.ended) await failingPool.end();
+    }
   });
 
   it("serializes same-user transactions with one advisory lock", async () => {
@@ -324,7 +365,7 @@ postgresDescribe("PostgreSQL storage", () => {
     }
   });
 
-  it("prunes expired sessions and old nonpending rows but preserves old pending jobs", async () => {
+  it("prunes expired sessions and terminal rows but keeps old pending and reclaimable sending jobs", async () => {
     const db = getStore(store);
     if (!pool) throw new Error("PostgreSQL test pool was not initialized");
     const now = 500 * DAY;
@@ -338,10 +379,11 @@ postgresDescribe("PostgreSQL storage", () => {
     await pool.query(
       `INSERT INTO outbox (id, user_id, payload, kind, attempts, next_attempt, status, created_at, lease_token, lease_until)
        VALUES
-       ('old-pending', 53, '{}'::jsonb, 'reply', 0, 0, 'pending', 0, NULL, NULL),
+       ('old-pending', 53, '{}'::jsonb, 'reply', 0, $1, 'pending', 0, NULL, NULL),
        ('old-sent', 53, '{}'::jsonb, 'reply', 1, 0, 'sent', 0, NULL, NULL),
-       ('old-sending', 53, '{}'::jsonb, 'reply', 0, 0, 'sending', 0, $1, $2)`,
-      [randomUUID(), now + 60_000],
+       ('old-sending', 53, '{}'::jsonb, 'reply', 0, 0, 'sending', 0, $2, $3),
+       ('old-expired-sending', 53, '{}'::jsonb, 'reply', 0, 0, 'sending', 0, $4, $5)`,
+      [now + 1, randomUUID(), now + 60_000, randomUUID(), now - 1],
     );
     await pool.query("INSERT INTO events (id, created_at) VALUES ('old-event', $1), ('new-event', $2)", [jobCutoff - 1, jobCutoff + 1]);
 
@@ -351,40 +393,60 @@ postgresDescribe("PostgreSQL storage", () => {
     expect((await db.get(53))?.revision).toBe(1);
     const jobs = await pool.query<{ id: string }>("SELECT id FROM outbox ORDER BY id");
     const events = await pool.query<{ id: string }>("SELECT id FROM events ORDER BY id");
-    expect(jobs.rows.map((row) => row.id)).toEqual(["old-pending", "old-sending"]);
+    expect(jobs.rows.map((row) => row.id)).toEqual([
+      "old-expired-sending",
+      "old-pending",
+      "old-sending",
+    ]);
     expect(events.rows.map((row) => row.id)).toEqual(["new-event"]);
+
+    const leaseToken = randomUUID();
+    expect(await db.claim(now, leaseToken)).toMatchObject({
+      id: "old-expired-sending",
+      lease_token: leaseToken,
+    });
   });
 
   it("rechecks an expired profile after waiting for its user transaction lock", async () => {
     const db = getStore(store);
+    if (!pool) throw new Error("PostgreSQL test pool was not initialized");
+    const userId = uniqueUserId();
     const now = 500 * DAY;
     const cutoff = now - 400 * DAY;
-    await db.transaction(54, (tx) => tx.save(session(), cutoff - 1));
+    await db.transaction(userId, (tx) => tx.save(session(), cutoff - 1));
 
     let announceLocked!: () => void;
     const locked = new Promise<void>((resolve) => { announceLocked = resolve; });
     let releaseTransaction!: () => void;
     const hold = new Promise<void>((resolve) => { releaseTransaction = resolve; });
-    const refreshing = db.transaction(54, async (tx) => {
+    const refreshing = db.transaction(userId, async (tx) => {
       await tx.save(session(1), now);
       announceLocked();
       await hold;
     });
-    await locked;
+    let pruning: Promise<void> | undefined;
+    try {
+      await Promise.race([
+        locked,
+        refreshing.then(() => {
+          throw new Error("Refreshing transaction completed before acquiring its hold");
+        }),
+      ]);
+      pruning = db.prune(now);
+      await waitForAdvisoryWaiter(pool, userId);
+    } finally {
+      releaseTransaction();
+      await Promise.all([refreshing, ...(pruning ? [pruning] : [])]);
+    }
 
-    let pruneFinished = false;
-    const pruning = db.prune(now).then(() => { pruneFinished = true; });
-    await pause(30);
-    expect(pruneFinished).toBe(false);
-    releaseTransaction();
-    await Promise.all([refreshing, pruning]);
-
-    expect((await db.get(54))?.revision).toBe(1);
+    expect((await db.get(userId))?.revision).toBe(1);
   });
 
   it("serializes removal and cancellation before later user work", async () => {
     const db = getStore(store);
-    await db.transaction(55, async (tx) => {
+    if (!pool) throw new Error("PostgreSQL test pool was not initialized");
+    const userId = uniqueUserId();
+    await db.transaction(userId, async (tx) => {
       await tx.save(session(), 1_000);
       await tx.enqueue("before-remove", { ruleId: "a", dueDate: "2026-10-01" }, "reminder", 1_000, 1_000);
     });
@@ -393,30 +455,35 @@ postgresDescribe("PostgreSQL storage", () => {
     const didRemove = new Promise<void>((resolve) => { removed = resolve; });
     let finishRemoval!: () => void;
     const holdRemoval = new Promise<void>((resolve) => { finishRemoval = resolve; });
-    const removing = db.transaction(55, async (tx) => {
+    const removing = db.transaction(userId, async (tx) => {
       await tx.remove();
       await tx.cancelReminders();
       removed();
       await holdRemoval;
     });
-    await didRemove;
+    let later: Promise<void> | undefined;
+    try {
+      await Promise.race([
+        didRemove,
+        removing.then(() => {
+          throw new Error("Removal transaction completed before acquiring its hold");
+        }),
+      ]);
+      later = db.transaction(userId, async (tx) => {
+        await tx.save(session(2), 2_000);
+        await tx.enqueue("after-remove", { ruleId: "b", dueDate: "2026-10-02" }, "reminder", 2_000, 2_000);
+        await tx.cancelReminders();
+        await tx.enqueue("after-cancel", { ruleId: "c", dueDate: "2026-10-03" }, "reminder", 2_000, 2_000);
+      });
+      await waitForAdvisoryWaiter(pool, userId);
+    } finally {
+      finishRemoval();
+      await Promise.all([removing, ...(later ? [later] : [])]);
+    }
 
-    let laterFinished = false;
-    const later = db.transaction(55, async (tx) => {
-      await tx.save(session(2), 2_000);
-      await tx.enqueue("after-remove", { ruleId: "b", dueDate: "2026-10-02" }, "reminder", 2_000, 2_000);
-      await tx.cancelReminders();
-      await tx.enqueue("after-cancel", { ruleId: "c", dueDate: "2026-10-03" }, "reminder", 2_000, 2_000);
-      laterFinished = true;
-    });
-    await pause(30);
-    expect(laterFinished).toBe(false);
-    finishRemoval();
-    await Promise.all([removing, later]);
-
-    expect((await db.get(55))?.revision).toBe(2);
-    const rows = await pool?.query<{ id: string }>("SELECT id FROM outbox WHERE user_id = 55 ORDER BY id");
-    expect(rows?.rows.map((row) => row.id)).toEqual(["after-cancel"]);
+    expect((await db.get(userId))?.revision).toBe(2);
+    const rows = await pool.query<{ id: string }>("SELECT id FROM outbox WHERE user_id = $1 ORDER BY id", [userId]);
+    expect(rows.rows.map((row) => row.id)).toEqual(["after-cancel"]);
   });
 
   it("survives closing and reopening with session and outbox data intact", async () => {

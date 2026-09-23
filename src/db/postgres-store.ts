@@ -65,7 +65,16 @@ export class PostgresStore {
   private constructor(private readonly pool: Pool) {}
 
   static async open(pool: Pool): Promise<PostgresStore> {
-    await migrate(pool);
+    try {
+      await migrate(pool);
+    } catch (error) {
+      try {
+        await pool.end();
+      } catch {
+        // Preserve the migration error if pool shutdown also fails.
+      }
+      throw error;
+    }
     return new PostgresStore(pool);
   }
 
@@ -203,10 +212,9 @@ export class PostgresStore {
     await this.pool.query("DELETE FROM events WHERE created_at < $1", [eventCutoff]);
     await this.pool.query(
       `DELETE FROM outbox
-       WHERE status <> 'pending'
-         AND GREATEST(created_at, next_attempt) < $1
-         AND (status <> 'sending' OR lease_until <= $2)`,
-      [jobCutoff, now],
+       WHERE status IN ('sent', 'cancelled', 'failed')
+         AND GREATEST(created_at, next_attempt) < $1`,
+      [jobCutoff],
     );
   }
 
