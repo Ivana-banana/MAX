@@ -1,0 +1,21 @@
+{
+  "title": "Первые 90 дней",
+  "date": "23.09.2026",
+  "team": null,
+  "repository": "https://github.com/M1hairu/MAX_GOATed_messenger",
+  "checkedCodeCommit": "88b491bda0a79f033fb9c88a60bfd01701be73d3",
+  "sourceTree": "b78f8f684265452e422bc30ada5cc393c6eb82e9",
+  "botUrl": "https://max.ru/t149_hakaton_max_bot",
+  "publicBaseUrl": "https://81-26-178-75.sslip.io",
+  "ciUrl": "https://github.com/M1hairu/MAX_GOATed_messenger/actions/runs/35861847738",
+  "sources": [
+    {"id": "1", "title": "КФУ: заселение иностранных студентов", "url": "https://students.kpfu.ru/universiade-village/population-of-foreigners", "claim": "Памятка с общей формулировкой о 90 днях."},
+    {"id": "2", "title": "КФУ: медицинская и дактилоскопическая процедуры", "url": "https://kpfu.ru/content_print?p_cid=420481", "claim": "Памятка разделяет сроки 30 и 90 дней."},
+    {"id": "3", "title": "КФУ: сообщение о боте, 06.04.2021", "url": "https://media.kpfu.ru/news/v-kfu-zapustili-telegram-bot-po-priemu-inostrannykh-studentov", "claim": "Исторический пример цифрового канала миграционного учёта."},
+    {"id": "4", "title": "ВШЭ: миграционный центр HSE App X, 28.08.2025", "url": "https://www.hse.ru/web/mobile/news/1079245402.html", "claim": "Документы, статусы, замечания и автоматические напоминания."},
+    {"id": "5", "title": "Федеральный закон № 115-ФЗ, статья 5", "url": "https://www.consultant.ru/document/cons_doc_LAW_37868/e9d581e7e11d7901295efd89c869ae044dd3d20f/", "claim": "Справочный текст для проверки draft-правил; независимая вычитка не пройдена."},
+    {"id": "6", "title": "MAX: требования к webhook", "url": "https://dev.max.ru/docs-api/methods/POST/subscriptions", "claim": "Официальный контракт интеграции; бот работает по нему в MAX с 23.09.2026."},
+    {"id": "7", "title": "КФУ: оформление социальной стипендии", "url": "https://students.kpfu.ru/scholarship-commissions/academic", "claim": "Альтернатива для исследования; источник не доказывает частоту проблем."},
+    {"id": "8", "title": "Протокол проверок 23.09: развёртывание и MAX", "url": "https://github.com/M1hairu/MAX_GOATed_messenger/blob/main/docs/verification-2026-09-23.md", "claim": "HTTPS, webhook, 16 ответов доставлены через API MAX; Docker, лицензии, секреты. Протокол 22.09 — по ссылке внутри."}
+  ]
+}
