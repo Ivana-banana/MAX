@@ -9,6 +9,8 @@ type PostgresJobStatus = "pending" | "sending" | "sent" | "cancelled" | "failed"
 interface PostgresReminderPayload {
   ruleId: string;
   dueDate: string;
+  // Reminder day since D-021; jobs queued earlier have none.
+  day?: string;
 }
 
 export interface PostgresJob {

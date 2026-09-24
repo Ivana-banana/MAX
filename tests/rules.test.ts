@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { buildPlan } from "../src/core/deadlines.js";
 import { parseRuleSet, RuleValidationError } from "../src/data/loadRules.js";
 import type { UserProfile } from "../src/core/types.js";
+import { checkTranslated, readTexts } from "../src/data/loadTexts.js";
 import raw from "../src/data/rules/ru-student.json" with { type: "json" };
 
 const ruleSet = parseRuleSet(raw);
@@ -144,9 +145,12 @@ describe("parseRuleSet", () => {
     expect(() => parseRuleSet(broken)).toThrow(RuleValidationError);
   });
 
-  it("отвергает пропущенный перевод", () => {
+  it("отвергает пропущенный перевод: русский — при разборе, остальные языки — сверкой с текстами интерфейса", () => {
     const broken = structuredClone(valid) as unknown as { rules: { title: Record<string, string> }[] };
     delete broken.rules[0]!.title.en;
+    const withoutEn = parseRuleSet(broken);
+    expect(() => checkTranslated(readTexts("src/data/i18n"), withoutEn.rules, [])).toThrow(/нет перевода для r1.title/);
+    delete broken.rules[0]!.title.ru;
     expect(() => parseRuleSet(broken)).toThrow(RuleValidationError);
   });
 });

@@ -1,5 +1,5 @@
 import { Pool } from "pg";
-import { readConfig, loadRules, loadUniversities } from "./bot/config.js";
+import { readConfig, loadRules, loadTexts, loadUniversities } from "./bot/config.js";
 import { PostgresStore } from "./db/postgres-store.js";
 import { Service } from "./bot/service.js";
 import { createTransport } from "./bot/transport.js";
@@ -8,12 +8,13 @@ import { webhookServer } from "./bot/server.js";
 const config = readConfig();
 const rules = loadRules(config);
 const universities = loadUniversities(config);
+const texts = loadTexts(config, rules.rules, universities);
 const pool = new Pool({ connectionString: config.databaseUrl });
 // An idle connection dropped by PostgreSQL must not crash the process; the pool reconnects on the next query.
 pool.on("error", () => { console.error("PostgreSQL connection lost; the pool will reconnect."); });
 // Migrates the schema before the webhook accepts anything; a failure exits and Docker restarts the bot.
 const store = await PostgresStore.open(pool);
-const service = new Service(store, { rules: rules.rules, universities, version: rules.version, demo: config.mode === "demo" }, createTransport(config));
+const service = new Service(store, { rules: rules.rules, universities, texts, version: rules.version, demo: config.mode === "demo" }, createTransport(config));
 const server = webhookServer(service, config.secret);
 server.requestTimeout = 10000;
 server.headersTimeout = 10000;

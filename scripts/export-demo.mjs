@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { parseRuleSet } from '../dist/data/loadRules.js';
 import { readUniversities } from '../dist/data/loadUniversities.js';
 import { scratchSchema, startDevPostgres } from '../dist/db/dev-postgres.js';
+import { readTexts } from '../dist/data/loadTexts.js';
 import { Service } from '../dist/bot/service.js';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
@@ -16,13 +17,14 @@ assert.equal(git('rev-parse', `${manifest.checkedCodeCommit}:src`), manifest.sou
 assert.equal(git('rev-parse', 'HEAD:src'), manifest.sourceTree, 'Update the presentation manifest after source changes');
 const rules = parseRuleSet(JSON.parse(readFileSync(new URL('../src/data/rules/ru-student.json', import.meta.url), 'utf8')));
 const universities = readUniversities(fileURLToPath(new URL('../src/data/universities', import.meta.url)), 'kfu');
+const texts = readTexts(fileURLToPath(new URL('../src/data/i18n', import.meta.url)));
 const clock = '2026-09-24T10:00:00+03:00';
 const dev = await startDevPostgres();
 const schema = await scratchSchema(dev.url);
 const { store } = await schema.open();
 const replies = [];
 let last, serial = 0;
-const service = new Service(store, { rules: rules.rules, universities, version: rules.version, demo: true }, {
+const service = new Service(store, { rules: rules.rules, universities, texts, version: rules.version, demo: true }, {
   async send(_user, reply) { last = reply; replies.push(reply); },
 }, () => Date.parse(clock));
 const scenes = [];

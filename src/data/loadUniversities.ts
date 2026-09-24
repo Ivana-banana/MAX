@@ -47,7 +47,10 @@ export function parseUniversity(raw: unknown, path = "university"): University {
   }
   const checkedAt = text(u.checkedAt, `${path}.checkedAt`);
   if (!isValidDate(checkedAt)) throw new UniversityValidationError(`${path}.checkedAt`, "ожидается дата ГГГГ-ММ-ДД");
-  return { id, name: { ru: text(name?.ru, `${path}.name.ru`), en: text(name?.en, `${path}.name.en`) },
+  text(name?.ru, `${path}.name.ru`);
+  const names = Object.fromEntries(Object.entries(name ?? {}).filter(([lang]) => /^[a-z]{2}$/.test(lang))
+    .map(([lang, value]) => [lang, text(value, `${path}.name.${lang}`)]));
+  return { id, name: names,
     contactUrl, citizenships: [...new Set(u.citizenships as string[])], checkedAt };
 }
 

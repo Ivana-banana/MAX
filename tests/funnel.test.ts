@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { parseRuleSet } from "../src/data/loadRules.js";
 import raw from "../src/data/rules/ru-student.json" with { type: "json" };
+import { readTexts } from "../src/data/loadTexts.js";
 import { readUniversities } from "../src/data/loadUniversities.js";
 import type { Reply } from "../src/bot/dialog.js";
 import { Service } from "../src/bot/service.js";
@@ -9,6 +10,7 @@ import { testSchema } from "./pg.js";
 
 const rules = parseRuleSet(raw);
 const universities = readUniversities("src/data/universities", "kfu");
+const texts = readTexts("src/data/i18n");
 const cleanups: (() => Promise<void>)[] = [];
 afterEach(async () => { for (const fn of cleanups.splice(0).reverse()) await fn(); });
 async function fixture() {
@@ -17,7 +19,7 @@ async function fixture() {
   cleanups.push(() => store.close());
   let now = Date.parse("2026-09-23T10:00:00+03:00");
   const sent: Reply[] = [];
-  const service = new Service(store, { rules: rules.rules, universities, version: rules.version, demo: true },
+  const service = new Service(store, { rules: rules.rules, universities, texts, version: rules.version, demo: true },
     { async send(_user, reply) { sent.push(reply); } }, () => now);
   let n = 0;
   const input = (text: string, user = 1, callback = false) => service.receive({ id: String(++n), user, input: { text, callback } });
@@ -45,7 +47,7 @@ describe("anonymous funnel counters", () => {
     for (const doc of ["passport", "passport-translation", "migration-card", "arrival-notification"]) await f.click(`doc:medical-examination:${doc}`, 1);
     await f.click("done:medical-examination", 1); await f.input("/today", 1);
     await f.click("help:fingerprinting", 2);
-    expect(await f.totals()).toEqual({ "kfu:started": 1, "kfu:plan_ready": 1, "kfu:reminder_sent": 1, "kfu:reminder_opened": 1,
+    expect(await f.totals()).toEqual({ "kfu:started": 1, "kfu:plan_ready": 1, "kfu:reminders_on": 1, "kfu:reminder_sent": 1, "kfu:reminder_opened": 1,
       "kfu:checklist_completed": 1, "kfu:marked_done": 1, "itmo:started": 1, "itmo:plan_ready": 1, "itmo:help_opened": 1 });
     expect(new Set((await f.store.funnel()).map(r => r.day))).toEqual(new Set(["2026-09-23"]));
   });

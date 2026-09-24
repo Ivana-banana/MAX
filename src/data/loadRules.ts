@@ -46,7 +46,10 @@ function asDate(value: unknown, path: string): string {
 
 function asLocalized(value: unknown, path: string): Localized {
   const record = asRecord(value, path);
-  return { ru: asString(record.ru, `${path}.ru`), en: asString(record.en, `${path}.en`) };
+  // Russian is the base language; the rest are checked against the interface languages at startup.
+  asString(record.ru, `${path}.ru`);
+  return Object.fromEntries(Object.entries(record).filter(([lang]) => /^[a-z]{2}$/.test(lang))
+    .map(([lang, text]) => [lang, asString(text, `${path}.${lang}`)]));
 }
 
 function asCondition(value: unknown, path: string): Condition {
