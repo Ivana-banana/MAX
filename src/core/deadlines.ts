@@ -113,6 +113,7 @@ export function buildPlan(
       daysLeft: daysBetween(today, dueDate),
       status: statusFor(dueDate, today, done),
       documents: rule.documents,
+      ...(rule.documentsSource === undefined ? {} : { documentsSource: rule.documentsSource }),
       legal: rule.legal,
       isRepeat,
       provisional: rule.legal.status !== "approved",

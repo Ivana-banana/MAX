@@ -36,7 +36,7 @@ describe("файл норм ru-student.json", () => {
     const calculation = raw.rules.map(r => ({ id: r.id, term: r.term, repeat: r.repeat, appliesIf: r.appliesIf, documents: r.documents.map(d => d.id) }));
     const hash = createHash("sha256").update(JSON.stringify(calculation)).digest("hex").slice(0, 16);
     expect({ version: raw.version, hash }, "Расчёт норм изменился: поднимите version в ru-student.json и обновите хеш здесь")
-      .toEqual({ version: "2026-09-24-draft", hash: "41f5ae1d32be47c0" });
+      .toEqual({ version: "2026-09-24.2-draft", hash: "5abf2567077819c0" });
   });
 
   it("граждане Беларуси исключены из всех правил", () => {

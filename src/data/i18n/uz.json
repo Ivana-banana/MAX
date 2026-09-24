@@ -40,6 +40,8 @@
   "card.deadline": "Hisoblangan oxirgi muddat: ",
   "card.recommended": "\nTavsiya etilgan sana: ",
   "card.overdue": "\n\nHisoblangan muddat oʻtdi. Tartib-taomildan baribir oʻtish kerak — kechiktirmang. Bot muddatni oʻtkazib yuborish oqibatlarini baholamaydi: {uni} bilan bogʻlanib, qanday yoʻl tutishni soʻrang — tayyor savol quyidagi tugmada.",
+  "card.docsSource": "Hujjatlar roʻyxati manbasi: {url} (tekshirilgan: {date}).",
+  "card.docsNoSource": "Rasmiy hujjatlar roʻyxati eʼlon qilinmagan: pasport doim kerak, qolganini aniqlang ({uni}).",
   "card.checked": "\nManba tekshirilgan sana: ",
   "card.confirm": "\nJoy va hujjatlar roʻyxatini aniqlang ({uni}): ",
   "calendar.intro": "Muddatlaringiz yozilgan fayl: uni oching, voqealar telefon kalendariga qoʻshiladi. Kalendar 7, 3 va 1 kun oldin Moskva vaqti bilan 09:00 da eslatadi — bot bildirishnomalari oʻchirilgan boʻlsa ham. Bu hisoblangan sanalar, IIV qarori emas. Belgilarni oʻzgartirsangiz, faylni qayta yuklang: voqealar yangilanadi, takrorlanmaydi.",

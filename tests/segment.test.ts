@@ -56,3 +56,21 @@ describe("dates people can read and type", () => {
     expect(transition(r1.session!, { text: "31.02.2026", callback: false }, base).reply.text).toContain("Нужна дата между въездом и сегодня");
   });
 });
+
+describe("where the checklist comes from", () => {
+  it("names the published list and its check date, or says plainly that there is none", () => {
+    const entry = walk(base, "entry");
+    entry.type("01.09.2026");
+    const s = entry.s;
+    const card = (id: string) => transition(s, { text: `${s.nonce}.${s.revision}|card:${id}`, callback: true }, base).reply.text;
+    expect(card("medical-examination")).toContain("Комплект — по странице https://kpfu.ru/international/migracionnoe-soprovozhdenie-inostrannyh-grazhdan/daktiloskopiya-i-medicinskoe-osvidetelstvovanie (сверено 24 сентября 2026 г.)");
+    expect(card("medical-examination")).toContain("Результаты ранее пройденных обследований — если есть");
+    expect(card("medical-examination")).not.toContain("Миграционная карта");
+    expect(card("fingerprinting")).toContain("Официальный перечень документов не опубликован: паспорт нужен всегда, остальное уточните у КФУ.");
+  });
+  it("rejects a checklist source that is not an https page", () => {
+    const broken = structuredClone(raw) as { rules: { documentsSource?: { url: string } }[] };
+    broken.rules[0]!.documentsSource!.url = "http://kpfu.ru/";
+    expect(() => parseRuleSet(broken)).toThrow(/https/);
+  });
+});

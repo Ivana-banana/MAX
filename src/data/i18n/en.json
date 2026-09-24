@@ -40,6 +40,8 @@
   "card.deadline": "Calculated deadline: ",
   "card.recommended": "\nRecommended date: ",
   "card.overdue": "\n\nThe calculated date has passed. You still need to complete the procedure — do not put it off. The bot does not assess the consequences: ask {uni} what to do — a ready question is behind the button below.",
+  "card.docsSource": "Checklist from {url} (checked {date}).",
+  "card.docsNoSource": "No official list of documents is published: always bring your passport and confirm the rest with {uni}.",
   "card.checked": "\nSource checked: ",
   "card.confirm": "\nConfirm location and checklist with {uni}: ",
   "calendar.intro": "Your dates as a file: open it to add the events to your phone calendar. The calendar will remind you 7, 3 and 1 day before at 09:00 Moscow time, even with bot notifications off. These are calculated dates, not an official decision. After changing your marks, export again: events update instead of duplicating.",

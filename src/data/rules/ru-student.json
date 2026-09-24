@@ -8,7 +8,7 @@
     "студентов у нас нет, а выдуманный срок здесь опаснее отсутствующего.",
     "Ветка въезда до 01.09.2026 исключена: 162-ФЗ не содержит переходных положений, порядок для въехавших до этой даты не установлен нами по первоисточнику."
   ],
-  "version": "2026-09-24-draft",
+  "version": "2026-09-24.2-draft",
   "rules": [
     {
       "id": "medical-examination",
@@ -72,24 +72,28 @@
           }
         },
         {
-          "id": "migration-card",
+          "id": "arrival-notification",
           "title": {
-            "ru": "Миграционная карта",
-            "en": "Migration card",
-            "zh": "移民卡",
-            "uz": "Migratsiya kartasi"
+            "ru": "Уведомление о прибытии",
+            "en": "Arrival notification",
+            "zh": "抵达通知",
+            "uz": "Kelganlik haqida bildirishnoma"
           }
         },
         {
-          "id": "arrival-notification",
+          "id": "previous-results",
           "title": {
-            "ru": "Уведомление о прибытии — уточните комплект в вузе",
-            "en": "Arrival notification — confirm the checklist with your university",
-            "zh": "抵达通知——请向学校确认所需材料",
-            "uz": "Kelganlik haqida bildirishnoma — hujjatlar roʻyxatini universitetdan aniqlang"
+            "ru": "Результаты ранее пройденных обследований — если есть",
+            "en": "Results of earlier examinations, if any",
+            "zh": "以前的检查结果（如有）",
+            "uz": "Ilgari oʻtgan tekshiruvlar natijalari — agar boʻlsa"
           }
         }
       ],
+      "documentsSource": {
+        "url": "https://kpfu.ru/international/migracionnoe-soprovozhdenie-inostrannyh-grazhdan/daktiloskopiya-i-medicinskoe-osvidetelstvovanie",
+        "checkedAt": "2026-09-24"
+      },
       "legal": {
         "act": "Федеральный закон от 25.07.2002 № 115-ФЗ",
         "article": "ст. 5, п. 18 (первично), п. 19 (повторно); порядок — ст. 4.2",

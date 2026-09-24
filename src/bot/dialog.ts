@@ -98,7 +98,9 @@ function card(s: Session, ctx: DialogueContext, id: string): Reply {
   const late = overdue ? t(s, ctx, "card.overdue", { uni: u.name[s.lang]! }) : "";
   return reply(s, ctx, `${item.title[s.lang]}\n${item.action[s.lang]}\n` + t(s, ctx, "card.deadline") + date(s, item.dueDate) +
     (item.status === "done" ? "" : ` (${countdown(s, ctx, item)})`) + target + late +
-    "\n\n" + docs.join("\n") + "\n\n" + item.legal.act + ", " + item.legal.article +
+    "\n\n" + docs.join("\n") + "\n" + (item.documentsSource
+      ? t(s, ctx, "card.docsSource", { url: item.documentsSource.url, date: date(s, item.documentsSource.checkedAt) })
+      : t(s, ctx, "card.docsNoSource", { uni: u.name[s.lang]! })) + "\n\n" + item.legal.act + ", " + item.legal.article +
     "\n" + item.legal.url + t(s, ctx, "card.checked") + item.legal.checkedAt +
     t(s, ctx, "card.confirm", { uni: u.name[s.lang]! }) + u.contactUrl,
     [...item.documents.map(d => [button((s.documents[`${key}:${d.id}`] ? "✓ " : "□ ") + d.title[s.lang], `doc:${id}:${d.id}`)]),
