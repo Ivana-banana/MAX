@@ -151,7 +151,8 @@ async function runCli(): Promise<void> {
     return;
   }
 
-  const pool = new Pool();
+  // DATABASE_URL as for the bot; without it pg falls back to the PG* variables.
+  const pool = new Pool({ connectionString: process.env.DATABASE_URL });
   try {
     const snapshot = readSqliteSnapshot(sourcePath);
     const counts = await importSqlite(pool, snapshot);
