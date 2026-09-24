@@ -66,7 +66,7 @@ describe("interface texts live in data", () => {
     const home = transition(s, { text: "2026-09-01", callback: false }, ctx);
     s = home.session!;
     expect(home.reply.text).toContain("[kk] Your preparation plan");
-    expect(home.reply.text).toContain("[kk] Medical examination: 2026-09-30 — [kk] due soon, [kk] 6 days left");
+    expect(home.reply.text).toContain("[kk] Medical examination: 2026 ж. 30 қыркүйек — [kk] due soon, [kk] 6 days left");
     expect(click("card:medical-examination").text).toContain("[kk] \nConfirm location and checklist with [kk] KFU: ");
   });
   it("speaks Chinese and Uzbek from MAX locale through the plan, card and reminder", () => {
@@ -80,10 +80,10 @@ describe("interface texts live in data", () => {
     };
     const zh = run("zh-CN");
     expect(zh.lang).toBe("zh");
-    expect(zh.home).toContain("体检（医学检查）: 2026-09-30 — 即将到期，还剩6天");
+    expect(zh.home).toContain("体检（医学检查）: 2026年9月30日 — 即将到期，还剩6天");
     expect(zh.card).toContain("请向喀山联邦大学确认地点和材料清单");
     const uz = run("uz");
-    expect(uz.home).toContain("Tibbiy koʻrik: 2026-09-30 — yaqin, 6 kun qoldi");
+    expect(uz.home).toContain("Tibbiy koʻrik: 30-sentabr, 2026 — yaqin, 6 kun qoldi");
     expect(format(texts, "uz", "left", { n: 1 })).toBe("1 kun qoldi");
     expect(format(texts, "zh", "days", { n: 21 })).toBe("21天");
   });

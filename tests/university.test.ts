@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { parseRuleSet } from "../src/data/loadRules.js";
 import raw from "../src/data/rules/ru-student.json" with { type: "json" };
-import { parseUniversity, readUniversities } from "../src/data/loadUniversities.js";
+import { checkCitizenships, parseUniversity, readUniversities } from "../src/data/loadUniversities.js";
 import { checkTranslated, readTexts } from "../src/data/loadTexts.js";
 import { reminderReply, transition, plan, type DialogueContext, type Input, type Session } from "../src/bot/dialog.js";
 import { parseUpdate } from "../src/bot/service.js";
@@ -34,11 +34,13 @@ describe("university profiles are data", () => {
   it("rejects a profile that would break the dialogue or leak an unsafe link", () => {
     const good = { id: "demo-u", name: { ru: "ДУ", en: "DU" }, contactUrl: "https://example.org", citizenships: ["KZ"], checkedAt: "2026-09-23" };
     expect(parseUniversity(good).id).toBe("demo-u");
-    for (const bad of [{ ...good, id: "Demo U" }, { ...good, contactUrl: "http://example.org" }, { ...good, citizenships: ["BY"] },
+    for (const bad of [{ ...good, id: "Demo U" }, { ...good, contactUrl: "http://example.org" },
       { ...good, citizenships: [] }, { ...good, name: { en: "DU" } }, { ...good, checkedAt: "2026-02-30" }]) {
       expect(() => parseUniversity(bad)).toThrow(/Профиль вуза невалиден/);
     }
     expect(() => readUniversities("src/data/universities", "missing")).toThrow(/нет профиля по умолчанию/);
+    // Citizenships the rules exclude (BY) cannot be offered as covered.
+    expect(() => checkCitizenships([parseUniversity({ ...good, citizenships: ["KZ", "BY"] })], ["BY"])).toThrow(/BY исключены нормами/);
     // Other languages are checked against the interface languages at startup.
     expect(() => checkTranslated(texts, [], [parseUniversity({ ...good, name: { ru: "ДУ" } })])).toThrow(/нет перевода для demo-u.name/);
   });
@@ -53,7 +55,8 @@ describe("university profiles are data", () => {
     for (const a of ["ru", "accept"]) r = click(r.session!, a, c);
     expect(r.reply.text).toContain("общежитие КГМУ");
     r = click(r.session!, "yes", c);
-    expect(buttons(r).map(b => b.text)).toEqual(["IN", "EG", "BY", "OTHER"]);
+    expect(buttons(r).map(b => b.text)).toEqual(["Индия", "Египет", "Беларусь", "Другое"]);
+    expect(buttons(r).map(b => b.action!.split("|")[1])).toEqual(["IN", "EG", "BY", "OTHER"]);
     r = click(step(click(r.session!, "IN", c).session, { text: "2026-09-01", callback: false }, c).session!, "help:medical-examination", c);
     expect(copied(r)).toContain("студент КГМУ");
     expect(buttons(r).some(b => b.url === "https://example.org/kgmu")).toBe(true);
@@ -98,30 +101,30 @@ describe("days left and a missed date", () => {
   const s = onboard();
   const home = (today: string, lang = s) => step(lang, { text: "/plan", callback: false }, { ...ctx, today }).reply.text;
   it("shows how many days are left, with Russian plural forms", () => {
-    expect(home("2026-09-24")).toContain("Медицинское освидетельствование: 2026-09-30 — скоро, осталось 6 дней");
-    expect(home("2026-09-24")).toContain("2026-11-29 — есть время, осталось 66 дней");
+    expect(home("2026-09-24")).toContain("Медицинское освидетельствование: 30 сентября 2026 г. — скоро, осталось 6 дней");
+    expect(home("2026-09-24")).toContain("29 ноября 2026 г. — есть время, осталось 66 дней");
     expect(home("2026-09-29")).toContain("остался 1 день");
     expect(home("2026-09-28")).toContain("осталось 2 дня");
-    expect(home("2026-09-30")).toContain("2026-09-30 — сегодня последний день");
+    expect(home("2026-09-30")).toContain("30 сентября 2026 г. — сегодня последний день");
     expect(home("2026-11-18")).toContain("осталось 11 дней");
     expect(home("2026-11-08")).toContain("остался 21 день");
     expect(home("2026-09-24", onboard("/start", ctx, "en"))).toContain("due soon, 6 days left");
   });
   it("adds the countdown to the card and to the reminder", () => {
-    expect(click(s, "card:medical-examination").reply.text).toContain("Расчётный предельный срок: 2026-09-30 (скоро, осталось 6 дней)");
+    expect(click(s, "card:medical-examination").reply.text).toContain("Расчётный предельный срок: 30 сентября 2026 г. (скоро, осталось 6 дней)");
     const c = { ...ctx, today: "2026-09-23" };
     const item = plan(s, c).find(i => i.ruleId === "medical-examination")!;
-    expect(reminderReply(s, c, item).text).toContain("Напоминание: Медицинское освидетельствование — 2026-09-30 (скоро, осталось 7 дней)");
+    expect(reminderReply(s, c, item).text).toContain("Напоминание: Медицинское освидетельствование — 30 сентября 2026 г. (скоро, осталось 7 дней)");
   });
   it("after the date: says so, points to the university and prepares a question, without legal consequences", () => {
     const c = { ...ctx, today: "2026-10-02" };
-    expect(home("2026-10-02")).toContain("2026-09-30 — расчётный срок прошёл 2 дня назад");
+    expect(home("2026-10-02")).toContain("30 сентября 2026 г. — расчётный срок прошёл 2 дня назад");
     const card = click(s, "card:medical-examination", c);
     expect(card.reply.text).toContain("Расчётный срок прошёл. Процедуру всё равно нужно пройти");
     expect(buttons(card).find(b => b.action?.endsWith("|help:medical-examination"))!.text).toBe("Срок прошёл — что делать");
     const help = click(card.session!, "help:medical-examination", c);
     expect(help.reply.text).toContain("Бот не оценивает последствия пропуска");
-    expect(copied(help)).toContain("расчётный срок был до 2026-09-30 и уже прошёл");
+    expect(copied(help)).toContain("расчётный срок был до 30 сентября 2026 г. и уже прошёл");
     expect(help.reply.text + card.reply.text).not.toMatch(/штраф|выдвор/i);
     expect(click(s, "card:fingerprinting", c).reply.text).not.toContain("Расчётный срок прошёл");
   });

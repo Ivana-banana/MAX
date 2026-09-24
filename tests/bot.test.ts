@@ -246,8 +246,8 @@ describe("calendar export, MAX link/clipboard buttons and reminder navigation", 
     expect(flat(f.sent.at(-1)?.reply)).toContainEqual({ text:"Открыть норму", url:expect.stringContaining("consultant.ru") });
     await f.click("help:medical-examination"); await f.service.flush();
     const copy=flat(f.sent.at(-1)?.reply).find(b=>"copy" in b) as {copy:string}|undefined;
-    expect(copy?.copy).toContain("«Медицинское освидетельствование», расчётный срок — до 2026-09-30");
-    expect(copy?.copy).toContain("гражданство KZ, въезд 2026-09-01");
+    expect(copy?.copy).toContain("«Медицинское освидетельствование», расчётный срок — до 30 сентября 2026 г.");
+    expect(copy?.copy).toContain("гражданство Казахстан, въезд 1 сентября 2026 г.");
     expect(flat(f.sent.at(-1)?.reply).some(b=>"url" in b && b.url.includes("kpfu.ru"))).toBe(true);
     expect(f.sent.at(-1)?.reply.text).toContain("kpfu.ru");
   });

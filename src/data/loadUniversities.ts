@@ -41,9 +41,8 @@ export function parseUniversity(raw: unknown, path = "university"): University {
   const contactUrl = text(u.contactUrl, `${path}.contactUrl`);
   if (!contactUrl.startsWith("https://")) throw new UniversityValidationError(`${path}.contactUrl`, "нужна ссылка https://");
   if (!Array.isArray(u.citizenships) || u.citizenships.length === 0 ||
-      !u.citizenships.every(c => typeof c === "string" && /^[A-Z]{2}$/.test(c) && c !== "BY")) {
-    // BY is excluded by the rules themselves and always leads to the help branch.
-    throw new UniversityValidationError(`${path}.citizenships`, "ожидается непустой список кодов ISO из двух букв, кроме BY");
+      !u.citizenships.every(c => typeof c === "string" && /^[A-Z]{2}$/.test(c))) {
+    throw new UniversityValidationError(`${path}.citizenships`, "ожидается непустой список кодов ISO из двух букв");
   }
   const checkedAt = text(u.checkedAt, `${path}.checkedAt`);
   if (!isValidDate(checkedAt)) throw new UniversityValidationError(`${path}.checkedAt`, "ожидается дата ГГГГ-ММ-ДД");
@@ -63,4 +62,12 @@ export function readUniversities(dir: string, defaultId: string): University[] {
   const first = list.find(u => u.id === defaultId);
   if (!first) throw new UniversityValidationError(dir, `нет профиля по умолчанию «${defaultId}»`);
   return [first, ...list.filter(u => u !== first)];
+}
+
+/** A citizenship the rules exclude must not look covered: it is offered separately and leads to help. */
+export function checkCitizenships(universities: University[], excluded: string[]): void {
+  for (const u of universities) {
+    const clash = u.citizenships.filter(c => excluded.includes(c));
+    if (clash.length) throw new UniversityValidationError(u.id, `гражданства ${clash.join(", ")} исключены нормами — уберите их из профиля`);
+  }
 }

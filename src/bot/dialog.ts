@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { buildPlan } from "../core/deadlines.js";
+import { buildPlan, coverage } from "../core/deadlines.js";
 import { compareDates, isValidDate } from "../core/dates.js";
 import type { Completions, DeadlineRule, Lang, PlanItem, UserProfile } from "../core/types.js";
 import type { University } from "../data/loadUniversities.js";
@@ -31,6 +31,15 @@ export interface Transition { session: Session | null; reply: Reply }
 const t = (s: Session, ctx: DialogueContext, key: string, vars?: Record<string, string | number>) => format(ctx.texts, s.lang, key, vars);
 // Sessions created before university profiles existed have no id and fall back to the default one.
 const uni = (s: Session, ctx: DialogueContext) => ctx.universities.find(u => u.id === s.university) ?? ctx.universities[0]!;
+/** Dates in replies are written out in the user's language (Intl), not as ISO strings. */
+const date = (s: Session, iso: string) => new Intl.DateTimeFormat(s.lang, { dateStyle: "long", timeZone: "UTC" }).format(new Date(`${iso}T00:00:00Z`));
+const country = (s: Session, ctx: DialogueContext, code: string) =>
+  code === "OTHER" ? t(s, ctx, "btn.otherCountry") : new Intl.DisplayNames([s.lang], { type: "region" }).of(code) ?? code;
+/** Typed dates: ISO or the DD.MM.YYYY people write by hand. */
+function typedDate(text: string): string {
+  const dotted = /^(\d{1,2})\.(\d{1,2})\.(\d{4})$/.exec(text);
+  return dotted ? `${dotted[3]}-${dotted[2]!.padStart(2, "0")}-${dotted[1]!.padStart(2, "0")}` : text;
+}
 function countdown(s: Session, ctx: DialogueContext, item: PlanItem): string {
   if (item.status === "done") return t(s, ctx, "countdown.done");
   if (item.daysLeft < 0) return t(s, ctx, "countdown.passed", { days: t(s, ctx, "days", { n: -item.daysLeft }) });
@@ -67,7 +76,7 @@ const navigation = (action: string) => action === "plan" || action === "help" ||
   action.startsWith("card:") || action.startsWith("help:");
 function home(s: Session, ctx: DialogueContext, prefix = ""): Reply {
   const items = plan(s, ctx);
-  const lines = items.map(i => `• ${i.title[s.lang]}: ${i.dueDate} — ${countdown(s, ctx, i)}`);
+  const lines = items.map(i => `• ${i.title[s.lang]}: ${date(s, i.dueDate)} — ${countdown(s, ctx, i)}`);
   // Reminders are the core mechanic, so while they are off the switch comes first, right under the text.
   const toggle = [button(t(s, ctx, s.reminders ? "btn.remindersOff" : "btn.remindersOn"), "reminders")];
   return reply(s, ctx, prefix + t(s, ctx, "home.title") + lines.join("\n") + t(s, ctx, "home.scope") +
@@ -83,11 +92,11 @@ function card(s: Session, ctx: DialogueContext, id: string): Reply {
   if (!item) return home(s, ctx);
   const key = `${item.ruleId}:${item.dueDate}`;
   const docs = item.documents.map(d => `${s.documents[`${key}:${d.id}`] ? "✓" : "□"} ${d.title[s.lang]}`);
-  const target = item.recommendedDate ? t(s, ctx, "card.recommended") + item.recommendedDate : "";
+  const target = item.recommendedDate ? t(s, ctx, "card.recommended") + date(s, item.recommendedDate) : "";
   const u = uni(s, ctx), overdue = item.status === "overdue";
   // No consequences or fines here: the law text on liability is not reviewed (docs/legal-review.md).
   const late = overdue ? t(s, ctx, "card.overdue", { uni: u.name[s.lang]! }) : "";
-  return reply(s, ctx, `${item.title[s.lang]}\n${item.action[s.lang]}\n` + t(s, ctx, "card.deadline") + item.dueDate +
+  return reply(s, ctx, `${item.title[s.lang]}\n${item.action[s.lang]}\n` + t(s, ctx, "card.deadline") + date(s, item.dueDate) +
     (item.status === "done" ? "" : ` (${countdown(s, ctx, item)})`) + target + late +
     "\n\n" + docs.join("\n") + "\n\n" + item.legal.act + ", " + item.legal.article +
     "\n" + item.legal.url + t(s, ctx, "card.checked") + item.legal.checkedAt +
@@ -113,9 +122,9 @@ function help(s: Session, ctx: DialogueContext, ruleId?: string): Reply {
     const draft = t(s, ctx, "help.generic.draft", { uni: name });
     return reply(s, ctx, t(s, ctx, "help.generic", { draft, uni: name, url: u.contactUrl }), actions(draft));
   }
-  const who = t(s, ctx, "help.who", { citizenship: s.citizenship!, entry: s.entryDate! });
+  const who = t(s, ctx, "help.who", { citizenship: country(s, ctx, s.citizenship!), entry: date(s, s.entryDate!) });
   const overdue = item.status === "overdue";
-  const draft = t(s, ctx, overdue ? "help.draft.overdue" : "help.draft", { uni: name, who, title: item.title[s.lang]!, due: item.dueDate });
+  const draft = t(s, ctx, overdue ? "help.draft.overdue" : "help.draft", { uni: name, who, title: item.title[s.lang]!, due: date(s, item.dueDate) });
   return reply(s, ctx, t(s, ctx, overdue ? "help.intro.overdue" : "help.intro", { uni: name }) + draft +
     t(s, ctx, "help.contacts", { uni: name, url: u.contactUrl }), actions(draft));
 }
@@ -124,11 +133,13 @@ function prompt(s: Session, ctx: DialogueContext): Reply {
     case "language": return reply(s, ctx, [...ctx.texts.keys()].map(l => format(ctx.texts, l, "language.choose")).join(" / "), languages(ctx));
     case "consent": return reply(s, ctx, t(s, ctx, "consent"),
       [[button(t(s, ctx, "btn.continue"), "accept")], ...languages(ctx, s.lang), [button(t(s, ctx, "btn.leave"), "delete")]]);
-    case "scope": return reply(s, ctx, t(s, ctx, "scope", { uni: uni(s, ctx).name[s.lang]! }),
+    case "scope": return reply(s, ctx, t(s, ctx, "scope", { uni: uni(s, ctx).name[s.lang]!, from: date(s, coverage(ctx.rules).from) }),
       [[button(t(s, ctx, "btn.yes"), "yes"), button(t(s, ctx, "btn.no"), "no")]]);
     case "citizenship": return reply(s, ctx, t(s, ctx, "citizenship"),
-      [...rows(uni(s, ctx).citizenships, 4), ["BY", "OTHER"]].map(row => row.map(x => button(x, x))));
-    case "entry": return reply(s, ctx, t(s, ctx, "entry"));
+      // Citizenships the rules exclude stay as buttons: they lead to the help branch, not to a dead end.
+      [...rows(uni(s, ctx).citizenships, 2), ...rows([...coverage(ctx.rules).excluded, "OTHER"], 2)]
+        .map(row => row.map(code => button(country(s, ctx, code), code))));
+    case "entry": return reply(s, ctx, t(s, ctx, "entry", { from: date(s, coverage(ctx.rules).from) }));
     case "completion": return reply(s, ctx, t(s, ctx, "completion"), [[button(t(s, ctx, "btn.cancel"), "plan")]]);
     case "delete": return reply(s, ctx, t(s, ctx, "delete"),
       [[button(t(s, ctx, "btn.confirmDelete"), "confirm-delete"), button(t(s, ctx, "btn.cancel"), "cancel-delete")]]);
@@ -167,7 +178,7 @@ export function transition(previous: Session | null, input: Input, ctx: Dialogue
     if (s.step === "language" && lang && ctx.texts.has(lang)) { s.lang = lang; s.step = "consent"; }
     return { session: s, reply: prompt(s, ctx) };
   }
-  if (action === "/help" || action === "help" || action === "no" || action === "OTHER" || action === "BY") return { session: s, reply: help(s, ctx) };
+  if (action === "/help" || action === "help" || action === "no" || action === "OTHER" || coverage(ctx.rules).excluded.includes(action)) return { session: s, reply: help(s, ctx) };
   if (action.startsWith("help:")) return { session: s, reply: help(s, ctx, action.slice(5)) };
   if (s.step === "language" && ctx.texts.has(action)) { s.lang = action; s.step = "consent"; }
   else if (s.step === "consent" && ctx.texts.has(action)) s.lang = action;
@@ -175,18 +186,19 @@ export function transition(previous: Session | null, input: Input, ctx: Dialogue
   else if (s.step === "scope" && action === "yes") s.step = "citizenship";
   else if (s.step === "citizenship" && uni(s, ctx).citizenships.includes(action)) { s.citizenship = action; s.step = "entry"; }
   else if (s.step === "entry") {
-    if (!isValidDate(action) || action < "2026-09-01" || action > ctx.today) {
-      return { session: s, reply: reply(s, ctx, t(s, ctx, "entry.invalid")) };
+    const entry = typedDate(action), from = coverage(ctx.rules).from;
+    if (!isValidDate(entry) || entry < from || entry > ctx.today) {
+      return { session: s, reply: reply(s, ctx, t(s, ctx, "entry.invalid", { from: date(s, from) })) };
     }
-    s.entryDate = action; s.step = "plan";
+    s.entryDate = entry; s.step = "plan";
   } else if (profile(s) && (action === "plan" || action === "/plan")) { s.step = "plan"; delete s.selected; }
   else if (s.step === "completion") {
-    const date = action === "/today" ? ctx.today : action;
+    const done = action === "/today" ? ctx.today : typedDate(action);
     const last = s.selected ? s.completions[s.selected] : undefined;
-    if (!s.selected || !isValidDate(date) || date > ctx.today || date < s.entryDate! || (last && compareDates(date, last) <= 0)) {
+    if (!s.selected || !isValidDate(done) || done > ctx.today || done < s.entryDate! || (last && compareDates(done, last) <= 0)) {
       return { session: s, reply: reply(s, ctx, t(s, ctx, "completion.invalid")) };
     }
-    s.completions[s.selected] = date; s.step = "plan"; delete s.selected;
+    s.completions[s.selected] = done; s.step = "plan"; delete s.selected;
   } else if (s.step === "plan") {
     if (action === "reminders") { s.reminders = !s.reminders; }
     else if (action.startsWith("card:")) return { session: s, reply: card(s, ctx, action.slice(5).replace(FROM_REMINDER, "")) };
@@ -206,6 +218,6 @@ export function transition(previous: Session | null, input: Input, ctx: Dialogue
   return { session: s, reply: prompt(s, ctx) };
 }
 export function reminderReply(s: Session, ctx: DialogueContext, item: PlanItem): Reply {
-  return reply(s, ctx, t(s, ctx, item.status === "overdue" ? "reminder.overdue" : "reminder", { title: item.title[s.lang]!, due: item.dueDate, countdown: countdown(s, ctx, item) }),
+  return reply(s, ctx, t(s, ctx, item.status === "overdue" ? "reminder.overdue" : "reminder", { title: item.title[s.lang]!, due: date(s, item.dueDate), countdown: countdown(s, ctx, item) }),
     [[button(t(s, ctx, "btn.details"), `card:${item.ruleId}${FROM_REMINDER}`)], [button(t(s, ctx, "btn.planShort"), "plan")]]);
 }
