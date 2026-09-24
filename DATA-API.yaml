@@ -1,10 +1,11 @@
 # Proposed configuration based on task page 10; evaluator schema is still TBD.
-# Public deployment: https://81-26-178-75.sslip.io — checks health and
-# reject_unauthenticated_webhook pass there (docs/verification-2026-09-23.md).
-# synthetic_start needs the webhook secret, which is published only for the local demo.
+# Public deployment: https://81-26-178-75.sslip.io — both checks below pass there
+# (docs/verification-2026-09-23.md). A synthetic start needs the webhook secret, which
+# is not published for the public bot; locally it is covered by
+# `docker compose run --rm bot node dist/demo.js --script` (README, «Запуск одной командой»).
 version: 1
 name: first-90-days-demo
-base_url: http://127.0.0.1:3000
+base_url: https://81-26-178-75.sslip.io
 checks:
   - name: health
     method: GET
@@ -22,14 +23,3 @@ checks:
     expected_status: [401]
     expected_content_type: application/json
     required_fields: [error]
-  - name: synthetic_start
-    method: POST
-    path: /webhook
-    role: demo-webhook
-    headers:
-      Content-Type: application/json
-      X-Max-Bot-Api-Secret: local-demo-only-not-for-deployment # secret-scan: allow — public local demonstration
-    body: {update_type: bot_started, timestamp: 1790210400000, user: {user_id: 1001}}
-    expected_status: [200]
-    expected_content_type: application/json
-    required_fields: [success]
