@@ -1,7 +1,7 @@
 import type { Pool } from "pg";
-import { SCHEMA_V1 } from "./schema.js";
+import { SCHEMA_V1, SCHEMA_V2 } from "./schema.js";
 
-const SCHEMA_VERSION = 1;
+const MIGRATIONS: readonly [version: number, sql: string][] = [[1, SCHEMA_V1], [2, SCHEMA_V2]];
 
 export async function migrate(pool: Pool): Promise<void> {
   const client = await pool.connect();
@@ -18,14 +18,13 @@ export async function migrate(pool: Pool): Promise<void> {
       )
     `);
 
-    const applied = await client.query<{ version: number }>(
-      "SELECT version FROM schema_migrations WHERE version = $1",
-      [SCHEMA_VERSION],
-    );
+    const applied = await client.query<{ version: number }>("SELECT version FROM schema_migrations");
+    const done = new Set(applied.rows.map((row) => row.version));
 
-    if (applied.rows.length === 0) {
-      await client.query(SCHEMA_V1);
-      await client.query("INSERT INTO schema_migrations (version) VALUES ($1)", [SCHEMA_VERSION]);
+    for (const [version, sql] of MIGRATIONS) {
+      if (done.has(version)) continue;
+      await client.query(sql);
+      await client.query("INSERT INTO schema_migrations (version) VALUES ($1)", [version]);
     }
 
     await client.query("COMMIT");

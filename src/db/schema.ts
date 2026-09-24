@@ -34,3 +34,14 @@ CREATE INDEX outbox_expired_lease_idx
 CREATE INDEX outbox_user_kind_status_idx
   ON outbox (user_id, kind, status);
 `;
+
+// Anonymous per-day totals (src/bot/funnel.ts): no user id, so /delete has nothing to remove here.
+export const SCHEMA_V2 = `
+CREATE TABLE funnel (
+  day TEXT NOT NULL,
+  university TEXT NOT NULL,
+  event TEXT NOT NULL,
+  n INTEGER NOT NULL,
+  PRIMARY KEY (day, university, event)
+);
+`;

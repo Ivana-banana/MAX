@@ -69,7 +69,7 @@ postgresDescribe("PostgreSQL storage", () => {
   });
 
   beforeEach(async () => {
-    if (store && pool) await pool.query("TRUNCATE sessions, events, outbox");
+    if (store && pool) await pool.query("TRUNCATE sessions, events, outbox, funnel");
   });
 
   afterAll(async () => {
@@ -506,6 +506,27 @@ postgresDescribe("PostgreSQL storage", () => {
     } finally {
       await reopened.close();
     }
+  });
+
+  it("adds anonymous funnel counts inside and outside a user transaction and prunes them after 400 days", async () => {
+    const db = getStore(store);
+    await db.transaction(57, async (tx) => {
+      await tx.count("2026-09-01", "kfu", "started");
+      await tx.count("2026-09-01", "kfu", "started");
+    });
+    await db.count("2026-09-02", "itmo", "reminder_sent");
+    await expect(db.transaction(57, async (tx) => {
+      await tx.count("2026-09-01", "kfu", "plan_ready");
+      throw new Error("rolled back");
+    })).rejects.toThrow("rolled back");
+
+    expect(await db.funnel()).toEqual([
+      { day: "2026-09-01", university: "kfu", event: "started", n: 2 },
+      { day: "2026-09-02", university: "itmo", event: "reminder_sent", n: 1 },
+    ]);
+
+    await db.prune(Date.parse("2026-09-01T00:00:00Z") + 401 * DAY);
+    expect((await db.funnel()).map((row) => row.day)).toEqual(["2026-09-02"]);
   });
 
   it("rejects unsafe BIGINT job fields returned by a claim", async () => {

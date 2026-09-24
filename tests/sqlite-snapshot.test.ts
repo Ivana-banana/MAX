@@ -72,7 +72,29 @@ describe("readSqliteSnapshot", () => {
           createdAt: 1_760_000_000_002,
         },
       ],
+      funnel: [],
     });
+  });
+
+  it("reads anonymous funnel counters when the database already has them", async () => {
+    const path = createLegacyDatabase({ includeFunnel: true });
+    write(path, db => {
+      db.prepare("INSERT INTO funnel (day, university, event, n) VALUES (?, ?, ?, ?)").run("2026-09-20", "kfu", "started", 3);
+    });
+
+    const readSqliteSnapshot = await snapshotReader();
+
+    expect(readSqliteSnapshot(path).funnel).toEqual([{ day: "2026-09-20", university: "kfu", event: "started", n: 3 }]);
+  });
+
+  it("rejects an unknown funnel event without returning a partial snapshot", async () => {
+    const path = createLegacyDatabase({ includeFunnel: true });
+    write(path, db => {
+      db.prepare("INSERT INTO funnel (day, university, event, n) VALUES (?, ?, ?, ?)").run("2026-09-20", "kfu", "clicked", 1);
+    });
+
+    const readSqliteSnapshot = await snapshotReader();
+    expectNoSnapshot(readSqliteSnapshot, path);
   });
 
   it("retains original JSON text for integers beyond JavaScript safe precision", async () => {
@@ -167,7 +189,7 @@ describe("readSqliteSnapshot", () => {
   });
 });
 
-function createLegacyDatabase(options: { includeOutbox?: boolean } = {}): string {
+function createLegacyDatabase(options: { includeOutbox?: boolean; includeFunnel?: boolean } = {}): string {
   const path = join(createTempDirectory(), "legacy.sqlite");
   const db = new DatabaseSync(path);
   try {
@@ -179,6 +201,8 @@ function createLegacyDatabase(options: { includeOutbox?: boolean } = {}): string
         attempts INTEGER NOT NULL DEFAULT 0, next_attempt INTEGER NOT NULL,
         status TEXT NOT NULL DEFAULT 'pending', created_at INTEGER NOT NULL
       );`}
+      ${options.includeFunnel ? `CREATE TABLE funnel (day TEXT NOT NULL, university TEXT NOT NULL, event TEXT NOT NULL,
+        n INTEGER NOT NULL, PRIMARY KEY (day, university, event));` : ""}
     `);
   } finally {
     db.close();

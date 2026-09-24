@@ -1,5 +1,6 @@
 import type { Pool, PoolClient, QueryResultRow } from "pg";
 import type { Reply, Session } from "../bot/dialog.js";
+import type { FunnelCount, FunnelEvent } from "../bot/funnel.js";
 import { migrate } from "./migrate.js";
 
 type PostgresJobKind = "reply" | "reminder";
@@ -34,6 +35,7 @@ export interface PostgresStoreTx {
   ): Promise<void>;
   cancelReminders(): Promise<void>;
   supersedeReplies(): Promise<void>;
+  count(day: string, university: string, event: FunnelEvent): Promise<void>;
 }
 
 const dayMs = 86_400_000;
@@ -46,6 +48,8 @@ const retryMaxMs = 3_600_000;
 const maxAttempts = 8;
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const getSessionSql = "SELECT user_id, data FROM sessions WHERE user_id = $1";
+const countSql = `INSERT INTO funnel (day, university, event, n) VALUES ($1, $2, $3, 1)
+  ON CONFLICT (day, university, event) DO UPDATE SET n = funnel.n + 1`;
 const sessionSteps = new Set([
   "language",
   "consent",
@@ -123,6 +127,18 @@ export class PostgresStore {
       counts[status] = safeInteger(row.count, "outbox.count");
     }
     return counts;
+  }
+
+  /** Counter outside a user transaction, e.g. after a reminder was delivered. */
+  async count(day: string, university: string, event: FunnelEvent): Promise<void> {
+    await this.pool.query(countSql, [day, university, event]);
+  }
+
+  async funnel(): Promise<FunnelCount[]> {
+    const result = await this.pool.query<FunnelCount>(
+      "SELECT day, university, event, n FROM funnel ORDER BY day, university, event",
+    );
+    return result.rows;
   }
 
   async claim(now: number, leaseToken: string): Promise<PostgresJob | undefined> {
@@ -210,6 +226,7 @@ export class PostgresStore {
     }
 
     await this.pool.query("DELETE FROM events WHERE created_at < $1", [eventCutoff]);
+    await this.pool.query("DELETE FROM funnel WHERE day < $1", [new Date(sessionCutoff).toISOString().slice(0, 10)]);
     await this.pool.query(
       `DELETE FROM outbox
        WHERE status IN ('sent', 'cancelled', 'failed')
@@ -330,6 +347,9 @@ function transactionFor(client: PoolClient, userId: number): PostgresStoreTx {
         [userId],
       );
     },
+    async count(day, university, event) {
+      await client.query(countSql, [day, university, event]);
+    },
   };
 }
 
@@ -344,14 +364,15 @@ function readSession(value: unknown): Session {
   if (!isRecord(value) ||
       !nonEmptyStringValue(value.nonce) ||
       !isSafeInteger(value.revision, 0) ||
-      (value.lang !== "ru" && value.lang !== "en") ||
+      !nonEmptyStringValue(value.lang) ||
       typeof value.step !== "string" || !sessionSteps.has(value.step) ||
       !isRecord(value.completions) || !isRecord(value.documents) ||
       typeof value.reminders !== "boolean" || !nonEmptyStringValue(value.ruleVersion)) {
     throw invalidValue("sessions.data");
   }
 
-  if (("citizenship" in value && typeof value.citizenship !== "string") ||
+  if (("university" in value && typeof value.university !== "string") ||
+      ("citizenship" in value && typeof value.citizenship !== "string") ||
       ("entryDate" in value && typeof value.entryDate !== "string") ||
       ("selected" in value && typeof value.selected !== "string")) {
     throw invalidValue("sessions.data");

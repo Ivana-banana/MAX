@@ -8,12 +8,14 @@ export interface SqliteImportCounts {
   sessions: number;
   events: number;
   outbox: number;
+  funnel: number;
 }
 
 interface SqliteCountText {
   sessions: string;
   events: string;
   outbox: string;
+  funnel: string;
 }
 
 export async function importSqlite(pool: Pool, snapshot: SqliteSnapshot): Promise<SqliteImportCounts> {
@@ -26,43 +28,49 @@ export async function importSqlite(pool: Pool, snapshot: SqliteSnapshot): Promis
     await client.query("BEGIN");
     transactionStarted = true;
 
-    await client.query("LOCK TABLE sessions, events, outbox IN ACCESS EXCLUSIVE MODE");
+    await client.query("LOCK TABLE sessions, events, outbox, funnel IN ACCESS EXCLUSIVE MODE");
     const existing = await client.query<{
       sessions: boolean;
       events: boolean;
       outbox: boolean;
+      funnel: boolean;
     }>(`
       SELECT
         EXISTS (SELECT 1 FROM sessions) AS sessions,
         EXISTS (SELECT 1 FROM events) AS events,
-        EXISTS (SELECT 1 FROM outbox) AS outbox
+        EXISTS (SELECT 1 FROM outbox) AS outbox,
+        EXISTS (SELECT 1 FROM funnel) AS funnel
     `);
     const target = existing.rows[0];
-    if (!target || target.sessions || target.events || target.outbox) {
+    if (!target || target.sessions || target.events || target.outbox || target.funnel) {
       throw new Error("PostgreSQL target tables must be empty before importing SQLite");
     }
 
     await insertSessions(client, snapshot.sessions);
     await insertEvents(client, snapshot.events);
     await insertOutbox(client, snapshot.outbox);
+    await insertFunnel(client, snapshot.funnel);
 
     const actual = await client.query<SqliteCountText>(`
       SELECT
         (SELECT COUNT(*)::text FROM sessions) AS sessions,
         (SELECT COUNT(*)::text FROM events) AS events,
-        (SELECT COUNT(*)::text FROM outbox) AS outbox
+        (SELECT COUNT(*)::text FROM outbox) AS outbox,
+        (SELECT COUNT(*)::text FROM funnel) AS funnel
     `);
     const counts = actual.rows[0];
     const expected = {
       sessions: snapshot.sessions.length,
       events: snapshot.events.length,
       outbox: snapshot.outbox.length,
+      funnel: snapshot.funnel.length,
     };
     if (
       !counts ||
       counts.sessions !== String(expected.sessions) ||
       counts.events !== String(expected.events) ||
-      counts.outbox !== String(expected.outbox)
+      counts.outbox !== String(expected.outbox) ||
+      counts.funnel !== String(expected.funnel)
     ) {
       throw new Error("PostgreSQL import row counts do not match the SQLite snapshot");
     }
@@ -126,6 +134,15 @@ async function insertOutbox(client: PoolClient, outbox: SqliteSnapshot["outbox"]
   }
 }
 
+async function insertFunnel(client: PoolClient, funnel: SqliteSnapshot["funnel"]): Promise<void> {
+  for (const row of funnel) {
+    await client.query(
+      "INSERT INTO funnel (day, university, event, n) VALUES ($1, $2, $3, $4)",
+      [row.day, row.university, row.event, row.n],
+    );
+  }
+}
+
 async function runCli(): Promise<void> {
   const [sourcePath, ...extraArguments] = process.argv.slice(2);
   if (!sourcePath || extraArguments.length > 0) {
@@ -138,7 +155,7 @@ async function runCli(): Promise<void> {
   try {
     const snapshot = readSqliteSnapshot(sourcePath);
     const counts = await importSqlite(pool, snapshot);
-    process.stdout.write(`sessions=${counts.sessions} events=${counts.events} outbox=${counts.outbox}\n`);
+    process.stdout.write(`sessions=${counts.sessions} events=${counts.events} outbox=${counts.outbox} funnel=${counts.funnel}\n`);
   } catch {
     process.stderr.write("SQLite-to-PostgreSQL import failed; details are omitted to avoid exposing stored data.\n");
     process.exitCode = 1;

@@ -25,11 +25,12 @@ describe("importSqlite transaction contract", () => {
       sessions: 1,
       events: 2,
       outbox: 2,
+      funnel: 1,
     });
 
     expect(pool.clients).toHaveLength(2);
     expect(pool.queries.filter((query) => query === "BEGIN")).toHaveLength(2);
-    expect(pool.queries.indexOf("LOCK TABLE sessions, events, outbox IN ACCESS EXCLUSIVE MODE"))
+    expect(pool.queries.indexOf("LOCK TABLE sessions, events, outbox, funnel IN ACCESS EXCLUSIVE MODE"))
       .toBeGreaterThan(pool.queries.indexOf("COMMIT"));
     expect(pool.clients.every((client) => client.released)).toBe(true);
     expect(pool.state.sessions).toEqual([
@@ -45,9 +46,10 @@ describe("importSqlite transaction contract", () => {
       ["synthetic-job-2", 42, '{"text":"synthetic reply","buttons":["open","copy"]}', "reply", 1,
         1_760_000_001_234, "sent", 1_760_000_000_002],
     ]);
+    expect(pool.state.funnel).toEqual([["2026-09-20", "kfu", "started", 3]]);
 
     const insertQueries = pool.clients[1]?.queries.filter((query) => query.text.startsWith("INSERT INTO ")) ?? [];
-    expect(insertQueries).toHaveLength(5);
+    expect(insertQueries).toHaveLength(6);
     expect(insertQueries.every((query) => query.text.includes("$1"))).toBe(true);
     expect(insertQueries.every((query) => query.values.length > 0)).toBe(true);
   });
@@ -151,7 +153,7 @@ postgresDescribe("importSqlite PostgreSQL integration", () => {
     const sourceBefore = readFileSync(sourcePath);
     const snapshot = readSqliteSnapshot(sourcePath);
 
-    await expect(importSqlite(pool, snapshot)).resolves.toEqual({ sessions: 1, events: 2, outbox: 2 });
+    await expect(importSqlite(pool, snapshot)).resolves.toEqual({ sessions: 1, events: 2, outbox: 2, funnel: 1 });
 
     const sessions = await pool.query(
       "SELECT user_id::text AS user_id, data, updated_at::text AS updated_at FROM sessions",
@@ -193,6 +195,9 @@ postgresDescribe("importSqlite PostgreSQL integration", () => {
         created_at: "1760000000002",
       },
     ]);
+
+    const funnel = await pool.query("SELECT day, university, event, n FROM funnel");
+    expect(funnel.rows).toEqual([{ day: "2026-09-20", university: "kfu", event: "started", n: 3 }]);
 
     const rowsBeforeRepeat = { sessions: sessions.rows, events: events.rows, outbox: outbox.rows };
     await expect(importSqlite(pool, snapshot)).rejects.toThrow();
@@ -252,6 +257,7 @@ interface ImportTables {
   sessions: unknown[][];
   events: unknown[][];
   outbox: unknown[][];
+  funnel: unknown[][];
 }
 
 interface FakeState extends ImportTables {
@@ -263,6 +269,7 @@ class RecordingPool {
     sessions: [],
     events: [],
     outbox: [],
+    funnel: [],
     migrationVersion: undefined,
   };
   clients: RecordingClient[] = [];
@@ -323,6 +330,7 @@ class RecordingClient {
         sessions: state.sessions.length > 0,
         events: state.events.length > 0,
         outbox: state.outbox.length > 0,
+        funnel: state.funnel.length > 0,
       } as unknown as Row]);
     }
     if (text.startsWith("INSERT INTO sessions")) {
@@ -340,12 +348,17 @@ class RecordingClient {
       this.currentState().outbox.push([...values]);
       return queryResult<Row>([]);
     }
+    if (text.startsWith("INSERT INTO funnel")) {
+      this.currentState().funnel.push([...values]);
+      return queryResult<Row>([]);
+    }
     if (text.includes("AS sessions") && text.includes("AS events") && text.includes("AS outbox")) {
       const state = this.currentState();
       return queryResult<Row>([{
         sessions: String(state.sessions.length + (this.pool.reportWrongCounts ? 1 : 0)),
         events: String(state.events.length),
         outbox: String(state.outbox.length),
+        funnel: String(state.funnel.length),
       } as unknown as Row]);
     }
 
@@ -404,6 +417,7 @@ function syntheticSnapshot(): SqliteSnapshot {
         createdAt: 1_760_000_000_002,
       },
     ],
+    funnel: [{ day: "2026-09-20", university: "kfu", event: "started", n: 3 }],
   };
 }
 
@@ -422,7 +436,13 @@ function createSqliteSource(snapshot: SqliteSnapshot): string {
         attempts INTEGER NOT NULL DEFAULT 0, next_attempt INTEGER NOT NULL,
         status TEXT NOT NULL DEFAULT 'pending', created_at INTEGER NOT NULL
       );
+      CREATE TABLE funnel (day TEXT NOT NULL, university TEXT NOT NULL, event TEXT NOT NULL, n INTEGER NOT NULL,
+        PRIMARY KEY (day, university, event));
     `);
+    for (const row of snapshot.funnel) {
+      db.prepare("INSERT INTO funnel (day, university, event, n) VALUES (?, ?, ?, ?)")
+        .run(row.day, row.university, row.event, row.n);
+    }
     for (const session of snapshot.sessions) {
       db.prepare("INSERT INTO sessions (user_id, data, updated_at) VALUES (?, ?, ?)")
         .run(session.userId, session.rawDataJson, session.updatedAt);

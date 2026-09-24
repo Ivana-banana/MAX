@@ -1,4 +1,5 @@
 import { DatabaseSync } from "node:sqlite";
+import { FUNNEL_EVENTS, type FunnelCount } from "../bot/funnel.js";
 
 export interface SqliteSnapshot {
   sessions: { userId: number; data: unknown; rawDataJson: string; updatedAt: number }[];
@@ -14,6 +15,8 @@ export interface SqliteSnapshot {
     status: "pending" | "sent" | "cancelled" | "failed";
     createdAt: number;
   }[];
+  // Empty for databases created before the funnel counters (D-019).
+  funnel: FunnelCount[];
 }
 
 type Row = Record<string, unknown>;
@@ -40,7 +43,14 @@ export function readSqliteSnapshot(path: string): SqliteSnapshot {
       ORDER BY created_at, id
     `).map(readOutboxJob);
 
-    return { sessions, events, outbox };
+    const hasFunnel = db.prepare("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'funnel'").get() !== undefined;
+    const funnel = hasFunnel ? readRows(db, "funnel", `
+      SELECT day, university, event, n
+      FROM funnel
+      ORDER BY day, university, event
+    `).map(readFunnelCount) : [];
+
+    return { sessions, events, outbox, funnel };
   } finally {
     db.close();
   }
@@ -88,6 +98,17 @@ function readOutboxJob(value: unknown): SqliteSnapshot["outbox"][number] {
     nextAttempt: safeInteger(row.next_attempt, "outbox.next_attempt"),
     status: outboxStatus(row.status),
     createdAt: safeInteger(row.created_at, "outbox.created_at"),
+  };
+}
+
+function readFunnelCount(value: unknown): FunnelCount {
+  const row = asRow(value, "funnel");
+  if (!FUNNEL_EVENTS.includes(row.event as FunnelCount["event"])) throw invalidValue("funnel.event");
+  return {
+    day: nonEmptyString(row.day, "funnel.day"),
+    university: nonEmptyString(row.university, "funnel.university"),
+    event: row.event as FunnelCount["event"],
+    n: safeInteger(row.n, "funnel.n", 1),
   };
 }
 

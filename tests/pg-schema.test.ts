@@ -35,24 +35,24 @@ postgresDescribe("PostgreSQL v1 schema migration", () => {
     }
   });
 
-  it("records version 1 once and creates the required tables after repeated migrations", async () => {
+  it("records each version once and creates the required tables after repeated migrations", async () => {
     if (!pool) throw new Error("PostgreSQL test pool was not initialized");
 
     await migrate(pool);
     await migrate(pool);
 
-    const migration = await pool.query<{ n: string }>(
-      "SELECT count(*)::text AS n FROM schema_migrations WHERE version = 1",
+    const migration = await pool.query<{ version: number }>(
+      "SELECT version FROM schema_migrations ORDER BY version",
     );
-    expect(migration.rows[0]?.n).toBe("1");
+    expect(migration.rows.map((row) => row.version)).toEqual([1, 2]);
 
     const tables = await pool.query<{ table_name: string }>(
       `SELECT table_name
        FROM information_schema.tables
        WHERE table_schema = current_schema()
-         AND table_name IN ('sessions', 'events', 'outbox')
+         AND table_name IN ('sessions', 'events', 'outbox', 'funnel')
        ORDER BY table_name`,
     );
-    expect(tables.rows.map((row) => row.table_name)).toEqual(["events", "outbox", "sessions"]);
+    expect(tables.rows.map((row) => row.table_name)).toEqual(["events", "funnel", "outbox", "sessions"]);
   });
 });
