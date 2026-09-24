@@ -8,7 +8,9 @@
 import type { AppResult, AppStateResponse, AppTicket } from "../../src/webapp/contract.js";
 import { initData } from "./bridge.js";
 
-export type { AppPlanItem, AppResult, AppSession, AppState, AppStep, AppUniversity } from "../../src/webapp/contract.js";
+export type {
+  AppDocument, AppLaunch, AppPlanItem, AppResult, AppSession, AppState, AppStep, AppUniversity,
+} from "../../src/webapp/contract.js";
 
 /** Why a request could not be made or was refused. The UI shows a sentence per case. */
 export type ApiFailure = "no_launch" | "unauthorized" | "conflict" | "offline" | "server";

@@ -7,7 +7,7 @@
 
 import { FROM_REMINDER, plan, profile, type DialogueContext, type Input, type Session } from "./dialog.js";
 
-export const FUNNEL_EVENTS = ["started", "plan_ready", "reminder_sent", "reminder_opened", "checklist_completed",
+export const FUNNEL_EVENTS = ["started", "plan_ready", "reminders_on", "reminder_sent", "reminder_opened", "checklist_completed",
   "marked_done", "help_opened", "deleted"] as const;
 export type FunnelEvent = typeof FUNNEL_EVENTS[number];
 export interface FunnelCount { day: string; university: string; event: FunnelEvent; n: number }
@@ -24,6 +24,7 @@ export function funnelEvents(before: Session | null, after: Session | null, inpu
   if (before && !after) events.push("deleted");
   if (!after) return events;
   if (!(before && profile(before)) && profile(after)) events.push("plan_ready");
+  if (!before?.reminders && after.reminders) events.push("reminders_on");
   if (input.callback && action.startsWith("card:") && action.endsWith(FROM_REMINDER)) events.push("reminder_opened");
   if (action === "help" || action === "/help" || action.startsWith("help:")) events.push("help_opened");
   const was = before ? ready(before, ctx) : new Set<string>();

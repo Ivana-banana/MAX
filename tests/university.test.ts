@@ -5,12 +5,14 @@ import { join } from "node:path";
 import { parseRuleSet } from "../src/data/loadRules.js";
 import raw from "../src/data/rules/ru-student.json" with { type: "json" };
 import { parseUniversity, readUniversities } from "../src/data/loadUniversities.js";
+import { checkTranslated, readTexts } from "../src/data/loadTexts.js";
 import { reminderReply, transition, plan, type DialogueContext, type Input, type Session } from "../src/bot/dialog.js";
 import { parseUpdate } from "../src/bot/service.js";
 
 const rules = parseRuleSet(raw);
 const universities = readUniversities("src/data/universities", "kfu");
-const ctx: DialogueContext = { rules: rules.rules, universities, version: rules.version, demo: true, today: "2026-09-24" };
+const texts = readTexts("src/data/i18n");
+const ctx: DialogueContext = { rules: rules.rules, universities, texts, version: rules.version, demo: true, today: "2026-09-24" };
 const cleanups: (() => void)[] = [];
 afterEach(() => { for (const fn of cleanups.splice(0)) fn(); });
 
@@ -33,10 +35,12 @@ describe("university profiles are data", () => {
     const good = { id: "demo-u", name: { ru: "ДУ", en: "DU" }, contactUrl: "https://example.org", citizenships: ["KZ"], checkedAt: "2026-09-23" };
     expect(parseUniversity(good).id).toBe("demo-u");
     for (const bad of [{ ...good, id: "Demo U" }, { ...good, contactUrl: "http://example.org" }, { ...good, citizenships: ["BY"] },
-      { ...good, citizenships: [] }, { ...good, name: { ru: "ДУ" } }, { ...good, checkedAt: "2026-02-30" }]) {
+      { ...good, citizenships: [] }, { ...good, name: { en: "DU" } }, { ...good, checkedAt: "2026-02-30" }]) {
       expect(() => parseUniversity(bad)).toThrow(/Профиль вуза невалиден/);
     }
     expect(() => readUniversities("src/data/universities", "missing")).toThrow(/нет профиля по умолчанию/);
+    // Other languages are checked against the interface languages at startup.
+    expect(() => checkTranslated(texts, [], [parseUniversity({ ...good, name: { ru: "ДУ" } })])).toThrow(/нет перевода для demo-u.name/);
   });
   it("adds a university with one JSON file and no code changes", () => {
     const dir = mkdtempSync(join(tmpdir(), "universities-"));

@@ -57,7 +57,11 @@ MAX принимает webhook только по HTTPS на 443 с сертиф�
    MAX_BOT_TOKEN=<токен от организаторов>
    WEBHOOK_SECRET=<openssl rand -hex 32>
    WEBHOOK_URL=https://<домен>/webhook
+   POSTGRES_PASSWORD=<openssl rand -hex 24>
    ```
+   Пароль PostgreSQL — только буквы и цифры: он же входит в `DATABASE_URL`, который
+   Compose собирает для бота. С демо-паролем из `.env.example` бот при `TRANSPORT=max`
+   не запускается.
    Токен вписывать так, чтобы он не попал в историю команд:
    ```sh
    read -rsp 'Токен MAX: ' T && echo && sed -i "s|^MAX_BOT_TOKEN=.*|MAX_BOT_TOKEN=$T|" ~/max-bot/.env && unset T
@@ -91,8 +95,56 @@ git archive origin/main | ssh deploy@81.26.178.75 "tar -x -C ~/max-bot" && git r
 cd ~/max-bot && docker compose up --build -d --wait
 ```
 
-Подписка и данные переживают пересборку: БД лежит в томе `bot-data`. **Не запускать
-`docker compose down -v`** — `-v` удаляет том с профилями пользователей.
+Подписка и данные переживают пересборку: БД PostgreSQL лежит в томе `pg-data`, старая
+SQLite — в томе `bot-data` (нужна только для импорта). **Не запускать
+`docker compose down -v`** — `-v` удаляет тома с профилями пользователей.
+
+## Бэкап PostgreSQL и проверка восстановления
+
+```sh
+cd ~/max-bot
+docker compose exec -T postgres pg_dump -U bot -Fc bot > ~/backup-$(date +%F).dump
+# восстановление проверяется в отдельной БД, рабочая не затрагивается
+docker compose exec -T postgres createdb -U bot restore_check
+docker compose exec -T postgres pg_restore -U bot -d restore_check < ~/backup-$(date +%F).dump
+docker compose exec -T postgres psql -U bot -d restore_check -c "SELECT (SELECT count(*) FROM sessions) AS sessions, (SELECT count(*) FROM outbox) AS outbox"
+docker compose exec -T postgres dropdb -U bot restore_check
+```
+
+Дамп содержит MAX ID и даты пользователей: хранить с правами 600, не выносить с ВМ
+без решения об операторе данных (README, «Данные, надёжность и интеграции»).
+
+## Переход с SQLite на PostgreSQL (один раз)
+
+Версия до `D-022` хранила данные в SQLite (`/app/data/bot.sqlite` в томе `bot-data`).
+Переход — короткое окно, пока бот остановлен; входящие webhook в это время не
+принимаются. **Шаги ниже на ВМ ещё не выполнялись** — первый проход записать в `HANDOFF.md`.
+
+1. Записаться в `HANDOFF.md` (кто и когда переключает), добавить в `.env`
+   `POSTGRES_PASSWORD` (шаг 4 выше), выкатить код без запуска:
+   `git archive <коммит> | ssh deploy@81.26.178.75 "tar -x -C ~/max-bot"`.
+2. Остановить старого бота и сохранить копию SQLite вместе с WAL-файлами:
+   ```sh
+   cd ~/max-bot && docker compose stop bot
+   docker run --rm -v max-bot_bot-data:/data:ro -v ~/:/backup busybox tar czf /backup/sqlite-before-pg-$(date +%F).tgz -C /data .
+   ```
+3. Поднять PostgreSQL и собрать образ: `docker compose up -d --wait postgres && docker compose build bot`.
+4. Импорт. Он переносит `sessions`, `events`, `outbox` и `funnel` одной транзакцией,
+   требует пустые таблицы, сверяет число строк и не печатает содержимое:
+   ```sh
+   docker compose run --rm bot node dist/db/import-sqlite.js /app/data/bot.sqlite
+   # → sessions=N events=N outbox=N funnel=N
+   ```
+   Числа строк импорт сверяет со снимком SQLite сам; при расхождении он откатывается
+   целиком и завершается с кодом 1. Повторный запуск на непустой БД отклоняется.
+5. Запуск: `docker compose up -d --wait`, `/health` → 200, подписка на месте (шаг 7
+   выше), бэкап PostgreSQL по разделу выше.
+6. Пройти сценарий в мобильном и веб-MAX на уже существующем профиле: план и отметки
+   должны сохраниться.
+
+**Откат:** выкатить прежний коммит (`DEPLOYED_COMMIT`) и `docker compose up --build -d bot`.
+SQLite-том импорт не меняет, но всё, что пользователи сделали после переключения,
+останется только в PostgreSQL.
 
 ## Частые поломки
 

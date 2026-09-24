@@ -19,7 +19,7 @@ COPY src ./src
 RUN npm run build && npm prune --omit=dev --ignore-scripts --no-audit --no-fund
 
 FROM node:24-bookworm-slim@sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6
-ENV NODE_ENV=production HOST=0.0.0.0 PORT=3000 DB_PATH=/app/data/bot.sqlite WEBAPP_DIR=/app/web/dist \
+ENV NODE_ENV=production HOST=0.0.0.0 PORT=3000 WEBAPP_DIR=/app/web/dist \
     NODE_EXTRA_CA_CERTS=/app/certs/russian_trusted_root_ca.pem
 WORKDIR /app
 COPY --from=build --chown=node:node /app/node_modules ./node_modules
@@ -28,6 +28,7 @@ COPY --from=web --chown=node:node /app/web/dist ./web/dist
 COPY --chown=node:node package.json ./
 COPY --chown=node:node src/data/rules ./src/data/rules
 COPY --chown=node:node src/data/universities ./src/data/universities
+COPY --chown=node:node src/data/i18n ./src/data/i18n
 # platform-api2.max.ru is issued by Russian Trusted Root CA (Минцифры), absent from Node's store
 COPY --chown=node:node certs/russian_trusted_root_ca.pem /app/certs/russian_trusted_root_ca.pem
 RUN mkdir -p /app/data && chown node:node /app/data

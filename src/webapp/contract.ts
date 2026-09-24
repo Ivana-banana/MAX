@@ -20,6 +20,8 @@ export interface AppPlanItem {
   recommendedDate?: string;
   /** Negative once the calculated deadline has passed. */
   daysLeft: number;
+  /** The chat's own wording for the time left, plural forms included (src/data/i18n). */
+  countdown: string;
   status: PlanItemStatus;
   /** The legal basis is not confirmed by a lawyer yet: the screen must say so. */
   provisional: boolean;
@@ -50,6 +52,13 @@ export interface AppState {
   /** `null` until the user starts, and again after they delete their data. */
   session: AppSession | null;
   universities: AppUniversity[];
+  /**
+   * Interface texts for the current language, resolved from `src/data/i18n` (`D-020`). The app has
+   * no dictionary of its own: a new language is a new file there, and nothing else.
+   */
+  texts: Record<string, string>;
+  /** Languages the bot has texts for, so the picker is data too. */
+  languages: { code: Lang; name: string }[];
   today: string;
   ruleVersion: string;
   /** Synthetic demonstration data; the UI must label it. */

@@ -1,8 +1,9 @@
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { reminderDates } from "../core/deadlines.js";
-import { plan, reminderReply, transition, type DialogueContext, type Input, type Reply } from "./dialog.js";
+import { addDays } from "../core/dates.js";
+import type { PostgresStore, PostgresStoreTx } from "../db/postgres-store.js";
+import { plan, reminderReply, transition, type DialogueContext, type Input, type Reply, type Session } from "./dialog.js";
 import { funnelEvents, funnelUniversity } from "./funnel.js";
-import { Store } from "./store.js";
 
 export interface Incoming { id: string; user: number; input: Input; callbackId?: string }
 export interface Transport { send(user: number, reply: Reply): Promise<void>; answer?(id: string): Promise<void> }
@@ -42,65 +43,72 @@ export function moscowDate(now: number): string {
 }
 export class Service {
   private sending = false;
-  constructor(readonly store: Store, readonly context: Omit<DialogueContext, "today">, readonly transport: Transport, readonly clock: () => number = Date.now) {}
+  constructor(readonly store: PostgresStore, readonly context: Omit<DialogueContext, "today">, readonly transport: Transport, readonly clock: () => number = Date.now) {}
   ctx(): DialogueContext { return { ...this.context, today: moscowDate(this.clock()) }; }
-  receive(update: Incoming): void {
+  // Resolves after COMMIT: the webhook answers 200 only for a stored update.
+  async receive(update: Incoming): Promise<void> {
     const now = this.clock();
-    this.store.transaction(() => {
-      if (this.store.seen(update.id, now)) return;
-      const before = this.store.get(update.user), ctx = this.ctx();
+    await this.store.transaction(update.user, async tx => {
+      if (await tx.seen(update.id, now)) return;
+      const before = await tx.get(), ctx = this.ctx();
       const outcome = transition(before, update.input, ctx);
       const university = funnelUniversity(outcome.session ?? before, ctx);
-      for (const event of funnelEvents(before, outcome.session, update.input, ctx)) this.store.count(ctx.today, university, event);
-      this.store.supersedeReplies(update.user);
-      this.store.cancelReminders(update.user);
-      if (outcome.session) this.store.save(update.user, outcome.session, now);
-      else this.store.remove(update.user);
-      this.store.enqueue(update.id, update.user, outcome.reply, "reply", now, now);
-      this.scheduleUser(update.user);
+      for (const event of funnelEvents(before, outcome.session, update.input, ctx)) await tx.count(ctx.today, university, event);
+      await tx.supersedeReplies();
+      await tx.cancelReminders();
+      if (outcome.session) await tx.save(outcome.session, now);
+      else await tx.remove();
+      await tx.enqueue(update.id, outcome.reply, "reply", now, now);
+      await this.scheduleUser(tx, update.user, outcome.session);
     });
   }
-  scheduleUser(user: number, state = this.store.get(user)): void {
+  async scheduleUser(tx: PostgresStoreTx, user: number, state: Session | null): Promise<void> {
     const now = this.clock(), ctx = this.ctx();
     if (!state?.reminders || state.ruleVersion !== ctx.version) return;
     for (const item of plan(state, ctx)) {
-      for (const day of reminderDates(item, ctx.today)) {
+      // One calm follow-up the day after the calculated date: the procedure is still required (D-021).
+      const followUp = addDays(item.dueDate, 1);
+      const days = [...reminderDates(item, ctx.today), ...(item.status !== "done" && followUp >= ctx.today ? [followUp] : [])];
+      for (const day of days) {
         const when = Date.parse(day + "T09:00:00+03:00");
         const key = createHash("sha256").update(JSON.stringify([state.nonce, user, ctx.version, item.ruleId, item.dueDate, day])).digest("hex");
-        this.store.enqueue(key, user, { ruleId: item.ruleId, dueDate: item.dueDate }, "reminder", when, now);
+        await tx.enqueue(key, { ruleId: item.ruleId, dueDate: item.dueDate, day }, "reminder", when, now);
       }
     }
   }
-  maintain(): void {
-    this.store.transaction(() => {
-      this.store.prune(this.clock());
-      for (const { user, state } of this.store.sessions()) this.scheduleUser(user, state);
-    });
+  // One user at a time under the same lock as receive(): a concurrent update cannot interleave.
+  async maintain(): Promise<void> {
+    await this.store.prune(this.clock());
+    for (const { user } of await this.store.sessions()) {
+      await this.store.transaction(user, async tx => this.scheduleUser(tx, user, await tx.get()));
+    }
   }
   async flush(limit = 20): Promise<void> {
     if (this.sending) return;
     this.sending = true;
     try {
       for (let n = 0; n < limit; n++) {
-        const job = this.store.next(this.clock());
+        const job = await this.store.claim(this.clock(), randomUUID());
         if (!job) return;
         let message: Reply;
         if (job.kind === "reminder") {
-          const state = this.store.get(job.user_id);
-          const ref = JSON.parse(job.payload) as {ruleId:string;dueDate:string};
+          const state = await this.store.get(job.user_id);
+          const ref = JSON.parse(job.payload) as {ruleId:string;dueDate:string;day?:string};
           const item = state && state.ruleVersion === this.context.version && state.reminders
             ? plan(state, this.ctx()).find(i => i.ruleId === ref.ruleId && i.dueDate === ref.dueDate && i.status !== "done") : undefined;
-          if (!state || !item || item.dueDate < this.ctx().today) { this.store.cancel(job.id); continue; }
+          // Before the date a late reminder is still useful; the follow-up after it goes only on its own day.
+          const today = this.ctx().today, followUp = ref.day !== undefined && ref.day > ref.dueDate;
+          if (!state || !item || (followUp ? ref.day !== today : item.dueDate < today)) { await this.store.cancel(job.id, job.lease_token); continue; }
           message = reminderReply(state, this.ctx(), item);
         } else {
           message = JSON.parse(job.payload) as Reply;
-          if (message.ruleVersion !== this.context.version) { this.store.cancel(job.id); continue; }
+          if (message.ruleVersion !== this.context.version) { await this.store.cancel(job.id, job.lease_token); continue; }
         }
-        try { await this.transport.send(job.user_id, message); this.store.finish(job.id); }
-        catch { this.store.retry(job, this.clock()); continue; }
+        try { await this.transport.send(job.user_id, message); await this.store.finish(job.id, job.lease_token); }
+        catch { await this.store.retry(job, this.clock()); continue; }
         // Outside the send block: a failed counter must not resend the reminder.
         if (job.kind === "reminder") {
-          try { this.store.count(this.ctx().today, funnelUniversity(this.store.get(job.user_id), this.context), "reminder_sent"); }
+          try { await this.store.count(this.ctx().today, funnelUniversity(await this.store.get(job.user_id), this.context), "reminder_sent"); }
           catch { console.error("Funnel counter failed; the reminder was delivered."); }
         }
       }

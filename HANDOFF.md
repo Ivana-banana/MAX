@@ -15,8 +15,9 @@
 
 - **Продукт** (`D-010`): бот считает иностранному первокурснику КФУ даты обязательных
   процедур от даты въезда, показывает комплект документов и напоминает. `docs/product/`.
-- **Стек** (`D-009`): TypeScript на Node.js 24, SDK `@maxhub/max-bot-api`, SQLite
-  (Codex готовит переход на PostgreSQL — строка в «Активных задачах»).
+- **Стек** (`D-009`, `D-022`): TypeScript на Node.js 24, SDK `@maxhub/max-bot-api`,
+  PostgreSQL 16 (в `main` с 24.09; на ВМ пока SQLite — см. «Деплой»). Тесты сами поднимают
+  временный PG (`embedded-postgres`), Docker для них не нужен.
 - **Сделано в `main`**: движок сроков, диалог ru/en, очередь и напоминания, webhook,
   Docker, README, CI, развёртывание, календарь `.ics` и кнопки MAX, PDF-презентация. 97 тестов.
 - **Бот работает в MAX** (23.09): [max.ru/t149_hakaton_max_bot](https://max.ru/t149_hakaton_max_bot),
@@ -64,12 +65,10 @@ end-to-end в MAX, потом сдача, потом презентация.
 | Иван (Claude Code) | — | Деплой: HTTPS на 443, webhook-подписка с секретом, мониторинг `/health` и подписки | ВМ `81.26.178.75`, см. «Деплой» ниже | бот отвечает весь период проверки; после 8 ч без доставки подписка снимается | HTTPS и подписка готовы 23.09; **нет**: прохода сценария в MAX, внешнего мониторинга, deploy key |
 | — | — | Проверить CI после push и обязательность checks перед merge | `.github/workflows/check.yml` | зелёный GitHub Actions на опубликованном commit | 23.09: checks зелёные на каждом push и PR; защита `main` выключена (`protected: false`) — включить «Require status checks» может только M1hairu |
 | Иван (Claude Code) | `worktree-pitch-finish` | Презентация: PDF, первый слайд технический (`docs/tz-compliance.md`, С7–С8); ветка Codex `worktree-pitch-afk` слита с main и дополнена | `docs/presentation/`, `scripts/build-presentation.py` | скилл `submission-checklist`, п. 7; `build-presentation.py --check` в CI | [PR #5](https://github.com/M1hairu/MAX_GOATed_messenger/pull/5); PDF по 19f1a7c; **нужен состав команды** (`manifest.json` → `team`); пересобрать на теге сдачи и после слияния PR #4 |
-| Claude Code (Chichetin) | `worktree-i18n-texts`, [PR #8](https://github.com/M1hairu/MAX_GOATed_messenger/pull/8) | Тексты интерфейса — данные: `src/data/i18n/<язык>.json`, формы множественного числа по `Intl.PluralRules`, проверка переводов при запуске; решение: машинный перевод допустим (`D-020`) | `src/data/i18n/`, `src/data/loadTexts.ts`, `src/bot/dialog.ts`, `src/bot/calendar.ts` | 118 тестов, typecheck, build, demo:check, Docker `/health` 200 | **на ревью**; сливать раньше #9. Найдено: `scripts/export-demo.mjs` и на main падает на `reminders.length === 1` — поправить при перевыгрузке сцен |
-| Claude Code (Chichetin) | `worktree-reminders-nudge`, [PR #9](https://github.com/M1hairu/MAX_GOATed_messenger/pull/9) (поверх #8) | Кнопка «🔔 Включить напоминания» первой под планом; одно напоминание на следующий день после срока (`D-021`) | `src/bot/{dialog,service}.ts`, `src/data/i18n/`, `tests/reminders.test.ts` | 121 тест, typecheck, build, demo:check | **на ревью** |
-| — | — | **Третий язык** (узбекский или китайский — по странам студентов): `src/data/i18n/<код>.json` + переводы названий в `src/data/rules/*.json` и `src/data/universities/*.json`. Машинный перевод допустим (`D-020`), пометить в журнале решений | после слияния PR #8 | бот стартует (сверка переводов), тест с новым языком, скриншот в MAX | свободно; ждёт #8 |
+| — | — | **Третий язык** (узбекский или китайский — по странам студентов): `src/data/i18n/<код>.json` + переводы названий в `src/data/rules/*.json` и `src/data/universities/*.json`. Машинный перевод допустим (`D-020`), пометить в журнале решений | после слияния PR #8 | бот стартует (сверка переводов), тест с новым языком, скриншот в MAX | свободно; PR #8 слит — можно брать |
 | — | — | **QR-плакат вуза**: `npm run qr <вуз>` → SVG/PDF с диплинком `max.ru/<бот>?start=<вуз>`, названием вуза и подписью; раздел в README и слайд «канал внедрения» | `scripts/` или `src/`, открытая библиотека QR с лицензией MIT | QR сканируется телефоном и открывает бота с нужным вузом (шаг 16 чек-листа) | свободно; README-раздел обязателен (просьба человека) |
 | — | — | **Меню команд бота** (`/plan`, `/help`, `/stop`, `/delete`): `PATCH /me/commands` — есть в [документации](https://dev.max.ru/docs-api/methods/PATCH/me/commands) (до 32 команд, подсказки при вводе «/», без разделения по языкам) и в SDK (`bot.api.setMyCommands`). Скрипт по образцу `npm run subscribe`, запускает держатель токена | `src/`, `package.json` | команды видны при вводе «/» в мобильной и веб-версии | проверено 24.09: метод есть; кандидат на платформенный бонус; свободно |
-| Иван (Claude Code) | `worktree-app-miniapp-foundation` | **Основа мини-приложения MAX**: `src/webapp/` — проверка подписи стартовых данных, общий с ботом стейт (тот же `transition()`), JSON API (`/api/state`, `/api/action`, `/api/calendar.ics`, билет на скачивание) и раздача бандла; `web/` — React 19 + `@maxhub/max-ui` 0.5.0, обёртка над MAX Bridge с веб-fallback, экраны онбординга, плана и карточки; стадия сборки бандла в Dockerfile (`D-022`) | `src/webapp/`, `web/`, `src/bot/{config,server}.ts`, `src/main.ts`, `Dockerfile`, `.dockerignore`, `tests/webapp.test.ts` | 134 теста, typecheck сервера и бандла, `vite build`, сквозной прогон по живому серверу в demo (онбординг → план → отметки → напоминания → `.ics`) | **на ревью**, в `main` не влито (крупное: общие контракты + Docker). **Не проверено:** `docker compose build` и 5-минутный лимит (на машине нет docker), открытие в мобильном и веб-MAX, URL приложения в карточке бота |
+| Иван (Claude Code) | `worktree-app-miniapp-foundation` | **Основа мини-приложения MAX**: `src/webapp/` — проверка подписи стартовых данных, общий с ботом стейт (тот же `transition()`), JSON API (`/api/state`, `/api/action`, `/api/calendar.ics`, билет на скачивание) и раздача бандла; `web/` — React 19 + `@maxhub/max-ui` 0.5.0, обёртка над MAX Bridge с веб-fallback, экраны онбординга, плана и карточки; стадия сборки бандла в Dockerfile (`D-023`) | `src/webapp/`, `web/`, `src/bot/{config,server}.ts`, `src/main.ts`, `Dockerfile`, `.dockerignore`, `tests/webapp.test.ts` | 186 тестов, typecheck сервера и бандла, `vite build`, `demo:check`, 21 проверка по живому серверу на PostgreSQL (онбординг → план → отметки → напоминания → билет и `.ics`, 401/409/400, отдача бандла) | **на ревью**, в `main` не влито (крупное: общие контракты + Docker). Ветка слита с `main` (PR #8, #9, PostgreSQL); попутно исправлены два дефекта `src/db/dev-postgres.ts`, из-за которых тесты не запускались на Windows: имя бинарного пакета (`windows-x64`, а не `win32-x64`) и кодировка временного кластера (initdb брал WIN1251 и падал на эмодзи в кнопках). **Не проверено:** `docker compose build` и 5-минутный лимит (на машине нет docker), открытие в мобильном и веб-MAX, URL приложения в карточке бота |
 | — | — | Исследование барьера B: 8–12 интервью с первокурсниками, 2–3 с кураторами, наблюдаемое задание | `docs/product/problem.md` «Условие продолжения», `hypothesis.md` | пороги из протокола, рубрика утверждена до сессий | свободно; барьер A от него не зависит |
 
 Локальный демонстратор подготовлен в `worktree-bot-afk-mvp`; отчёт —
@@ -90,6 +89,14 @@ end-to-end в MAX, потом сдача, потом презентация.
 (`TRANSPORT=console`) или отдельный бот.
 
 ## Деплой
+
+> **Внимание: `main` с 24.09 работает на PostgreSQL (`D-022`), ВМ — ещё на SQLite.**
+> Обычная выкатка (`git archive` + `docker compose up --build`) без подготовки положит
+> бота: с `TRANSPORT=max` и без своего `POSTGRES_PASSWORD` в `.env` он не стартует, а
+> профили без импорта останутся в SQLite. Следующая выкатка — только по разделу
+> «Переход с SQLite на PostgreSQL» в [`docs/deploy.md`](docs/deploy.md): пароль в `.env`,
+> остановка, копия SQLite, импорт, сверка, запуск, проход в MAX. Runbook на ВМ ещё не
+> выполнялся; откат — прежний коммит из `DEPLOYED_COMMIT`.
 
 Бот работает на ВМ Yandex Cloud `81.26.178.75` (`ssh deploy@…`, ключ — у Ивана), webhook
 `https://81-26-178-75.sslip.io/webhook`, живость — `/health`. Устройство, развёртывание
@@ -128,7 +135,8 @@ end-to-end в MAX, потом сдача, потом презентация.
   проверенного источника по сроку для студентов.
 - `src/data/loadRules.ts` — валидация данных при загрузке. `approved` без `reviewedBy`
   не проходит.
-- `src/bot/` — диалог ru/en, SQLite, webhook, очередь, транспорт SDK MAX.
+- `src/bot/` — диалог, webhook, очередь, транспорт SDK MAX; `src/db/` — схема PostgreSQL,
+  хранилище, одноразовый импорт прежней SQLite.
 - `src/demo.ts` — локальная учебная демонстрация; `src/main.ts` — сервер.
 - `tests/` — 80 тестов. Есть тест, который требует, чтобы все нормы были `draft`:
   после юридической вычитки он упадёт, и статус нельзя будет поменять молча.
@@ -139,6 +147,8 @@ end-to-end в MAX, потом сдача, потом презентация.
 
 | Дата | Кто | Что | Commit | Проверка |
 |---|---|---|---|---|
+| 2026-09-24 | ir6 (Claude Code; схему, импорт и хранилище начал Codex) | Ветка `worktree-api-postgres-plan` влита в `main` без ревью (решение человека): бот, демо, отчёт воронки и экспорт сцен на PostgreSQL (`D-022`), импорт SQLite с `funnel`, Compose с PostgreSQL 16, runbook переноса и бэкапа в `docs/deploy.md`. **Не выкачено, ВМ на SQLite** — см. предупреждение в «Деплой». `receive`/`maintain` в `service.ts` теперь `async` | см. `git log` | 163 теста на настоящем PG 16, typecheck, build, demo:check; CI ветки зелёный, `docker compose build` 17 с. Не проверено: `docker compose up` локально, runbook на ВМ, проход в MAX |
+| 2026-09-24 | Claude Code (Chichetin) | PR #8 и #9 слиты (решение человека): тексты интерфейса в `src/data/i18n/<язык>.json`, машинный перевод допустим (`D-020`); кнопка «🔔 Включить напоминания» первой под планом и одно напоминание после срока (`D-021`). **Не выкачены** — выкатывать вместе с PR #4, #6, #7. Для ir6: `receive` в `service.ts` и тесты изменились — PostgreSQL-ветка вливается второй. `scripts/export-demo.mjs` падает на `reminders.length === 1` (и до этих PR) — поправить при перевыгрузке сцен | `c69147d` | 121 тест, typecheck, build, demo:check, `build-presentation.py --check`; CI PR #8 зелёный |
 | 2026-09-24 | Claude Code (Chichetin) | PR #7 слит (решение человека): обезличенные счётчики воронки (`D-019`), отчёт `npm run funnel`, суффикс `:reminder` у кнопки напоминания, строка о счётчиках на экране согласия. **Не выкачен** — выкатывать вместе с PR #4 и #6; сцены презентации перевыгрузить | `1474230` | 113 тестов, typecheck, build, demo:check, `build-presentation.py --check`; CI PR #7 зелёный |
 | 2026-09-24 | Claude Code (Chichetin) | PR #6 слит (решение человека): профили вузов в `src/data/universities/*.json` (КФУ по умолчанию, демо-профиль ИТМО), диплинк `?start=<вуз>`, язык из `user_locale`, «осталось N дней», ветка просроченного срока (`D-018`). **Не выкачен**: выкатка (Иван), шаги 16–17 `docs/max-manual-check.md` в MAX, перевыгрузка сцен и PDF | `a3efe02` | 108 тестов, typecheck, build, demo:check, `build-presentation.py --check`; CI PR #6 зелёный |
 | 2026-09-23 | Claude Code (Chichetin) | PR #4 слит (решение человека): до ответа юриста день въезда входит в срок (`D-016`), KZ с въездом 01.09 — 30.09 и 29.11. **Не выкачен**: нужна выкатка (Иван), перевыгрузка сцен и PDF, у ранее прошедших — /delete | ветка `worktree-legal-norms-review` → main | 98 тестов, typecheck, build, demo:check; CI PR #4 зелёный |

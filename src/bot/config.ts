@@ -1,9 +1,11 @@
 import { readFileSync } from "node:fs";
 import { parseRuleSet, type RuleSet } from "../data/loadRules.js";
+import type { DeadlineRule } from "../core/types.js";
 import { readUniversities, type University } from "../data/loadUniversities.js";
+import { checkTranslated, readTexts, type Texts } from "../data/loadTexts.js";
 export interface Config {
   mode: "demo" | "live"; transport: "console" | "max"; token: string; secret: string;
-  dbPath: string; port: number; host: string; rulesPath: string; universitiesPath: string; defaultUniversity: string;
+  databaseUrl: string; port: number; host: string; rulesPath: string; universitiesPath: string; defaultUniversity: string; textsPath: string;
   /** Built mini app bundle; served by the same process, because MAX needs one public HTTPS origin. */
   webappDir: string;
   /** Origin of the Vite dev server, allowed through CORS. Local demo only. */
@@ -27,6 +29,9 @@ export function readConfig(env: NodeJS.ProcessEnv = process.env): Config {
   if (!/^[a-zA-Z0-9_-]{32,256}$/.test(secret)) throw new Error("WEBHOOK_SECRET must have 32–256 safe characters");
   if (transport === "max" && secret === "local-demo-only-not-for-deployment") throw new Error("Set your own WEBHOOK_SECRET for MAX");
   if (transport === "max" && env.DEBUG) throw new Error("Disable DEBUG: SDK diagnostics may contain personal data");
+  const databaseUrl = env.DATABASE_URL ?? "";
+  if (!databaseUrl) throw new Error("DATABASE_URL is required (PostgreSQL)");
+  if (transport === "max" && databaseUrl.includes("local-demo-only-not-for-deployment")) throw new Error("Set your own POSTGRES_PASSWORD for MAX");
   const port = Number(env.PORT ?? 3000);
   if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error("Invalid PORT");
   const webappDevOrigin = env.WEBAPP_DEV_ORIGIN ?? "";
@@ -36,11 +41,11 @@ export function readConfig(env: NodeJS.ProcessEnv = process.env): Config {
   if (webappDevOrigin && !/^https?:\/\/[a-z0-9.-]{1,253}(:\d{1,5})?$/i.test(webappDevOrigin)) {
     throw new Error("WEBAPP_DEV_ORIGIN must be a bare origin, e.g. http://localhost:5173");
   }
-  return { mode, transport, token, secret, port, host: env.HOST ?? "127.0.0.1",
+  return { mode, transport, token, secret, port, host: env.HOST ?? "127.0.0.1", databaseUrl,
     webappDir: env.WEBAPP_DIR ?? "./web/dist", webappDevOrigin,
-    dbPath: env.DB_PATH ?? "./data/bot.sqlite",
     rulesPath: env.RULES_PATH ?? "./src/data/rules/ru-student.json",
-    universitiesPath: env.UNIVERSITIES_PATH ?? "./src/data/universities", defaultUniversity: env.DEFAULT_UNIVERSITY ?? "kfu" };
+    universitiesPath: env.UNIVERSITIES_PATH ?? "./src/data/universities", defaultUniversity: env.DEFAULT_UNIVERSITY ?? "kfu",
+    textsPath: env.TEXTS_PATH ?? "./src/data/i18n" };
 }
 export function loadRules(config: Pick<Config, "rulesPath" | "mode">): RuleSet {
   const set = parseRuleSet(JSON.parse(readFileSync(config.rulesPath, "utf8")));
@@ -51,4 +56,10 @@ export function loadRules(config: Pick<Config, "rulesPath" | "mode">): RuleSet {
 }
 export function loadUniversities(config: Pick<Config, "universitiesPath" | "defaultUniversity">): University[] {
   return readUniversities(config.universitiesPath, config.defaultUniversity);
+}
+/** Interface languages; fails at startup if a rule or university name is missing in one of them. */
+export function loadTexts(config: Pick<Config, "textsPath">, rules: DeadlineRule[], universities: University[]): Texts {
+  const texts = readTexts(config.textsPath);
+  checkTranslated(texts, rules, universities);
+  return texts;
 }

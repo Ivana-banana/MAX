@@ -3,7 +3,8 @@ import { randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { parseRuleSet } from "./data/loadRules.js";
 import { readUniversities } from "./data/loadUniversities.js";
-import { Store } from "./bot/store.js";
+import { checkTranslated, readTexts } from "./data/loadTexts.js";
+import { scratchSchema, startDevPostgres } from "./db/dev-postgres.js";
 import { Service, moscowDate } from "./bot/service.js";
 import { addDays } from "./core/dates.js";
 import type { Reply } from "./bot/dialog.js";
@@ -11,11 +12,17 @@ import type { Reply } from "./bot/dialog.js";
 const scripted = process.argv.includes("--script");
 const rules = parseRuleSet(JSON.parse(readFileSync("./src/data/rules/ru-student.json", "utf8")));
 const universities = readUniversities("./src/data/universities", "kfu");
-const store = new Store(scripted ? ":memory:" : "./data/terminal-demo.sqlite");
+const texts = readTexts("./src/data/i18n");
+checkTranslated(texts, rules.rules, universities);
+// Synthetic profile in a temporary schema, dropped on exit: inside Compose it is the bot's DATABASE_URL,
+// locally a throwaway PostgreSQL (embedded-postgres, dev dependency).
+const dev = process.env.DATABASE_URL ? undefined : await startDevPostgres();
+const schema = await scratchSchema(process.env.DATABASE_URL ?? dev!.url);
+const { store } = await schema.open();
 let last: Reply;
 let reminderCount = 0;
 const clock = scripted ? () => Date.parse("2026-09-24T10:00:00+03:00") : Date.now;
-const service = new Service(store, { rules: rules.rules, universities, version: rules.version, demo: true }, {
+const service = new Service(store, { rules: rules.rules, universities, texts, version: rules.version, demo: true }, {
   async send(_user, reply) {
     last = reply;
     if (reply.text.includes("Напоминание:")) reminderCount++;
@@ -26,7 +33,7 @@ const service = new Service(store, { rules: rules.rules, universities, version: 
   },
 }, clock);
 async function act(text: string, callback = false) {
-  service.receive({ id: randomUUID(), user: 1, input: { text, callback } });
+  await service.receive({ id: randomUUID(), user: 1, input: { text, callback } });
   await service.flush();
 }
 try {
@@ -37,10 +44,10 @@ try {
     if (entry < "2026-09-01") throw new Error("Demo date must fall within the supported period");
     for (const text of ["/start", "ru", "accept", "yes", "KZ", entry, "card:medical-examination",
       "doc:medical-examination:passport", "plan", "reminders"]) await act(text);
-    service.maintain(); await service.flush();
+    await service.maintain(); await service.flush();
     if (reminderCount !== 1) throw new Error("Expected exactly one due reminder");
     for (const text of ["done:medical-examination", "/today", "/stop"]) await act(text);
-    if (!store.get(1)?.completions["medical-examination"]) throw new Error("Demo did not complete");
+    if (!(await store.get(1))?.completions["medical-examination"]) throw new Error("Demo did not complete");
     console.log("\nDemo completed: progress saved, reminder delivered, completion recorded, reminders stopped.");
   } else {
     const terminal = createInterface({ input: process.stdin, output: process.stdout });
@@ -56,4 +63,4 @@ try {
       }
     } finally { terminal.close(); }
   }
-} finally { store.close(); }
+} finally { await store.close(); await schema.drop(); await dev?.stop(); }

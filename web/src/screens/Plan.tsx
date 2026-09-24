@@ -6,11 +6,12 @@
  */
 
 import { Button, CellHeader, CellList, CellSimple, Switch, Typography } from "@maxhub/max-ui";
-import type { AppPlanItem, AppSession } from "../api.js";
-import { daysLeft, text, type Lang } from "../texts.js";
+import type { AppSession } from "../api.js";
+import { text, type Texts } from "../texts.js";
 
 interface Props {
   session: AppSession;
+  texts: Texts;
   pending: string | null;
   onAction: (action: string) => void;
   onOpen: (ruleId: string) => void;
@@ -18,27 +19,21 @@ interface Props {
   calendarBusy: boolean;
 }
 
-export function statusLabel(lang: Lang, item: AppPlanItem): string {
-  if (item.status === "done") return text(lang, "done");
-  if (item.status === "overdue") return `${text(lang, "overdue")} · ${daysLeft(lang, item.daysLeft)}`;
-  return daysLeft(lang, item.daysLeft);
-}
-
-export function Plan({ session, pending, onAction, onOpen, onCalendar, calendarBusy }: Props) {
-  const lang: Lang = session.lang;
-  const t = (key: Parameters<typeof text>[1]) => text(lang, key);
+export function Plan({ session, texts, pending, onAction, onOpen, onCalendar, calendarBusy }: Props) {
+  const t = (key: string) => text(texts, key);
   const unfinished = session.plan.some(item => item.status !== "done");
 
   return (
     <div className="stack">
-      <CellList mode="island" header={<CellHeader>{t("planTitle")}</CellHeader>}>
-        {session.plan.length === 0 && <CellSimple title={t("planEmpty")} />}
+      <CellList mode="island" header={<CellHeader>{t("app.planTitle")}</CellHeader>}>
+        {session.plan.length === 0 && <CellSimple title={t("app.plan.empty")} />}
         {session.plan.map(item => (
           <CellSimple
             key={item.ruleId}
             title={item.title}
-            subtitle={`${item.dueDate} · ${statusLabel(lang, item)}`}
-            overline={item.provisional ? t("provisional") : undefined}
+            // The countdown comes from the server: plural forms live in the shared text data.
+            subtitle={`${item.dueDate} · ${item.countdown}`}
+            overline={item.provisional ? t("app.provisional") : undefined}
             showChevron
             disabled={pending !== null}
             onClick={() => onOpen(item.ruleId)}
@@ -48,7 +43,7 @@ export function Plan({ session, pending, onAction, onOpen, onCalendar, calendarB
 
       <CellList mode="island">
         <CellSimple
-          title={t("reminders")}
+          title={t("app.reminders")}
           after={<Switch
             checked={session.reminders}
             disabled={pending !== null}
@@ -59,14 +54,14 @@ export function Plan({ session, pending, onAction, onOpen, onCalendar, calendarB
 
       {unfinished && (
         <Button stretched variant="secondary" loading={calendarBusy} disabled={pending !== null} onClick={onCalendar}>
-          {t("calendar")}
+          {t("app.calendar")}
         </Button>
       )}
 
-      <Typography.Text variant="note" color="tertiary" className="prose">{t("selfReported")}</Typography.Text>
+      <Typography.Text variant="note" color="tertiary" className="prose">{t("app.selfReported")}</Typography.Text>
 
       <Button stretched variant="ghost" disabled={pending !== null} onClick={() => onAction("/delete")}>
-        {t("deleteTitle")}
+        {t("btn.delete")}
       </Button>
     </div>
   );

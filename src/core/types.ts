@@ -9,8 +9,10 @@
 /** Calendar date without time, ISO `YYYY-MM-DD`. Deadlines are whole days. */
 export type PlainDate = string;
 
-export type Lang = "ru" | "en";
+/** ISO 639-1 code; the available languages are the files in src/data/i18n. */
+export type Lang = string;
 
+/** Text per language; every interface language must be present (checked at startup by checkTranslated). */
 export type Localized = Record<Lang, string>;
 
 /** Personal event a deadline is counted from. */

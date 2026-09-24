@@ -12,7 +12,7 @@ import { createReadStream } from "node:fs";
 import { stat } from "node:fs/promises";
 import { join, normalize, resolve, sep } from "node:path";
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { plan, type Session } from "../bot/dialog.js";
+import { plan } from "../bot/dialog.js";
 import { CALENDAR_FILE, planToIcs } from "../bot/calendar.js";
 import type { Service } from "../bot/service.js";
 import { LaunchError, verifyLaunch } from "./initData.js";
@@ -141,12 +141,13 @@ function authenticate(req: IncomingMessage, options: WebappOptions, now: number)
   }
 }
 
-function icsFor(session: Session | null, service: Service): string | null {
+async function icsFor(service: Service, user: number): Promise<string | null> {
+  const session = await service.store.get(user);
   if (!session) return null;
   const ctx = service.ctx();
   const items = plan(session, ctx).filter(i => i.status !== "done");
   if (!items.length) return null;
-  return planToIcs(items, { lang: session.lang, demo: ctx.demo, uid: session.nonce, today: ctx.today });
+  return planToIcs(items, { lang: session.lang, texts: ctx.texts, demo: ctx.demo, uid: session.nonce, today: ctx.today });
 }
 
 /**
@@ -190,7 +191,7 @@ export function webappRouter(service: Service, options: WebappOptions) {
         if (path === "/api/state") {
           if (req.method !== "GET") throw new HttpError(405, "method_not_allowed");
           send(200, {
-            state: readState(service, caller.user, caller.mocked),
+            state: await readState(service, caller.user, caller.mocked),
             // The client turns these into the first action: the university a QR poster chose and
             // the MAX interface language. Both are hints, both are re-checked by the dialogue.
             launch: {
@@ -209,7 +210,7 @@ export function webappRouter(service: Service, options: WebappOptions) {
           if (revision !== undefined && !(Number.isSafeInteger(revision) && Number(revision) >= 0)) {
             throw new HttpError(400, "invalid_revision");
           }
-          send(200, applyAction(service, caller.user, action, caller.mocked,
+          send(200, await applyAction(service, caller.user, action, caller.mocked,
             revision === undefined ? undefined : Number(revision)));
           return true;
         }
@@ -222,7 +223,7 @@ export function webappRouter(service: Service, options: WebappOptions) {
           return true;
         }
         if (req.method !== "GET") throw new HttpError(405, "method_not_allowed");
-        const ics = icsFor(service.store.get(caller.user), service);
+        const ics = await icsFor(service, caller.user);
         if (ics === null) throw new HttpError(404, "nothing_to_export");
         res.writeHead(200, head({
           "content-type": "text/calendar; charset=utf-8",

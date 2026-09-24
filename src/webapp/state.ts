@@ -2,15 +2,17 @@
  * State of the mini app: the same session, the same rule engine and the same wording as the chat.
  *
  * The app sends the action vocabulary the chat buttons already use, so `transition`
- * (src/bot/dialog.ts) stays the single state machine. Nothing here decides what a step means or
- * what a deadline is: a second implementation of the scenario would be a second set of legal
+ * (src/bot/dialog.ts) stays the single state machine, and every text comes from
+ * `src/data/i18n` (`D-020`). Nothing here decides what a step means, what a deadline is or how a
+ * warning is worded: a second implementation of the scenario would be a second set of legal
  * answers, which is exactly what this product exists to prevent.
  */
 
 import { isValidDate } from "../core/dates.js";
 import type { Lang } from "../core/types.js";
-import { plan, profile, transition, type DialogueContext, type Input, type Session } from "../bot/dialog.js";
+import { countdown, plan, profile, transition, type DialogueContext, type Input, type Session } from "../bot/dialog.js";
 import { funnelEvents, funnelUniversity } from "../bot/funnel.js";
+import { BASE_LANG, format } from "../data/loadTexts.js";
 import type { Service } from "../bot/service.js";
 import type { AppResult, AppState, AppUniversity } from "./contract.js";
 
@@ -32,7 +34,7 @@ export class RevisionConflict extends Error {
  */
 export function isAppAction(action: string): boolean {
   return action === "/start" || /^\/start [a-z0-9_-]{1,32}$/.test(action)
-    || action === "ru" || action === "en"
+    || /^[a-z]{2}$/.test(action)
     || action === "accept" || action === "yes"
     || action === "plan" || action === "reminders" || action === "/today"
     || action === "/delete" || action === "confirm-delete" || action === "cancel-delete"
@@ -44,11 +46,28 @@ export function isAppAction(action: string): boolean {
 
 const university = (id: string | undefined, ctx: DialogueContext, lang: Lang): AppUniversity => {
   const found = ctx.universities.find(u => u.id === id) ?? ctx.universities[0]!;
-  return { id: found.id, name: found.name[lang], contactUrl: found.contactUrl };
+  return { id: found.id, name: found.name[lang] ?? found.name[BASE_LANG]!, contactUrl: found.contactUrl };
 };
 
+/**
+ * Every plain key of the interface language. Plural forms (`days#one`) are left out: they need a
+ * number at render time, so the server renders those strings itself (see `countdown` below).
+ */
+function texts(ctx: DialogueContext, lang: Lang): Record<string, string> {
+  const table: Record<string, string> = {};
+  for (const key of Object.keys(ctx.texts.get(BASE_LANG) ?? {})) {
+    if (key.includes("#")) continue;
+    table[key] = format(ctx.texts, lang, key);
+  }
+  return table;
+}
+
+const languages = (ctx: DialogueContext) => [...ctx.texts.keys()]
+  .map(code => ({ code, name: format(ctx.texts, code, "language.name") }));
+
 function view(session: Session | null, ctx: DialogueContext, mocked: boolean): AppState {
-  const lang = session?.lang ?? "ru";
+  const lang = session?.lang ?? BASE_LANG;
+  const localized = (value: Record<string, string>) => value[lang] ?? value[BASE_LANG]!;
   return {
     session: session === null ? null : {
       revision: session.revision,
@@ -62,23 +81,26 @@ function view(session: Session | null, ctx: DialogueContext, mocked: boolean): A
       reminders: session.reminders,
       plan: profile(session) ? plan(session, ctx).map(item => ({
         ruleId: item.ruleId,
-        title: item.title[lang],
-        action: item.action[lang],
+        title: localized(item.title),
+        action: localized(item.action),
         dueDate: item.dueDate,
         ...(item.recommendedDate === undefined ? {} : { recommendedDate: item.recommendedDate }),
         daysLeft: item.daysLeft,
+        countdown: countdown(session, ctx, item),
         status: item.status,
         provisional: item.provisional,
         isRepeat: item.isRepeat,
         documents: item.documents.map(d => ({
           id: d.id,
-          title: d.title[lang],
+          title: localized(d.title),
           checked: session.documents[`${item.ruleId}:${item.dueDate}:${d.id}`] === true,
         })),
         legal: item.legal,
       })) : [],
     },
-    universities: ctx.universities.map(u => ({ id: u.id, name: u.name[lang], contactUrl: u.contactUrl })),
+    universities: ctx.universities.map(u => ({ id: u.id, name: localized(u.name), contactUrl: u.contactUrl })),
+    texts: texts(ctx, lang),
+    languages: languages(ctx),
     today: ctx.today,
     ruleVersion: ctx.version,
     demo: ctx.demo,
@@ -87,8 +109,8 @@ function view(session: Session | null, ctx: DialogueContext, mocked: boolean): A
 }
 
 /** Current state without side effects: a screen refresh must not start a session. */
-export function readState(service: Service, user: number, mocked: boolean): AppState {
-  return view(service.store.get(user), service.ctx(), mocked);
+export async function readState(service: Service, user: number, mocked: boolean): Promise<AppState> {
+  return view(await service.store.get(user), service.ctx(), mocked);
 }
 
 /**
@@ -96,13 +118,14 @@ export function readState(service: Service, user: number, mocked: boolean): AppS
  *
  * The app always renders the state it just received, so its actions carry no staleness stamp:
  * they travel as plain text, exactly like a typed message, and the revision check below does
- * the job the chat's button stamp does.
+ * the job the chat's button stamp does. The whole thing runs in the store's per-user transaction,
+ * so a webhook update for the same person cannot interleave with it.
  */
-export function applyAction(
+export async function applyAction(
   service: Service, user: number, action: string, mocked: boolean, revision?: number,
-): AppResult {
-  return service.store.transaction(() => {
-    const before = service.store.get(user);
+): Promise<AppResult> {
+  return service.store.transaction(user, async tx => {
+    const before = await tx.get();
     const ctx = service.ctx();
     if (revision !== undefined && (before?.revision ?? 0) !== revision) {
       throw new RevisionConflict(before?.revision ?? 0);
@@ -110,14 +133,14 @@ export function applyAction(
     const input: Input = { text: action, callback: false };
     const outcome = transition(before, input, ctx);
     const target = funnelUniversity(outcome.session ?? before, ctx);
-    for (const event of funnelEvents(before, outcome.session, input, ctx)) service.store.count(ctx.today, target, event);
+    for (const event of funnelEvents(before, outcome.session, input, ctx)) await tx.count(ctx.today, target, event);
     // A chat reply queued earlier carries buttons stamped with the previous revision. The dialogue
     // already refuses them, so drop them rather than leave the user a dead button in the chat.
-    service.store.supersedeReplies(user);
-    service.store.cancelReminders(user);
-    if (outcome.session) service.store.save(user, outcome.session, service.clock());
-    else service.store.remove(user);
-    service.scheduleUser(user, outcome.session);
+    await tx.supersedeReplies();
+    await tx.cancelReminders();
+    if (outcome.session) await tx.save(outcome.session, service.clock());
+    else await tx.remove();
+    await service.scheduleUser(tx, user, outcome.session);
     return { state: view(outcome.session, ctx, mocked), message: outcome.reply.text };
   });
 }

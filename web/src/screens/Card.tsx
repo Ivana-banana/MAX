@@ -8,19 +8,18 @@
 import { Button, CellHeader, CellList, CellSimple, Typography } from "@maxhub/max-ui";
 import type { AppPlanItem, AppSession } from "../api.js";
 import { openLink, tap } from "../bridge.js";
-import { text, type Lang } from "../texts.js";
-import { statusLabel } from "./Plan.js";
+import { text, type Texts } from "../texts.js";
 
 interface Props {
   session: AppSession;
+  texts: Texts;
   item: AppPlanItem;
   pending: string | null;
   onAction: (action: string) => void;
 }
 
-export function Card({ session, item, pending, onAction }: Props) {
-  const lang: Lang = session.lang;
-  const t = (key: Parameters<typeof text>[1]) => text(lang, key);
+export function Card({ session, texts, item, pending, onAction }: Props) {
+  const t = (key: string) => text(texts, key);
 
   return (
     <div className="stack">
@@ -30,14 +29,14 @@ export function Card({ session, item, pending, onAction }: Props) {
       </div>
 
       <CellList mode="island">
-        <CellSimple title={item.dueDate} subtitle={statusLabel(lang, item)} />
+        <CellSimple title={item.dueDate} subtitle={item.countdown} />
         {item.recommendedDate !== undefined && (
-          <CellSimple title={item.recommendedDate} subtitle={lang === "ru" ? "рекомендуемая дата" : "recommended date"} />
+          <CellSimple title={item.recommendedDate} subtitle={t("app.recommended")} />
         )}
-        {item.provisional && <CellSimple title={t("provisional")} subtitleMode="tertiary" />}
+        {item.provisional && <CellSimple title={t("app.provisional")} subtitleMode="tertiary" />}
       </CellList>
 
-      <CellList mode="island" header={<CellHeader>{t("documents")}</CellHeader>}>
+      <CellList mode="island" header={<CellHeader>{t("app.documents")}</CellHeader>}>
         {item.documents.map(document => (
           <CellSimple
             key={document.id}
@@ -50,24 +49,24 @@ export function Card({ session, item, pending, onAction }: Props) {
         ))}
       </CellList>
 
-      <CellList mode="island" header={<CellHeader>{t("source")}</CellHeader>}>
+      <CellList mode="island" header={<CellHeader>{t("app.source")}</CellHeader>}>
         <CellSimple title={item.legal.act} subtitle={item.legal.article} />
-        <CellSimple title={`${t("checkedAt")}: ${item.legal.checkedAt}`} subtitleMode="tertiary" />
+        <CellSimple title={`${t("app.checkedAt")}: ${item.legal.checkedAt}`} subtitleMode="tertiary" />
       </CellList>
 
-      <Button stretched variant="secondary" onClick={() => openLink(item.legal.url)}>{t("openLaw")}</Button>
+      <Button stretched variant="secondary" onClick={() => openLink(item.legal.url)}>{t("btn.law")}</Button>
 
       {item.status !== "done" && (
         <Button
           stretched loading={pending === `done:${item.ruleId}`} disabled={pending !== null}
           onClick={() => onAction(`done:${item.ruleId}`)}
         >
-          {t("markDone")}
+          {t("btn.done")}
         </Button>
       )}
 
       <Button stretched variant="ghost" onClick={() => openLink(session.university.contactUrl)}>
-        {t("contactUniversity")}
+        {t("app.contact")}
       </Button>
     </div>
   );
