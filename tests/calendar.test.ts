@@ -16,18 +16,17 @@ describe("calendar export", () => {
     expect(ics.endsWith("END:VCALENDAR\r\n")).toBe(true);
     expect(ics.replaceAll("\r\n", "")).not.toMatch(/\n/);
     expect(events(ics)).toHaveLength(2);
-    expect(ics).toContain("DTSTART;VALUE=DATE:20261001\r\nDTEND;VALUE=DATE:20261002");
-    expect(ics).toContain("DTSTART;VALUE=DATE:20261130");
+    expect(ics).toContain("DTSTART;VALUE=DATE:20260930\r\nDTEND;VALUE=DATE:20261001");
+    expect(ics).toContain("DTSTART;VALUE=DATE:20261129");
   });
   it("sets alarms at 09:00 Moscow time only for reminder days still ahead", () => {
     const ics = planToIcs(buildPlan(rules, profile, {}, "2026-09-24"), options);
-    const medical = events(ics).find(e => e.includes("20261001"))!;
-    // 7 days before 01.10 is 24.09 (today, kept); 3 and 1 days before follow.
+    const medical = events(ics).find(e => e.includes("20260930"))!;
+    // Entry day counts (D-016): due 30.09; 7 days before is 23.09 (past, dropped), 3 and 1 days before stay.
     expect(medical.match(/TRIGGER;VALUE=DATE-TIME:\d{8}T060000Z/g)).toEqual([
-      "TRIGGER;VALUE=DATE-TIME:20260924T060000Z", "TRIGGER;VALUE=DATE-TIME:20260928T060000Z",
-      "TRIGGER;VALUE=DATE-TIME:20260930T060000Z"]);
+      "TRIGGER;VALUE=DATE-TIME:20260927T060000Z", "TRIGGER;VALUE=DATE-TIME:20260929T060000Z"]);
     const late = planToIcs(buildPlan(rules, profile, {}, "2026-09-29"), { ...options, today: "2026-09-29" });
-    expect(events(late).find(e => e.includes("20261001"))!.match(/BEGIN:VALARM/g)).toHaveLength(1);
+    expect(events(late).find(e => e.includes("20260930"))!.match(/BEGIN:VALARM/g)).toHaveLength(1);
   });
   it("skips completed one-time procedures and exports the next round of repeating ones", () => {
     const plan = buildPlan(rules, profile, { fingerprinting: "2026-09-10", "medical-examination": "2026-09-20" }, "2026-09-24");

@@ -2,6 +2,7 @@ import { createInterface } from "node:readline/promises";
 import { randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { parseRuleSet } from "./data/loadRules.js";
+import { readUniversities } from "./data/loadUniversities.js";
 import { Store } from "./bot/store.js";
 import { Service, moscowDate } from "./bot/service.js";
 import { addDays } from "./core/dates.js";
@@ -9,11 +10,12 @@ import type { Reply } from "./bot/dialog.js";
 
 const scripted = process.argv.includes("--script");
 const rules = parseRuleSet(JSON.parse(readFileSync("./src/data/rules/ru-student.json", "utf8")));
+const universities = readUniversities("./src/data/universities", "kfu");
 const store = new Store(scripted ? ":memory:" : "./data/terminal-demo.sqlite");
 let last: Reply;
 let reminderCount = 0;
 const clock = scripted ? () => Date.parse("2026-09-24T10:00:00+03:00") : Date.now;
-const service = new Service(store, { rules: rules.rules, version: rules.version, demo: true }, {
+const service = new Service(store, { rules: rules.rules, universities, version: rules.version, demo: true }, {
   async send(_user, reply) {
     last = reply;
     if (reply.text.includes("Напоминание:")) reminderCount++;
@@ -30,7 +32,8 @@ async function act(text: string, callback = false) {
 try {
   if (scripted) {
     console.log("[MOCKED: clock frozen at 2026-09-24 for repeatable demonstration]");
-    const entry = addDays(moscowDate(clock()), -23);
+    // Entry day counts toward the 30-day term, so the 7-day reminder falls on the frozen day.
+    const entry = addDays(moscowDate(clock()), -22);
     if (entry < "2026-09-01") throw new Error("Demo date must fall within the supported period");
     for (const text of ["/start", "ru", "accept", "yes", "KZ", entry, "card:medical-examination",
       "doc:medical-examination:passport", "plan", "reminders"]) await act(text);

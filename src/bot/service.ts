@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { reminderDates } from "../core/deadlines.js";
 import { plan, reminderReply, transition, type DialogueContext, type Input, type Reply } from "./dialog.js";
+import { funnelEvents, funnelUniversity } from "./funnel.js";
 import { Store } from "./store.js";
 
 export interface Incoming { id: string; user: number; input: Input; callbackId?: string }
@@ -9,9 +10,12 @@ const object = (v: unknown): Record<string, unknown> | undefined => v !== null &
 export function parseUpdate(raw: unknown): Incoming | null {
   const u = object(raw);
   if (!u || typeof u.update_type !== "string") throw new Error("invalid update");
-  let user: unknown, text: unknown, id: unknown, callbackId: string | undefined;
+  let user: unknown, text: unknown, id: unknown, callbackId: string | undefined, locale: string | undefined;
   if (u.update_type === "bot_started") {
-    user = object(u.user)?.user_id; text = "/start"; id = u.timestamp;
+    // ?start=<payload> (up to 128 characters) selects the university; anything else starts as usual.
+    const payload = typeof u.payload === "string" && /^[A-Za-z0-9_-]{1,128}$/.test(u.payload) ? u.payload : undefined;
+    user = object(u.user)?.user_id; text = payload ? `/start ${payload}` : "/start"; id = u.timestamp;
+    if (typeof u.user_locale === "string" && /^[A-Za-z_-]{2,16}$/.test(u.user_locale)) locale = u.user_locale;
   } else if (u.update_type === "message_created" || u.update_type === "message_callback") {
     const m = object(u.message), recipient = object(m?.recipient);
     if (recipient?.chat_type !== "dialog") return null;
@@ -30,7 +34,7 @@ export function parseUpdate(raw: unknown): Incoming | null {
     throw new Error("invalid update");
   }
   const digest = createHash("sha256").update(JSON.stringify([u.update_type, user, id])).digest("hex");
-  return { id: digest, user: Number(user), input: { text, callback: u.update_type === "message_callback" },
+  return { id: digest, user: Number(user), input: { text, callback: u.update_type === "message_callback", ...(locale ? { locale } : {}) },
     ...(callbackId === undefined ? {} : { callbackId }) };
 }
 export function moscowDate(now: number): string {
@@ -44,7 +48,10 @@ export class Service {
     const now = this.clock();
     this.store.transaction(() => {
       if (this.store.seen(update.id, now)) return;
-      const outcome = transition(this.store.get(update.user), update.input, this.ctx());
+      const before = this.store.get(update.user), ctx = this.ctx();
+      const outcome = transition(before, update.input, ctx);
+      const university = funnelUniversity(outcome.session ?? before, ctx);
+      for (const event of funnelEvents(before, outcome.session, update.input, ctx)) this.store.count(ctx.today, university, event);
       this.store.supersedeReplies(update.user);
       this.store.cancelReminders(update.user);
       if (outcome.session) this.store.save(update.user, outcome.session, now);
@@ -90,7 +97,12 @@ export class Service {
           if (message.ruleVersion !== this.context.version) { this.store.cancel(job.id); continue; }
         }
         try { await this.transport.send(job.user_id, message); this.store.finish(job.id); }
-        catch { this.store.retry(job, this.clock()); }
+        catch { this.store.retry(job, this.clock()); continue; }
+        // Outside the send block: a failed counter must not resend the reminder.
+        if (job.kind === "reminder") {
+          try { this.store.count(this.ctx().today, funnelUniversity(this.store.get(job.user_id), this.context), "reminder_sent"); }
+          catch { console.error("Funnel counter failed; the reminder was delivered."); }
+        }
       }
     } finally { this.sending = false; }
   }

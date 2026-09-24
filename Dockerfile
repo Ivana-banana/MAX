@@ -14,6 +14,7 @@ COPY --from=build --chown=node:node /app/node_modules ./node_modules
 COPY --from=build --chown=node:node /app/dist ./dist
 COPY --chown=node:node package.json ./
 COPY --chown=node:node src/data/rules ./src/data/rules
+COPY --chown=node:node src/data/universities ./src/data/universities
 # platform-api2.max.ru is issued by Russian Trusted Root CA (Минцифры), absent from Node's store
 COPY --chown=node:node certs/russian_trusted_root_ca.pem /app/certs/russian_trusted_root_ca.pem
 RUN mkdir -p /app/data && chown node:node /app/data

@@ -12,8 +12,11 @@ import { webhookServer } from "../src/bot/server.js";
 import { loadRules, readConfig } from "../src/bot/config.js";
 import { createTransport } from "../src/bot/transport.js";
 
+import { readUniversities } from "../src/data/loadUniversities.js";
+
 const rules = parseRuleSet(raw);
-const ctx = { rules: rules.rules, version: rules.version, demo: true, today: "2026-09-24" };
+const universities = readUniversities("src/data/universities", "kfu");
+const ctx = { rules: rules.rules, universities, version: rules.version, demo: true, today: "2026-09-24" };
 const cleanups: (() => void)[] = [];
 afterEach(() => { for (const fn of cleanups.splice(0)) fn(); });
 function fixture(path = ":memory:") {
@@ -42,7 +45,7 @@ describe("student dialogue and durable processing", () => {
   it("completes onboarding, shows sources and saves document checkmarks", async () => {
     const f=fixture(); f.onboard(); f.click("card:medical-examination");
     f.click("doc:medical-examination:passport");
-    expect(f.store.get(1)?.documents["medical-examination:2026-10-01:passport"]).toBe(true);
+    expect(f.store.get(1)?.documents["medical-examination:2026-09-30:passport"]).toBe(true);
     await f.service.flush();
     expect(f.sent.at(-1)?.reply.text).toContain("consultant.ru");
     expect(f.sent.at(-1)?.reply.text).toContain("ДЕМО");
@@ -84,11 +87,12 @@ describe("student dialogue and durable processing", () => {
     expect(f.store.get(1)?.step).toBe("completion");
   });
   it("sends a scheduled reminder once and cancels remaining reminders on completion", async () => {
-    const f=fixture(); f.onboard(); f.click("reminders");
+    // Due 2026-09-30, first reminder 7 days earlier: the clock is set to that day.
+    const f=fixture(); f.time("2026-09-23T10:00:00+03:00"); f.onboard(); f.click("reminders");
     await f.service.flush(); const count=f.sent.length;
     f.service.maintain(); await f.service.flush(); expect(f.sent.length).toBe(count);
     expect(f.sent.some(x=>x.reply.text.includes("Напоминание:"))).toBe(true);
-    f.click("done:medical-examination"); f.input("2026-09-24"); await f.service.flush();
+    f.click("done:medical-examination"); f.input("2026-09-23"); await f.service.flush();
     f.time("2026-09-28T10:00:00+03:00"); await f.service.flush();
     expect(f.sent.filter(x=>x.reply.text.includes("Напоминание:"))).toHaveLength(1);
   });
@@ -219,7 +223,7 @@ describe("calendar export, MAX link/clipboard buttons and reminder navigation", 
     expect(flat(f.sent.at(-1)?.reply)).toContainEqual({ text:"Открыть норму", url:expect.stringContaining("consultant.ru") });
     f.click("help:medical-examination"); await f.service.flush();
     const copy=flat(f.sent.at(-1)?.reply).find(b=>"copy" in b) as {copy:string}|undefined;
-    expect(copy?.copy).toContain("«Медицинское освидетельствование», расчётный срок — до 2026-10-01");
+    expect(copy?.copy).toContain("«Медицинское освидетельствование», расчётный срок — до 2026-09-30");
     expect(copy?.copy).toContain("гражданство KZ, въезд 2026-09-01");
     expect(flat(f.sent.at(-1)?.reply).some(b=>"url" in b && b.url.includes("kpfu.ru"))).toBe(true);
     expect(f.sent.at(-1)?.reply.text).toContain("kpfu.ru");
@@ -229,9 +233,10 @@ describe("calendar export, MAX link/clipboard buttons and reminder navigation", 
     expect(flat(r).map(b=>Object.keys(b).sort().join())).toEqual(["copy,text","text,url"]);
   });
   it("opens the card from an old reminder even after other actions", async () => {
-    const f=fixture(); f.onboard(); f.click("reminders"); await f.service.flush();
+    // The 7-day reminder for the 30.09 deadline falls on 23.09.
+    const f=fixture(); f.time("2026-09-23T10:00:00+03:00"); f.onboard(); f.click("reminders"); await f.service.flush();
     const reminder=f.sent.find(x=>x.reply.text.includes("Напоминание:"))!.reply;
-    const details=flat(reminder).find(b=>"action" in b && b.action.endsWith("|card:medical-examination")) as {action:string};
+    const details=flat(reminder).find(b=>"action" in b && b.action.endsWith("|card:medical-examination:reminder")) as {action:string};
     f.click("doc:medical-examination:passport"); f.click("done:fingerprinting");
     expect(f.store.get(1)?.step).toBe("completion");
     f.input(details.action,1,"old-reminder",true); await f.service.flush();

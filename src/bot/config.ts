@@ -1,8 +1,9 @@
 import { readFileSync } from "node:fs";
 import { parseRuleSet, type RuleSet } from "../data/loadRules.js";
+import { readUniversities, type University } from "../data/loadUniversities.js";
 export interface Config {
   mode: "demo" | "live"; transport: "console" | "max"; token: string; secret: string;
-  dbPath: string; port: number; host: string; rulesPath: string;
+  dbPath: string; port: number; host: string; rulesPath: string; universitiesPath: string; defaultUniversity: string;
 }
 export function readConfig(env: NodeJS.ProcessEnv = process.env): Config {
   const mode = env.APP_MODE ?? "demo", transport = env.TRANSPORT ?? "console";
@@ -19,7 +20,8 @@ export function readConfig(env: NodeJS.ProcessEnv = process.env): Config {
   if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error("Invalid PORT");
   return { mode, transport, token, secret, port, host: env.HOST ?? "127.0.0.1",
     dbPath: env.DB_PATH ?? "./data/bot.sqlite",
-    rulesPath: env.RULES_PATH ?? "./src/data/rules/ru-student.json" };
+    rulesPath: env.RULES_PATH ?? "./src/data/rules/ru-student.json",
+    universitiesPath: env.UNIVERSITIES_PATH ?? "./src/data/universities", defaultUniversity: env.DEFAULT_UNIVERSITY ?? "kfu" };
 }
 export function loadRules(config: Pick<Config, "rulesPath" | "mode">): RuleSet {
   const set = parseRuleSet(JSON.parse(readFileSync(config.rulesPath, "utf8")));
@@ -27,4 +29,7 @@ export function loadRules(config: Pick<Config, "rulesPath" | "mode">): RuleSet {
     throw new Error("Live mode blocked: rules require independent review. Do not approve rules just to bypass this guard.");
   }
   return set;
+}
+export function loadUniversities(config: Pick<Config, "universitiesPath" | "defaultUniversity">): University[] {
+  return readUniversities(config.universitiesPath, config.defaultUniversity);
 }

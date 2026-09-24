@@ -11,6 +11,7 @@ services:
       MAX_BOT_TOKEN: ${MAX_BOT_TOKEN:-}
       WEBHOOK_SECRET: ${WEBHOOK_SECRET:-local-demo-only-not-for-deployment}
       WEBHOOK_URL: ${WEBHOOK_URL:-}
+      DEFAULT_UNIVERSITY: ${DEFAULT_UNIVERSITY:-kfu}
     volumes:
       - bot-data:/app/data
     read_only: true

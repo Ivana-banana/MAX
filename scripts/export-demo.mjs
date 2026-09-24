@@ -3,6 +3,7 @@ import { execFileSync } from 'node:child_process';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { parseRuleSet } from '../dist/data/loadRules.js';
+import { readUniversities } from '../dist/data/loadUniversities.js';
 import { Store } from '../dist/bot/store.js';
 import { Service } from '../dist/bot/service.js';
 
@@ -14,11 +15,12 @@ assert.equal(git('status', '--porcelain', '--untracked-files=all', '--', 'src'),
 assert.equal(git('rev-parse', `${manifest.checkedCodeCommit}:src`), manifest.sourceTree, 'Checked code does not match the declared source tree');
 assert.equal(git('rev-parse', 'HEAD:src'), manifest.sourceTree, 'Update the presentation manifest after source changes');
 const rules = parseRuleSet(JSON.parse(readFileSync(new URL('../src/data/rules/ru-student.json', import.meta.url), 'utf8')));
+const universities = readUniversities(fileURLToPath(new URL('../src/data/universities', import.meta.url)), 'kfu');
 const clock = '2026-09-24T10:00:00+03:00';
 const store = new Store(':memory:');
 const replies = [];
 let last, serial = 0;
-const service = new Service(store, { rules: rules.rules, version: rules.version, demo: true }, {
+const service = new Service(store, { rules: rules.rules, universities, version: rules.version, demo: true }, {
   async send(_user, reply) { last = reply; replies.push(reply); },
 }, () => Date.parse(clock));
 const scenes = [];
