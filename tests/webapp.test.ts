@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { createHmac } from "node:crypto";
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { once } from "node:events";
@@ -43,7 +43,7 @@ function fixture(dir = "./web/dist", devLaunch = true) {
   cleanups.push(() => store.close());
   const sent: { user: number; reply: Reply }[] = [];
   const service = new Service(store, ctx, { async send(u, reply) { sent.push({ user: u, reply }); } }, () => NOW);
-  const router = webappRouter(service, { token: TOKEN, dir, devLaunch, devOrigin: "" });
+  const router = webappRouter(service, { token: TOKEN, dir, devLaunch, devOrigin: "", ticketSecret: "ticket-key-for-tests" });
   return { store, service, sent, router };
 }
 
@@ -207,6 +207,24 @@ describe("mini app HTTP surface", () => {
     expect(ics.headers.get("content-disposition")).toContain("first-90-days.ics");
     expect((await ics.text()).match(/BEGIN:VEVENT/g)).toHaveLength(2);
   });
+  it("hands out a short-lived download ticket, because a download carries no header", async () => {
+    const f = fixture();
+    const url = await serve(f.router, f.service);
+    const value = genuine();
+    for (const action of ["/start", "ru", "accept", "yes", "KZ", "2026-09-01"]) await act(url, value, { action });
+    const issued = await fetch(`${url}/api/calendar-ticket`, { method: "POST", headers: auth(value) });
+    expect(issued.status).toBe(200);
+    const ticket = await issued.json() as { url: string; fileName: string; expiresIn: number };
+    expect(ticket.fileName).toBe("first-90-days.ics");
+    const downloaded = await fetch(`${url}/${ticket.url}`);
+    expect(downloaded.status).toBe(200);
+    expect((await downloaded.text()).match(/BEGIN:VEVENT/g)).toHaveLength(2);
+    // A ticket for somebody else, or with the signature edited, opens nothing.
+    expect((await fetch(`${url}/api/calendar.ics?ticket=8.9999999999.${"0".repeat(64)}`)).status).toBe(401);
+    expect((await fetch(`${url}/${ticket.url.replace(/.$/, "f")}`)).status).toBe(401);
+    expect((await fetch(`${url}/api/calendar-ticket`, { method: "POST" })).status).toBe(401);
+    expect((await fetch(`${url}/api/calendar-ticket`, { headers: auth(value) })).status).toBe(405);
+  });
   it("accepts an unsigned demo launch only where the config allows one", async () => {
     const open = fixture();
     const openUrl = await serve(open.router, open.service);
@@ -226,7 +244,7 @@ describe("mini app HTTP surface", () => {
     const dir = mkdtempSync(join(tmpdir(), "webapp-"));
     cleanups.push(() => rmSync(dir, { recursive: true, force: true }));
     writeFileSync(join(dir, "index.html"), "<!doctype html><title>app</title>");
-    writeFileSync(join(dir, "app.a1b2c3d4.js"), "export const ok = 1;");
+    writeFileSync(join(dir, "app-C5bBlBUA.js"), "export const ok = 1;");
     writeFileSync(join(dir, "notes.md"), "not part of the bundle");
     const f = fixture(dir);
     const url = await serve(f.router, f.service);
@@ -237,7 +255,7 @@ describe("mini app HTTP surface", () => {
     expect(page.headers.get("x-content-type-options")).toBe("nosniff");
     // A reload on a client-side route must reach the app, not a 404.
     expect((await fetch(`${url}/plan`)).status).toBe(200);
-    const asset = await fetch(`${url}/app.a1b2c3d4.js`);
+    const asset = await fetch(`${url}/app-C5bBlBUA.js`);
     expect(asset.headers.get("cache-control")).toContain("immutable");
     expect((await fetch(`${url}/notes.md`)).status).toBe(403);
     // Traversal is normalised away before it can leave the root, so these end as plain misses.
@@ -272,5 +290,38 @@ describe("mini app HTTP surface", () => {
     const state = await (await fetch(`${url}/api/state`, { headers: auth(value) })).json() as
       { state: { session: { plan: { documents: { id: string; checked: boolean }[] }[] } } };
     expect(state.state.session.plan[0]?.documents.find(d => d.id === "passport")?.checked).toBe(true);
+  });
+});
+
+describe("mini app packaging", () => {
+  it("builds the bundle in the image and points the server at it", () => {
+    const dockerfile = readFileSync("Dockerfile", "utf8");
+    // Its own stage, so the React toolchain never reaches the runtime image.
+    expect(dockerfile).toMatch(/^FROM \S+ AS web$/m);
+    expect(dockerfile).toContain("COPY --from=web --chown=node:node /app/web/dist ./web/dist");
+    expect(dockerfile).toContain("WEBAPP_DIR=/app/web/dist");
+    // The bundle type-checks against the wire contract, so both files must be in that stage.
+    expect(dockerfile).toContain("COPY src/webapp/contract.ts /app/src/webapp/contract.ts");
+    expect(dockerfile).toContain("COPY src/core/types.ts /app/src/core/types.ts");
+    // Nested node_modules and dist would otherwise be shipped into the build context.
+    const ignore = readFileSync(".dockerignore", "utf8");
+    expect(ignore).toContain("**/node_modules");
+    expect(ignore).toContain("**/dist");
+  });
+  it("pins the mini app dependencies in its own lock file", () => {
+    const manifest = JSON.parse(readFileSync("web/package.json", "utf8")) as
+      { dependencies: Record<string, string>; devDependencies: Record<string, string> };
+    const pinned = { ...manifest.dependencies, ...manifest.devDependencies };
+    for (const [name, version] of Object.entries(pinned)) {
+      expect(version, name).toMatch(/^\d+\.\d+\.\d+$/);
+    }
+    expect(pinned["@maxhub/max-ui"]).toBeDefined();
+    const lock = JSON.parse(readFileSync("web/package-lock.json", "utf8")) as { lockfileVersion: number };
+    expect(lock.lockfileVersion).toBeGreaterThanOrEqual(3);
+  });
+  it("loads MAX Bridge from the documented CDN and nowhere else", () => {
+    const html = readFileSync("web/index.html", "utf8");
+    expect(html).toContain('src="https://st.max.ru/js/max-web-app.js"');
+    expect(html.match(/<script[^>]*src="http/g)).toHaveLength(1);
   });
 });

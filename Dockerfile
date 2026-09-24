@@ -1,3 +1,15 @@
+FROM node:24-bookworm-slim@sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6 AS web
+# Mini app bundle. It type-checks against the server's wire contract, so those two files come
+# along; the layout under /app mirrors the repository, so the relative import resolves unchanged.
+WORKDIR /app/web
+COPY web/package.json web/package-lock.json ./
+RUN npm ci --ignore-scripts --no-audit --no-fund
+COPY src/core/types.ts /app/src/core/types.ts
+COPY src/webapp/contract.ts /app/src/webapp/contract.ts
+COPY web/tsconfig.json web/vite.config.ts web/index.html ./
+COPY web/src ./src
+RUN npm run build
+
 FROM node:24-bookworm-slim@sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6 AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
@@ -7,11 +19,12 @@ COPY src ./src
 RUN npm run build && npm prune --omit=dev --ignore-scripts --no-audit --no-fund
 
 FROM node:24-bookworm-slim@sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6
-ENV NODE_ENV=production HOST=0.0.0.0 PORT=3000 DB_PATH=/app/data/bot.sqlite \
+ENV NODE_ENV=production HOST=0.0.0.0 PORT=3000 DB_PATH=/app/data/bot.sqlite WEBAPP_DIR=/app/web/dist \
     NODE_EXTRA_CA_CERTS=/app/certs/russian_trusted_root_ca.pem
 WORKDIR /app
 COPY --from=build --chown=node:node /app/node_modules ./node_modules
 COPY --from=build --chown=node:node /app/dist ./dist
+COPY --from=web --chown=node:node /app/web/dist ./web/dist
 COPY --chown=node:node package.json ./
 COPY --chown=node:node src/data/rules ./src/data/rules
 COPY --chown=node:node src/data/universities ./src/data/universities

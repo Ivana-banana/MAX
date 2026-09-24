@@ -1,0 +1,26 @@
+{
+  "name": "max-first-90-days-webapp",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Мини-приложение MAX: план обязательных процедур иностранного первокурсника",
+  "license": "MIT",
+  "engines": { "node": ">=24" },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@maxhub/max-ui": "0.5.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.7",
+    "@vitejs/plugin-react": "6.1.1",
+    "typescript": "5.9.2",
+    "vite": "8.3.0"
+  }
+}

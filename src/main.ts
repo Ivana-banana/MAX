@@ -11,7 +11,7 @@ const universities = loadUniversities(config);
 const store = new Store(config.dbPath);
 const service = new Service(store, { rules: rules.rules, universities, version: rules.version, demo: config.mode === "demo" }, createTransport(config));
 const webapp = webappRouter(service, { token: config.token, dir: config.webappDir,
-  devLaunch: webappDevLaunch(config), devOrigin: config.webappDevOrigin });
+  devLaunch: webappDevLaunch(config), devOrigin: config.webappDevOrigin, ticketSecret: config.secret });
 const server = webhookServer(service, config.secret, webapp);
 server.requestTimeout = 10000;
 server.headersTimeout = 10000;

@@ -7,6 +7,7 @@
  * in the request body.
  */
 
+import { createHmac, timingSafeEqual } from "node:crypto";
 import { createReadStream } from "node:fs";
 import { stat } from "node:fs/promises";
 import { join, normalize, resolve, sep } from "node:path";
@@ -29,7 +30,16 @@ export interface WebappOptions {
   devLaunch: boolean;
   /** Origin of the Vite dev server, allowed through CORS during local development only. */
   devOrigin: string;
+  /** Signs short-lived download tickets. Any server secret; never leaves the server. */
+  ticketSecret: string;
 }
+
+/**
+ * A download cannot carry an Authorization header: `WebApp.downloadFile()` and a plain browser
+ * link both just fetch a URL. So the app asks for a ticket first — signed, five minutes, one
+ * user — instead of putting the launch data in a URL that ends up in logs and history.
+ */
+const TICKET_TTL = 300;
 
 const JSON_LIMIT = 4096;
 const TYPES = new Map(Object.entries({
@@ -55,6 +65,24 @@ const CSP = [
   "object-src 'none'",
   "form-action 'none'",
 ].join("; ");
+
+const ticketMac = (secret: string, user: number, expires: number) =>
+  createHmac("sha256", secret).update(`calendar:${user}:${expires}`).digest("hex");
+
+const issueTicket = (secret: string, user: number, now: number): string => {
+  const expires = Math.floor(now / 1000) + TICKET_TTL;
+  return `${user}.${expires}.${ticketMac(secret, user, expires)}`;
+};
+
+function readTicket(secret: string, ticket: string, now: number): number | null {
+  const [rawUser, rawExpires, mac] = ticket.split(".");
+  const user = Number(rawUser), expires = Number(rawExpires);
+  if (!Number.isSafeInteger(user) || user <= 0 || !Number.isSafeInteger(expires) || mac === undefined) return null;
+  const expected = Buffer.from(ticketMac(secret, user, expires), "utf8");
+  const given = Buffer.from(mac, "utf8");
+  if (expected.length !== given.length || !timingSafeEqual(expected, given)) return null;
+  return Math.floor(now / 1000) <= expires ? user : null;
+}
 
 class HttpError extends Error {
   constructor(readonly status: number, readonly code: string) { super(code); this.name = "HttpError"; }
@@ -130,7 +158,8 @@ export function webappRouter(service: Service, options: WebappOptions) {
   return async function handle(req: IncomingMessage, res: ServerResponse): Promise<boolean> {
     const url = new URL(req.url ?? "/", "http://localhost");
     const path = url.pathname;
-    const api = path === "/api/state" || path === "/api/action" || path === "/api/calendar.ics";
+    const api = path === "/api/state" || path === "/api/action"
+      || path === "/api/calendar.ics" || path === "/api/calendar-ticket";
     if (!api && !(req.method === "GET" || req.method === "HEAD")) return false;
 
     const cors = options.devOrigin !== "" && req.headers.origin === options.devOrigin;
@@ -151,7 +180,13 @@ export function webappRouter(service: Service, options: WebappOptions) {
 
     if (api) {
       try {
-        const caller = authenticate(req, options, service.clock());
+        // The calendar file is the one route a ticket may open: a download carries no header.
+        const ticket = path === "/api/calendar.ics" ? url.searchParams.get("ticket") : null;
+        const ticketUser = ticket === null ? null : readTicket(options.ticketSecret, ticket, service.clock());
+        if (ticket !== null && ticketUser === null) throw new HttpError(401, "unauthorized");
+        const caller = ticketUser === null
+          ? authenticate(req, options, service.clock())
+          : { user: ticketUser, mocked: false };
         if (path === "/api/state") {
           if (req.method !== "GET") throw new HttpError(405, "method_not_allowed");
           send(200, {
@@ -176,6 +211,14 @@ export function webappRouter(service: Service, options: WebappOptions) {
           }
           send(200, applyAction(service, caller.user, action, caller.mocked,
             revision === undefined ? undefined : Number(revision)));
+          return true;
+        }
+        if (path === "/api/calendar-ticket") {
+          if (req.method !== "POST") throw new HttpError(405, "method_not_allowed");
+          send(200, {
+            url: `api/calendar.ics?ticket=${issueTicket(options.ticketSecret, caller.user, service.clock())}`,
+            fileName: CALENDAR_FILE, expiresIn: TICKET_TTL,
+          });
           return true;
         }
         if (req.method !== "GET") throw new HttpError(405, "method_not_allowed");
@@ -217,8 +260,8 @@ export function webappRouter(service: Service, options: WebappOptions) {
       // Nothing built yet: let the webhook server answer 404 instead of pretending the app exists.
       return false;
     }
-    // Vite fingerprints bundle file names, so only index.html has to be revalidated.
-    const immutable = candidate !== "index.html" && /\.[0-9a-f]{8,}\./i.test(candidate);
+    // Vite fingerprints bundle file names (`index-C5bBlBUA.js`), so only index.html is revalidated.
+    const immutable = candidate !== "index.html" && /-[A-Za-z0-9_-]{8,}\.[a-z0-9]+$/.test(candidate);
     res.writeHead(200, head({
       "content-type": type,
       "content-length": String(size),

@@ -8,10 +8,15 @@
  */
 
 import { isValidDate } from "../core/dates.js";
-import type { Lang, LegalBasis, PlanItemStatus } from "../core/types.js";
+import type { Lang } from "../core/types.js";
 import { plan, profile, transition, type DialogueContext, type Input, type Session } from "../bot/dialog.js";
 import { funnelEvents, funnelUniversity } from "../bot/funnel.js";
 import type { Service } from "../bot/service.js";
+import type { AppResult, AppState, AppUniversity } from "./contract.js";
+
+export type {
+  AppDocument, AppLaunch, AppPlanItem, AppResult, AppSession, AppState, AppStateResponse, AppStep, AppTicket, AppUniversity,
+} from "./contract.js";
 
 /** Another tab (or the chat) moved the session on while this screen was open. */
 export class RevisionConflict extends Error {
@@ -19,60 +24,6 @@ export class RevisionConflict extends Error {
     super("session revision moved on");
     this.name = "RevisionConflict";
   }
-}
-
-export interface AppDocument { id: string; title: string; checked: boolean }
-
-export interface AppPlanItem {
-  ruleId: string;
-  title: string;
-  action: string;
-  dueDate: string;
-  recommendedDate?: string;
-  /** Negative once the calculated deadline has passed. */
-  daysLeft: number;
-  status: PlanItemStatus;
-  /** The legal basis is not confirmed by a lawyer yet: the screen must say so. */
-  provisional: boolean;
-  isRepeat: boolean;
-  documents: AppDocument[];
-  legal: LegalBasis;
-}
-
-export interface AppUniversity { id: string; name: string; contactUrl: string }
-
-export interface AppSession {
-  /** Optimistic concurrency: an action carries the revision the screen was rendered from. */
-  revision: number;
-  step: Session["step"];
-  lang: Lang;
-  university: AppUniversity;
-  /** Citizenships this university's scenario supports, for the picker. */
-  citizenships: string[];
-  citizenship?: string;
-  entryDate?: string;
-  /** Procedure the "completed" date is being asked for. */
-  selected?: string;
-  reminders: boolean;
-  plan: AppPlanItem[];
-}
-
-export interface AppState {
-  /** `null` until the user starts, and again after they delete their data. */
-  session: AppSession | null;
-  universities: AppUniversity[];
-  today: string;
-  ruleVersion: string;
-  /** Synthetic demonstration data; the UI must label it. */
-  demo: boolean;
-  /** The launch was not cryptographically verified (local development only). */
-  mocked: boolean;
-}
-
-export interface AppResult {
-  state: AppState;
-  /** Wording from the dialogue itself, so the app never invents its own legal or error text. */
-  message: string;
 }
 
 /**

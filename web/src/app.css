@@ -1,0 +1,62 @@
+/* Only the frame around MAX UI: the library owns colours, type and controls. */
+:root {
+  color-scheme: light dark;
+}
+
+body {
+  margin: 0;
+}
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  /* MAX draws its own header and home indicator over the viewport edges. */
+  padding-top: calc(16px + env(safe-area-inset-top, 0px));
+  padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.centre {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 48px 0;
+}
+
+/* Server wording arrives as plain text with newlines; keep them. */
+.prose {
+  white-space: pre-wrap;
+}
+
+.banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid currentColor;
+}
+
+.banner-demo { color: #8a6d00; }
+.banner-mocked { color: #7a4b00; }
+.banner-error { color: #a3271f; }
+
+.banner-close {
+  margin-left: auto;
+  border: 0;
+  background: none;
+  color: inherit;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
