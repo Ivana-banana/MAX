@@ -8,7 +8,7 @@ export function webhookServer(service: Service, secret: string) {
       res.end(JSON.stringify(value));
     };
     if (req.method === "GET" && req.url === "/health") {
-      try { send(200, { status: "ok", mode: service.context.demo ? "demo" : "live", queue: service.store.counts() }); }
+      try { send(200, { status: "ok", mode: service.context.demo ? "demo" : "live", queue: await service.store.counts() }); }
       catch { send(503, { error: "storage_unavailable" }); }
       return;
     }
@@ -23,7 +23,7 @@ export function webhookServer(service: Service, secret: string) {
     let update;
     try { update = parseUpdate(raw); }
     catch { send(400, { error: "invalid_update" }); return; }
-    try { if (update) service.receive(update); }
+    try { if (update) await service.receive(update); }
     catch { send(503, { error: "storage_or_processing_failure" }); return; }
     send(200, { success: true });
     if (update?.callbackId) void service.transport.answer?.(update.callbackId).catch(() => {});

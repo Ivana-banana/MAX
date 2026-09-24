@@ -1,11 +1,35 @@
 import { execFileSync } from "node:child_process";
+import { randomUUID } from "node:crypto";
 import { mkdtempSync } from "node:fs";
 import { createRequire } from "node:module";
 import { createServer } from "node:net";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
+import { Pool } from "pg";
+import { PostgresStore } from "./postgres-store.js";
 
 export interface DevPostgres { url: string; stop(): Promise<void> }
+export interface ScratchSchema { open(): Promise<{ store: PostgresStore; pool: Pool }>; drop(): Promise<void> }
+
+/**
+ * A temporary schema of its own in the database at url, for tests and the demo:
+ * their synthetic profiles never mix with the bot's tables. open() may be called again to reopen the same data.
+ */
+export async function scratchSchema(url: string): Promise<ScratchSchema> {
+  const name = `scratch_${randomUUID().replaceAll("-", "")}`;
+  const admin = new Pool({ connectionString: url });
+  await admin.query(`CREATE SCHEMA "${name}"`);
+  return {
+    open: async () => {
+      // The store owns the pool (store.close() ends it); the pool is returned for direct SQL checks.
+      const pool = new Pool({ connectionString: url, options: `-c search_path=${name}` });
+      return { store: await PostgresStore.open(pool), pool };
+    },
+    drop: async () => {
+      try { await admin.query(`DROP SCHEMA "${name}" CASCADE`); } finally { await admin.end(); }
+    },
+  };
+}
 
 /**
  * Throwaway local PostgreSQL for tests and the terminal demo when no database URL is given.

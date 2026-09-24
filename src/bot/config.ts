@@ -3,7 +3,7 @@ import { parseRuleSet, type RuleSet } from "../data/loadRules.js";
 import { readUniversities, type University } from "../data/loadUniversities.js";
 export interface Config {
   mode: "demo" | "live"; transport: "console" | "max"; token: string; secret: string;
-  dbPath: string; port: number; host: string; rulesPath: string; universitiesPath: string; defaultUniversity: string;
+  databaseUrl: string; port: number; host: string; rulesPath: string; universitiesPath: string; defaultUniversity: string;
 }
 export function readConfig(env: NodeJS.ProcessEnv = process.env): Config {
   const mode = env.APP_MODE ?? "demo", transport = env.TRANSPORT ?? "console";
@@ -16,10 +16,11 @@ export function readConfig(env: NodeJS.ProcessEnv = process.env): Config {
   if (!/^[a-zA-Z0-9_-]{32,256}$/.test(secret)) throw new Error("WEBHOOK_SECRET must have 32–256 safe characters");
   if (transport === "max" && secret === "local-demo-only-not-for-deployment") throw new Error("Set your own WEBHOOK_SECRET for MAX");
   if (transport === "max" && env.DEBUG) throw new Error("Disable DEBUG: SDK diagnostics may contain personal data");
+  const databaseUrl = env.DATABASE_URL ?? "";
+  if (!databaseUrl) throw new Error("DATABASE_URL is required (PostgreSQL)");
   const port = Number(env.PORT ?? 3000);
   if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error("Invalid PORT");
-  return { mode, transport, token, secret, port, host: env.HOST ?? "127.0.0.1",
-    dbPath: env.DB_PATH ?? "./data/bot.sqlite",
+  return { mode, transport, token, secret, port, host: env.HOST ?? "127.0.0.1", databaseUrl,
     rulesPath: env.RULES_PATH ?? "./src/data/rules/ru-student.json",
     universitiesPath: env.UNIVERSITIES_PATH ?? "./src/data/universities", defaultUniversity: env.DEFAULT_UNIVERSITY ?? "kfu" };
 }
