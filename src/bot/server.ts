@@ -1,7 +1,9 @@
-import { createServer, type IncomingMessage } from "node:http";
+import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { timingSafeEqual } from "node:crypto";
 import { parseUpdate, Service } from "./service.js";
-export function webhookServer(service: Service, secret: string) {
+/** Mini app routes, if one is enabled: returns true once it has answered the request. */
+export type ExtraRoutes = (req: IncomingMessage, res: ServerResponse) => Promise<boolean>;
+export function webhookServer(service: Service, secret: string, extra?: ExtraRoutes) {
   return createServer(async (req, res) => {
     const send = (status: number, value: object) => {
       res.writeHead(status, { "content-type": "application/json", "cache-control": "no-store" });
@@ -11,6 +13,11 @@ export function webhookServer(service: Service, secret: string) {
       try { send(200, { status: "ok", mode: service.context.demo ? "demo" : "live", queue: service.store.counts() }); }
       catch { send(503, { error: "storage_unavailable" }); }
       return;
+    }
+    if (extra) {
+      // The mini app answers its own routes; anything it does not own falls through to the webhook.
+      try { if (await extra(req, res)) return; }
+      catch { send(503, { error: "webapp_unavailable" }); return; }
     }
     if (req.method !== "POST" || req.url !== "/webhook") { send(404, { error: "not_found" }); return; }
     const header = req.headers["x-max-bot-api-secret"];

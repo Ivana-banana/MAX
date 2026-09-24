@@ -1,15 +1,18 @@
-import { readConfig, loadRules, loadUniversities } from "./bot/config.js";
+import { readConfig, loadRules, loadUniversities, webappDevLaunch } from "./bot/config.js";
 import { Store } from "./bot/store.js";
 import { Service } from "./bot/service.js";
 import { createTransport } from "./bot/transport.js";
 import { webhookServer } from "./bot/server.js";
+import { webappRouter } from "./webapp/router.js";
 
 const config = readConfig();
 const rules = loadRules(config);
 const universities = loadUniversities(config);
 const store = new Store(config.dbPath);
 const service = new Service(store, { rules: rules.rules, universities, version: rules.version, demo: config.mode === "demo" }, createTransport(config));
-const server = webhookServer(service, config.secret);
+const webapp = webappRouter(service, { token: config.token, dir: config.webappDir,
+  devLaunch: webappDevLaunch(config), devOrigin: config.webappDevOrigin });
+const server = webhookServer(service, config.secret, webapp);
 server.requestTimeout = 10000;
 server.headersTimeout = 10000;
 service.maintain();
@@ -24,7 +27,8 @@ const timer = setInterval(() => {
   } catch { console.error("Maintenance failed; inspect storage."); }
 }, 1000);
 server.listen(config.port, config.host, () => {
-  console.log(JSON.stringify({ event: "started", mode: config.mode, transport: config.transport, port: config.port }));
+  console.log(JSON.stringify({ event: "started", mode: config.mode, transport: config.transport, port: config.port,
+    webapp: config.webappDir }));
 });
 let stopping = false;
 function stop() {
