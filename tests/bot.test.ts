@@ -12,11 +12,13 @@ import { webhookServer } from "../src/bot/server.js";
 import { loadRules, readConfig } from "../src/bot/config.js";
 import { createTransport } from "../src/bot/transport.js";
 
+import { readTexts } from "../src/data/loadTexts.js";
 import { readUniversities } from "../src/data/loadUniversities.js";
 
 const rules = parseRuleSet(raw);
 const universities = readUniversities("src/data/universities", "kfu");
-const ctx = { rules: rules.rules, universities, version: rules.version, demo: true, today: "2026-09-24" };
+const texts = readTexts("src/data/i18n");
+const ctx = { rules: rules.rules, universities, texts, version: rules.version, demo: true, today: "2026-09-24" };
 const cleanups: (() => void)[] = [];
 afterEach(() => { for (const fn of cleanups.splice(0)) fn(); });
 function fixture(path = ":memory:") {

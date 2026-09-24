@@ -1,4 +1,4 @@
-import { readConfig, loadRules, loadUniversities } from "./bot/config.js";
+import { readConfig, loadRules, loadTexts, loadUniversities } from "./bot/config.js";
 import { Store } from "./bot/store.js";
 import { Service } from "./bot/service.js";
 import { createTransport } from "./bot/transport.js";
@@ -7,8 +7,9 @@ import { webhookServer } from "./bot/server.js";
 const config = readConfig();
 const rules = loadRules(config);
 const universities = loadUniversities(config);
+const texts = loadTexts(config, rules.rules, universities);
 const store = new Store(config.dbPath);
-const service = new Service(store, { rules: rules.rules, universities, version: rules.version, demo: config.mode === "demo" }, createTransport(config));
+const service = new Service(store, { rules: rules.rules, universities, texts, version: rules.version, demo: config.mode === "demo" }, createTransport(config));
 const server = webhookServer(service, config.secret);
 server.requestTimeout = 10000;
 server.headersTimeout = 10000;

@@ -2,11 +2,12 @@ import { describe, expect, it } from "vitest";
 import { buildPlan } from "../src/core/deadlines.js";
 import { parseRuleSet } from "../src/data/loadRules.js";
 import { planToIcs } from "../src/bot/calendar.js";
+import { readTexts } from "../src/data/loadTexts.js";
 import raw from "../src/data/rules/ru-student.json" with { type: "json" };
 
 const { rules } = parseRuleSet(raw);
 const profile = { citizenship: "KZ", purpose: "study" as const, entryDate: "2026-09-01" };
-const options = { lang: "ru" as const, demo: true, uid: "abc123", today: "2026-09-24" };
+const options = { lang: "ru", texts: readTexts("src/data/i18n"), demo: true, uid: "abc123", today: "2026-09-24" };
 const events = (ics: string) => ics.split("BEGIN:VEVENT").slice(1);
 
 describe("calendar export", () => {

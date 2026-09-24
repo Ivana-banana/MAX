@@ -1,10 +1,11 @@
 import { reminderDates } from "../core/deadlines.js";
 import { addDays } from "../core/dates.js";
 import type { Lang, PlanItem } from "../core/types.js";
+import { format, type Texts } from "../data/loadTexts.js";
 
 // iCalendar (RFC 5545) export of the personal plan: deadlines land in the phone's own
 // calendar with alarms, so they keep working even if the bot is muted or offline.
-export interface CalendarOptions { lang: Lang; demo: boolean; uid: string; today: string }
+export interface CalendarOptions { lang: Lang; texts: Texts; demo: boolean; uid: string; today: string }
 export const CALENDAR_FILE = "first-90-days.ics";
 const REMIND_AT = "T060000Z"; // 09:00 Moscow time, the same hour the bot reminds
 
@@ -23,21 +24,21 @@ function fold(line: string): string {
   return out.join("\r\n ");
 }
 export function planToIcs(items: PlanItem[], o: CalendarOptions): string {
-  const t = (ru: string, en: string) => o.lang === "ru" ? ru : en;
-  const demo = o.demo ? t("[ДЕМО] ", "[DEMO] ") : "";
+  const t = (key: string) => format(o.texts, o.lang, key);
+  const demo = o.demo ? t("ics.demo") : "";
   const stamp = compact(o.today) + "T000000Z";
   const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//max-first-90-days//RU", "CALSCALE:GREGORIAN", "METHOD:PUBLISH",
-    "X-WR-CALNAME:" + escape(t("Первые 90 дней", "First 90 days"))];
+    "X-WR-CALNAME:" + escape(t("ics.name"))];
   for (const item of items) {
     if (item.status === "done") continue;
     const note = [item.action[o.lang],
-      ...(item.recommendedDate ? [t("Рекомендуемая дата: ", "Recommended date: ") + item.recommendedDate] : []),
-      t("Расчётный срок по справочнику, не решение МВД.", "Calculated date, not an official decision."),
-      ...(item.provisional ? [t("Норма ещё не вычитана юристом.", "The rule has not been legally reviewed yet.")] : []),
+      ...(item.recommendedDate ? [t("ics.recommended") + item.recommendedDate] : []),
+      t("ics.calculated"),
+      ...(item.provisional ? [t("ics.provisional")] : []),
       `${item.legal.act}, ${item.legal.article}`, item.legal.url].join("\n");
     lines.push("BEGIN:VEVENT", `UID:${item.ruleId}-${o.uid}@max-first-90-days`, `DTSTAMP:${stamp}`,
       `DTSTART;VALUE=DATE:${compact(item.dueDate)}`, `DTEND;VALUE=DATE:${compact(addDays(item.dueDate, 1))}`,
-      "SUMMARY:" + escape(demo + t("Крайний срок: ", "Deadline: ") + item.title[o.lang]),
+      "SUMMARY:" + escape(demo + t("ics.deadline") + item.title[o.lang]),
       "DESCRIPTION:" + escape(note), "TRANSP:TRANSPARENT");
     for (const day of reminderDates(item, o.today)) {
       lines.push("BEGIN:VALARM", "ACTION:DISPLAY", `TRIGGER;VALUE=DATE-TIME:${compact(day)}${REMIND_AT}`,

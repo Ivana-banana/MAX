@@ -1,9 +1,11 @@
 import { readFileSync } from "node:fs";
 import { parseRuleSet, type RuleSet } from "../data/loadRules.js";
+import type { DeadlineRule } from "../core/types.js";
 import { readUniversities, type University } from "../data/loadUniversities.js";
+import { checkTranslated, readTexts, type Texts } from "../data/loadTexts.js";
 export interface Config {
   mode: "demo" | "live"; transport: "console" | "max"; token: string; secret: string;
-  dbPath: string; port: number; host: string; rulesPath: string; universitiesPath: string; defaultUniversity: string;
+  dbPath: string; port: number; host: string; rulesPath: string; universitiesPath: string; defaultUniversity: string; textsPath: string;
 }
 export function readConfig(env: NodeJS.ProcessEnv = process.env): Config {
   const mode = env.APP_MODE ?? "demo", transport = env.TRANSPORT ?? "console";
@@ -21,7 +23,8 @@ export function readConfig(env: NodeJS.ProcessEnv = process.env): Config {
   return { mode, transport, token, secret, port, host: env.HOST ?? "127.0.0.1",
     dbPath: env.DB_PATH ?? "./data/bot.sqlite",
     rulesPath: env.RULES_PATH ?? "./src/data/rules/ru-student.json",
-    universitiesPath: env.UNIVERSITIES_PATH ?? "./src/data/universities", defaultUniversity: env.DEFAULT_UNIVERSITY ?? "kfu" };
+    universitiesPath: env.UNIVERSITIES_PATH ?? "./src/data/universities", defaultUniversity: env.DEFAULT_UNIVERSITY ?? "kfu",
+    textsPath: env.TEXTS_PATH ?? "./src/data/i18n" };
 }
 export function loadRules(config: Pick<Config, "rulesPath" | "mode">): RuleSet {
   const set = parseRuleSet(JSON.parse(readFileSync(config.rulesPath, "utf8")));
@@ -32,4 +35,10 @@ export function loadRules(config: Pick<Config, "rulesPath" | "mode">): RuleSet {
 }
 export function loadUniversities(config: Pick<Config, "universitiesPath" | "defaultUniversity">): University[] {
   return readUniversities(config.universitiesPath, config.defaultUniversity);
+}
+/** Interface languages; fails at startup if a rule or university name is missing in one of them. */
+export function loadTexts(config: Pick<Config, "textsPath">, rules: DeadlineRule[], universities: University[]): Texts {
+  const texts = readTexts(config.textsPath);
+  checkTranslated(texts, rules, universities);
+  return texts;
 }

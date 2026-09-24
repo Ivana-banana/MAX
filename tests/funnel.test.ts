@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { parseRuleSet } from "../src/data/loadRules.js";
 import raw from "../src/data/rules/ru-student.json" with { type: "json" };
+import { readTexts } from "../src/data/loadTexts.js";
 import { readUniversities } from "../src/data/loadUniversities.js";
 import type { Reply } from "../src/bot/dialog.js";
 import { Store } from "../src/bot/store.js";
@@ -9,6 +10,7 @@ import { funnelReport, type FunnelCount } from "../src/bot/funnel.js";
 
 const rules = parseRuleSet(raw);
 const universities = readUniversities("src/data/universities", "kfu");
+const texts = readTexts("src/data/i18n");
 const cleanups: (() => void)[] = [];
 afterEach(() => { for (const fn of cleanups.splice(0)) fn(); });
 function fixture() {
@@ -16,7 +18,7 @@ function fixture() {
   cleanups.push(() => store.close());
   let now = Date.parse("2026-09-23T10:00:00+03:00");
   const sent: Reply[] = [];
-  const service = new Service(store, { rules: rules.rules, universities, version: rules.version, demo: true },
+  const service = new Service(store, { rules: rules.rules, universities, texts, version: rules.version, demo: true },
     { async send(_user, reply) { sent.push(reply); } }, () => now);
   let n = 0;
   const input = (text: string, user = 1, callback = false) => service.receive({ id: String(++n), user, input: { text, callback } });
