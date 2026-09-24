@@ -69,5 +69,9 @@
   "ics.deadline": "Deadline: ",
   "ics.recommended": "Recommended date: ",
   "ics.calculated": "Calculated date, not an official decision.",
-  "ics.provisional": "The rule has not been legally reviewed yet."
+  "ics.provisional": "The rule has not been legally reviewed yet.",
+  "poster.title": "Your first 90 days in Russia",
+  "poster.lead": "Get your deadlines for the medical examination and fingerprinting, with reminders",
+  "poster.scan": "Point your phone camera at the code to open the bot in MAX",
+  "poster.note": "The bot calculates deadlines from your entry date, reminds you and drafts a question to {uni}. It does not file documents and is not legal advice."
 }

@@ -18,6 +18,7 @@
     "demo:check": "node dist/demo.js --script",
     "subscribe": "node --env-file-if-exists=.env dist/subscribe.js",
     "funnel": "node --env-file-if-exists=.env dist/report.js",
+    "qr": "node --env-file-if-exists=.env dist/qr.js",
     "demo:export": "npm run build && node scripts/export-demo.mjs",
     "demo:export:check": "npm run build && node scripts/export-demo.mjs --check",
     "db:import-sqlite": "npm run build --silent && node --env-file-if-exists=.env dist/db/import-sqlite.js"
@@ -26,6 +27,7 @@
     "@types/node": "24.3.0",
     "@types/pg": "8.23.1",
     "embedded-postgres": "16.14.0-beta.17",
+    "qrcode-generator": "2.0.4",
     "typescript": "5.9.2",
     "vitest": "3.2.4"
   },
