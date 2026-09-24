@@ -73,5 +73,10 @@
   "poster.title": "Rossiyadagi dastlabki 90 kun",
   "poster.lead": "Tibbiy koʻrik va daktiloskopiya muddatlaringizni bilib oling va eslatmalar oling",
   "poster.scan": "Telefon kamerasini kodga qarating — MAXda bot ochiladi",
-  "poster.note": "Bot kirgan sanangiz boʻyicha muddatlarni hisoblaydi, eslatadi va savol tayyorlaydi ({uni} uchun). Hujjat topshirmaydi va maslahat oʻrnini bosmaydi."
+  "poster.note": "Bot kirgan sanangiz boʻyicha muddatlarni hisoblaydi, eslatadi va savol tayyorlaydi ({uni} uchun). Hujjat topshirmaydi va maslahat oʻrnini bosmaydi.",
+  "command.start": "botni ishga tushirish",
+  "command.plan": "rejam va muddatlar",
+  "command.help": "yordam kerak",
+  "command.stop": "eslatmalarni oʻchirish",
+  "command.delete": "maʼlumotlarimni oʻchirish"
 }

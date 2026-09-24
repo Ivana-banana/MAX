@@ -73,5 +73,10 @@
   "poster.title": "Your first 90 days in Russia",
   "poster.lead": "Get your deadlines for the medical examination and fingerprinting, with reminders",
   "poster.scan": "Point your phone camera at the code to open the bot in MAX",
-  "poster.note": "The bot calculates deadlines from your entry date, reminds you and drafts a question to {uni}. It does not file documents and is not legal advice."
+  "poster.note": "The bot calculates deadlines from your entry date, reminds you and drafts a question to {uni}. It does not file documents and is not legal advice.",
+  "command.start": "start the bot",
+  "command.plan": "my plan and dates",
+  "command.help": "I need help",
+  "command.stop": "turn off reminders",
+  "command.delete": "delete my data"
 }

@@ -152,6 +152,10 @@ DEBUG при max запрещён: SDK-диагностика может сод�
 4. После запуска вручную создать подписку MAX: в Docker —
    `docker compose run --rm --no-deps bot node dist/subscribe.js`, без Docker —
    `npm run subscribe`. Скрипт отказывается заменять существующие подписки.
+   Подсказки команд после «/» (`/start`, `/plan`, `/help`, `/stop`, `/delete`, описания
+   ru/en из src/data/i18n): `docker compose run --rm --no-deps bot node dist/commands.js`
+   или `npm run commands` (`PATCH /me/commands`, подписку не трогает; `--dry-run` только
+   показывает список, D-025).
 5. Пройти путь в мобильном и веб-MAX и записать коммит, дату, результат.
 
 Используется официальный @maxhub/max-bot-api 0.3.1, домен platform-api2.max.ru,

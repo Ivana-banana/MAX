@@ -84,7 +84,12 @@ MAX принимает webhook только по HTTPS на 443 с сертиф�
    ```sh
    docker compose exec -T bot node -e "fetch('https://platform-api2.max.ru/subscriptions',{headers:{Authorization:process.env.MAX_BOT_TOKEN}}).then(r=>r.json()).then(j=>console.log(j.subscriptions.map(s=>s.url)))"
    ```
-8. **Прогон** сценария в мобильном и веб-MAX; записать коммит, дату и результат.
+8. **Подсказки команд** после «/» — один раз, повторный запуск просто перезаписывает список:
+   ```sh
+   docker compose run --rm --no-deps bot node dist/commands.js
+   ```
+   Подписку webhook скрипт не трогает (`PATCH /me/commands`, `D-025`).
+9. **Прогон** сценария в мобильном и веб-MAX; записать коммит, дату и результат.
 
 ## Обновление
 

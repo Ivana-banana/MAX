@@ -71,5 +71,10 @@
   "poster.title": "在俄罗斯的最初90天",
   "poster.lead": "了解您的体检和指纹采集期限，并接收提醒",
   "poster.scan": "用手机相机扫描二维码——即可在MAX中打开机器人",
-  "poster.note": "机器人根据入境日期计算期限、发送提醒，并帮您草拟给{uni}的问题。它不代为递交文件，也不构成法律意见。"
+  "poster.note": "机器人根据入境日期计算期限、发送提醒，并帮您草拟给{uni}的问题。它不代为递交文件，也不构成法律意见。",
+  "command.start": "启动机器人",
+  "command.plan": "我的计划和期限",
+  "command.help": "需要帮助",
+  "command.stop": "关闭提醒",
+  "command.delete": "删除我的数据"
 }
