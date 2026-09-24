@@ -1,8 +1,28 @@
 services:
+  postgres:
+    image: postgres:16-bookworm@sha256:efedf3595f1d6f415c08568ba171029bf54052e754cc9f030e3f2412b21f3d67
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: bot
+      POSTGRES_DB: bot
+      # Letters and digits only: the password is also part of DATABASE_URL below.
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-local-demo-only-not-for-deployment}
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bot -d bot"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    security_opt:
+      - no-new-privileges:true
   bot:
     build: .
     init: true
     restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
     ports:
       - "127.0.0.1:${BOT_PORT:-3000}:3000"
     environment:
@@ -12,7 +32,9 @@ services:
       WEBHOOK_SECRET: ${WEBHOOK_SECRET:-local-demo-only-not-for-deployment}
       WEBHOOK_URL: ${WEBHOOK_URL:-}
       DEFAULT_UNIVERSITY: ${DEFAULT_UNIVERSITY:-kfu}
+      DATABASE_URL: postgresql://bot:${POSTGRES_PASSWORD:-local-demo-only-not-for-deployment}@postgres:5432/bot
     volumes:
+      # Former SQLite database: read once by the import (docs/deploy.md), not used at runtime.
       - bot-data:/app/data
     read_only: true
     tmpfs:
@@ -23,3 +45,4 @@ services:
       - ALL
 volumes:
   bot-data:
+  pg-data:

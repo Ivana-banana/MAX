@@ -18,6 +18,7 @@ export function readConfig(env: NodeJS.ProcessEnv = process.env): Config {
   if (transport === "max" && env.DEBUG) throw new Error("Disable DEBUG: SDK diagnostics may contain personal data");
   const databaseUrl = env.DATABASE_URL ?? "";
   if (!databaseUrl) throw new Error("DATABASE_URL is required (PostgreSQL)");
+  if (transport === "max" && databaseUrl.includes("local-demo-only-not-for-deployment")) throw new Error("Set your own POSTGRES_PASSWORD for MAX");
   const port = Number(env.PORT ?? 3000);
   if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error("Invalid PORT");
   return { mode, transport, token, secret, port, host: env.HOST ?? "127.0.0.1", databaseUrl,

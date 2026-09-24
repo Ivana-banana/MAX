@@ -194,6 +194,8 @@ describe("webhook boundary and release guards", () => {
     expect(()=>readConfig({APP_MODE:"live"})).toThrow(/MAX/);
     expect(()=>loadRules({mode:"live",rulesPath:"src/data/rules/ru-student.json"})).toThrow(/review/);
     expect(()=>readConfig({})).toThrow(/DATABASE_URL/);
+    expect(()=>readConfig({TRANSPORT:"max",MAX_BOT_TOKEN:"t",WEBHOOK_SECRET:"your-demo-secret-change-before-deploy",
+      DATABASE_URL:"postgresql://bot:local-demo-only-not-for-deployment@postgres:5432/bot"})).toThrow(/POSTGRES_PASSWORD/);
   });
   it("authenticates HTTP, validates JSON and accepts repeated events once", async () => {
     const f=await fixture(), server=webhookServer(f.service,"test-secret");
