@@ -68,10 +68,12 @@ const navigation = (action: string) => action === "plan" || action === "help" ||
 function home(s: Session, ctx: DialogueContext, prefix = ""): Reply {
   const items = plan(s, ctx);
   const lines = items.map(i => `• ${i.title[s.lang]}: ${i.dueDate} — ${countdown(s, ctx, i)}`);
+  // Reminders are the core mechanic, so while they are off the switch comes first, right under the text.
+  const toggle = [button(t(s, ctx, s.reminders ? "btn.remindersOff" : "btn.remindersOn"), "reminders")];
   return reply(s, ctx, prefix + t(s, ctx, "home.title") + lines.join("\n") + t(s, ctx, "home.scope") +
     t(s, ctx, s.reminders ? "home.reminders.on" : "home.reminders.off"),
-    [...items.map(i => [button(i.title[s.lang]!, `card:${i.ruleId}`)]),
-      [button(t(s, ctx, "btn.reminders"), "reminders")],
+    [...(s.reminders ? [] : [toggle]), ...items.map(i => [button(i.title[s.lang]!, `card:${i.ruleId}`)]),
+      ...(s.reminders ? [toggle] : []),
       ...(items.some(i => i.status !== "done") ? [[button(t(s, ctx, "btn.calendar"), "calendar")]] : []),
       [button(t(s, ctx, "btn.help"), "help")],
       [button(t(s, ctx, "btn.delete"), "delete")]]);
@@ -204,6 +206,6 @@ export function transition(previous: Session | null, input: Input, ctx: Dialogue
   return { session: s, reply: prompt(s, ctx) };
 }
 export function reminderReply(s: Session, ctx: DialogueContext, item: PlanItem): Reply {
-  return reply(s, ctx, t(s, ctx, "reminder", { title: item.title[s.lang]!, due: item.dueDate, countdown: countdown(s, ctx, item) }),
+  return reply(s, ctx, t(s, ctx, item.status === "overdue" ? "reminder.overdue" : "reminder", { title: item.title[s.lang]!, due: item.dueDate, countdown: countdown(s, ctx, item) }),
     [[button(t(s, ctx, "btn.details"), `card:${item.ruleId}${FROM_REMINDER}`)], [button(t(s, ctx, "btn.planShort"), "plan")]]);
 }

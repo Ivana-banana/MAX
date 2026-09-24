@@ -54,7 +54,7 @@ export class Store {
   seen(id: string, now: number): boolean {
     return this.sql("INSERT OR IGNORE INTO events VALUES(?,?)").run(id, now).changes === 0;
   }
-  enqueue(id: string, user: number, payload: Reply | { ruleId: string; dueDate: string }, kind: string, when: number, now: number): void {
+  enqueue(id: string, user: number, payload: Reply | { ruleId: string; dueDate: string; day: string }, kind: string, when: number, now: number): void {
     this.sql("INSERT OR IGNORE INTO outbox(id,user_id,payload,kind,next_attempt,created_at) VALUES(?,?,?,?,?,?)")
       .run(id, user, JSON.stringify(payload), kind, when, now);
   }

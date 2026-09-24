@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import { reminderDates } from "../core/deadlines.js";
+import { addDays } from "../core/dates.js";
 import { plan, reminderReply, transition, type DialogueContext, type Input, type Reply } from "./dialog.js";
 import { funnelEvents, funnelUniversity } from "./funnel.js";
 import { Store } from "./store.js";
@@ -64,10 +65,13 @@ export class Service {
     const now = this.clock(), ctx = this.ctx();
     if (!state?.reminders || state.ruleVersion !== ctx.version) return;
     for (const item of plan(state, ctx)) {
-      for (const day of reminderDates(item, ctx.today)) {
+      // One calm follow-up the day after the calculated date: the procedure is still required (D-021).
+      const followUp = addDays(item.dueDate, 1);
+      const days = [...reminderDates(item, ctx.today), ...(item.status !== "done" && followUp >= ctx.today ? [followUp] : [])];
+      for (const day of days) {
         const when = Date.parse(day + "T09:00:00+03:00");
         const key = createHash("sha256").update(JSON.stringify([state.nonce, user, ctx.version, item.ruleId, item.dueDate, day])).digest("hex");
-        this.store.enqueue(key, user, { ruleId: item.ruleId, dueDate: item.dueDate }, "reminder", when, now);
+        this.store.enqueue(key, user, { ruleId: item.ruleId, dueDate: item.dueDate, day }, "reminder", when, now);
       }
     }
   }
@@ -87,10 +91,12 @@ export class Service {
         let message: Reply;
         if (job.kind === "reminder") {
           const state = this.store.get(job.user_id);
-          const ref = JSON.parse(job.payload) as {ruleId:string;dueDate:string};
+          const ref = JSON.parse(job.payload) as {ruleId:string;dueDate:string;day?:string};
           const item = state && state.ruleVersion === this.context.version && state.reminders
             ? plan(state, this.ctx()).find(i => i.ruleId === ref.ruleId && i.dueDate === ref.dueDate && i.status !== "done") : undefined;
-          if (!state || !item || item.dueDate < this.ctx().today) { this.store.cancel(job.id); continue; }
+          // Before the date a late reminder is still useful; the follow-up after it goes only on its own day.
+          const today = this.ctx().today, followUp = ref.day !== undefined && ref.day > ref.dueDate;
+          if (!state || !item || (followUp ? ref.day !== today : item.dueDate < today)) { this.store.cancel(job.id); continue; }
           message = reminderReply(state, this.ctx(), item);
         } else {
           message = JSON.parse(job.payload) as Reply;

@@ -44,7 +44,7 @@ describe("anonymous funnel counters", () => {
     for (const doc of ["passport", "passport-translation", "migration-card", "arrival-notification"]) f.click(`doc:medical-examination:${doc}`, 1);
     f.click("done:medical-examination", 1); f.input("/today", 1);
     f.click("help:fingerprinting", 2);
-    expect(f.totals()).toEqual({ "kfu:started": 1, "kfu:plan_ready": 1, "kfu:reminder_sent": 1, "kfu:reminder_opened": 1,
+    expect(f.totals()).toEqual({ "kfu:started": 1, "kfu:plan_ready": 1, "kfu:reminders_on": 1, "kfu:reminder_sent": 1, "kfu:reminder_opened": 1,
       "kfu:checklist_completed": 1, "kfu:marked_done": 1, "itmo:started": 1, "itmo:plan_ready": 1, "itmo:help_opened": 1 });
     expect(new Set(f.store.funnel().map(r => r.day))).toEqual(new Set(["2026-09-23"]));
   });
