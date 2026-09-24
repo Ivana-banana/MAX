@@ -90,7 +90,7 @@ describe("deep link ?start= and client language", () => {
     const switched = click(r.session!, "ru");
     expect(switched.session!.lang).toBe("ru");
     expect(switched.reply.text).toContain("Бот хранит MAX ID");
-    expect(step(null, { text: "/start", callback: false, locale: "uz" }).session!.step).toBe("language");
+    expect(step(null, { text: "/start", callback: false, locale: "de" }).session!.step).toBe("language");
   });
 });
 

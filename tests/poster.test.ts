@@ -35,7 +35,7 @@ describe("university QR poster", () => {
   it("prints the link, the university and every interface language, marked as demo", () => {
     const svg = posterSvg(kfu, texts, { botLink, demo: true });
     expect(svg).toContain(">https://max.ru/t149_hakaton_max_bot?start=kfu<");
-    for (const line of ["Первые 90 дней в России", "Your first 90 days in Russia", ">КФУ<", "готовит вопрос в КФУ.", "drafts a question to"]) expect(svg).toContain(line);
+    for (const line of ["Первые 90 дней в России", "Your first 90 days in Russia", "Rossiyadagi dastlabki 90 kun", "在俄罗斯的最初90天", ">КФУ<", "готовит вопрос в КФУ.", "drafts a question to"]) expect(svg).toContain(line);
     expect(svg).toContain("ДЕМО · учебные данные, нормы не утверждены.");
     expect(posterSvg(kfu, texts, { botLink, demo: false })).not.toContain("ДЕМО");
   });
@@ -48,8 +48,8 @@ describe("university QR poster", () => {
   it("keeps room for more languages and refuses a QR code too small to scan", () => {
     const withLangs = (n: number): Texts => new Map([...texts, ...Array.from({ length: n }, (_, i) =>
       [`x${String.fromCharCode(97 + i)}`, texts.get("en")!] as const)]);
-    expect(() => posterSvg(kfu, withLangs(1), { botLink, demo: true })).not.toThrow();
-    expect(() => posterSvg(kfu, withLangs(6), { botLink, demo: true })).toThrow(/smaller than 6 cm/);
+    expect(() => posterSvg(kfu, texts, { botLink, demo: true })).not.toThrow(); // ru, en, uz, zh
+    expect(() => posterSvg(kfu, withLangs(4), { botLink, demo: true })).toThrow(/smaller than 6 cm/);
   });
   it.skipIf(!has("rsvg-convert") || !has("zbarimg"))("scans back to the same link with a real QR reader", () => {
     const dir = mkdtempSync(join(tmpdir(), "poster-"));

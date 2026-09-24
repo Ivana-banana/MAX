@@ -14,11 +14,15 @@
       "id": "medical-examination",
       "title": {
         "ru": "Медицинское освидетельствование",
-        "en": "Medical examination"
+        "en": "Medical examination",
+        "zh": "体检（医学检查）",
+        "uz": "Tibbiy koʻrik"
       },
       "action": {
-        "ru": "Пройти медосвидетельствование в уполномоченной медорганизации. Результаты в МВД передаёт сама клиника. Не требуется, если вы уже проходили медосвидетельствование в России по ФЗ-115 или закону «О беженцах» не раньше чем за год до въезда — это уточните в КФУ.",
-        "en": "Undergo the medical examination at an authorised clinic. The clinic itself submits the results to the Ministry of Internal Affairs. Not required if you already passed a medical examination in Russia under Law 115-FZ or the Refugees Law within one year before entry — confirm this with KFU."
+        "ru": "Пройти медосвидетельствование в уполномоченной медорганизации. Результаты в МВД передаёт сама клиника. Не требуется, если вы уже проходили медосвидетельствование в России по ФЗ-115 или закону «О беженцах» не раньше чем за год до въезда — это уточните в вузе.",
+        "en": "Undergo the medical examination at an authorised clinic. The clinic itself submits the results to the Ministry of Internal Affairs. Not required if you already passed a medical examination in Russia under Law 115-FZ or the Refugees Law within one year before entry — confirm this with your university.",
+        "zh": "在授权医疗机构进行体检。检查结果由诊所直接提交给内务部。如果您在入境前一年内已根据第115号联邦法或《难民法》在俄罗斯进行过体检，则无需再做——请向学校确认。",
+        "uz": "Vakolatli tibbiyot muassasasida tibbiy koʻrikdan oʻting. Natijalarni IIVga klinikaning oʻzi yuboradi. Agar kirishdan oldingi bir yil ichida Rossiyada 115-FZ yoki «Qochqinlar toʻgʻrisida»gi qonun boʻyicha tibbiy koʻrikdan oʻtgan boʻlsangiz, talab qilinmaydi — buni universitetdan aniqlang."
       },
       "term": {
         "event": "entry",
@@ -53,28 +57,36 @@
           "id": "passport",
           "title": {
             "ru": "Паспорт",
-            "en": "Passport"
+            "en": "Passport",
+            "zh": "护照",
+            "uz": "Pasport"
           }
         },
         {
           "id": "passport-translation",
           "title": {
             "ru": "Нотариальный перевод паспорта",
-            "en": "Notarised translation of the passport"
+            "en": "Notarised translation of the passport",
+            "zh": "经公证的护照翻译件",
+            "uz": "Pasportning notarial tarjimasi"
           }
         },
         {
           "id": "migration-card",
           "title": {
             "ru": "Миграционная карта",
-            "en": "Migration card"
+            "en": "Migration card",
+            "zh": "移民卡",
+            "uz": "Migratsiya kartasi"
           }
         },
         {
           "id": "arrival-notification",
           "title": {
-            "ru": "Уведомление о прибытии — уточните комплект в КФУ",
-            "en": "Arrival notification — confirm the checklist with KFU"
+            "ru": "Уведомление о прибытии — уточните комплект в вузе",
+            "en": "Arrival notification — confirm the checklist with your university",
+            "zh": "抵达通知——请向学校确认所需材料",
+            "uz": "Kelganlik haqida bildirishnoma — hujjatlar roʻyxatini universitetdan aniqlang"
           }
         }
       ],
@@ -91,11 +103,15 @@
       "id": "fingerprinting",
       "title": {
         "ru": "Дактилоскопия и фотографирование",
-        "en": "Fingerprinting and photographing"
+        "en": "Fingerprinting and photographing",
+        "zh": "指纹采集和拍照",
+        "uz": "Daktiloskopiya va suratga tushish"
       },
       "action": {
         "ru": "Пройти обязательную государственную дактилоскопическую регистрацию и фотографирование в подразделении МВД. Процедура однократная.",
-        "en": "Complete the mandatory state fingerprint registration and photographing at a Ministry of Internal Affairs office. One time only."
+        "en": "Complete the mandatory state fingerprint registration and photographing at a Ministry of Internal Affairs office. One time only.",
+        "zh": "在内务部下属机构办理强制性国家指纹登记和拍照。该手续只需办理一次。",
+        "uz": "IIV boʻlinmasida majburiy davlat daktiloskopik roʻyxatidan va suratga tushishdan oʻting. Tartib-taomil bir martalik."
       },
       "term": {
         "event": "entry",
@@ -126,14 +142,18 @@
           "id": "passport",
           "title": {
             "ru": "Паспорт",
-            "en": "Passport"
+            "en": "Passport",
+            "zh": "护照",
+            "uz": "Pasport"
           }
         },
         {
           "id": "migration-card",
           "title": {
             "ru": "Миграционная карта",
-            "en": "Migration card"
+            "en": "Migration card",
+            "zh": "移民卡",
+            "uz": "Migratsiya kartasi"
           }
         }
       ],

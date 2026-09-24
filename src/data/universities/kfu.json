@@ -1,7 +1,7 @@
 {
   "$comment": "Профиль вуза: всё, что меняется при переносе сценария в другой вуз. КФУ — кандидат в пилот, не партнёр (D-011). Контакт — публичная страница, не интеграция.",
   "id": "kfu",
-  "name": { "ru": "КФУ", "en": "KFU" },
+  "name": { "ru": "КФУ", "en": "KFU", "zh": "喀山联邦大学", "uz": "KFU" },
   "contactUrl": "https://admissions.kpfu.ru/adaptacziya-inostrannyh-grazhdan/viza-i-migraczionnyj-uchyot/",
   "citizenships": ["KZ", "UZ", "TJ", "KG", "CN", "IN", "EG", "TR"],
   "checkedAt": "2026-09-23"
