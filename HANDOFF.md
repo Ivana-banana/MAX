@@ -15,8 +15,9 @@
 
 - **Продукт** (`D-010`): бот считает иностранному первокурснику КФУ даты обязательных
   процедур от даты въезда, показывает комплект документов и напоминает. `docs/product/`.
-- **Стек** (`D-009`): TypeScript на Node.js 24, SDK `@maxhub/max-bot-api`, SQLite
-  (Codex готовит переход на PostgreSQL — строка в «Активных задачах»).
+- **Стек** (`D-009`, `D-022`): TypeScript на Node.js 24, SDK `@maxhub/max-bot-api`,
+  PostgreSQL 16 (в `main` с 24.09; на ВМ пока SQLite — см. «Деплой»). Тесты сами поднимают
+  временный PG (`embedded-postgres`), Docker для них не нужен.
 - **Сделано в `main`**: движок сроков, диалог ru/en, очередь и напоминания, webhook,
   Docker, README, CI, развёртывание, календарь `.ics` и кнопки MAX, PDF-презентация. 97 тестов.
 - **Бот работает в MAX** (23.09): [max.ru/t149_hakaton_max_bot](https://max.ru/t149_hakaton_max_bot),
@@ -62,7 +63,6 @@ end-to-end в MAX, потом сдача, потом презентация.
 | — (нужен юрист) | — | **Юридическое утверждение справочника норм — блокирует `live`.** Сверка с текстом ФЗ-115/162-ФЗ сделана 23.09: 30/90 дней — разные нормы (п. 18 и п. 13 ст. 5), переходных положений нет, штраф — ст. 18.11.1 КоАП. Осталось 4 вопроса юристу: день въезда в сроке (`term.counting`), въехавшие до 01.09.2026, текст ст. 18.11.1, ограничение даты для дактилоскопии | `src/data/rules/*.json`, [`docs/legal-review.md`](docs/legal-review.md) | ответы юриста с основанием; после них `status: approved` + `reviewedBy` | ждёт юриста; **критично** |
 | — (решает команда) | — | Название и описание бота (ник генерирует платформа; правка карточки — повторная модерация до 48 ч по рабочим дням) | карточка бота; варианты — [`docs/product/bot-card.md`](docs/product/bot-card.md) | согласовано и отправлено **до 25.09** | варианты готовы (рекомендация: «Первые 90 дней — сроки после въезда»); выбрать и выяснить, кто правит карточку — мы или организаторы |
 | Иван (Claude Code) | — | Деплой: HTTPS на 443, webhook-подписка с секретом, мониторинг `/health` и подписки | ВМ `81.26.178.75`, см. «Деплой» ниже | бот отвечает весь период проверки; после 8 ч без доставки подписка снимается | HTTPS и подписка готовы 23.09; **нет**: прохода сценария в MAX, внешнего мониторинга, deploy key |
-| ir6 (Claude Code; начал Codex) | `worktree-api-postgres-plan` | Переход с SQLite на PostgreSQL (`D-022`): бот, демо, отчёт воронки и экспорт сцен на `PostgresStore`; импорт SQLite с `funnel`; Compose с PostgreSQL 16 (`POSTGRES_PASSWORD` в `.env`); runbook переноса и бэкапа — `docs/deploy.md` | `src/db/`, `src/bot/{service,server,config}.ts`, `src/main.ts`, `src/demo.ts`, `src/report.ts`, `scripts/export-demo.mjs`, `tests/`, `compose.yaml`, `Dockerfile` | 163 теста на настоящем PG 16 (локально поднимается сам), typecheck/build/demo:check; CI ветки зелёный, `docker compose build` 17 с | **готово к ревью**, PR не открыт; PR #8/#9 уже влиты в ветку. **Не сделано**: `docker compose up` локально (нет Docker), переключение ВМ по runbook, проход в MAX. Новым PR в `src/bot/service.ts` и тестах — `receive`/`maintain` теперь `async` |
 | — | — | Проверить CI после push и обязательность checks перед merge | `.github/workflows/check.yml` | зелёный GitHub Actions на опубликованном commit | 23.09: checks зелёные на каждом push и PR; защита `main` выключена (`protected: false`) — включить «Require status checks» может только M1hairu |
 | Иван (Claude Code) | `worktree-pitch-finish` | Презентация: PDF, первый слайд технический (`docs/tz-compliance.md`, С7–С8); ветка Codex `worktree-pitch-afk` слита с main и дополнена | `docs/presentation/`, `scripts/build-presentation.py` | скилл `submission-checklist`, п. 7; `build-presentation.py --check` в CI | [PR #5](https://github.com/M1hairu/MAX_GOATed_messenger/pull/5); PDF по 19f1a7c; **нужен состав команды** (`manifest.json` → `team`); пересобрать на теге сдачи и после слияния PR #4 |
 | — | — | **Третий язык** (узбекский или китайский — по странам студентов): `src/data/i18n/<код>.json` + переводы названий в `src/data/rules/*.json` и `src/data/universities/*.json`. Машинный перевод допустим (`D-020`), пометить в журнале решений | после слияния PR #8 | бот стартует (сверка переводов), тест с новым языком, скриншот в MAX | свободно; PR #8 слит — можно брать |
@@ -88,6 +88,14 @@ end-to-end в MAX, потом сдача, потом презентация.
 (`TRANSPORT=console`) или отдельный бот.
 
 ## Деплой
+
+> **Внимание: `main` с 24.09 работает на PostgreSQL (`D-022`), ВМ — ещё на SQLite.**
+> Обычная выкатка (`git archive` + `docker compose up --build`) без подготовки положит
+> бота: с `TRANSPORT=max` и без своего `POSTGRES_PASSWORD` в `.env` он не стартует, а
+> профили без импорта останутся в SQLite. Следующая выкатка — только по разделу
+> «Переход с SQLite на PostgreSQL» в [`docs/deploy.md`](docs/deploy.md): пароль в `.env`,
+> остановка, копия SQLite, импорт, сверка, запуск, проход в MAX. Runbook на ВМ ещё не
+> выполнялся; откат — прежний коммит из `DEPLOYED_COMMIT`.
 
 Бот работает на ВМ Yandex Cloud `81.26.178.75` (`ssh deploy@…`, ключ — у Ивана), webhook
 `https://81-26-178-75.sslip.io/webhook`, живость — `/health`. Устройство, развёртывание
@@ -126,7 +134,8 @@ end-to-end в MAX, потом сдача, потом презентация.
   проверенного источника по сроку для студентов.
 - `src/data/loadRules.ts` — валидация данных при загрузке. `approved` без `reviewedBy`
   не проходит.
-- `src/bot/` — диалог ru/en, SQLite, webhook, очередь, транспорт SDK MAX.
+- `src/bot/` — диалог, webhook, очередь, транспорт SDK MAX; `src/db/` — схема PostgreSQL,
+  хранилище, одноразовый импорт прежней SQLite.
 - `src/demo.ts` — локальная учебная демонстрация; `src/main.ts` — сервер.
 - `tests/` — 80 тестов. Есть тест, который требует, чтобы все нормы были `draft`:
   после юридической вычитки он упадёт, и статус нельзя будет поменять молча.
@@ -137,6 +146,7 @@ end-to-end в MAX, потом сдача, потом презентация.
 
 | Дата | Кто | Что | Commit | Проверка |
 |---|---|---|---|---|
+| 2026-09-24 | ir6 (Claude Code; схему, импорт и хранилище начал Codex) | Ветка `worktree-api-postgres-plan` влита в `main` без ревью (решение человека): бот, демо, отчёт воронки и экспорт сцен на PostgreSQL (`D-022`), импорт SQLite с `funnel`, Compose с PostgreSQL 16, runbook переноса и бэкапа в `docs/deploy.md`. **Не выкачено, ВМ на SQLite** — см. предупреждение в «Деплой». `receive`/`maintain` в `service.ts` теперь `async` | см. `git log` | 163 теста на настоящем PG 16, typecheck, build, demo:check; CI ветки зелёный, `docker compose build` 17 с. Не проверено: `docker compose up` локально, runbook на ВМ, проход в MAX |
 | 2026-09-24 | Claude Code (Chichetin) | PR #8 и #9 слиты (решение человека): тексты интерфейса в `src/data/i18n/<язык>.json`, машинный перевод допустим (`D-020`); кнопка «🔔 Включить напоминания» первой под планом и одно напоминание после срока (`D-021`). **Не выкачены** — выкатывать вместе с PR #4, #6, #7. Для ir6: `receive` в `service.ts` и тесты изменились — PostgreSQL-ветка вливается второй. `scripts/export-demo.mjs` падает на `reminders.length === 1` (и до этих PR) — поправить при перевыгрузке сцен | `c69147d` | 121 тест, typecheck, build, demo:check, `build-presentation.py --check`; CI PR #8 зелёный |
 | 2026-09-24 | Claude Code (Chichetin) | PR #7 слит (решение человека): обезличенные счётчики воронки (`D-019`), отчёт `npm run funnel`, суффикс `:reminder` у кнопки напоминания, строка о счётчиках на экране согласия. **Не выкачен** — выкатывать вместе с PR #4 и #6; сцены презентации перевыгрузить | `1474230` | 113 тестов, typecheck, build, demo:check, `build-presentation.py --check`; CI PR #7 зелёный |
 | 2026-09-24 | Claude Code (Chichetin) | PR #6 слит (решение человека): профили вузов в `src/data/universities/*.json` (КФУ по умолчанию, демо-профиль ИТМО), диплинк `?start=<вуз>`, язык из `user_locale`, «осталось N дней», ветка просроченного срока (`D-018`). **Не выкачен**: выкатка (Иван), шаги 16–17 `docs/max-manual-check.md` в MAX, перевыгрузка сцен и PDF | `a3efe02` | 108 тестов, typecheck, build, demo:check, `build-presentation.py --check`; CI PR #6 зелёный |
