@@ -7,7 +7,7 @@
  * because the plural forms live in that same data.
  */
 
-import type { AppState } from "./api.js";
+import type { AppState } from "../../src/webapp/contract.js";
 
 export type Texts = AppState["texts"];
 
