@@ -64,6 +64,12 @@ export interface RequiredDocument {
   title: Localized;
 }
 
+/** Where the checklist comes from; absent when no official list is published. */
+export interface DocumentsSource {
+  url: string;
+  checkedAt: PlainDate;
+}
+
 export interface DeadlineRule {
   id: string;
   title: Localized;
@@ -84,6 +90,7 @@ export interface DeadlineRule {
   /** Rule applies only if every condition holds. Empty means "always". */
   appliesIf: Condition[];
   documents: RequiredDocument[];
+  documentsSource?: DocumentsSource;
   legal: LegalBasis;
 }
 
@@ -110,6 +117,7 @@ export interface PlanItem {
   daysLeft: number;
   status: PlanItemStatus;
   documents: RequiredDocument[];
+  documentsSource?: DocumentsSource;
   legal: LegalBasis;
   /** True when the term is a repeat round rather than the first one. */
   isRepeat: boolean;

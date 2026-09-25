@@ -13,7 +13,7 @@ import { downloadFile, insideMax, onBack, platform, tap } from "./bridge.js";
 import { universityPhoto } from "./photos.js";
 import { Accented, Button } from "./ui.js";
 import { useApp } from "./useApp.js";
-import { text, type Texts } from "./texts.js";
+import { isText, text, type Texts } from "./texts.js";
 import { Onboarding } from "./screens/Onboarding.js";
 import { Plan } from "./screens/Plan.js";
 import { Card } from "./screens/Card.js";
@@ -190,8 +190,8 @@ function Completion({ texts, today, message, pending, onAction }: {
   return (
     <div className="stack">
       <h1 className="heading in">{t("app.completionTitle")}</h1>
-      <p className={`prose in d1 ${message.includes(t("completion.invalid")) ? "banner banner-error" : ""}`}>
-        {message.includes(t("completion.invalid")) ? t("completion.invalid") : t("app.completion.body")}
+      <p className={`prose in d1 ${isText(message, t("completion.invalid")) ? "banner banner-error" : ""}`}>
+        {isText(message, t("completion.invalid")) ? t("completion.invalid") : t("app.completion.body")}
       </p>
       <div className="in d2">
         <DateField label={t("app.completionTitle")} hint={t("app.entry.hint")} onChange={setValue} />

@@ -43,8 +43,8 @@ describe("anonymous funnel counters", () => {
     await f.click("card:fingerprinting", 1);
     await f.input(details.action, 1, true);
     await f.service.flush();
-    expect(f.sent.at(-1)!.text).toContain("Расчётный предельный срок: 2026-09-30");
-    for (const doc of ["passport", "passport-translation", "migration-card", "arrival-notification"]) await f.click(`doc:medical-examination:${doc}`, 1);
+    expect(f.sent.at(-1)!.text).toContain("Расчётный предельный срок: 30 сентября 2026 г.");
+    for (const doc of ["passport", "passport-translation", "arrival-notification", "previous-results"]) await f.click(`doc:medical-examination:${doc}`, 1);
     await f.click("done:medical-examination", 1); await f.input("/today", 1);
     await f.click("help:fingerprinting", 2);
     expect(await f.totals()).toEqual({ "kfu:started": 1, "kfu:plan_ready": 1, "kfu:reminders_on": 1, "kfu:reminder_sent": 1, "kfu:reminder_opened": 1,

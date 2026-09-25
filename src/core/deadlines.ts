@@ -38,6 +38,18 @@ export function matchesCondition(condition: Condition, profile: UserProfile): bo
   }
 }
 
+/**
+ * What a rule set covers, read from its own conditions: the earliest entry date any rule
+ * accepts and the citizenships every rule excludes. The dialogue asks only within these
+ * bounds, so a new category or period is a data change, not a code change.
+ */
+export function coverage(rules: DeadlineRule[]): { from: PlainDate; excluded: string[] } {
+  const starts = rules.flatMap(r => r.appliesIf.flatMap(c => c.field === "entryDate" && c.op === "onOrAfter" ? [c.value] : []));
+  if (!starts.length) throw new Error("Rules must bound the entry date (entryDate onOrAfter)");
+  const excludedBy = rules.map(r => new Set(r.appliesIf.flatMap(c => c.field === "citizenship" && c.op === "notIn" ? c.values : [])));
+  return { from: starts.sort(compareDates)[0]!, excluded: [...excludedBy[0] ?? []].filter(code => excludedBy.every(set => set.has(code))) };
+}
+
 export function isApplicable(rule: DeadlineRule, profile: UserProfile): boolean {
   return rule.appliesIf.every((condition) => matchesCondition(condition, profile));
 }
@@ -101,6 +113,7 @@ export function buildPlan(
       daysLeft: daysBetween(today, dueDate),
       status: statusFor(dueDate, today, done),
       documents: rule.documents,
+      ...(rule.documentsSource === undefined ? {} : { documentsSource: rule.documentsSource }),
       legal: rule.legal,
       isRepeat,
       provisional: rule.legal.status !== "approved",

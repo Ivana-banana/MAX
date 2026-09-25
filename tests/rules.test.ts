@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
 
 import { buildPlan } from "../src/core/deadlines.js";
@@ -28,6 +29,14 @@ describe("файл норм ru-student.json", () => {
     for (const rule of ruleSet.rules) {
       expect(rule.legal.status, rule.id).toBe("draft");
     }
+  });
+
+  it("расчёт меняется только вместе с version: иначе старые профили молча получат новые даты и потеряют отметки", () => {
+    // Plan dates and checklist keys (`rule:dueDate:doc`) depend on these fields; titles and legal texts may change freely.
+    const calculation = raw.rules.map(r => ({ id: r.id, term: r.term, repeat: r.repeat, appliesIf: r.appliesIf, documents: r.documents.map(d => d.id) }));
+    const hash = createHash("sha256").update(JSON.stringify(calculation)).digest("hex").slice(0, 16);
+    expect({ version: raw.version, hash }, "Расчёт норм изменился: поднимите version в ru-student.json и обновите хеш здесь")
+      .toEqual({ version: "2026-09-24.2-draft", hash: "5abf2567077819c0" });
   });
 
   it("граждане Беларуси исключены из всех правил", () => {

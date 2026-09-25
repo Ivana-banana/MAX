@@ -1,7 +1,8 @@
 import { readFileSync } from "node:fs";
 import { parseRuleSet, type RuleSet } from "../data/loadRules.js";
 import type { DeadlineRule } from "../core/types.js";
-import { readUniversities, type University } from "../data/loadUniversities.js";
+import { checkCitizenships, readUniversities, type University } from "../data/loadUniversities.js";
+import { coverage } from "../core/deadlines.js";
 import { checkTranslated, readTexts, type Texts } from "../data/loadTexts.js";
 export interface Config {
   mode: "demo" | "live"; transport: "console" | "max"; token: string; secret: string;
@@ -61,5 +62,6 @@ export function loadUniversities(config: Pick<Config, "universitiesPath" | "defa
 export function loadTexts(config: Pick<Config, "textsPath">, rules: DeadlineRule[], universities: University[]): Texts {
   const texts = readTexts(config.textsPath);
   checkTranslated(texts, rules, universities);
+  checkCitizenships(universities, coverage(rules).excluded);
   return texts;
 }

@@ -10,22 +10,22 @@ const texts = readTexts("src/data/i18n");
 const rules = parseRuleSet(raw);
 const universities = readUniversities("src/data/universities", "kfu");
 
-// A third language built only from data: interface file, rule texts and university names.
-function withUzbek(): DialogueContext {
+// One more language built only from data: interface file, rule texts and university names.
+function withKazakh(): DialogueContext {
   const en = texts.get("en")!;
-  const uz = Object.fromEntries(Object.entries(en).map(([k, v]) => [k, k === "language.name" ? "Oʻzbekcha" : `[uz] ${v}`]));
-  const all: Texts = new Map([...texts, ["uz", uz]]);
-  const tr = (l: Record<string, string>) => ({ ...l, uz: `[uz] ${l.en}` });
-  const uzRules = rules.rules.map(r => ({ ...r, title: tr(r.title), action: tr(r.action),
+  const kk = Object.fromEntries(Object.entries(en).map(([k, v]) => [k, k === "language.name" ? "Qazaqşa" : `[kk] ${v}`]));
+  const all: Texts = new Map([...texts, ["kk", kk]]);
+  const tr = (l: Record<string, string>) => ({ ...l, kk: `[kk] ${l.en}` });
+  const kkRules = rules.rules.map(r => ({ ...r, title: tr(r.title), action: tr(r.action),
     documents: r.documents.map(d => ({ ...d, title: tr(d.title) })) }));
-  const uzUniversities = universities.map(u => ({ ...u, name: tr(u.name) }));
-  checkTexts(all); checkTranslated(all, uzRules, uzUniversities);
-  return { rules: uzRules, universities: uzUniversities, texts: all, version: rules.version, demo: true, today: "2026-09-24" };
+  const kkUniversities = universities.map(u => ({ ...u, name: tr(u.name) }));
+  checkTexts(all); checkTranslated(all, kkRules, kkUniversities);
+  return { rules: kkRules, universities: kkUniversities, texts: all, version: rules.version, demo: true, today: "2026-09-24" };
 }
 
 describe("interface texts live in data", () => {
   it("has the same keys, placeholders and needed plural forms in every language", () => {
-    expect([...texts.keys()]).toEqual(["ru", "en"]);
+    expect([...texts.keys()]).toEqual(["ru", "en", "uz", "zh"]);
     expect(() => checkTexts(texts)).not.toThrow();
     expect(() => checkTranslated(texts, rules.rules, universities)).not.toThrow();
   });
@@ -56,17 +56,35 @@ describe("interface texts live in data", () => {
     }
   });
   it("adds a language with data files only: button, MAX locale, plan and card", () => {
-    const ctx = withUzbek();
+    const ctx = withKazakh();
     const first = transition(null, { text: "/start", callback: false }, ctx);
-    expect(first.reply.buttons.flat().map(b => b.text)).toEqual(["Русский", "English", "Oʻzbekcha"]);
-    let s: Session = transition(null, { text: "/start", callback: false, locale: "uz-UZ" }, ctx).session!;
-    expect(s.lang).toBe("uz");
+    expect(first.reply.buttons.flat().map(b => b.text)).toEqual(["Русский", "English", "Oʻzbekcha", "中文", "Qazaqşa"]);
+    let s: Session = transition(null, { text: "/start", callback: false, locale: "kk-KZ" }, ctx).session!;
+    expect(s.lang).toBe("kk");
     const click = (action: string) => { const r = transition(s, { text: `${s.nonce}.${s.revision}|${action}`, callback: true }, ctx); s = r.session!; return r.reply; };
     for (const a of ["accept", "yes", "KZ"]) click(a);
     const home = transition(s, { text: "2026-09-01", callback: false }, ctx);
     s = home.session!;
-    expect(home.reply.text).toContain("[uz] Your preparation plan");
-    expect(home.reply.text).toContain("[uz] Medical examination: 2026-09-30 — [uz] due soon, [uz] 6 days left");
-    expect(click("card:medical-examination").text).toContain("[uz] \nConfirm location and checklist with [uz] KFU: ");
+    expect(home.reply.text).toContain("[kk] Your preparation plan");
+    expect(home.reply.text).toContain("[kk] Medical examination: 2026 ж. 30 қыркүйек — [kk] due soon, [kk] 6 days left");
+    expect(click("card:medical-examination").text).toContain("[kk] \nConfirm location and checklist with [kk] KFU: ");
+  });
+  it("speaks Chinese and Uzbek from MAX locale through the plan, card and reminder", () => {
+    const ctx = { rules: rules.rules, universities, texts, version: rules.version, demo: true, today: "2026-09-24" };
+    const run = (locale: string) => {
+      let s: Session = transition(null, { text: "/start", callback: false, locale }, ctx).session!;
+      const click = (action: string) => { const r = transition(s, { text: `${s.nonce}.${s.revision}|${action}`, callback: true }, ctx); s = r.session!; return r.reply; };
+      for (const a of ["accept", "yes", "KZ"]) click(a);
+      const home = transition(s, { text: "2026-09-01", callback: false }, ctx); s = home.session!;
+      return { lang: s.lang, home: home.reply.text, card: click("card:medical-examination").text };
+    };
+    const zh = run("zh-CN");
+    expect(zh.lang).toBe("zh");
+    expect(zh.home).toContain("体检（医学检查）: 2026年9月30日 — 即将到期，还剩6天");
+    expect(zh.card).toContain("请向喀山联邦大学确认地点和材料清单");
+    const uz = run("uz");
+    expect(uz.home).toContain("Tibbiy koʻrik: 30-sentabr, 2026 — yaqin, 6 kun qoldi");
+    expect(format(texts, "uz", "left", { n: 1 })).toBe("1 kun qoldi");
+    expect(format(texts, "zh", "days", { n: 21 })).toBe("21天");
   });
 });

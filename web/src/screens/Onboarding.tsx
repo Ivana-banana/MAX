@@ -10,7 +10,7 @@ import { useEffect, useState } from "react";
 import type { AppSession, AppState } from "../api.js";
 import { closingConfirmation } from "../bridge.js";
 import { DateField } from "../DateField.js";
-import { text, type Texts } from "../texts.js";
+import { isText, text, type Texts } from "../texts.js";
 import { Button, ordinal } from "../ui.js";
 
 interface Props {
@@ -78,6 +78,8 @@ export function Onboarding({ session, texts, languages, message, today, pending,
   }
 
   if (session.step === "citizenship") {
+    // Country names in the user's language, as the chat shows them (Intl knows every language).
+    const names = new Intl.DisplayNames([session.lang], { type: "region" });
     return (
       <div className="stack">
         <h1 className="display title in">{t("app.citizenshipTitle")}</h1>
@@ -85,7 +87,7 @@ export function Onboarding({ session, texts, languages, message, today, pending,
           {session.citizenships.map((code, index) => (
             <button key={code} type="button" className="tile" disabled={busy} onClick={() => onAction(code)}>
               <span className="code">{code}</span>
-              <span className="name">{pending === code ? "…" : ordinal(index)}</span>
+              <span className="name">{pending === code ? "…" : `${ordinal(index)} · ${names.of(code) ?? code}`}</span>
             </button>
           ))}
           <button type="button" className="tile tile-wide" disabled={busy} onClick={() => onAction("OTHER")}>
@@ -108,8 +110,8 @@ function EntryDate({ texts, today, message, pending, onAction }: {
   const valid = value !== "" && value <= today;
   // Say why Save is off right away, and drop the server's error once the user changes the date.
   const prompt = value > today ? t("app.entry.future")
-    : !edited && message.includes(t("entry.invalid")) ? t("app.entry.invalid") : t("app.entry.body");
-  const warning = value > today || (!edited && message.includes(t("entry.invalid")));
+    : !edited && isText(message, t("entry.invalid")) ? t("app.entry.invalid") : t("app.entry.body");
+  const warning = value > today || (!edited && isText(message, t("entry.invalid")));
   // A half-filled date is worth a confirmation before MAX closes the app over it.
   useEffect(() => {
     closingConfirmation(value !== "");

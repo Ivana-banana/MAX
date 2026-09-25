@@ -16,3 +16,12 @@ export type Texts = AppState["texts"];
  * so a forgotten translation is visible instead of silently blanking the interface.
  */
 export const text = (texts: Texts, key: string): string => texts[key] ?? key;
+
+/**
+ * Whether a server message is the given text. Texts may carry placeholders (`{from}`) the server
+ * fills in, so only the fixed part before the first one is compared.
+ */
+export const isText = (message: string, template: string): boolean => {
+  const fixed = template.split("{")[0]!.trim();
+  return fixed !== "" && message.includes(fixed);
+};

@@ -84,13 +84,20 @@ MAX принимает webhook только по HTTPS на 443 с сертиф�
    ```sh
    docker compose exec -T bot node -e "fetch('https://platform-api2.max.ru/subscriptions',{headers:{Authorization:process.env.MAX_BOT_TOKEN}}).then(r=>r.json()).then(j=>console.log(j.subscriptions.map(s=>s.url)))"
    ```
-8. **Прогон** сценария в мобильном и веб-MAX; записать коммит, дату и результат.
+8. **Подсказки команд** после «/» — один раз, повторный запуск просто перезаписывает список:
+   ```sh
+   docker compose run --rm --no-deps bot node dist/commands.js
+   ```
+   Подписку webhook скрипт не трогает (`PATCH /me/commands`, `D-025`).
+9. **Прогон** сценария в мобильном и веб-MAX; записать коммит, дату и результат.
 
 ## Обновление
 
 ```sh
 # с машины разработчика, пока нет deploy key
-git archive origin/main | ssh deploy@81.26.178.75 "tar -x -C ~/max-bot" && git rev-parse origin/main | ssh deploy@81.26.178.75 "cat > ~/max-bot/DEPLOYED_COMMIT"
+# src/ стирается перед распаковкой: tar не удаляет файлы, которых нет в новом коммите,
+# а сборка компилирует весь src/ — лишний модуль без своей зависимости её роняет
+git archive origin/main | ssh deploy@81.26.178.75 "rm -rf ~/max-bot/src && tar -x -C ~/max-bot" && git rev-parse origin/main | ssh deploy@81.26.178.75 "cat > ~/max-bot/DEPLOYED_COMMIT"
 # на ВМ
 cd ~/max-bot && docker compose up --build -d --wait
 ```
@@ -119,10 +126,12 @@ docker compose exec -T postgres dropdb -U bot restore_check
 Версия до `D-022` хранила данные в SQLite (`/app/data/bot.sqlite` в томе `bot-data`).
 Переход — короткое окно, пока бот остановлен; входящие webhook в это время не
 принимаются. **Шаги ниже на ВМ ещё не выполнялись** — первый проход записать в `HANDOFF.md`.
+24.09 они отрепетированы локально в Docker: `19f1a7c` (версия на ВМ) и `88b491b` с
+данными трёх профилей → `main`: импорт, запуск, сценарий на перенесённых профилях, откат.
 
 1. Записаться в `HANDOFF.md` (кто и когда переключает), добавить в `.env`
    `POSTGRES_PASSWORD` (шаг 4 выше), выкатить код без запуска:
-   `git archive <коммит> | ssh deploy@81.26.178.75 "tar -x -C ~/max-bot"`.
+   `git archive <коммит> | ssh deploy@81.26.178.75 "rm -rf ~/max-bot/src && tar -x -C ~/max-bot"`.
 2. Остановить старого бота и сохранить копию SQLite вместе с WAL-файлами:
    ```sh
    cd ~/max-bot && docker compose stop bot
@@ -139,10 +148,18 @@ docker compose exec -T postgres dropdb -U bot restore_check
    целиком и завершается с кодом 1. Повторный запуск на непустой БД отклоняется.
 5. Запуск: `docker compose up -d --wait`, `/health` → 200, подписка на месте (шаг 7
    выше), бэкап PostgreSQL по разделу выше.
-6. Пройти сценарий в мобильном и веб-MAX на уже существующем профиле: план и отметки
+6. Пройти сценарий в мобильном и веб-MAX на уже существующем профиле. Если с прошлой
+   выкатки изменилась `version` в `src/data/rules/ru-student.json` (с `19f1a7c` так и
+   есть: `2026-09-23-draft` → `2026-09-24-draft`, `D-016`), старый профиль отвечает «Правила
+   изменились. Расчёт остановлен…» — это ожидаемо и заодно доказывает, что профиль
+   перенесён (новый начинал бы с выбора языка). Дальше `/delete` → «Да, удалить» →
+   `/start` и сценарий до плана и напоминаний. Если версия не менялась, план и отметки
    должны сохраниться.
 
-**Откат:** выкатить прежний коммит (`DEPLOYED_COMMIT`) и `docker compose up --build -d bot`.
+**Откат:** выкатить прежний коммит (`DEPLOYED_COMMIT`) той же командой с `rm -rf ~/max-bot/src`
+(без неё сборка старой версии падает на новых файлах `src/db/`) и
+`docker compose up --build -d --wait --remove-orphans`: контейнер PostgreSQL удаляется,
+том `pg-data` остаётся.
 SQLite-том импорт не меняет, но всё, что пользователи сделали после переключения,
 останется только в PostgreSQL.
 

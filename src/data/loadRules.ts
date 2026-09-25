@@ -12,6 +12,7 @@ import type {
   DeadlineRule,
   LegalBasis,
   Localized,
+  DocumentsSource,
   RequiredDocument,
 } from "../core/types.js";
 
@@ -121,6 +122,13 @@ function asDocument(value: unknown, path: string): RequiredDocument {
   };
 }
 
+function asDocumentsSource(value: unknown, path: string): DocumentsSource {
+  const record = asRecord(value, path);
+  const url = asString(record.url, `${path}.url`);
+  if (!url.startsWith("https://")) throw new RuleValidationError(`${path}.url`, "нужна ссылка https://");
+  return { url, checkedAt: asDate(record.checkedAt, `${path}.checkedAt`) };
+}
+
 function asRule(value: unknown, path: string): DeadlineRule {
   const record = asRecord(value, path);
   const term = asRecord(record.term, `${path}.term`);
@@ -172,6 +180,7 @@ function asRule(value: unknown, path: string): DeadlineRule {
     ...(repeat === undefined ? {} : { repeat }),
     appliesIf: appliesIfRaw.map((c, i) => asCondition(c, `${path}.appliesIf[${i}]`)),
     documents: documentsRaw.map((d, i) => asDocument(d, `${path}.documents[${i}]`)),
+    ...(record.documentsSource === undefined ? {} : { documentsSource: asDocumentsSource(record.documentsSource, `${path}.documentsSource`) }),
     legal: asLegalBasis(record.legal, `${path}.legal`),
   };
 }
