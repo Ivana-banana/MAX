@@ -14,9 +14,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@fontsource/alumni-sans": "5.3.0",
-    "@fontsource/onest": "5.3.1",
-    "@fontsource/unbounded": "5.3.0",
+    "@fontsource-variable/tektur": "5.3.0",
+    "@fontsource/pt-sans": "5.3.0",
     "@maxhub/max-ui": "0.5.0",
     "react": "19.2.8",
     "react-dom": "19.2.8"

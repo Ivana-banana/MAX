@@ -88,15 +88,16 @@ end-to-end в MAX, потом сдача, потом презентация.
 
 ## Деплой
 
-> **Внимание: `main` с 24.09 работает на PostgreSQL (`D-022`), ВМ — ещё на SQLite.**
-> Обычная выкатка (`git archive` + `docker compose up --build`) без подготовки положит
-> бота: с `TRANSPORT=max` и без своего `POSTGRES_PASSWORD` в `.env` он не стартует, а
-> профили без импорта останутся в SQLite. Следующая выкатка — только по разделу
-> «Переход с SQLite на PostgreSQL» в [`docs/deploy.md`](docs/deploy.md): пароль в `.env`,
-> остановка, копия SQLite, импорт, сверка, запуск, проход в MAX. Runbook на ВМ ещё не
-> выполнялся (24.09 отрепетирован локально в Docker на копии `19f1a7c`, включая откат);
-> откат — прежний коммит из `DEPLOYED_COMMIT`. Инструкция для Ивана по шагам —
-> https://claude.ai/artifact/1upSfHsVtntJktDMLvLYmq
+> **25.09.2026 ~15:17 МСК ВМ переведена на PostgreSQL и `main` `068599d`** (M1hairu с Claude
+> Code, по разделу «Переход с SQLite на PostgreSQL» в [`docs/deploy.md`](docs/deploy.md)):
+> пароль в `.env` (копия прежнего — `.env.bak-before-pg`), остановка, архив SQLite
+> `~/sqlite-before-pg-2026-09-25.tgz` (600), импорт `sessions=1 events=34 outbox=23 funnel=0`,
+> запуск — простой около минуты; `/health` 200, подписка на месте, `POST /webhook` без
+> секрета — 401, `/api/state` без подписи — 401, подсказки команд отправлены (MAX подтвердил
+> 5), бэкап `~/backup-2026-09-25.dump` (600) восстановлен в проверочную БД (1 / 23) и удалён.
+> Дальше — обычная выкатка из раздела «Обновление». У сервера есть read-only deploy key
+> (`/home/deploy/.ssh/github_deploy`). **Не сделано:** проход в MAX после выкатки, URL
+> мини-приложения `https://81-26-178-75.sslip.io/` в форму организаторов.
 
 Бот работает на ВМ Yandex Cloud `81.26.178.75` (`ssh deploy@…`, ключ — у Ивана), webhook
 `https://81-26-178-75.sslip.io/webhook`, живость — `/health`. Устройство, развёртывание
