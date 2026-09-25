@@ -11,7 +11,7 @@ import type { AppSession, AppState } from "../api.js";
 import { closingConfirmation } from "../bridge.js";
 import { DateField } from "../DateField.js";
 import { isText, text, type Texts } from "../texts.js";
-import { Button, ordinal } from "../ui.js";
+import { Button } from "../ui.js";
 
 interface Props {
   session: AppSession;
@@ -32,9 +32,8 @@ export function Onboarding({ session, texts, languages, message, today, pending,
       <div className="stack">
         <h1 className="display title in">{t("language.choose")}</h1>
         <div className="rows in d1">
-          {languages.map((language, index) => (
+          {languages.map(language => (
             <button key={language.code} type="button" className="row" disabled={busy} onClick={() => onAction(language.code)}>
-              <span className="num">{ordinal(index)}</span>
               <span>{language.name}</span>
               <span className="go" aria-hidden="true">{pending === language.code ? "…" : "→"}</span>
             </button>
@@ -84,10 +83,10 @@ export function Onboarding({ session, texts, languages, message, today, pending,
       <div className="stack">
         <h1 className="display title in">{t("app.citizenshipTitle")}</h1>
         <div className="tiles in d1">
-          {session.citizenships.map((code, index) => (
+          {session.citizenships.map(code => (
             <button key={code} type="button" className="tile" disabled={busy} onClick={() => onAction(code)}>
               <span className="code">{code}</span>
-              <span className="name">{pending === code ? "…" : `${ordinal(index)} · ${names.of(code) ?? code}`}</span>
+              <span className="name">{pending === code ? "…" : names.of(code) ?? code}</span>
             </button>
           ))}
           <button type="button" className="tile tile-wide" disabled={busy} onClick={() => onAction("OTHER")}>

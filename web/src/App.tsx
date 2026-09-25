@@ -87,7 +87,7 @@ export function App() {
       return (
         <section className="hero">
           <div className="photo">{photo !== undefined && <img src={photo} alt="" />}</div>
-          <div className="circle" /><div className="ring" />
+          <div className="circle" />
           {university !== undefined && <div className="vert" aria-hidden="true">{university.name}</div>}
           <div className="content">
             <h1 className="display word in"><Accented text={t("app.title")} /></h1>
@@ -132,7 +132,7 @@ export function App() {
       );
     }
     return (
-      <Plan session={session} texts={texts} today={status.state.today} pending={status.pending} onAction={act} onOpen={setOpenCard}
+      <Plan session={session} texts={texts} pending={status.pending} onAction={act} onOpen={setOpenCard}
         onCalendar={() => void exportCalendar()} calendarBusy={calendarBusy} />
     );
   };

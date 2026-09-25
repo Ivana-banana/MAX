@@ -29,7 +29,7 @@ export function Card({ session, texts, item, pending, onAction }: Props) {
 
       <div className={`deadline ${calm ? "deadline-calm" : ""} in d1`}>
         <span className="big">{dayMonth(item.dueDate)}</span>
-        <span className="label">{t("app.deadline")}<br />{item.countdown}</span>
+        <span className="label">{item.countdown}</span>
       </div>
 
       <div className="facts in d1">

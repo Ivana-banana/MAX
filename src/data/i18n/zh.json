@@ -118,11 +118,7 @@
   "app.checkedAt": "来源核对日期",
   "app.recommended": "建议日期",
   "app.contact": "联系学校",
-  "app.tag.dueSoon": "即将到期",
-  "app.tag.overdue": "已逾期",
-  "app.tag.done": "已完成",
-  "app.done.stamp": "全部\n完成",
-  "app.done.title": "完成。好好学习",
+  "app.done.title": "全部已标记",
   "app.done.body": "入境后的手续已标记——基于您本人的说明。请保存发给您的文件。",
   "app.deadline": "期限"
 }

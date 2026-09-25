@@ -15,7 +15,6 @@ import { Button, Switch, dotted } from "../ui.js";
 interface Props {
   session: AppSession;
   texts: Texts;
-  today: string;
   pending: string | null;
   onAction: (action: string) => void;
   onOpen: (ruleId: string) => void;
@@ -23,18 +22,32 @@ interface Props {
   calendarBusy: boolean;
 }
 
-const DAY = 86_400_000;
-const days = (from: string, to: string) => Math.round((Date.parse(to) - Date.parse(from)) / DAY);
-
-/** Five segments of the window between entry and the deadline that are still ahead. */
-function remaining(item: AppPlanItem, entryDate: string | undefined, today: string): number {
-  if (entryDate === undefined || item.status === "done") return 0;
-  const total = days(entryDate, item.dueDate);
-  if (total <= 0) return 0;
-  return Math.max(0, Math.min(5, Math.ceil((days(today, item.dueDate) / total) * 5)));
+/**
+ * One procedure: the number of days, its name and one line under it. The date is enough when a
+ * deadline is ahead; a missed or marked one needs the chat's words, since a bare number would not
+ * say which way it counts. The whole countdown is read out to screen readers either way.
+ */
+function Task({ item, index, deadline, disabled, onOpen }: {
+  item: AppPlanItem; index: number; deadline: string; disabled: boolean; onOpen: (ruleId: string) => void;
+}) {
+  const tone = item.status === "done" ? "done" : item.status === "ok" ? "calm" : "hot";
+  const days = String(Math.abs(item.daysLeft)).padStart(2, "0");
+  return (
+    <button type="button" className={`task task-${tone} in d${Math.min(index + 1, 6)}`} disabled={disabled}
+      aria-label={`${item.title}. ${item.countdown}`} onClick={() => onOpen(item.ruleId)}>
+      <span className={`n ${days.length > 2 && item.status !== "done" ? "n-long" : ""}`} aria-hidden="true">
+        {item.status === "done" ? "✓" : days}
+      </span>
+      <span aria-hidden="true">
+        <span className="t">{item.title}</span>
+        {/* The countdown comes from the server: plural forms live in the shared text data. */}
+        <span className="d">{item.status === "ok" || item.status === "dueSoon" ? `${deadline}: ${dotted(item.dueDate)}` : item.countdown}</span>
+      </span>
+    </button>
+  );
 }
 
-export function Plan({ session, texts, today, pending, onAction, onOpen, onCalendar, calendarBusy }: Props) {
+export function Plan({ session, texts, pending, onAction, onOpen, onCalendar, calendarBusy }: Props) {
   const t = (key: string) => text(texts, key);
   const unfinished = session.plan.some(item => item.status !== "done");
   // A marked first-round procedure is replaced by its repeat a year later, so "everything done"
@@ -48,7 +61,6 @@ export function Plan({ session, texts, today, pending, onAction, onOpen, onCalen
       {finished && (
         <div className="finale">
           <div className="photo">{photo !== undefined && <img src={photo} alt="" />}</div>
-          <div className="stamp prose" aria-hidden="true">{t("app.done.stamp")}</div>
           <h1 className="display in d1">{t("app.done.title")}</h1>
           <p className="in d2 finale-body">{t("app.done.body")}</p>
         </div>
@@ -62,32 +74,13 @@ export function Plan({ session, texts, today, pending, onAction, onOpen, onCalen
       )}
 
       {session.plan.length === 0 && <p className="prose">{t("app.plan.empty")}</p>}
-      {session.plan.map((item, index) => {
-        const tone = item.status === "done" ? "done" : item.status === "overdue" ? "overdue" : item.status === "dueSoon" ? "hot" : "calm";
-        const tag = item.status === "ok" ? undefined : t(`app.tag.${item.status}`);
-        const left = remaining(item, session.entryDate, today);
-        return (
-          <button key={item.ruleId} type="button" className={`task task-${tone} in d${Math.min(index + 1, 6)}`}
-            disabled={pending !== null} onClick={() => onOpen(item.ruleId)}>
-            <span className={`n ${Math.abs(item.daysLeft) > 99 && item.status !== "done" ? "n-long" : ""}`} aria-hidden="true">
-              {item.status === "done" ? "✓" : String(Math.abs(item.daysLeft)).padStart(2, "0")}
-            </span>
-            <span>
-              <span className="t">{item.title}</span>
-              <span className="d">{`${t("app.deadline")} ${dotted(item.dueDate)}`}</span>
-              {/* The countdown comes from the server: plural forms live in the shared text data. */}
-              <span className="c">{item.countdown}</span>
-              {item.status !== "done" && (
-                <span className="meter" aria-hidden="true">
-                  {[0, 1, 2, 3, 4].map(i => <i key={i} className={i < left ? "on" : ""} />)}
-                </span>
-              )}
-              {item.provisional && item.status !== "done" && <span className="p">{t("app.provisional")}</span>}
-            </span>
-            {tag !== undefined && <span className="tag">{tag}</span>}
-          </button>
-        );
-      })}
+      {session.plan.map((item, index) => (
+        <Task key={item.ruleId} item={item} index={index} deadline={t("app.deadline")} disabled={pending !== null} onOpen={onOpen} />
+      ))}
+      {/* Said once for the whole list rather than on every card. */}
+      {session.plan.some(item => item.provisional && item.status !== "done") && (
+        <p className="small muted prose">{t("app.provisional")}</p>
+      )}
 
       <div className="toggle in d4">
         <span>{t("app.reminders")}</span>

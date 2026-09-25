@@ -120,11 +120,7 @@
   "app.checkedAt": "Manba tekshirilgan",
   "app.recommended": "Tavsiya etilgan sana",
   "app.contact": "Universitetga yozish",
-  "app.tag.dueSoon": "Yaqin",
-  "app.tag.overdue": "Muddat oʻtdi",
-  "app.tag.done": "Oʻtildi",
-  "app.done.stamp": "Hammasi\noʻtildi",
-  "app.done.title": "Tayyor. Oʻqing",
+  "app.done.title": "Hammasi belgilandi",
   "app.done.body": "Kirgandan keyingi tartiblar belgilandi — sizning soʻzlaringizdan. Sizga berilgan hujjatlarni saqlang.",
   "app.deadline": "Muddat"
 }
