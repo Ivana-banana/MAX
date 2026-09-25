@@ -32,6 +32,7 @@ services:
       WEBHOOK_SECRET: ${WEBHOOK_SECRET:-local-demo-only-not-for-deployment}
       WEBHOOK_URL: ${WEBHOOK_URL:-}
       DEFAULT_UNIVERSITY: ${DEFAULT_UNIVERSITY:-kfu}
+      WEBAPP_BOT: ${WEBAPP_BOT:-}
       DATABASE_URL: postgresql://bot:${POSTGRES_PASSWORD:-local-demo-only-not-for-deployment}@postgres:5432/bot
     volumes:
       # Former SQLite database: read once by the import (docs/deploy.md), not used at runtime.

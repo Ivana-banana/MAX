@@ -51,7 +51,7 @@ describe("one follow-up the day after the calculated date", () => {
     await f.at("2026-09-30T09:00:00+03:00");
     await f.at("2026-10-01T09:00:00+03:00");
     const last = f.sent.at(-1)!;
-    expect(f.reminders().at(-1)).toContain("Медицинское освидетельствование — расчётный срок был до 30 сентября 2026 г.. Процедуру всё равно нужно пройти");
+    expect(f.reminders().at(-1)).toContain("Медицинское освидетельствование — расчётный срок был до 30 сентября 2026 г., но процедуру всё равно нужно пройти");
     expect(f.reminders().at(-1)).not.toMatch(/штраф|выдвор/i);
     const details = last.buttons.flat().find(b => "action" in b && b.action.endsWith("|card:medical-examination:reminder")) as { action: string };
     expect(details).toBeDefined();

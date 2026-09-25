@@ -21,9 +21,11 @@ export interface AppStatus {
   error: ApiFailure | null;
   /** Wording from the dialogue for the last action: the app shows it instead of inventing text. */
   message: string;
+  /** The ready question to the university from the last reply, when it offered one to copy. */
+  copy: string;
 }
 
-const initial: AppStatus = { state: null, launch: {}, loading: true, pending: null, error: null, message: "" };
+const initial: AppStatus = { state: null, launch: {}, loading: true, pending: null, error: null, message: "", copy: "" };
 
 export function useApp() {
   const [status, setStatus] = useState<AppStatus>(initial);
@@ -36,7 +38,7 @@ export function useApp() {
     try {
       const { state, launch } = await getState();
       if (ticket !== sequence.current) return;
-      setStatus({ state, launch, loading: false, pending: null, error: null, message: "" });
+      setStatus({ state, launch, loading: false, pending: null, error: null, message: "", copy: "" });
     } catch (e) {
       if (ticket !== sequence.current) return;
       setStatus(previous => ({
@@ -56,6 +58,7 @@ export function useApp() {
       if (ticket !== sequence.current) return;
       setStatus(previous => ({
         ...previous, state: result.state, pending: null, error: null, loading: false, message: result.message,
+        copy: result.copy ?? "",
       }));
     } catch (e) {
       if (ticket !== sequence.current) return;
@@ -66,7 +69,7 @@ export function useApp() {
     }
   }, [load, status.state?.session?.revision]);
 
-  const dismiss = useCallback(() => setStatus(previous => ({ ...previous, error: null, message: "" })), []);
+  const dismiss = useCallback(() => setStatus(previous => ({ ...previous, error: null, message: "", copy: "" })), []);
 
   return { status, dispatch, reload: load, dismiss };
 }

@@ -30,7 +30,9 @@ export class RevisionConflict extends Error {
 
 /**
  * Actions the mini app is allowed to send. Explicit, because the vocabulary also contains
- * chat-only branches (`/stop`, `calendar`, `help:`) that must not be reachable from a screen.
+ * chat-only branches (`/stop`, `calendar`, the generic `help`) that must not be reachable from a
+ * screen. `help:<procedure>` is shared: it changes nothing and returns the ready question to the
+ * university, which the card shows next to a copy button (`AppResult.copy`).
  */
 export function isAppAction(action: string): boolean {
   return action === "/start" || /^\/start [a-z0-9_-]{1,32}$/.test(action)
@@ -41,7 +43,8 @@ export function isAppAction(action: string): boolean {
     || /^[A-Z]{2}$/.test(action) || action === "OTHER"
     || isValidDate(action)
     || /^doc:[a-z0-9-]{1,64}:[a-z0-9-]{1,64}$/.test(action)
-    || /^done:[a-z0-9-]{1,64}$/.test(action);
+    || /^done:[a-z0-9-]{1,64}$/.test(action)
+    || /^help:[a-z0-9-]{1,64}$/.test(action);
 }
 
 const university = (id: string | undefined, ctx: DialogueContext, lang: Lang): AppUniversity => {
@@ -141,6 +144,8 @@ export async function applyAction(
     if (outcome.session) await tx.save(outcome.session, service.clock());
     else await tx.remove();
     await service.scheduleUser(tx, user, outcome.session);
-    return { state: view(outcome.session, ctx, mocked), message: outcome.reply.text };
+    const copy = outcome.reply.buttons.flat().find(b => "copy" in b);
+    return { state: view(outcome.session, ctx, mocked), message: outcome.reply.text,
+      ...(copy !== undefined && "copy" in copy ? { copy: copy.copy } : {}) };
   });
 }

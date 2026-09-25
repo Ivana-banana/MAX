@@ -17,6 +17,7 @@
   "btn.remindersOn": "🔔 开启提醒",
   "btn.remindersOff": "🔕 关闭提醒",
   "btn.calendar": "📅 将日期添加到日历",
+  "btn.app": "📱 在小程序中查看计划",
   "btn.help": "需要帮助",
   "btn.delete": "删除我的数据",
   "btn.done": "已完成该手续",
@@ -120,5 +121,8 @@
   "app.contact": "联系学校",
   "app.done.title": "全部已标记",
   "app.done.body": "入境后的手续已标记——基于您本人的说明。请保存发给您的文件。",
-  "app.deadline": "期限"
+  "app.deadline": "期限",
+  "app.question": "给学校的问题",
+  "app.copied": "已复制",
+  "app.copyManual": "无法复制——请选中上方文字手动复制。"
 }

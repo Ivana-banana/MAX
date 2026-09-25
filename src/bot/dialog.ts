@@ -7,7 +7,8 @@ import { format, type Texts } from "../data/loadTexts.js";
 import { CALENDAR_FILE, planToIcs } from "./calendar.js";
 
 // callback buttons come back to the bot; link and clipboard buttons are handled by MAX itself
-export type Button = { text: string; action: string } | { text: string; url: string } | { text: string; copy: string };
+export type Button = { text: string; action: string } | { text: string; url: string } | { text: string; copy: string }
+  | { text: string; app: string; payload: string };
 export interface Reply { text: string; buttons: Button[][]; ruleVersion: string; file?: { name: string; content: string } }
 export interface Session {
   nonce: string;
@@ -23,7 +24,11 @@ export interface Session {
   reminders: boolean;
   ruleVersion: string;
 }
-export interface DialogueContext { rules: DeadlineRule[]; universities: University[]; texts: Texts; version: string; today: string; demo: boolean }
+export interface DialogueContext {
+  rules: DeadlineRule[]; universities: University[]; texts: Texts; version: string; today: string; demo: boolean;
+  /** Bot whose mini app the plan opens (`open_app`); unset until the app URL is registered with MAX. */
+  webApp?: string;
+}
 // locale comes only with bot_started (MAX client language); a ?start= payload arrives as "/start <payload>"
 export interface Input { text: string; callback: boolean; locale?: string }
 export interface Transition { session: Session | null; reply: Reply }
@@ -84,6 +89,8 @@ function home(s: Session, ctx: DialogueContext, prefix = ""): Reply {
     [...(s.reminders ? [] : [toggle]), ...items.map(i => [button(i.title[s.lang]!, `card:${i.ruleId}`)]),
       ...(s.reminders ? [toggle] : []),
       ...(items.some(i => i.status !== "done") ? [[button(t(s, ctx, "btn.calendar"), "calendar")]] : []),
+      // The same plan as a screen; the payload picks the university the way ?start= does.
+      ...(ctx.webApp ? [[{ text: t(s, ctx, "btn.app"), app: ctx.webApp, payload: uni(s, ctx).id }]] : []),
       [button(t(s, ctx, "btn.help"), "help")],
       [button(t(s, ctx, "btn.delete"), "delete")]]);
 }

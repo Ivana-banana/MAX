@@ -11,6 +11,8 @@ export interface Config {
   webappDir: string;
   /** Origin of the Vite dev server, allowed through CORS. Local demo only. */
   webappDevOrigin: string;
+  /** Bot name for the plan's `open_app` button; empty keeps the button off until MAX knows the app URL. */
+  webappBot: string;
 }
 
 /**
@@ -42,8 +44,10 @@ export function readConfig(env: NodeJS.ProcessEnv = process.env): Config {
   if (webappDevOrigin && !/^https?:\/\/[a-z0-9.-]{1,253}(:\d{1,5})?$/i.test(webappDevOrigin)) {
     throw new Error("WEBAPP_DEV_ORIGIN must be a bare origin, e.g. http://localhost:5173");
   }
+  const webappBot = env.WEBAPP_BOT ?? "";
+  if (webappBot && !/^[A-Za-z0-9_]{1,64}$/.test(webappBot)) throw new Error("WEBAPP_BOT must be the bot name, e.g. t149_hakaton_max_bot");
   return { mode, transport, token, secret, port, host: env.HOST ?? "127.0.0.1", databaseUrl,
-    webappDir: env.WEBAPP_DIR ?? "./web/dist", webappDevOrigin,
+    webappDir: env.WEBAPP_DIR ?? "./web/dist", webappDevOrigin, webappBot,
     rulesPath: env.RULES_PATH ?? "./src/data/rules/ru-student.json",
     universitiesPath: env.UNIVERSITIES_PATH ?? "./src/data/universities", defaultUniversity: env.DEFAULT_UNIVERSITY ?? "kfu",
     textsPath: env.TEXTS_PATH ?? "./src/data/i18n" };

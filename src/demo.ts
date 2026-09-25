@@ -60,7 +60,10 @@ try {
         const text = await terminal.question("> ");
         if (text === "/exit") break;
         const option = /^\d+$/.test(text) ? last!.buttons.flat()[Number(text) - 1] : undefined;
-        if (option && !("action" in option)) { console.log("url" in option ? option.url : option.copy); continue; }
+        if (option && !("action" in option)) {
+          console.log("url" in option ? option.url : "copy" in option ? option.copy : `[open_app ${option.app} startapp=${option.payload}]`);
+          continue;
+        }
         await act(option?.action ?? text, option !== undefined);
       }
     } finally { terminal.close(); }

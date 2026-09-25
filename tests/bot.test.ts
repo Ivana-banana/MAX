@@ -246,7 +246,7 @@ describe("calendar export, MAX link/clipboard buttons and reminder navigation", 
     expect(flat(f.sent.at(-1)?.reply)).toContainEqual({ text:"Открыть норму", url:expect.stringContaining("consultant.ru") });
     await f.click("help:medical-examination"); await f.service.flush();
     const copy=flat(f.sent.at(-1)?.reply).find(b=>"copy" in b) as {copy:string}|undefined;
-    expect(copy?.copy).toContain("«Медицинское освидетельствование», расчётный срок — до 30 сентября 2026 г.");
+    expect(copy?.copy).toContain("«Медицинское освидетельствование» (расчётный срок — до 30 сентября 2026 г.), но не получается");
     expect(copy?.copy).toContain("гражданство Казахстан, въезд 1 сентября 2026 г.");
     expect(flat(f.sent.at(-1)?.reply).some(b=>"url" in b && b.url.includes("kpfu.ru"))).toBe(true);
     expect(f.sent.at(-1)?.reply.text).toContain("kpfu.ru");
@@ -303,5 +303,30 @@ describe("queue storage performance guards", () => {
         expect(plan).toMatch(/outbox_user_kind_status_idx/);
       }
     } finally { await client.query("ROLLBACK"); client.release(); }
+  });
+});
+
+describe("plan button for the mini app", () => {
+  const planReply = (context: typeof ctx & { webApp?: string }, start: string) => {
+    let session: Session | null = null, reply: Reply | undefined;
+    for (const text of [start, "ru", "accept", "yes", "KZ", "2026-09-01"]) {
+      const out = transition(session, { text, callback: false }, context);
+      session = out.session; reply = out.reply;
+    }
+    return reply!;
+  };
+  it("opens the app for the student's university once the app is registered, and stays off before", () => {
+    const off = planReply(ctx, "/start itmo");
+    expect(off.buttons.flat().some(b => "app" in b)).toBe(false);
+    const on = planReply({ ...ctx, webApp: "t149_hakaton_max_bot" }, "/start itmo");
+    expect(on.buttons.flat().filter(b => "app" in b)).toEqual([
+      { text: "📱 План в мини-приложении", app: "t149_hakaton_max_bot", payload: "itmo" },
+    ]);
+  });
+  it("refuses a bot name that is not one", () => {
+    const env = { DATABASE_URL: "postgresql://x" };
+    expect(readConfig({ ...env, WEBAPP_BOT: "t149_hakaton_max_bot" }).webappBot).toBe("t149_hakaton_max_bot");
+    expect(readConfig(env).webappBot).toBe("");
+    expect(() => readConfig({ ...env, WEBAPP_BOT: "https://max.ru/bot" })).toThrow(/WEBAPP_BOT/);
   });
 });

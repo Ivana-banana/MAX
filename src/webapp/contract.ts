@@ -71,6 +71,8 @@ export interface AppResult {
   state: AppState;
   /** Wording from the dialogue itself, so the app never invents its own legal or error text. */
   message: string;
+  /** The ready question to the university that the chat puts behind its "Copy" button, when there is one. */
+  copy?: string;
 }
 
 /** Hints MAX passed with the launch; the dialogue re-checks both before using them. */

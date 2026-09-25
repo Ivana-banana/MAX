@@ -19,6 +19,7 @@
   "btn.remindersOn": "🔔 Eslatmalarni yoqish",
   "btn.remindersOff": "🔕 Eslatmalarni oʻchirish",
   "btn.calendar": "📅 Muddatlarni kalendarga qoʻshish",
+  "btn.app": "📱 Reja mini ilovada",
   "btn.help": "Yordam kerak",
   "btn.delete": "Maʼlumotlarimni oʻchirish",
   "btn.done": "Tartib-taomildan oʻtdim",
@@ -122,5 +123,8 @@
   "app.contact": "Universitetga yozish",
   "app.done.title": "Hammasi belgilandi",
   "app.done.body": "Kirgandan keyingi tartiblar belgilandi — sizning soʻzlaringizdan. Sizga berilgan hujjatlarni saqlang.",
-  "app.deadline": "Muddat"
+  "app.deadline": "Muddat",
+  "app.question": "Universitetga savol",
+  "app.copied": "Nusxa olindi",
+  "app.copyManual": "Nusxa olib boʻlmadi — yuqoridagi matnni belgilab, qoʻlda nusxa oling."
 }

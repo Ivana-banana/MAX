@@ -29,6 +29,9 @@ flowchart LR
     Q --> T[transport.ts<br/>SDK MAX, 10 запросов/с,<br/>повтор до 8 раз]
     T -- сообщение, кнопки,<br/>файл .ics --> MAX
     M[service.maintain<br/>раз в минуту] -->|напоминания 09:00 МСК,<br/>очистка по срокам| DB
+    U -- кнопка open_app,<br/>?startapp=вуз --> W[web/: мини-приложение<br/>React, тот же origin]
+    W -- /api/state, /api/action<br/>Authorization: MaxWebApp initData --> R[webapp/router.ts<br/>подпись HMAC, auth_date ≤ 1 ч]
+    R -->|та же транзакция и ревизия,<br/>409 при конфликте| P
 ```
 
 ## Модули

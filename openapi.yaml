@@ -1,8 +1,12 @@
 openapi: 3.1.0
 info:
-  title: First 90 days — bot delivery boundary
-  version: 0.2.0-demo
-  description: Bot delivery boundary. The public server runs APP_MODE=demo; its webhook secret is not published, so only /health and the 401 check are reproducible there.
+  title: First 90 days — bot delivery boundary and mini app API
+  version: 0.3.0-demo
+  description: >-
+    Bot delivery boundary and the mini app API. The public server runs APP_MODE=demo; its webhook
+    secret is not published and the mini app accepts only launches signed by MAX, so on the public
+    server only /health and the 401 checks are reproducible. The mini app types live in
+    src/webapp/contract.ts; the same origin serves the bundle at /.
 servers:
   - url: https://81-26-178-75.sslip.io
     description: Public demo deployment in MAX (docs/deploy.md)
@@ -58,9 +62,65 @@ paths:
         '413': {description: Body exceeds 65536 bytes}
         '415': {description: Content type must be application/json}
         '503': {description: Storage or processing failure; retry}
+  /api/state:
+    get:
+      summary: Mini app screen state for the signed-in MAX user (the same session as the chat)
+      security: [{MaxLaunch: []}]
+      responses:
+        '200':
+          description: "`AppStateResponse`: state (session or null, texts, languages, today, demo flags) and launch hints (startParam, languageCode)"
+          content: {application/json: {schema: {type: object, required: [state, launch]}}}
+        '401': {description: Missing, forged or expired MAX launch data (the reason is not disclosed)}
+        '503': {description: Storage failure; nothing changed}
+  /api/action:
+    post:
+      summary: Apply one dialogue action — the same vocabulary as the chat buttons, minus chat-only branches
+      security: [{MaxLaunch: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [action]
+              properties:
+                action: {type: string, description: "e.g. /start kfu, ru, accept, yes, KZ, 2026-09-01, reminders, doc:<rule>:<doc>, done:<rule>, help:<rule>, /today, /delete, confirm-delete"}
+                revision: {type: integer, minimum: 0, description: Session revision the screen was rendered from}
+            example: {action: "done:fingerprinting", revision: 12}
+      responses:
+        '200':
+          description: "`AppResult`: new state, the dialogue's own wording, and `copy` — the ready question to the university when the reply offers one"
+          content: {application/json: {schema: {type: object, required: [state, message]}}}
+        '400': {description: Invalid JSON, unsupported action or revision}
+        '401': {description: Missing, forged or expired MAX launch data}
+        '409': {description: "The session moved on (chat or another window); body carries the current revision"}
+        '503': {description: Storage failure; nothing changed}
+  /api/calendar-ticket:
+    post:
+      summary: Short-lived signed URL for the calendar file, because a download cannot carry the Authorization header
+      security: [{MaxLaunch: []}]
+      responses:
+        '200':
+          description: "`AppTicket`: relative url, fileName, expiresIn (seconds, 300)"
+          content: {application/json: {schema: {type: object, required: [url, fileName, expiresIn]}}}
+        '401': {description: Missing, forged or expired MAX launch data}
+  /api/calendar.ics:
+    get:
+      summary: The plan as an RFC 5545 calendar file
+      parameters:
+        - {name: ticket, in: query, required: true, schema: {type: string}, description: Ticket from /api/calendar-ticket}
+      responses:
+        '200': {description: text/calendar attachment first-90-days.ics}
+        '401': {description: Missing, forged or expired ticket}
+        '404': {description: Nothing to export — no unfinished procedures}
 components:
   securitySchemes:
     WebhookSecret:
       type: apiKey
       in: header
       name: X-Max-Bot-Api-Secret
+    MaxLaunch:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: "`MaxWebApp <initData>` — MAX launch data, HMAC-SHA256 signature checked with the bot token, auth_date not older than 1 hour"

@@ -149,9 +149,22 @@ describe("mini app actions on the shared session", () => {
   it("keeps chat-only branches out of the app's vocabulary", () => {
     for (const action of ["/start", "/start kfu", "ru", "en", "accept", "yes", "KZ", "OTHER", "2026-09-01", "/today",
       "plan", "reminders", "doc:medical-examination:passport", "done:fingerprinting", "/delete", "confirm-delete",
-      "cancel-delete"]) expect(isAppAction(action), action).toBe(true);
-    for (const action of ["/stop", "calendar", "help", "/help", "help:fingerprinting", "card:fingerprinting",
+      "cancel-delete", "help:fingerprinting"]) expect(isAppAction(action), action).toBe(true);
+    for (const action of ["/stop", "calendar", "help", "/help", "help:", "help:../x", "card:fingerprinting",
       "/start ../etc", "doc:x", "done:", "reminders ", "2026-02-30", ""]) expect(isAppAction(action), action).toBe(false);
+  });
+  it("gives the card the chat's ready question to the university, and changes nothing", async () => {
+    const f = await fixture();
+    for (const action of ONBOARDING) await applyAction(f.service, 7, action, false);
+    const before = await readState(f.service, 7, false);
+    const result = await applyAction(f.service, 7, "help:medical-examination", false);
+    // The same text the chat puts behind its "Copy" button: the app never words a request itself.
+    expect(result.copy).toContain("КФУ");
+    expect(result.message).toContain(result.copy!);
+    expect(result.state.session?.step).toBe("plan");
+    expect(result.state.session?.plan).toEqual(before.session?.plan);
+    // An ordinary action carries no question.
+    expect((await applyAction(f.service, 7, "plan", false)).copy).toBeUndefined();
   });
   it("drops chat messages that the app's change would have made stale", async () => {
     const f = await fixture();

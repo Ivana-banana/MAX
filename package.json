@@ -34,7 +34,7 @@
     "embedded-postgres": "16.14.0-beta.17",
     "qrcode-generator": "2.0.4",
     "typescript": "5.9.2",
-    "vitest": "3.2.4"
+    "vitest": "4.1.11"
   },
   "dependencies": {
     "@maxhub/max-bot-api": "0.3.1",

@@ -355,6 +355,10 @@ body {
 .law { font: 700 15px/1.35 var(--text); margin: 8px 0 0; }
 .law small { display: block; font-weight: 500; color: var(--muted); margin-top: 3px; }
 
+/* The ready question to the university: a quoted block the user can copy or select. */
+.help { display: flex; flex-direction: column; gap: 12px; }
+.quote { border-left: 5px solid var(--red); padding: 4px 0 4px 12px; user-select: text; -webkit-user-select: text; margin: 0; }
+
 /* ── Date field ─────────────────────────────────────────── */
 .datefield { display: flex; flex-direction: column; gap: 6px; }
 .datefield input {

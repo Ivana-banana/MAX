@@ -127,7 +127,7 @@ export function App() {
       return (
         <div className="stack">
           {!insideMax() && <button type="button" className="link back" onClick={closeCard}>{`← ${t("app.back")}`}</button>}
-          <Card session={session} texts={texts} item={item} pending={status.pending} onAction={act} />
+          <Card key={item.ruleId} session={session} texts={texts} item={item} pending={status.pending} copy={status.copy} onAction={act} />
         </div>
       );
     }
