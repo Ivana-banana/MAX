@@ -5,13 +5,18 @@
   "type": "module",
   "description": "Мини-приложение MAX: план обязательных процедур иностранного первокурсника",
   "license": "MIT",
-  "engines": { "node": ">=24" },
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@fontsource/alumni-sans": "5.3.0",
+    "@fontsource/onest": "5.3.1",
+    "@fontsource/unbounded": "5.3.0",
     "@maxhub/max-ui": "0.5.0",
     "react": "19.2.8",
     "react-dom": "19.2.8"

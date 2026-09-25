@@ -6,9 +6,12 @@
  */
 
 import { useCallback, useEffect, useState } from "react";
-import { Button, CellList, CellSimple, Input, MaxUI, Spinner, Typography } from "@maxhub/max-ui";
+import { MaxUI } from "@maxhub/max-ui";
+import { DateField } from "./DateField.js";
 import { calendarTicket, ApiError } from "./api.js";
 import { downloadFile, insideMax, onBack, platform, tap } from "./bridge.js";
+import { universityPhoto } from "./photos.js";
+import { Accented, Button } from "./ui.js";
 import { useApp } from "./useApp.js";
 import { text, type Texts } from "./texts.js";
 import { Onboarding } from "./screens/Onboarding.js";
@@ -58,11 +61,9 @@ export function App() {
   const body = () => {
     if (status.loading) {
       return (
-        <div className="centre">
-          <Spinner />
-          <Typography.Text variant="body" color="secondary">
-            {status.state === null ? BOOT.ru : t("app.loading")}
-          </Typography.Text>
+        <div className="centre" role="status">
+          <div className="loader" aria-hidden="true" />
+          <p className="caps">{status.state === null ? BOOT.ru : t("app.loading")}</p>
         </div>
       );
     }
@@ -80,28 +81,36 @@ export function App() {
       // the university a QR poster chose when MAX passed one.
       const startParam = status.launch.startParam;
       const start = startParam !== undefined && /^[a-z0-9_-]{1,32}$/.test(startParam) ? `/start ${startParam}` : "/start";
+      // The poster shows the university the QR code pointed at; without one, the default profile.
+      const university = status.state.universities.find(u => u.id === startParam) ?? status.state.universities[0];
+      const photo = university === undefined ? undefined : universityPhoto(university.id);
       return (
-        <div className="stack">
-          <Typography.Title variant="small">{t("app.start.title")}</Typography.Title>
-          <Typography.Text variant="body" color="secondary" className="prose">
-            {status.message === "" ? t("app.start.body") : status.message}
-          </Typography.Text>
-          <Button stretched loading={status.pending !== null} onClick={() => act(start)}>{t("app.start.action")}</Button>
-        </div>
+        <section className="hero">
+          <div className="photo">{photo !== undefined && <img src={photo} alt="" />}</div>
+          <div className="circle" /><div className="ring" />
+          {university !== undefined && <div className="vert" aria-hidden="true">{university.name}</div>}
+          <div className="content">
+            <h1 className="display word in"><Accented text={t("app.title")} /></h1>
+            <p className="caps uni in d1">{t("app.start.title")}</p>
+            <div className="spacer" />
+            <p className="lead prose in d2">{status.message === "" ? t("app.start.body") : status.message}</p>
+            <Button className="in d3" loading={status.pending !== null} onClick={() => act(start)}>{t("app.start.action")}</Button>
+          </div>
+        </section>
       );
     }
     if (session.step === "delete") {
       return (
         <div className="stack">
-          <Typography.Title variant="small">{t("btn.delete")}</Typography.Title>
-          <Typography.Text variant="body" color="secondary" className="prose">{status.message}</Typography.Text>
-          <Button stretched variant="destructive" loading={status.pending === "confirm-delete"}
+          <h1 className="heading in">{t("btn.delete")}</h1>
+          <p className="prose in d1">{status.message}</p>
+          <Button className="in d2" arrow="×" loading={status.pending === "confirm-delete"}
             disabled={status.pending !== null} onClick={() => act("confirm-delete")}>
             {t("btn.confirmDelete")}
           </Button>
-          <Button stretched variant="ghost" disabled={status.pending !== null} onClick={() => act("cancel-delete")}>
+          <button type="button" className="link in d3" disabled={status.pending !== null} onClick={() => act("cancel-delete")}>
             {t("btn.cancel")}
-          </Button>
+          </button>
         </div>
       );
     }
@@ -117,13 +126,13 @@ export function App() {
     if (item !== undefined) {
       return (
         <div className="stack">
-          {!insideMax() && <Button variant="ghost" onClick={closeCard}>{`← ${t("app.back")}`}</Button>}
+          {!insideMax() && <button type="button" className="link back" onClick={closeCard}>{`← ${t("app.back")}`}</button>}
           <Card session={session} texts={texts} item={item} pending={status.pending} onAction={act} />
         </div>
       );
     }
     return (
-      <Plan session={session} texts={texts} pending={status.pending} onAction={act} onOpen={setOpenCard}
+      <Plan session={session} texts={texts} today={status.state.today} pending={status.pending} onAction={act} onOpen={setOpenCard}
         onCalendar={() => void exportCalendar()} calendarBusy={calendarBusy} />
     );
   };
@@ -136,14 +145,16 @@ export function App() {
   };
 
   return (
-    <MaxUI platform={appearance()}>
+    <MaxUI platform={appearance()} className="app">
       <main className="page">
-        {status.state?.demo === true && <Banner tone="demo">{t("banner.demo").trim()}</Banner>}
-        {status.state?.mocked === true && <Banner tone="mocked">{t("app.banner.mocked")}</Banner>}
-        {status.error !== null && status.error !== "no_launch" && status.state !== null && (
-          <Banner tone="error" onDismiss={dismiss}>{failure()}</Banner>
-        )}
-        {calendarError && <Banner tone="error" onDismiss={() => setCalendarError(false)}>{t("app.error.server")}</Banner>}
+        <div className="banners">
+          {status.state?.demo === true && <Banner tone="demo">{t("banner.demo").trim()}</Banner>}
+          {status.state?.mocked === true && <Banner tone="mocked">{t("app.banner.mocked")}</Banner>}
+          {status.error !== null && status.error !== "no_launch" && status.state !== null && (
+            <Banner tone="error" onDismiss={dismiss}>{failure()}</Banner>
+          )}
+          {calendarError && <Banner tone="error" onDismiss={() => setCalendarError(false)}>{t("app.error.server")}</Banner>}
+        </div>
         {body()}
       </main>
     </MaxUI>
@@ -155,7 +166,7 @@ function Banner({ tone, children, onDismiss }: {
 }) {
   return (
     <div className={`banner banner-${tone}`} role={tone === "error" ? "alert" : "note"}>
-      <Typography.Text variant="note">{children}</Typography.Text>
+      <span>{children}</span>
       {onDismiss !== undefined && <button type="button" className="banner-close" onClick={onDismiss} aria-label="×">×</button>}
     </div>
   );
@@ -164,9 +175,9 @@ function Banner({ tone, children, onDismiss }: {
 function Notice({ title, body, action }: { title: string; body: string; action?: { label: string; onClick: () => void } }) {
   return (
     <div className="stack">
-      <Typography.Title variant="small">{title}</Typography.Title>
-      <Typography.Text variant="body" color="secondary" className="prose">{body}</Typography.Text>
-      {action !== undefined && <Button stretched onClick={action.onClick}>{action.label}</Button>}
+      <h1 className="display title">{title}</h1>
+      <p className="prose">{body}</p>
+      {action !== undefined && <Button arrow="↻" onClick={action.onClick}>{action.label}</Button>}
     </div>
   );
 }
@@ -178,20 +189,23 @@ function Completion({ texts, today, message, pending, onAction }: {
   const t = (key: string) => text(texts, key);
   return (
     <div className="stack">
-      <Typography.Title variant="small">{t("app.completionTitle")}</Typography.Title>
-      <Typography.Text variant="body" color="secondary" className="prose">{message}</Typography.Text>
-      <Input type="date" value={value} max={today} aria-label={t("app.completionTitle")}
-        onChange={event => setValue(event.target.value)} />
-      <Button stretched disabled={value === "" || pending !== null} loading={pending === value}
+      <h1 className="heading in">{t("app.completionTitle")}</h1>
+      <p className={`prose in d1 ${message.includes(t("completion.invalid")) ? "banner banner-error" : ""}`}>
+        {message.includes(t("completion.invalid")) ? t("completion.invalid") : t("app.completion.body")}
+      </p>
+      <div className="in d2">
+        <DateField label={t("app.completionTitle")} hint={t("app.entry.hint")} onChange={setValue} />
+      </div>
+      <Button className="in d3" disabled={value === "" || value > today || pending !== null} loading={pending === value}
         onClick={() => onAction(value)}>
         {t("app.save")}
       </Button>
-      <Button stretched variant="secondary" disabled={pending !== null} onClick={() => onAction("/today")}>
+      <Button className="in d4" tone="outline" disabled={pending !== null} loading={pending === "/today"} onClick={() => onAction("/today")}>
         {t("app.today")}
       </Button>
-      <CellList mode="island">
-        <CellSimple title={t("btn.cancel")} disabled={pending !== null} onClick={() => onAction("plan")} />
-      </CellList>
+      <button type="button" className="link in d5" disabled={pending !== null} onClick={() => onAction("plan")}>
+        {t("btn.cancel")}
+      </button>
     </div>
   );
 }

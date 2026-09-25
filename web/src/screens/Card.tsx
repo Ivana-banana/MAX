@@ -5,10 +5,10 @@
  * kind of confident-sounding answer this product is built to replace.
  */
 
-import { Button, CellHeader, CellList, CellSimple, Typography } from "@maxhub/max-ui";
 import type { AppPlanItem, AppSession } from "../api.js";
 import { openLink, tap } from "../bridge.js";
 import { text, type Texts } from "../texts.js";
+import { Button, dayMonth, dotted, ordinal } from "../ui.js";
 
 interface Props {
   session: AppSession;
@@ -20,54 +20,61 @@ interface Props {
 
 export function Card({ session, texts, item, pending, onAction }: Props) {
   const t = (key: string) => text(texts, key);
+  const checked = item.documents.filter(document => document.checked).length;
+  const calm = item.status === "ok" || item.status === "done";
 
   return (
     <div className="stack">
-      <div>
-        <Typography.Title variant="small">{item.title}</Typography.Title>
-        <Typography.Text variant="body" color="secondary" className="prose">{item.action}</Typography.Text>
+      <h1 className="heading in">{item.title}</h1>
+
+      <div className={`deadline ${calm ? "deadline-calm" : ""} in d1`}>
+        <span className="big">{dayMonth(item.dueDate)}</span>
+        <span className="label">{t("app.deadline")}<br />{item.countdown}</span>
       </div>
 
-      <CellList mode="island">
-        <CellSimple title={item.dueDate} subtitle={item.countdown} />
-        {item.recommendedDate !== undefined && (
-          <CellSimple title={item.recommendedDate} subtitle={t("app.recommended")} />
-        )}
-        {item.provisional && <CellSimple title={t("app.provisional")} subtitleMode="tertiary" />}
-      </CellList>
+      <div className="facts in d1">
+        {item.recommendedDate !== undefined && <span>{`${t("app.recommended")}: ${dotted(item.recommendedDate)}`}</span>}
+        {item.provisional && <span>{t("app.provisional")}</span>}
+      </div>
 
-      <CellList mode="island" header={<CellHeader>{t("app.documents")}</CellHeader>}>
-        {item.documents.map(document => (
-          <CellSimple
+      <p className="prose in d2">{item.action}</p>
+
+      <div className="in d3">
+        <h2 className="section"><span>{t("app.documents")}</span><span>{`${checked} / ${item.documents.length}`}</span></h2>
+        {item.documents.map((document, index) => (
+          <button
             key={document.id}
-            title={document.title}
-            before={<span aria-hidden="true">{document.checked ? "✓" : "□"}</span>}
-            aria-pressed={document.checked}
+            type="button"
+            role="checkbox"
+            aria-checked={document.checked}
+            className="doc"
             disabled={pending !== null}
             onClick={() => { tap(); onAction(`doc:${item.ruleId}:${document.id}`); }}
-          />
+          >
+            <span className="num">{ordinal(index)}</span>
+            <span className="txt">{document.title}</span>
+            <span className="box" aria-hidden="true" />
+          </button>
         ))}
-      </CellList>
+      </div>
 
-      <CellList mode="island" header={<CellHeader>{t("app.source")}</CellHeader>}>
-        <CellSimple title={item.legal.act} subtitle={item.legal.article} />
-        <CellSimple title={`${t("app.checkedAt")}: ${item.legal.checkedAt}`} subtitleMode="tertiary" />
-      </CellList>
+      <div className="in d4">
+        <h2 className="section"><span>{t("app.source")}</span></h2>
+        <p className="law">{item.legal.act}<small>{`${item.legal.article} · ${t("app.checkedAt")}: ${dotted(item.legal.checkedAt)}`}</small></p>
+      </div>
 
-      <Button stretched variant="secondary" onClick={() => openLink(item.legal.url)}>{t("btn.law")}</Button>
+      <Button className="in d5" tone="outline" arrow="↗" onClick={() => openLink(item.legal.url)}>{t("btn.law")}</Button>
 
       {item.status !== "done" && (
-        <Button
-          stretched loading={pending === `done:${item.ruleId}`} disabled={pending !== null}
-          onClick={() => onAction(`done:${item.ruleId}`)}
-        >
+        <Button className="in d5" arrow="✓" loading={pending === `done:${item.ruleId}`} disabled={pending !== null}
+          onClick={() => onAction(`done:${item.ruleId}`)}>
           {t("btn.done")}
         </Button>
       )}
 
-      <Button stretched variant="ghost" onClick={() => openLink(session.university.contactUrl)}>
+      <button type="button" className="link in d6" onClick={() => openLink(session.university.contactUrl)}>
         {t("app.contact")}
-      </Button>
+      </button>
     </div>
   );
 }

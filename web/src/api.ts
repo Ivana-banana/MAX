@@ -29,7 +29,7 @@ export class ApiError extends Error {
  */
 function authorization(): string {
   const real = initData();
-  if (real !== undefined && real !== "") return `MaxWebApp ${real}`;
+  if (typeof real === "string" && real !== "") return `MaxWebApp ${real}`;
   const demo = new URLSearchParams(window.location.search).get("demo");
   if (demo !== null && /^[0-9]{1,15}$/.test(demo)) return `MaxWebApp demo:${demo}`;
   throw new ApiError("no_launch");

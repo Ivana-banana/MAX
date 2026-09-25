@@ -88,7 +88,11 @@
   "app.source": "Legal basis",
   "app.provisional": "The rule has not been reviewed by a lawyer yet — the date is provisional.",
   "app.selfReported": "Marks are self-reported, not an official decision.",
-  "app.entry.hint": "YYYY-MM-DD",
+  "app.entry.hint": "DD.MM.YYYY",
+  "app.entry.body": "Entry date as DD.MM.YYYY, from 01.09.2026 through today.",
+  "app.entry.invalid": "Date is outside the scenario. Enter a date from 01.09.2026 through today.",
+  "app.entry.future": "Entry date cannot be in the future: deadlines count from your actual entry.",
+  "app.completion.body": "Completion date as DD.MM.YYYY. This is self-reported, not confirmation from the authorities.",
   "app.save": "Save",
   "app.today": "Today",
   "app.reminders": "Reminders in the chat",
@@ -103,5 +107,12 @@
   "app.planTitle": "Your plan",
   "app.checkedAt": "Source checked",
   "app.recommended": "Recommended date",
-  "app.contact": "Contact the university"
+  "app.contact": "Contact the university",
+  "app.tag.dueSoon": "Soon",
+  "app.tag.overdue": "Overdue",
+  "app.tag.done": "Done",
+  "app.done.stamp": "All\ndone",
+  "app.done.title": "Done. Now study",
+  "app.done.body": "Your after-entry procedures are marked, as reported by you. Keep the papers you were given.",
+  "app.deadline": "Deadline"
 }
