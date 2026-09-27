@@ -4,6 +4,7 @@ import argparse
 from html import escape
 from io import BytesIO
 import json
+import os
 from pathlib import Path
 from reportlab.lib.colors import HexColor
 from reportlab.lib.styles import ParagraphStyle
@@ -14,6 +15,8 @@ from reportlab.lib.utils import ImageReader
 from reportlab.platypus import Paragraph
 
 ROOT = Path(__file__).resolve().parents[1]
+# ReportLab names an embedded image by a hash of its path: a relative path keeps the PDF byte-identical across checkouts.
+os.chdir(ROOT)
 ASSETS = ROOT / 'docs/presentation'
 M = json.loads((ASSETS / 'manifest.json').read_text(encoding='utf-8'))
 DEMO = json.loads((ASSETS / 'demo-transcript.json').read_text(encoding='utf-8'))
@@ -75,7 +78,7 @@ def start(section, title, subtitle='', dark=False):
 
 def shot(name, x, y, w, h):
     # Screenshot from real MAX (docs/presentation/screens), fitted to the box and anchored to its top.
-    path = ASSETS / 'screens' / f'{name}.jpg'
+    path = (ASSETS / 'screens' / f'{name}.jpg').relative_to(ROOT)
     iw, ih = ImageReader(str(path)).getSize()
     scale = min(w / iw, h / ih)
     dw, dh = iw * scale, ih * scale
