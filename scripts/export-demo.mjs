@@ -18,7 +18,7 @@ assert.equal(git('rev-parse', 'HEAD:src'), manifest.sourceTree, 'Update the pres
 const rules = parseRuleSet(JSON.parse(readFileSync(new URL('../src/data/rules/ru-student.json', import.meta.url), 'utf8')));
 const universities = readUniversities(fileURLToPath(new URL('../src/data/universities', import.meta.url)), 'kfu');
 const texts = readTexts(fileURLToPath(new URL('../src/data/i18n', import.meta.url)));
-const clock = '2026-09-24T10:00:00+03:00';
+const clock = '2026-09-27T10:00:00+03:00';
 const dev = await startDevPostgres();
 const schema = await scratchSchema(dev.url);
 const { store } = await schema.open();
@@ -51,12 +51,12 @@ try {
   await service.maintain(); await service.flush();
   const reminders = replies.filter(r => r.text.includes('Напоминание:'));
   assert.equal(reminders.length, 1);
-  capture('reminder', 'Напоминание за семь дней', reminders[0]);
+  capture('reminder', 'Напоминание за три дня', reminders[0]);
   await click('card:medical-examination'); await click('done:medical-examination');
   await input('/today'); await click('card:medical-examination');
   capture('renewal', 'Следующий цикл после самоотметки');
-  assert.equal((await store.get(1)).completions['medical-examination'], '2026-09-24');
-  assert.ok(last.text.includes('2027-10-24') && last.text.includes('2027-09-24'));
+  assert.equal((await store.get(1)).completions['medical-examination'], '2026-09-27');
+  assert.ok(last.text.includes('27 октября 2027') && last.text.includes('27 сентября 2027'));
   await input('/stop'); capture('stop', 'Остановка уведомлений');
   assert.equal((await store.get(1)).reminders, false);
   await input('/delete'); await click('confirm-delete'); capture('delete', 'Удаление профиля');

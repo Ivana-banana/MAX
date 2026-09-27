@@ -1,13 +1,13 @@
 {
   "title": "Первые 90 дней",
-  "date": "23.09.2026",
+  "date": "27.09.2026",
   "team": null,
   "repository": "https://github.com/M1hairu/MAX_GOATed_messenger",
-  "checkedCodeCommit": "19f1a7c47848676921ce6568383899f125e35e87",
-  "sourceTree": "02340c7a8291fd8d6ce536c0711bc5e36adfd2e9",
+  "checkedCodeCommit": "208b15a3544eede97edda9d7c6ec5ac42d57967d",
+  "sourceTree": "2a86f6a31ab44b72d85ebbd7f16b454516d1b384",
   "botUrl": "https://max.ru/t149_hakaton_max_bot",
   "publicBaseUrl": "https://81-26-178-75.sslip.io",
-  "ciUrl": "https://github.com/M1hairu/MAX_GOATed_messenger/actions/runs/35891812570",
+  "ciUrl": "https://github.com/M1hairu/MAX_GOATed_messenger/actions/runs/36335890792",
   "sources": [
     {"id": "1", "title": "КФУ: заселение иностранных студентов", "url": "https://students.kpfu.ru/universiade-village/population-of-foreigners", "claim": "Памятка с общей формулировкой о 90 днях."},
     {"id": "2", "title": "КФУ: медицинская и дактилоскопическая процедуры", "url": "https://kpfu.ru/content_print?p_cid=420481", "claim": "Памятка разделяет сроки 30 и 90 дней."},
@@ -16,6 +16,6 @@
     {"id": "5", "title": "Федеральный закон № 115-ФЗ, статья 5", "url": "https://www.consultant.ru/document/cons_doc_LAW_37868/e9d581e7e11d7901295efd89c869ae044dd3d20f/", "claim": "Справочный текст для проверки draft-правил; независимая вычитка не пройдена."},
     {"id": "6", "title": "MAX: требования к webhook", "url": "https://dev.max.ru/docs-api/methods/POST/subscriptions", "claim": "Официальный контракт интеграции; бот работает по нему в MAX с 23.09.2026."},
     {"id": "7", "title": "КФУ: оформление социальной стипендии", "url": "https://students.kpfu.ru/scholarship-commissions/academic", "claim": "Альтернатива для исследования; источник не доказывает частоту проблем."},
-    {"id": "8", "title": "Протокол проверок 23.09: развёртывание и MAX", "url": "https://github.com/M1hairu/MAX_GOATed_messenger/blob/main/docs/verification-2026-09-23.md", "claim": "HTTPS, webhook, 16 ответов доставлены через API MAX; Docker, лицензии, секреты. Протокол 22.09 — по ссылке внутри."}
+    {"id": "8", "title": "Протокол проверок 27.09: прогон в MAX", "url": "https://github.com/M1hairu/MAX_GOATed_messenger/blob/main/docs/verification-2026-09-27.md", "claim": "Мобильная и веб-версия, шаги 1–24, скриншоты; развёртывание, Docker и секреты — в прежних протоколах по ссылкам."}
   ]
 }
