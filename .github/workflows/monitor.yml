@@ -1,0 +1,50 @@
+name: monitor
+# External liveness check of the deployed bot (D-032): the bot must answer for the whole
+# review period, and MAX drops the webhook subscription after 8 hours without delivery.
+# A failed scheduled run emails whoever last changed this cron line.
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: monitor
+  cancel-in-progress: false
+env:
+  BASE_URL: https://81-26-178-75.sslip.io
+jobs:
+  bot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout: certs
+      - name: /health answers ok with no failed deliveries
+        run: |
+          for attempt in 1 2 3; do
+            if body=$(curl -fsS --max-time 20 "$BASE_URL/health"); then
+              echo "$body"
+              echo "$body" | jq -e '.status == "ok" and (.queue.failed // 0) == 0' > /dev/null && exit 0
+              echo "::error::/health is up but reports a problem: $body"
+              exit 1
+            fi
+            echo "attempt $attempt failed"; sleep 20
+          done
+          echo "::error::$BASE_URL/health is unreachable after 3 attempts"
+          exit 1
+      - name: Webhook subscription is registered in MAX
+        env:
+          MAX_BOT_TOKEN: ${{ secrets.MAX_BOT_TOKEN }}
+        run: |
+          if [ -z "$MAX_BOT_TOKEN" ]; then
+            echo "::warning::secret MAX_BOT_TOKEN is not set: subscription check skipped"
+            exit 0
+          fi
+          # platform-api2.max.ru is issued by Russian Trusted Root CA, which the runner does not trust.
+          urls=$(curl -fsS --max-time 20 --cacert certs/russian_trusted_root_ca.pem \
+            -H "Authorization: $MAX_BOT_TOKEN" https://platform-api2.max.ru/subscriptions \
+            | jq -r '.subscriptions[].url')
+          echo "subscriptions: $urls"
+          echo "$urls" | grep -qxF "$BASE_URL/webhook" || { echo "::error::webhook subscription $BASE_URL/webhook is missing"; exit 1; }

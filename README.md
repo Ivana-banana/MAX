@@ -358,7 +358,8 @@ docker compose up -d
 Локальный Node останавливается Ctrl+C с ожиданием текущей отправки.
 Бэкап — `pg_dump` с проверкой восстановления в отдельной БД (docs/deploy.md); там же
 разовый перенос прежней SQLite.
-Мониторить HTTPS, /health, failed-задания и наличие подписки MAX.
+Мониторинг: GitHub Actions `monitor.yml` раз в 15 минут проверяет HTTPS, /health, failed-задания
+и — при секрете `MAX_BOT_TOKEN` — наличие подписки MAX (D-032).
 
 **Ограничения**
 
