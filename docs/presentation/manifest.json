@@ -1,13 +1,13 @@
 {
   "title": "Первые 90 дней",
-  "date": "27.09.2026",
+  "date": "28.09.2026",
   "team": null,
   "repository": "https://github.com/M1hairu/MAX_GOATed_messenger",
-  "checkedCodeCommit": "208b15a3544eede97edda9d7c6ec5ac42d57967d",
-  "sourceTree": "2a86f6a31ab44b72d85ebbd7f16b454516d1b384",
+  "checkedCodeCommit": "8bcb1cd7a92fb623dc98ccfad4655bc045f4ddbd",
+  "sourceTree": "2fdb829ddee2281c9d91c9a7a937756eceaf32ea",
   "botUrl": "https://max.ru/t149_hakaton_max_bot",
   "publicBaseUrl": "https://81-26-178-75.sslip.io",
-  "ciUrl": "https://github.com/M1hairu/MAX_GOATed_messenger/actions/runs/36335890792",
+  "ciUrl": "https://github.com/M1hairu/MAX_GOATed_messenger/actions/runs/36395680935",
   "sources": [
     {"id": "1", "title": "КФУ: заселение иностранных студентов", "url": "https://students.kpfu.ru/universiade-village/population-of-foreigners", "claim": "Памятка с общей формулировкой о 90 днях."},
     {"id": "2", "title": "КФУ: медицинская и дактилоскопическая процедуры", "url": "https://kpfu.ru/content_print?p_cid=420481", "claim": "Памятка разделяет сроки 30 и 90 дней."},
