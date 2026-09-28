@@ -12,6 +12,9 @@ PostgreSQL и мини-приложением (docs/verification-2026-09-25.md);
 в поле `commit` ответа `/health`. Ручной прогон выкаченной версии по
 docs/max-manual-check.md (шаги 1–24, включая мини-приложение) — 25–27.09 в мобильной и
 веб-версии MAX, скриншоты мобильной — в images/max-check (docs/verification-2026-09-27.md).
+28.09 выкачен `8bcb1cd` (исправления по ревью кода, календарь, очередь, проверка норм;
+`/health` показывает этот коммит) — docs/verification-2026-09-28.md; прогон изменений
+28.09 в MAX (шаги 25–32) ещё не записан.
 Все нормативные правила — draft; APP_MODE=live их блокирует.
 Развёртывание — [docs/deploy.md](docs/deploy.md), архитектура — [docs/architecture.md](docs/architecture.md).
 
