@@ -327,7 +327,7 @@ describe("mini app HTTP surface", () => {
     expect((await downloaded.text()).match(/BEGIN:VEVENT/g)).toHaveLength(2);
     // A ticket for somebody else, or with the signature edited, opens nothing.
     expect((await fetch(`${url}/api/calendar.ics?ticket=8.9999999999.${"0".repeat(64)}`)).status).toBe(401);
-    expect((await fetch(`${url}/${ticket.url.replace(/.$/, "f")}`)).status).toBe(401);
+    expect((await fetch(`${url}/${ticket.url.replace(/.$/, (last) => (last === "0" ? "1" : "0"))}`)).status).toBe(401);
     expect((await fetch(`${url}/api/calendar-ticket`, { method: "POST" })).status).toBe(401);
     expect((await fetch(`${url}/api/calendar-ticket`, { headers: auth(value) })).status).toBe(405);
     // The signing key never leaves the process: a secret known outside it (the webhook one, which
