@@ -193,6 +193,63 @@ describe("mini app actions on the shared session", () => {
   });
 });
 
+describe("mini app shows what the chat shows", () => {
+  it("brings the step's own wording, without a second demo banner", async () => {
+    const f = await fixture();
+    await f.service.receive({ id: "1", user: 7, input: { text: "/start", callback: false, locale: "ru-RU" } });
+    const opened = await readState(f.service, 7, false);
+    expect(opened.session?.step).toBe("consent");
+    expect(opened.session?.prompt).toContain("MAX ID");
+    const accepted = await applyAction(f.service, 7, "accept", false);
+    expect(accepted.message.startsWith(texts.get("ru")!["banner.demo"]!)).toBe(false);
+    expect(accepted.state.session?.prompt.startsWith(texts.get("ru")!["banner.demo"]!)).toBe(false);
+  });
+  it("stops a plan built on rules that have changed since, as the chat does", async () => {
+    const f = await fixture();
+    const old = new Service(f.store, { ...ctx, version: "old-version" }, { async send() {} }, () => NOW);
+    for (const action of ONBOARDING) await applyAction(old, 7, action, false);
+    const state = await readState(f.service, 7, false);
+    expect(state.session?.stale).toBe(true);
+    expect(state.session?.plan).toEqual([]);
+    const url = await serve(f.router, f.service);
+    const issued = await (await fetch(`${url}/api/calendar-ticket`, { method: "POST", headers: auth(genuine()) })).json() as { url: string };
+    expect((await fetch(`${url}/${issued.url}`)).status).toBe(404);
+  });
+  it("says where each checklist comes from, or that there is no official one", async () => {
+    const f = await fixture();
+    for (const action of ONBOARDING) await applyAction(f.service, 7, action, false);
+    const items = (await readState(f.service, 7, false)).session!.plan;
+    expect(items.find(i => i.ruleId === "medical-examination")?.documentsNote).toContain("Комплект — по странице https://");
+    expect(items.find(i => i.ruleId === "fingerprinting")?.documentsNote).toContain("Официальный перечень документов не опубликован");
+  });
+  it("offers the citizenships the rules exclude, which lead to help as in the chat", async () => {
+    const f = await fixture();
+    for (const action of ONBOARDING.slice(0, 4)) await applyAction(f.service, 7, action, false);
+    expect((await readState(f.service, 7, false)).session?.citizenships).toContain("BY");
+    const other = await applyAction(f.service, 7, "BY", false);
+    expect(other.copy).toContain("Я учусь в");
+  });
+  it("starts in the MAX interface language, as the chat does", async () => {
+    const f = await fixture();
+    const url = await serve(f.router, f.service);
+    const value = genuine({ user: person(7, "en-US") });
+    const first = await (await fetch(`${url}/api/state`, { headers: auth(value) })).json() as { state: { texts: Record<string, string> } };
+    expect(first.state.texts["app.start.action"]).toBe(texts.get("en")!["app.start.action"]);
+    const started = await (await act(url, value, { action: "/start" })).json() as { state: { session: { step: string; lang: string } } };
+    expect(started.state.session).toMatchObject({ step: "consent", lang: "en" });
+  });
+  it("takes the first entry date of the app screens from the rules", async () => {
+    const f = await fixture();
+    const shifted = parseRuleSet(JSON.parse(JSON.stringify(raw).replaceAll("2026-09-01", "2027-09-01")));
+    const later = new Service(f.store, { ...ctx, rules: shifted.rules }, { async send() {} }, () => NOW);
+    const table = (await readState(later, 7, false)).texts;
+    expect(table["app.entry.body"]).toContain("01.09.2027");
+    expect(table["app.entry.invalid"]).toContain("01.09.2027");
+    // Chat texts keep their placeholder: the app matches server messages against the fixed part.
+    expect(table["entry.invalid"]).toContain("{from}");
+  });
+});
+
 describe("mini app HTTP surface", () => {
   it("answers only with a verified launch, and never says which check failed", async () => {
     const f = await fixture();

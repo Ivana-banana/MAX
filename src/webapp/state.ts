@@ -8,9 +8,12 @@
  * answers, which is exactly what this product exists to prevent.
  */
 
+import { coverage } from "../core/deadlines.js";
 import { isValidDate } from "../core/dates.js";
 import type { Lang } from "../core/types.js";
-import { countdown, plan, profile, transition, type DialogueContext, type Input, type Session } from "../bot/dialog.js";
+import {
+  countdown, documentsNote, plan, profile, prompt, transition, type DialogueContext, type Input, type Session,
+} from "../bot/dialog.js";
 import { funnelEvents, funnelUniversity } from "../bot/funnel.js";
 import { BASE_LANG, format } from "../data/loadTexts.js";
 import type { Service } from "../bot/service.js";
@@ -57,32 +60,48 @@ const university = (id: string | undefined, ctx: DialogueContext, lang: Lang): A
  * number at render time, so the server renders those strings itself (see `countdown` below).
  */
 function texts(ctx: DialogueContext, lang: Lang): Record<string, string> {
+  // App-only texts are filled here; the chat's keep their placeholders, because the app recognises a
+  // server message by the fixed part before the first one (web/src/texts.ts).
+  const from = coverage(ctx.rules).from.split("-").reverse().join(".");
   const table: Record<string, string> = {};
   for (const key of Object.keys(ctx.texts.get(BASE_LANG) ?? {})) {
     if (key.includes("#")) continue;
-    table[key] = format(ctx.texts, lang, key);
+    table[key] = format(ctx.texts, lang, key, key.startsWith("app.") ? { from } : {});
   }
   return table;
+}
+
+/** The app shows the demo banner once, at the top; the chat repeats it in every message. */
+function withoutBanner(text: string, ctx: DialogueContext): string {
+  if (!ctx.demo) return text;
+  const banner = [...ctx.texts.keys()].map(l => format(ctx.texts, l, "banner.demo")).find(b => text.startsWith(b));
+  return banner === undefined ? text : text.slice(banner.length);
 }
 
 const languages = (ctx: DialogueContext) => [...ctx.texts.keys()]
   .map(code => ({ code, name: format(ctx.texts, code, "language.name") }));
 
-function view(session: Session | null, ctx: DialogueContext, mocked: boolean): AppState {
-  const lang = session?.lang ?? BASE_LANG;
+/** `hint`: the MAX interface language, for the screen shown before a session exists. */
+function view(session: Session | null, ctx: DialogueContext, mocked: boolean, hint?: string): AppState {
+  const hinted = hint?.slice(0, 2).toLowerCase();
+  const lang = session?.lang ?? (hinted !== undefined && ctx.texts.has(hinted) ? hinted : BASE_LANG);
   const localized = (value: Record<string, string>) => value[lang] ?? value[BASE_LANG]!;
+  const stale = session !== null && session.ruleVersion !== ctx.version;
   return {
     session: session === null ? null : {
       revision: session.revision,
       step: session.step,
       lang: session.lang,
       university: university(session.university, ctx, lang),
-      citizenships: (ctx.universities.find(u => u.id === session.university) ?? ctx.universities[0]!).citizenships,
+      citizenships: [...(ctx.universities.find(u => u.id === session.university) ?? ctx.universities[0]!).citizenships,
+        ...coverage(ctx.rules).excluded],
       ...(session.citizenship === undefined ? {} : { citizenship: session.citizenship }),
       ...(session.entryDate === undefined ? {} : { entryDate: session.entryDate }),
       ...(session.selected === undefined ? {} : { selected: session.selected }),
       reminders: session.reminders,
-      plan: profile(session) ? plan(session, ctx).map(item => ({
+      stale,
+      prompt: withoutBanner(prompt(session, ctx).text, ctx),
+      plan: profile(session) && !stale ? plan(session, ctx).map(item => ({
         ruleId: item.ruleId,
         title: localized(item.title),
         action: localized(item.action),
@@ -98,6 +117,7 @@ function view(session: Session | null, ctx: DialogueContext, mocked: boolean): A
           title: localized(d.title),
           checked: session.documents[`${item.ruleId}:${item.dueDate}:${d.id}`] === true,
         })),
+        documentsNote: documentsNote(session, ctx, item),
         legal: item.legal,
       })) : [],
     },
@@ -112,8 +132,8 @@ function view(session: Session | null, ctx: DialogueContext, mocked: boolean): A
 }
 
 /** Current state without side effects: a screen refresh must not start a session. */
-export async function readState(service: Service, user: number, mocked: boolean): Promise<AppState> {
-  return view(await service.store.get(user), service.ctx(), mocked);
+export async function readState(service: Service, user: number, mocked: boolean, locale?: string): Promise<AppState> {
+  return view(await service.store.get(user), service.ctx(), mocked, locale);
 }
 
 /**
@@ -125,7 +145,7 @@ export async function readState(service: Service, user: number, mocked: boolean)
  * so a webhook update for the same person cannot interleave with it.
  */
 export async function applyAction(
-  service: Service, user: number, action: string, mocked: boolean, revision?: number,
+  service: Service, user: number, action: string, mocked: boolean, revision?: number, locale?: string,
 ): Promise<AppResult> {
   return service.store.transaction(user, async tx => {
     const before = await tx.get();
@@ -133,7 +153,8 @@ export async function applyAction(
     if (revision !== undefined && (before?.revision ?? 0) !== revision) {
       throw new RevisionConflict(before?.revision ?? 0);
     }
-    const input: Input = { text: action, callback: false };
+    // The MAX interface language picks the first screen's language on /start, as bot_started does in the chat.
+    const input: Input = { text: action, callback: false, ...(locale === undefined ? {} : { locale }) };
     const outcome = transition(before, input, ctx);
     const target = funnelUniversity(outcome.session ?? before, ctx);
     for (const event of funnelEvents(before, outcome.session, input, ctx)) await tx.count(ctx.today, target, event);
@@ -145,7 +166,7 @@ export async function applyAction(
     else await tx.remove();
     await service.scheduleUser(tx, user, outcome.session);
     const copy = outcome.reply.buttons.flat().find(b => "copy" in b);
-    return { state: view(outcome.session, ctx, mocked), message: outcome.reply.text,
+    return { state: view(outcome.session, ctx, mocked), message: withoutBanner(outcome.reply.text, ctx),
       ...(copy !== undefined && "copy" in copy ? { copy: copy.copy } : {}) };
   });
 }

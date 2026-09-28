@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { MaxUI } from "@maxhub/max-ui";
 import { DateField } from "./DateField.js";
-import { calendarTicket, ApiError } from "./api.js";
+import { calendarTicket, ApiError, type ApiFailure } from "./api.js";
 import { downloadFile, insideMax, onBack, platform, tap } from "./bridge.js";
 import { universityPhoto } from "./photos.js";
 import { Accented, Button } from "./ui.js";
@@ -25,14 +25,16 @@ const appearance = (): "ios" | "android" => (platform() === "ios" ? "ios" : "and
  * Before the first answer arrives there are no texts yet, so the loading screen and the
  * "open me from MAX" screen are the only two places with a literal string.
  */
-const BOOT = { ru: "Загрузка…", en: "Loading…" };
+const BOOT = "Загрузка…";
 const BOOT_LAUNCH = "Приложение открывается из бота в MAX / Open this app from the bot in MAX";
+const BOOT_FAILED = "Не удалось загрузить. Проверьте связь или откройте приложение из бота заново / "
+  + "Could not load. Check the connection or reopen the app from the bot";
 
 export function App() {
   const { status, dispatch, reload, dismiss } = useApp();
   const [openCard, setOpenCard] = useState<string | null>(null);
   const [calendarBusy, setCalendarBusy] = useState(false);
-  const [calendarError, setCalendarError] = useState(false);
+  const [calendarError, setCalendarError] = useState<ApiFailure | "download" | null>(null);
   const session = status.state?.session ?? null;
   const texts: Texts = status.state?.texts ?? {};
   const t = (key: string) => text(texts, key);
@@ -47,12 +49,13 @@ export function App() {
 
   const exportCalendar = useCallback(async () => {
     setCalendarBusy(true);
-    setCalendarError(false);
+    setCalendarError(null);
     try {
       const ticket = await calendarTicket();
-      downloadFile(new URL(ticket.url, document.baseURI).toString(), ticket.fileName);
+      // Not awaited: the spinner is about the ticket; MAX may settle the download much later.
+      downloadFile(new URL(ticket.url, document.baseURI).toString(), ticket.fileName).catch(() => setCalendarError("download"));
     } catch (e) {
-      setCalendarError(e instanceof ApiError);
+      setCalendarError(e instanceof ApiError ? e.failure : "server");
     } finally {
       setCalendarBusy(false);
     }
@@ -63,7 +66,7 @@ export function App() {
       return (
         <div className="centre" role="status">
           <div className="loader" aria-hidden="true" />
-          <p className="caps">{status.state === null ? BOOT.ru : t("app.loading")}</p>
+          <p className="caps">{status.state === null ? BOOT : t("app.loading")}</p>
         </div>
       );
     }
@@ -71,8 +74,9 @@ export function App() {
       return <Notice title="MAX" body={BOOT_LAUNCH} />;
     }
     if (status.state === null) {
+      // Loading is over and nothing arrived: the first request failed.
       return <Notice
-        title="MAX" body={`${BOOT.ru} / ${BOOT.en}`}
+        title="MAX" body={BOOT_FAILED}
         action={{ label: "↻", onClick: () => void reload() }}
       />;
     }
@@ -103,7 +107,7 @@ export function App() {
       return (
         <div className="stack">
           <h1 className="heading in">{t("btn.delete")}</h1>
-          <p className="prose in d1">{status.message}</p>
+          <p className="prose in d1">{session.prompt}</p>
           <Button className="in d2" arrow="×" loading={status.pending === "confirm-delete"}
             disabled={status.pending !== null} onClick={() => act("confirm-delete")}>
             {t("btn.confirmDelete")}
@@ -114,13 +118,25 @@ export function App() {
         </div>
       );
     }
+    if (session.stale) {
+      // The chat has stopped this plan (rulesChanged): the app must not keep showing its dates.
+      return (
+        <div className="stack">
+          <p className="prose in">{t("rulesChanged")}</p>
+          <Button className="in d1" arrow="×" loading={status.pending === "/delete"} disabled={status.pending !== null}
+            onClick={() => act("/delete")}>
+            {t("btn.delete")}
+          </Button>
+        </div>
+      );
+    }
     if (session.step === "completion") {
       return <Completion texts={texts} today={status.state.today} message={status.message}
         pending={status.pending} onAction={act} />;
     }
     if (session.step !== "plan") {
       return <Onboarding session={session} texts={texts} languages={status.state.languages}
-        message={status.message} today={status.state.today} pending={status.pending} onAction={act} />;
+        message={status.message} copy={status.copy} today={status.state.today} pending={status.pending} onAction={act} />;
     }
     const item = openCard === null ? undefined : session.plan.find(i => i.ruleId === openCard);
     if (item !== undefined) {
@@ -137,10 +153,11 @@ export function App() {
     );
   };
 
-  const failure = () => {
-    if (status.error === "unauthorized") return t("app.error.expired");
-    if (status.error === "offline") return t("app.error.offline");
-    if (status.error === "conflict") return t("app.error.conflict");
+  const failure = (kind: ApiFailure | "download" | null) => {
+    if (kind === "unauthorized") return t("app.error.expired");
+    if (kind === "offline") return t("app.error.offline");
+    if (kind === "conflict") return t("app.error.conflict");
+    if (kind === "download") return t("app.error.download");
     return t("app.error.server");
   };
 
@@ -151,9 +168,9 @@ export function App() {
           {status.state?.demo === true && <Banner tone="demo">{t("banner.demo").trim()}</Banner>}
           {status.state?.mocked === true && <Banner tone="mocked">{t("app.banner.mocked")}</Banner>}
           {status.error !== null && status.error !== "no_launch" && status.state !== null && (
-            <Banner tone="error" onDismiss={dismiss}>{failure()}</Banner>
+            <Banner tone="error" onDismiss={dismiss}>{failure(status.error)}</Banner>
           )}
-          {calendarError && <Banner tone="error" onDismiss={() => setCalendarError(false)}>{t("app.error.server")}</Banner>}
+          {calendarError !== null && <Banner tone="error" onDismiss={() => setCalendarError(null)}>{failure(calendarError)}</Banner>}
         </div>
         {body()}
       </main>

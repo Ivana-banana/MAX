@@ -142,8 +142,9 @@ function authenticate(req: IncomingMessage, options: WebappOptions, now: number)
 
 async function icsFor(service: Service, user: number): Promise<string | null> {
   const session = await service.store.get(user);
-  if (!session) return null;
   const ctx = service.ctx();
+  // The chat has stopped a plan built on older rules (rulesChanged); no calendar for it either.
+  if (!session || session.ruleVersion !== ctx.version) return null;
   const items = plan(session, ctx).filter(i => i.status !== "done");
   if (!items.length) return null;
   return planToIcs(items, { lang: session.lang, texts: ctx.texts, demo: ctx.demo, uid: session.nonce, today: ctx.today });
@@ -193,7 +194,7 @@ export function webappRouter(service: Service, options: WebappOptions) {
         if (path === "/api/state") {
           if (req.method !== "GET") throw new HttpError(405, "method_not_allowed");
           send(200, {
-            state: await readState(service, caller.user, caller.mocked),
+            state: await readState(service, caller.user, caller.mocked, caller.languageCode),
             // The client turns these into the first action: the university a QR poster chose and
             // the MAX interface language. Both are hints, both are re-checked by the dialogue.
             launch: {
@@ -213,7 +214,7 @@ export function webappRouter(service: Service, options: WebappOptions) {
             throw new HttpError(400, "invalid_revision");
           }
           send(200, await applyAction(service, caller.user, action, caller.mocked,
-            revision === undefined ? undefined : Number(revision)));
+            revision === undefined ? undefined : Number(revision), caller.languageCode));
           return true;
         }
         if (path === "/api/calendar-ticket") {

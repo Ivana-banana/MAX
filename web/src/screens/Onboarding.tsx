@@ -1,29 +1,44 @@
 /**
  * Steps before a plan exists: language, consent, scope, citizenship, entry date.
  *
- * The wording of consent and scope comes from the server (`status.message`): it is the text a
+ * The wording of consent and scope comes from the server (`session.prompt`): it is the text a
  * lawyer reads and the chat already shows, so the app must not paraphrase it. The language list
  * is data too — whatever files exist in `src/data/i18n`.
  */
 
 import { useEffect, useState } from "react";
 import type { AppSession, AppState } from "../api.js";
-import { closingConfirmation } from "../bridge.js";
+import { closingConfirmation, openLink } from "../bridge.js";
 import { DateField } from "../DateField.js";
 import { isText, text, type Texts } from "../texts.js";
 import { Button } from "../ui.js";
+import { Question } from "./Card.js";
 
 interface Props {
   session: AppSession;
   texts: Texts;
   languages: AppState["languages"];
   message: string;
+  /** The ready question to the university when the last answer led out of the scenario. */
+  copy: string;
   today: string;
   pending: string | null;
   onAction: (action: string) => void;
 }
 
-export function Onboarding({ session, texts, languages, message, today, pending, onAction }: Props) {
+/** "No" and "Other" lead out of the scenario, as in the chat: say so and hand over the question to the university. */
+function Unsupported({ session, texts, copy }: { session: AppSession; texts: Texts; copy: string }) {
+  const t = (key: string) => text(texts, key);
+  return (
+    <>
+      <p className="prose in" role="status">{t("help.unsupported")}</p>
+      <Question key={copy} texts={texts} copy={copy} />
+      <button type="button" className="link in" onClick={() => openLink(session.university.contactUrl)}>{t("app.contact")}</button>
+    </>
+  );
+}
+
+export function Onboarding({ session, texts, languages, message, copy, today, pending, onAction }: Props) {
   const t = (key: string) => text(texts, key);
   const busy = pending !== null;
 
@@ -48,7 +63,7 @@ export function Onboarding({ session, texts, languages, message, today, pending,
     return (
       <div className="stack">
         <h1 className="display title in">{t("app.consentTitle")}</h1>
-        <p className="prose in d1">{message}</p>
+        <p className="prose in d1">{session.prompt}</p>
         <Button className="in d2" loading={pending === "accept"} disabled={busy} onClick={() => onAction("accept")}>
           {t("btn.continue")}
         </Button>
@@ -65,13 +80,14 @@ export function Onboarding({ session, texts, languages, message, today, pending,
     return (
       <div className="stack">
         <h1 className="heading in">{t("app.scopeTitle")}</h1>
-        <p className="prose in d1">{message}</p>
+        <p className="prose in d1">{session.prompt}</p>
         <Button className="in d2" loading={pending === "yes"} disabled={busy} onClick={() => onAction("yes")}>
           {t("btn.yes")}
         </Button>
         <Button className="in d3" tone="outline" arrow="×" loading={pending === "OTHER"} disabled={busy} onClick={() => onAction("OTHER")}>
           {t("btn.no")}
         </Button>
+        {copy !== "" && <Unsupported session={session} texts={texts} copy={copy} />}
       </div>
     );
   }
@@ -93,6 +109,7 @@ export function Onboarding({ session, texts, languages, message, today, pending,
             <span className="name">{t("app.citizenshipOther")}</span>
           </button>
         </div>
+        {copy !== "" && <Unsupported session={session} texts={texts} copy={copy} />}
       </div>
     );
   }
@@ -104,6 +121,7 @@ function EntryDate({ texts, today, message, pending, onAction }: {
   texts: Texts; today: string; message: string; pending: string | null; onAction: (action: string) => void;
 }) {
   const [value, setValue] = useState("");
+  const [typed, setTyped] = useState("");
   const [edited, setEdited] = useState(false);
   const t = (key: string) => text(texts, key);
   const valid = value !== "" && value <= today;
@@ -113,9 +131,9 @@ function EntryDate({ texts, today, message, pending, onAction }: {
   const warning = value > today || (!edited && isText(message, t("entry.invalid")));
   // A half-filled date is worth a confirmation before MAX closes the app over it.
   useEffect(() => {
-    closingConfirmation(value !== "");
+    closingConfirmation(typed !== "");
     return () => closingConfirmation(false);
-  }, [value]);
+  }, [typed]);
 
   return (
     <div className="stack">
@@ -124,7 +142,7 @@ function EntryDate({ texts, today, message, pending, onAction }: {
       <p className={`prose in d1 ${warning ? "banner banner-error" : ""}`} role={warning ? "alert" : undefined}>{prompt}</p>
       <div className="in d2">
         <DateField label={t("app.entryTitle")} hint={t("app.entry.hint")}
-          onChange={iso => { setValue(iso); setEdited(true); }} />
+          onChange={(iso, display) => { setValue(iso); setTyped(display); setEdited(true); }} />
       </div>
       <Button className="in d3" loading={pending !== null} disabled={!valid || pending !== null}
         onClick={() => { setEdited(false); onAction(value); }}>

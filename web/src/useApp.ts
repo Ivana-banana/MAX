@@ -32,19 +32,22 @@ export function useApp() {
   // Guards against a late response from an action the user has already replaced.
   const sequence = useRef(0);
 
-  const load = useCallback(async () => {
+  /** True when the server's state is on screen now. */
+  const load = useCallback(async (): Promise<boolean> => {
     const ticket = ++sequence.current;
     setStatus(previous => ({ ...previous, loading: previous.state === null, error: null }));
     try {
       const { state, launch } = await getState();
-      if (ticket !== sequence.current) return;
+      if (ticket !== sequence.current) return false;
       setStatus({ state, launch, loading: false, pending: null, error: null, message: "", copy: "" });
+      return true;
     } catch (e) {
-      if (ticket !== sequence.current) return;
+      if (ticket !== sequence.current) return false;
       setStatus(previous => ({
         ...previous, loading: false, pending: null,
         error: e instanceof ApiError ? e.failure : "server",
       }));
+      return false;
     }
   }, []);
 
@@ -64,8 +67,8 @@ export function useApp() {
       if (ticket !== sequence.current) return;
       const failure = e instanceof ApiError ? e.failure : "server";
       setStatus(previous => ({ ...previous, pending: null, error: failure }));
-      // Somebody else moved the session on: show the server's version rather than guess.
-      if (failure === "conflict") await load();
+      // Somebody else moved the session on: show the server's version rather than guess, then say why it changed.
+      if (failure === "conflict" && await load()) setStatus(previous => ({ ...previous, error: "conflict" }));
     }
   }, [load, status.state?.session?.revision]);
 

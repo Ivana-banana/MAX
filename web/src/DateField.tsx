@@ -10,7 +10,8 @@ import { useId, useState } from "react";
 import { mask, toIso } from "./dateInput.js";
 
 export function DateField({ label, hint, onChange }: {
-  label: string; hint: string; onChange: (iso: string) => void;
+  /** `iso` is "" until the date is complete and real; `display` is what the field shows. */
+  label: string; hint: string; onChange: (iso: string, display: string) => void;
 }) {
   const [display, setDisplay] = useState("");
   const hintId = useId();
@@ -22,7 +23,7 @@ export function DateField({ label, hint, onChange }: {
         onChange={event => {
           const next = mask(event.target.value);
           setDisplay(next);
-          onChange(toIso(next));
+          onChange(toIso(next), next);
         }}
       />
       <span className="hint" id={hintId}>{hint}</span>

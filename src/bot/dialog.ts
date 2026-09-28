@@ -97,6 +97,12 @@ function home(s: Session, ctx: DialogueContext, prefix = ""): Reply {
       [button(t(s, ctx, "btn.help"), "help")],
       [button(t(s, ctx, "btn.delete"), "delete")]]);
 }
+/** Where the checklist comes from, or that no official list is published (D-027); the app shows it too. */
+export function documentsNote(s: Session, ctx: DialogueContext, item: PlanItem): string {
+  return item.documentsSource
+    ? t(s, ctx, "card.docsSource", { url: item.documentsSource.url, date: date(s, item.documentsSource.checkedAt) })
+    : t(s, ctx, "card.docsNoSource", { uni: uni(s, ctx).name[s.lang]! });
+}
 function card(s: Session, ctx: DialogueContext, id: string): Reply {
   const item = plan(s, ctx).find(i => i.ruleId === id);
   if (!item) return home(s, ctx);
@@ -108,9 +114,7 @@ function card(s: Session, ctx: DialogueContext, id: string): Reply {
   const late = overdue ? t(s, ctx, "card.overdue", { uni: u.name[s.lang]! }) : "";
   return reply(s, ctx, `${item.title[s.lang]}\n${item.action[s.lang]}\n` + t(s, ctx, "card.deadline") + date(s, item.dueDate) +
     (item.status === "done" ? "" : ` (${countdown(s, ctx, item)})`) + target + late +
-    "\n\n" + docs.join("\n") + "\n" + (item.documentsSource
-      ? t(s, ctx, "card.docsSource", { url: item.documentsSource.url, date: date(s, item.documentsSource.checkedAt) })
-      : t(s, ctx, "card.docsNoSource", { uni: u.name[s.lang]! })) + "\n\n" + item.legal.act + ", " + item.legal.article +
+    "\n\n" + docs.join("\n") + "\n" + documentsNote(s, ctx, item) + "\n\n" + item.legal.act + ", " + item.legal.article +
     "\n" + item.legal.url + t(s, ctx, "card.checked") + item.legal.checkedAt +
     t(s, ctx, "card.confirm", { uni: u.name[s.lang]! }) + u.contactUrl,
     [...item.documents.map(d => [button((s.documents[`${key}:${d.id}`] ? "✓ " : "□ ") + d.title[s.lang], `doc:${id}:${d.id}`)]),
@@ -141,7 +145,7 @@ function help(s: Session, ctx: DialogueContext, ruleId?: string, unsupported = f
   return reply(s, ctx, t(s, ctx, overdue ? "help.intro.overdue" : "help.intro", { uni: name }) + draft +
     t(s, ctx, "help.contacts", { uni: name, url: u.contactUrl }), actions(draft));
 }
-function prompt(s: Session, ctx: DialogueContext): Reply {
+export function prompt(s: Session, ctx: DialogueContext): Reply {
   switch (s.step) {
     case "language": return reply(s, ctx, [...ctx.texts.keys()].map(l => format(ctx.texts, l, "language.choose")).join(" / "), languages(ctx));
     case "consent": return reply(s, ctx, t(s, ctx, "consent"),

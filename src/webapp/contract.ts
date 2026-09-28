@@ -27,6 +27,8 @@ export interface AppPlanItem {
   provisional: boolean;
   isRepeat: boolean;
   documents: AppDocument[];
+  /** The chat's line on where the checklist comes from, or that no official list exists (D-027). */
+  documentsNote: string;
   legal: LegalBasis;
 }
 
@@ -38,13 +40,17 @@ export interface AppSession {
   step: AppStep;
   lang: Lang;
   university: AppUniversity;
-  /** Citizenships this university's scenario supports, for the picker. */
+  /** Citizenship buttons as the chat offers them: the university's, then those the rules exclude (they lead to help). */
   citizenships: string[];
   citizenship?: string;
   entryDate?: string;
   /** Procedure the "completed" date is being asked for. */
   selected?: string;
   reminders: boolean;
+  /** The rules changed after this plan was built: the chat has stopped it (`rulesChanged`), and `plan` is empty. */
+  stale: boolean;
+  /** The dialogue's own wording of the current step (consent, scope, delete), without the demo banner. */
+  prompt: string;
   plan: AppPlanItem[];
 }
 

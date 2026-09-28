@@ -67,9 +67,9 @@ export function openLink(url: string): void {
  * Saves a file. Inside MAX only `downloadFile` works — an `<a download>` is ignored — and in a
  * browser the opposite is true, so both paths stay.
  */
-export function downloadFile(url: string, fileName: string): void {
+export async function downloadFile(url: string, fileName: string): Promise<void> {
   const bridge = app();
-  if (bridge?.downloadFile) { void bridge.downloadFile(url, fileName); return; }
+  if (bridge?.downloadFile) { await bridge.downloadFile(url, fileName); return; }
   const link = document.createElement("a");
   link.href = url;
   link.download = fileName;

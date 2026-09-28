@@ -195,8 +195,9 @@ npm start               # сервер отдаёт web/dist и /api/*
 Локальная отладка без MAX: собрать бандл (`npm run web:build`), запустить сервер с
 `APP_MODE=demo TRANSPORT=console` и открыть `http://localhost:3000/?demo=42`, где `42` —
 условный MAX ID (другое число — новый пользователь). Для горячей перезагрузки
-`npm run web:dev` поднимает Vite на 5173, сервер тогда запускается с
-`WEBAPP_DEV_ORIGIN=http://localhost:5173`. Такой запуск работает
+`npm run web:dev` поднимает Vite на 5173 и проксирует `/api` на сервер (`http://127.0.0.1:3000`),
+сервер тогда запускается с `WEBAPP_DEV_ORIGIN=http://localhost:5173`; открывать
+`http://localhost:5173/?demo=42`. Такой запуск работает
 **только** при `APP_MODE=demo` и `TRANSPORT=console`: сервер пишет в лог
 `[MOCKED: mini app launch data ...]`, а приложение показывает баннер «Запуск без
 подписи MAX». В любом другом режиме конфигурация с `WEBAPP_DEV_ORIGIN` не стартует,

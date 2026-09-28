@@ -31,11 +31,26 @@ async function copyText(value: string): Promise<boolean> {
   }
 }
 
+/** The chat's ready question to the university, with its "Copy" button. */
+export function Question({ texts, copy }: { texts: Texts; copy: string }) {
+  const t = (key: string) => text(texts, key);
+  const [copied, setCopied] = useState<boolean | null>(null);
+  return (
+    <div className="help in">
+      <h2 className="section"><span>{t("app.question")}</span></h2>
+      <p className="quote prose">{copy}</p>
+      <Button tone="ink" arrow={copied ? "✓" : "⧉"} onClick={() => void copyText(copy).then(ok => { setCopied(ok); tap(ok ? "success" : "warning"); })}>
+        {copied ? t("app.copied") : t("btn.copy")}
+      </Button>
+      {copied === false && <p className="small muted">{t("app.copyManual")}</p>}
+    </div>
+  );
+}
+
 export function Card({ session, texts, item, pending, copy, onAction }: Props) {
   const t = (key: string) => text(texts, key);
   // The help branch is the chat's: the question comes from the dialogue, not from the app.
   const [helpAsked, setHelpAsked] = useState(false);
-  const [copied, setCopied] = useState<boolean | null>(null);
   const overdue = item.status === "overdue";
   const checked = item.documents.filter(document => document.checked).length;
   const calm = item.status === "ok" || item.status === "done";
@@ -73,6 +88,7 @@ export function Card({ session, texts, item, pending, copy, onAction }: Props) {
             <span className="box" aria-hidden="true" />
           </button>
         ))}
+        <p className="small muted">{item.documentsNote}</p>
       </div>
 
       <div className="in d4">
@@ -91,21 +107,12 @@ export function Card({ session, texts, item, pending, copy, onAction }: Props) {
 
       {item.status !== "done" && !(helpAsked && copy !== "") && (
         <Button className="in d6" tone="outline" arrow="?" loading={pending === `help:${item.ruleId}`} disabled={pending !== null}
-          onClick={() => { setHelpAsked(true); setCopied(null); onAction(`help:${item.ruleId}`); }}>
+          onClick={() => { setHelpAsked(true); onAction(`help:${item.ruleId}`); }}>
           {t(overdue ? "btn.overdueHelp" : "btn.cantComplete")}
         </Button>
       )}
 
-      {helpAsked && copy !== "" && (
-        <div className="help in">
-          <h2 className="section"><span>{t("app.question")}</span></h2>
-          <p className="quote prose">{copy}</p>
-          <Button tone="ink" arrow={copied ? "✓" : "⧉"} onClick={() => void copyText(copy).then(ok => { setCopied(ok); tap(ok ? "success" : "warning"); })}>
-            {copied ? t("app.copied") : t("btn.copy")}
-          </Button>
-          {copied === false && <p className="small muted">{t("app.copyManual")}</p>}
-        </div>
-      )}
+      {helpAsked && copy !== "" && <Question key={copy} texts={texts} copy={copy} />}
 
       <button type="button" className="link in d6" onClick={() => openLink(session.university.contactUrl)}>
         {t("app.contact")}
