@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { createHmac } from "node:crypto";
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { chmodSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { connect } from "node:net";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { once } from "node:events";
@@ -48,7 +49,7 @@ async function fixture(dir = "./web/dist", devLaunch = true) {
   cleanups.push(() => store.close());
   const sent: { user: number; reply: Reply }[] = [];
   const service = new Service(store, ctx, { async send(u, reply) { sent.push({ user: u, reply }); } }, () => NOW);
-  const router = webappRouter(service, { token: TOKEN, dir, devLaunch, devOrigin: "", ticketSecret: TICKET_KEY });
+  const router = webappRouter(service, { token: TOKEN, dir, devLaunch, devOrigin: "" });
   return { store, pool, service, sent, router };
 }
 
@@ -272,6 +273,11 @@ describe("mini app HTTP surface", () => {
     expect((await fetch(`${url}/${ticket.url.replace(/.$/, "f")}`)).status).toBe(401);
     expect((await fetch(`${url}/api/calendar-ticket`, { method: "POST" })).status).toBe(401);
     expect((await fetch(`${url}/api/calendar-ticket`, { headers: auth(value) })).status).toBe(405);
+    // The signing key never leaves the process: a secret known outside it (the webhook one, which
+    // MAX holds too) cannot mint a ticket for another user.
+    const expires = Math.floor(NOW / 1000) + 60;
+    const forged = `7.${expires}.${createHmac("sha256", TICKET_KEY).update(`calendar:7:${expires}`).digest("hex")}`;
+    expect((await fetch(`${url}/api/calendar.ics?ticket=${forged}`)).status).toBe(401);
   });
   it("accepts an unsigned demo launch only where the config allows one", async () => {
     const open = await fixture();
@@ -320,6 +326,44 @@ describe("mini app HTTP surface", () => {
     // The webhook still belongs to the bot.
     expect((await fetch(`${url}/webhook`, { method: "POST" })).status).toBe(401);
     expect((await fetch(`${url}/health`)).status).toBe(200);
+  });
+  // Root reads any file, so an unreadable one cannot be staged there.
+  it.skipIf(process.getuid?.() === 0)("survives a bundle file that fails to open after the headers went out", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "webapp-"));
+    cleanups.push(async () => rmSync(dir, { recursive: true, force: true }));
+    writeFileSync(join(dir, "index.html"), "<!doctype html><title>app</title>");
+    writeFileSync(join(dir, "locked-ABCDEFGH.js"), "export const ok = 1;");
+    chmodSync(join(dir, "locked-ABCDEFGH.js"), 0o000);
+    const f = await fixture(dir);
+    const url = await serve(f.router, f.service);
+    const crashes: unknown[] = [];
+    const record = (e: unknown) => { crashes.push(e); };
+    process.on("unhandledRejection", record);
+    cleanups.push(async () => { process.off("unhandledRejection", record); });
+    await fetch(`${url}/locked-ABCDEFGH.js`).then(r => r.text()).catch(() => "");
+    await new Promise(done => setTimeout(done, 50));
+    expect(crashes).toEqual([]);
+    expect((await fetch(`${url}/health`)).status).toBe(200);
+  });
+  it("closes the file when a client drops a download halfway", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "webapp-"));
+    cleanups.push(async () => rmSync(dir, { recursive: true, force: true }));
+    writeFileSync(join(dir, "big-ABCDEFGH.js"), "x".repeat(4_000_000));
+    const f = await fixture(dir);
+    const pending = new Set<Promise<boolean>>();
+    const tracked: typeof f.router = (req, res) => {
+      const handled = f.router(req, res);
+      pending.add(handled);
+      void handled.finally(() => pending.delete(handled)).catch(() => {});
+      return handled;
+    };
+    const url = new URL(await serve(tracked, f.service));
+    const socket = connect(Number(url.port), url.hostname);
+    socket.write(`GET /big-ABCDEFGH.js HTTP/1.1\r\nHost: ${url.host}\r\n\r\n`);
+    await once(socket, "data");
+    socket.destroy();
+    for (let n = 0; n < 50 && pending.size > 0; n++) await new Promise(done => setTimeout(done, 20));
+    expect(pending.size).toBe(0);
   });
   it("answers 404 for the app while no bundle has been built", async () => {
     const f = await fixture(join(tmpdir(), "webapp-missing-on-purpose"));

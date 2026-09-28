@@ -18,23 +18,16 @@ const store = await PostgresStore.open(pool);
 const service = new Service(store, { rules: rules.rules, universities, texts, version: rules.version, demo: config.mode === "demo",
   ...(config.webappBot ? { webApp: config.webappBot } : {}) }, createTransport(config));
 const webapp = webappRouter(service, { token: config.token, dir: config.webappDir,
-  devLaunch: webappDevLaunch(config), devOrigin: config.webappDevOrigin, ticketSecret: config.secret });
+  devLaunch: webappDevLaunch(config), devOrigin: config.webappDevOrigin });
 const server = webhookServer(service, config.secret, webapp);
 server.requestTimeout = 10000;
 server.headersTimeout = 10000;
-await service.maintain();
-let maintenance = Date.now();
 let active: Promise<void> | undefined;
 const timer = setInterval(() => {
   if (active) return;
-  active = (async () => {
-    if (Date.now() - maintenance > 60000) {
-      try { await service.maintain(); maintenance = Date.now(); }
-      catch { console.error("Maintenance failed; inspect storage."); return; }
-    }
-    try { await service.flush(); }
-    catch { console.error("Queue processing failed; inspect storage and health counters."); }
-  })().finally(() => { active = undefined; });
+  active = service.tick()
+    .catch(() => { console.error("Queue processing failed; inspect storage and health counters."); })
+    .finally(() => { active = undefined; });
 }, 1000);
 server.listen(config.port, config.host, () => {
   console.log(JSON.stringify({ event: "started", mode: config.mode, transport: config.transport, port: config.port,

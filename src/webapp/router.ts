@@ -7,9 +7,10 @@
  * in the request body.
  */
 
-import { createHmac, timingSafeEqual } from "node:crypto";
+import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import { createReadStream } from "node:fs";
 import { stat } from "node:fs/promises";
+import { pipeline } from "node:stream/promises";
 import { join, normalize, resolve, sep } from "node:path";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { plan } from "../bot/dialog.js";
@@ -30,8 +31,6 @@ export interface WebappOptions {
   devLaunch: boolean;
   /** Origin of the Vite dev server, allowed through CORS during local development only. */
   devOrigin: string;
-  /** Signs short-lived download tickets. Any server secret; never leaves the server. */
-  ticketSecret: string;
 }
 
 /**
@@ -156,6 +155,9 @@ async function icsFor(service: Service, user: number): Promise<string | null> {
  */
 export function webappRouter(service: Service, options: WebappOptions) {
   const root = resolve(options.dir);
+  // Tickets live five minutes, so a key of this process alone is enough, and no configured secret
+  // (the webhook one is known to MAX as well) can mint a ticket for somebody else.
+  const ticketSecret = randomBytes(32).toString("hex");
   return async function handle(req: IncomingMessage, res: ServerResponse): Promise<boolean> {
     const url = new URL(req.url ?? "/", "http://localhost");
     const path = url.pathname;
@@ -183,7 +185,7 @@ export function webappRouter(service: Service, options: WebappOptions) {
       try {
         // The calendar file is the one route a ticket may open: a download carries no header.
         const ticket = path === "/api/calendar.ics" ? url.searchParams.get("ticket") : null;
-        const ticketUser = ticket === null ? null : readTicket(options.ticketSecret, ticket, service.clock());
+        const ticketUser = ticket === null ? null : readTicket(ticketSecret, ticket, service.clock());
         if (ticket !== null && ticketUser === null) throw new HttpError(401, "unauthorized");
         const caller = ticketUser === null
           ? authenticate(req, options, service.clock())
@@ -217,7 +219,7 @@ export function webappRouter(service: Service, options: WebappOptions) {
         if (path === "/api/calendar-ticket") {
           if (req.method !== "POST") throw new HttpError(405, "method_not_allowed");
           send(200, {
-            url: `api/calendar.ics?ticket=${issueTicket(options.ticketSecret, caller.user, service.clock())}`,
+            url: `api/calendar.ics?ticket=${issueTicket(ticketSecret, caller.user, service.clock())}`,
             fileName: CALENDAR_FILE, expiresIn: TICKET_TTL,
           });
           return true;
@@ -272,9 +274,9 @@ export function webappRouter(service: Service, options: WebappOptions) {
       "referrer-policy": "no-referrer",
     }));
     if (req.method === "HEAD") { res.end(); return true; }
-    await new Promise<void>((done, fail) => {
-      createReadStream(file).on("error", fail).pipe(res).on("finish", () => done()).on("error", fail);
-    });
+    // pipeline closes the file when the client drops the download. Headers are already out, so a
+    // read error can only cut the response short, not turn into a second answer.
+    try { await pipeline(createReadStream(file), res); } catch { res.destroy(); }
     return true;
   };
 }

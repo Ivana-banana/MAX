@@ -17,7 +17,7 @@ export function webhookServer(service: Service, secret: string, extra?: ExtraRou
     if (extra) {
       // The mini app answers its own routes; anything it does not own falls through to the webhook.
       try { if (await extra(req, res)) return; }
-      catch { send(503, { error: "webapp_unavailable" }); return; }
+      catch { if (res.headersSent) res.destroy(); else send(503, { error: "webapp_unavailable" }); return; }
     }
     if (req.method !== "POST" || req.url !== "/webhook") { send(404, { error: "not_found" }); return; }
     const header = req.headers["x-max-bot-api-secret"];

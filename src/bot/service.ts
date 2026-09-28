@@ -43,6 +43,7 @@ export function moscowDate(now: number): string {
 }
 export class Service {
   private sending = false;
+  private maintained = -Infinity;
   constructor(readonly store: PostgresStore, readonly context: Omit<DialogueContext, "today">, readonly transport: Transport, readonly clock: () => number = Date.now) {}
   ctx(): DialogueContext { return { ...this.context, today: moscowDate(this.clock()) }; }
   // Resolves after COMMIT: the webhook answers 200 only for a stored update.
@@ -82,6 +83,16 @@ export class Service {
     for (const { user } of await this.store.sessions()) {
       await this.store.transaction(user, async tx => this.scheduleUser(tx, user, await tx.get()));
     }
+  }
+  /** One pass of the background loop: maintenance once a minute, then the queue. */
+  async tick(): Promise<void> {
+    const now = this.clock();
+    if (now - this.maintained >= 60_000) {
+      this.maintained = now;
+      // Maintenance only prunes and schedules reminders: its failure must not hold back replies already queued.
+      try { await this.maintain(); } catch { console.error("Maintenance failed; inspect storage."); }
+    }
+    await this.flush();
   }
   async flush(limit = 20): Promise<void> {
     if (this.sending) return;

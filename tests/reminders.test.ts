@@ -71,3 +71,19 @@ describe("one follow-up the day after the calculated date", () => {
     expect(done.reminders().some(r => r.includes("расчётный срок был до 30 сентября 2026 г."))).toBe(false);
   });
 });
+
+describe("the background loop", () => {
+  it("keeps delivering replies when maintenance fails on one unreadable profile", async () => {
+    const schema = await testSchema(); cleanups.push(schema.drop);
+    const { store, pool } = await schema.open();
+    cleanups.push(() => store.close());
+    const sent: Reply[] = [];
+    const service = new Service(store, context, { async send(_u, reply) { sent.push(reply); } },
+      () => Date.parse("2026-09-24T10:00:00+03:00"));
+    await pool.query("INSERT INTO sessions (user_id, data, updated_at) VALUES (99, $1::jsonb, $2)",
+      [JSON.stringify({ step: "written-by-a-newer-build" }), Date.parse("2026-09-24T10:00:00+03:00")]);
+    await service.receive({ id: "1", user: 1, input: { text: "/start", callback: false } });
+    await service.tick();
+    expect(sent).toHaveLength(1);
+  });
+});
