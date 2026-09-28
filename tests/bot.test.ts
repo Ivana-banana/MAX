@@ -199,6 +199,28 @@ describe("webhook boundary and release guards", () => {
     expect(()=>readConfig({TRANSPORT:"max",MAX_BOT_TOKEN:"t",WEBHOOK_SECRET:"your-demo-secret-change-before-deploy",
       DATABASE_URL:"postgresql://bot:local-demo-only-not-for-deployment@postgres:5432/bot"})).toThrow(/POSTGRES_PASSWORD/);
   });
+  it("keeps only a 7–40 character hexadecimal deployed commit and never refuses to start over it", () => {
+    const env = { DATABASE_URL: "postgresql://unused" };
+    expect(readConfig({ ...env, DEPLOYED_COMMIT: "a1B2c3D" }).deployedCommit).toBe("a1B2c3D");
+    expect(readConfig(env).deployedCommit).toBe("");
+    expect(readConfig({ ...env, DEPLOYED_COMMIT: "" }).deployedCommit).toBe("");
+    for (const value of ["abc123", "a".repeat(41), "abcdefg!", " abcdefg", "abcdefg\n"]) {
+      expect(readConfig({ ...env, DEPLOYED_COMMIT: value }).deployedCommit).toBe("");
+    }
+  });
+  it("includes the deployed commit in health only when configured", async () => {
+    const f=await fixture(), commit="a1b2c3d4e5f6";
+    const server=webhookServer(f.service,"test-secret",undefined,readConfig({
+      DATABASE_URL:"postgresql://unused",DEPLOYED_COMMIT:commit,
+    }).deployedCommit);
+    server.listen(0,"127.0.0.1"); await once(server,"listening");
+    const addr=server.address() as {port:number};
+    try {
+      const response=await fetch(`http://127.0.0.1:${addr.port}/health`);
+      expect(response.status).toBe(200);
+      expect(await response.json()).toEqual({status:"ok",mode:"demo",queue:await f.store.counts(),commit});
+    } finally { server.closeAllConnections(); await new Promise<void>(resolve=>server.close(()=>resolve())); }
+  });
   it("authenticates HTTP, validates JSON and accepts repeated events once", async () => {
     const f=await fixture(), server=webhookServer(f.service,"test-secret");
     server.listen(0,"127.0.0.1"); await once(server,"listening");
@@ -213,7 +235,7 @@ describe("webhook boundary and release guards", () => {
       expect((await fetch(url+"/webhook",{method:"POST",body,headers})).status).toBe(200);
       expect((await fetch(url+"/webhook",{method:"POST",body,headers})).status).toBe(200);
       expect((await f.store.counts()).pending).toBe(1);
-      expect(await (await fetch(url+"/health")).json()).toMatchObject({mode:"demo"});
+      expect(await (await fetch(url+"/health")).json()).toEqual({status:"ok",mode:"demo",queue:await f.store.counts()});
       // A storage failure is not acknowledged: MAX redelivers the update later.
       await f.pool.query("DROP TABLE sessions");
       const other=JSON.stringify({update_type:"bot_started",timestamp:124,user:{user_id:2}});

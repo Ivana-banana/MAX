@@ -3,14 +3,15 @@ import { timingSafeEqual } from "node:crypto";
 import { parseUpdate, Service } from "./service.js";
 /** Mini app routes, if one is enabled: returns true once it has answered the request. */
 export type ExtraRoutes = (req: IncomingMessage, res: ServerResponse) => Promise<boolean>;
-export function webhookServer(service: Service, secret: string, extra?: ExtraRoutes) {
+export function webhookServer(service: Service, secret: string, extra?: ExtraRoutes, commit = "") {
   return createServer(async (req, res) => {
     const send = (status: number, value: object) => {
       res.writeHead(status, { "content-type": "application/json", "cache-control": "no-store" });
       res.end(JSON.stringify(value));
     };
     if (req.method === "GET" && req.url === "/health") {
-      try { send(200, { status: "ok", mode: service.context.demo ? "demo" : "live", queue: await service.store.counts() }); }
+      try { send(200, { status: "ok", mode: service.context.demo ? "demo" : "live", queue: await service.store.counts(),
+        ...(commit ? { commit } : {}) }); }
       catch { send(503, { error: "storage_unavailable" }); }
       return;
     }

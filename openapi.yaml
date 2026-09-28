@@ -28,6 +28,7 @@ paths:
                   status: {type: string, const: ok}
                   mode: {type: string, enum: [demo, live]}
                   queue: {type: object, additionalProperties: {type: integer}}
+                  commit: {type: string, pattern: '^[a-fA-F0-9]{7,40}$', description: 'Хеш выкаченного коммита; отсутствует, если DEPLOYED_COMMIT не задан.'}
         '503': {description: Storage unavailable}
   /webhook:
     post:

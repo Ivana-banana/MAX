@@ -19,7 +19,7 @@ const service = new Service(store, { rules: rules.rules, universities, texts, ve
   ...(config.webappBot ? { webApp: config.webappBot } : {}) }, createTransport(config));
 const webapp = webappRouter(service, { token: config.token, dir: config.webappDir,
   devLaunch: webappDevLaunch(config), devOrigin: config.webappDevOrigin });
-const server = webhookServer(service, config.secret, webapp);
+const server = webhookServer(service, config.secret, webapp, config.deployedCommit);
 server.requestTimeout = 10000;
 server.headersTimeout = 10000;
 let active: Promise<void> | undefined;

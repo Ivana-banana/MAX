@@ -8,7 +8,8 @@
 ДЕМО): [max.ru/t149_hakaton_max_bot](https://max.ru/t149_hakaton_max_bot), проверка
 живости — https://81-26-178-75.sslip.io/health. 25.09 на сервер выкачен `main` с
 PostgreSQL и мини-приложением (docs/verification-2026-09-25.md); точный коммит — в
-`DEPLOYED_COMMIT` на ВМ и в HANDOFF. Ручной прогон выкаченной версии по
+`DEPLOYED_COMMIT` на ВМ и в HANDOFF; после передачи переменной в контейнер он виден
+в поле `commit` ответа `/health`. Ручной прогон выкаченной версии по
 docs/max-manual-check.md (шаги 1–24, включая мини-приложение) — 25–27.09 в мобильной и
 веб-версии MAX, скриншоты мобильной — в images/max-check (docs/verification-2026-09-27.md).
 Все нормативные правила — draft; APP_MODE=live их блокирует.
@@ -137,6 +138,7 @@ BY и въезд до сентября не получают нормативн�
 | PORT / HOST | 3000 / 127.0.0.1 | прямой запуск; Docker задаёт HOST=0.0.0.0 |
 | POSTGRES_PASSWORD | публичное локальное демозначение | пароль PostgreSQL в Compose, только буквы и цифры; для max нужен собственный |
 | DATABASE_URL | — (обязательна) | строка подключения PostgreSQL; Compose собирает её сам из POSTGRES_PASSWORD |
+| DEPLOYED_COMMIT | пусто | хеш выкаченного коммита (7–40 hex) для поля `commit` в `/health`; пустое или некорректное значение — поля нет |
 | RULES_PATH | ./src/data/rules/ru-student.json | путь к справочнику |
 | WEBHOOK_URL | пусто | https://ваш-домен/webhook для регистрации |
 | UNIVERSITIES_PATH | ./src/data/universities | каталог профилей вузов (JSON) |
