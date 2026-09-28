@@ -22,12 +22,12 @@
 - **Сделано в `main`**: движок сроков, диалог ru/en/uz/zh, очередь и напоминания, webhook,
   диплинк вуза и QR-плакат, подсказки команд, календарь `.ics` и кнопки MAX, мини-приложение
   (облик — `D-029`, шрифты — `D-030`), Docker, README, CI, развёртывание; проверки — в [`tests/`](tests/).
-- **На сервере** по сравнению хешей бандла 28.09 — `bc649ef`, текущий `0ed918a` ещё не выкачен;
-  способ сверки и предел доказательства — в разделе «Деплой» ниже. Бот работает в `APP_MODE=demo`
+- **На сервере** с 28.09 — `8bcb1cd`, видно в поле `commit` ответа `/health`
+  ([`docs/verification-2026-09-28.md`](docs/verification-2026-09-28.md)). Бот работает в `APP_MODE=demo`
   ([`docs/verification-2026-09-27.md`](docs/verification-2026-09-27.md)). Руками 25–27.09 на
   выкаченной версии пройдены шаги 1–24: мобильная версия со скриншотами
   [`images/max-check/`](images/max-check/), веб — со слов проверявшего, без скриншотов
-  ([`docs/verification-2026-09-27.md`](docs/verification-2026-09-27.md)). На `0ed918a` прогона нет.
+  ([`docs/verification-2026-09-27.md`](docs/verification-2026-09-27.md)). На `8bcb1cd` прогона нет.
 - **Презентация** обновлена 27.09: [`docs/presentation/manifest.json`](docs/presentation/manifest.json)
   указывает `checkedCodeCommit=208b15a`, `team=null`; PDF содержит скриншоты из MAX
   ([`docs/verification-2026-09-27.md`](docs/verification-2026-09-27.md)); 28.09 добавлены резюме на
@@ -121,7 +121,7 @@ end-to-end в MAX, потом сдача, потом презентация.
 этого бандла со сборкой `bc649ef` и сборкой текущего `0ed918a`
 (`assets/index-IJ0tKCcZ.js`) указывает на выкаченный `bc649ef`; это вывод по бандлу,
 не чтение `DEPLOYED_COMMIT` на ВМ. Четыре коммита от 28.09 — `ae6198b`, `ef729a6`,
-`547cf17`, `0ed918a` ещё требуют выкатки и ручного прогона в MAX. Ранее commit на сервере
+`547cf17`, `0ed918a` выкачены 28.09 в составе `8bcb1cd`; ручного прогона в MAX ещё нет. Ранее commit на сервере
 также не был сверен напрямую ([`docs/verification-2026-09-27.md`](docs/verification-2026-09-27.md));
 сборка мини-приложения описана в [`web/package.json`](web/package.json), загрузка бандла —
 в [`src/webapp/router.ts`](src/webapp/router.ts).
