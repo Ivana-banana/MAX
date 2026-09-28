@@ -263,6 +263,7 @@ postgresDescribe("PostgreSQL storage", () => {
     const third = await db.claim(100, randomUUID());
 
     expect(first?.id).toBe("b-tie");
+    expect(first?.attempts).toBe(0);
     expect(first?.lease_token).toBe(firstToken);
     expect(first?.user_id).toBe(47);
     expect(JSON.parse(first?.payload ?? "null")).toEqual({ ruleId: "b", dueDate: "2026-10-01" });
@@ -333,7 +334,40 @@ postgresDescribe("PostgreSQL storage", () => {
       "SELECT status, attempts, lease_token FROM outbox WHERE id = $1",
       ["lease-job"],
     );
-    expect(row?.rows[0]).toMatchObject({ status: "sending", attempts: 0, lease_token: newToken });
+    expect(row?.rows[0]).toMatchObject({ status: "sending", attempts: 1, lease_token: newToken });
+    await db.retry(reClaimed, 60_102);
+    const retried = await pool?.query<{ status: string; attempts: number }>(
+      "SELECT status, attempts FROM outbox WHERE id = $1",
+      ["lease-job"],
+    );
+    expect(retried?.rows[0]).toEqual({ status: "pending", attempts: 2 });
+  });
+
+  it("fails a job after eight consecutive expired leases", async () => {
+    const db = getStore(store);
+    await db.transaction(54, (tx) => tx.enqueue(
+      "expired-lease-job",
+      { ruleId: "a", dueDate: "2026-10-01" },
+      "reminder",
+      100,
+      100,
+    ));
+    const first = await db.claim(100, randomUUID());
+    expect(first?.attempts).toBe(0);
+
+    for (let expiry = 1; expiry < 8; expiry += 1) {
+      const job = await db.claim(100 + expiry * 60_000, randomUUID());
+      expect(job?.id).toBe("expired-lease-job");
+      expect(job?.attempts).toBe(expiry);
+    }
+
+    expect(await db.claim(100 + 8 * 60_000, randomUUID())).toBeUndefined();
+    const row = await pool?.query<{ status: string; attempts: number; lease_token: string | null }>(
+      "SELECT status, attempts, lease_token FROM outbox WHERE id = $1",
+      ["expired-lease-job"],
+    );
+    expect(row?.rows[0]).toEqual({ status: "failed", attempts: 8, lease_token: null });
+    expect(await db.claim(100 + 9 * 60_000, randomUUID())).toBeUndefined();
   });
 
   it("retries with exponential backoff and fails after eight attempts", async () => {

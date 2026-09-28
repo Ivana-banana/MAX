@@ -156,14 +156,20 @@ export class PostgresStore {
          ORDER BY next_attempt, created_at, id
          LIMIT 1
          FOR UPDATE SKIP LOCKED
+       ), claimed AS (
+         UPDATE outbox AS job
+         SET attempts = job.attempts + CASE WHEN job.status = 'sending' THEN 1 ELSE 0 END,
+             status = CASE WHEN job.status = 'sending' AND job.attempts + 1 >= $4 THEN 'failed' ELSE 'sending' END,
+             lease_token = CASE WHEN job.status = 'sending' AND job.attempts + 1 >= $4 THEN NULL ELSE $2::uuid END,
+             lease_until = CASE WHEN job.status = 'sending' AND job.attempts + 1 >= $4 THEN NULL ELSE $3::bigint END
+         FROM candidate
+         WHERE job.id = candidate.id
+         RETURNING job.id, job.user_id, job.payload::text AS payload, job.kind,
+                   job.attempts, job.next_attempt, job.lease_token, job.status
        )
-       UPDATE outbox AS job
-       SET status = 'sending', lease_token = $2::uuid, lease_until = $3
-       FROM candidate
-       WHERE job.id = candidate.id
-       RETURNING job.id, job.user_id, job.payload::text AS payload, job.kind,
-                 job.attempts, job.next_attempt, job.lease_token`,
-      [now, leaseToken, leaseUntil],
+       SELECT id, user_id, payload, kind, attempts, next_attempt, lease_token
+       FROM claimed WHERE status = 'sending'`,
+      [now, leaseToken, leaseUntil, maxAttempts],
     );
     const row = result.rows[0];
     return row ? readClaimedJob(row) : undefined;
