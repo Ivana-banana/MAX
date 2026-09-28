@@ -92,6 +92,26 @@ def phones(items):
         text(label, x + 222, 220, 160, 15, TEAL, True)
         text(body, x + 222, 252, 160, 17, MUTED, max_h=360)
 
+def arrow(x1, y1, x2, y2, color=MUTED, both=False, width=2):
+    """Straight arrow in top-left coordinates; head at (x2, y2), optionally at both ends."""
+    from math import atan2, cos, sin
+    c.setStrokeColor(HexColor(color)); c.setFillColor(HexColor(color)); c.setLineWidth(width)
+    c.line(x1, H-y1, x2, H-y2)
+    ends = [(x1, y1, x2, y2)] + ([(x2, y2, x1, y1)] if both else [])
+    for ax, ay, bx, by in ends:
+        a = atan2(-(by - ay), bx - ax)
+        p = c.beginPath()
+        p.moveTo(bx, H-by)
+        for d in (2.7, -2.7):
+            p.lineTo(bx - 11*cos(a + d/6), H-by - 11*sin(a + d/6))
+        p.close()
+        c.drawPath(p, stroke=0, fill=1)
+
+def node(x, y, w, h, title, body, color=WHITE):
+    rect(x, y, w, h, color, 12)
+    text(title, x+16, y+14, w-32, 17, INK, True, max_h=26)
+    text(body, x+16, y+42, w-32, 14, MUTED, max_h=h-50)
+
 def card(x, y, w, h, number, title, body, color=WHITE, body_size=21):
     rect(x, y, w, h, color)
     text(number, x+24, y+20, w-48, 15, TEAL, True)
@@ -207,14 +227,31 @@ text('ЧЕМ ОТЛИЧАЕМСЯ', 846, 236, 356, 15, TEAL, True)
 text('• Своя дата каждой процедуры от даты въезда — по норме с датой сверки [5]\n• Повтор медосвидетельствования через год\n• Комплект документов к каждой процедуре\n• Напоминания и файл для календаря\n• Готовый вопрос вузу\n• Четыре языка, в MAX без установки', 846, 272, 356, 17, INK, max_h=350)
 
 start('архитектура', 'Состояние и ответ сохраняются вместе', 'Один Node.js-процесс · PostgreSQL 16 · официальный SDK MAX 0.3.1 · мини-приложение на React. [6, 8]')
-for x, n, title, body in [
-    (54, 'ВХОД', 'Webhook', 'Секрет, формат, предел размера; личный диалог. Повтор события не применяет действие заново.'),
-    (451, 'ТРАНЗАКЦИЯ', 'PostgreSQL', 'Профиль + отпечаток события + ответ в очереди под блокировкой пользователя. Квитанция webhook после COMMIT.'),
-    (848, 'ВЫХОД', 'Очередь', 'Напоминания и ответы, повторные попытки. В MAX — официальный SDK; локально — консоль.')]:
-    card(x, 227, 378, 296, n, title, body, body_size=21)
+node(54, 262, 190, 104, 'Студент', 'MAX: мобильная и веб-версия')
+node(294, 262, 190, 104, 'Платформа MAX', 'webhook, SDK, загрузка файлов')
+node(534, 262, 170, 104, 'Caddy', 'HTTPS :443, Let\'s Encrypt')
+rect(754, 216, 472, 206, WHITE, 12)
+text('Node.js-процесс · Docker на ВМ', 770, 230, 440, 17, INK, True)
+for i, (name, what) in enumerate([
+    ('/webhook', 'секрет, дедупликация, ответ после COMMIT'),
+    ('/api', 'мини-приложение, подпись initData'),
+    ('очередь', 'ответы и напоминания, повтор до 8 раз')]):
+    y = 266 + i * 50
+    rect(770, y, 440, 42, PAPER, 8)
+    text(name, 784, y + 11, 110, 15, TEAL, True)
+    text(what, 890, y + 12, 310, 14, INK, max_h=22)
+node(754, 440, 226, 90, 'PostgreSQL 16', 'профили, события, очередь')
+node(1000, 440, 226, 90, 'Данные в JSON', 'нормы, вузы, тексты 4 языков')
+arrow(244, 314, 294, 314, both=True)
+arrow(484, 314, 534, 314, both=True)
+arrow(704, 314, 754, 314, both=True)
+arrow(867, 422, 867, 440, both=True)
+arrow(1113, 440, 1113, 422)
+text('сообщения и кнопки', 54, 380, 430, 13, MUTED)
+text('webhook внутрь, ответы через SDK наружу', 294, 380, 420, 13, MUTED)
 rect(54, 547, 1172, 96, LIME)
-text('Данные и тексты — в JSON', 78, 568, 360, 24, INK, True)
-text('Нормы, вузы и тексты на 4 языках — файлы; live запрещает draft.\nМини-приложение — в том же процессе. МВД, Госуслуг и ИС КФУ нет.', 453, 566, 741, 19, INK, max_h=65)
+text('Границы', 78, 568, 360, 24, INK, True)
+text('APP_MODE=live запрещает draft-нормы; сейчас — демо-режим.\nПодключений к МВД, Госуслугам и ИС КФУ нет: отметки — со слов студента.', 453, 566, 741, 19, INK, max_h=65)
 
 start('доказательства', 'Работоспособность проверена', 'Это инженерные результаты, не измеренный эффект для студентов. [8]', dark=True)
 for x, value, label in [(54, '226', 'тестов пройдено, 1 пропущен'), (451, '64 с', 'Docker build без кеша · 8bcb1cd на ВМ'), (848, '2 / 2', 'версии MAX: мобильная (скриншоты), веб (со слов)')]:
