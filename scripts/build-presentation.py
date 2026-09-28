@@ -210,7 +210,7 @@ text('ЯДРО · БЕЗ ПРАВОК ПРИ ПЕРЕНОСЕ', 78, 234, 510, 15
 text('src/core/deadlines.ts — расчёт сроков\nsrc/bot/ — диалог и напоминания', 78, 270, 510, 18, INK, max_h=91)
 rect(639, 216, 587, 164, WHITE)
 text('ПЕРЕМЕННАЯ ЧАСТЬ · ФАЙЛЫ ДАННЫХ', 663, 234, 535, 15, TEAL, True)
-text('src/data/rules/ru-student.json — нормы\nsrc/data/universities/itmo.json — вуз\nsrc/data/i18n/ru.json — тексты', 663, 265, 535, 16, INK, max_h=106)
+text('src/data/rules/ru-student.json — нормы\nsrc/data/universities/itmo.json — вуз\nsrc/data/i18n/ru.json — тексты\nНовый вуз — один JSON, код не меняется (ИТМО; тест university)', 663, 262, 535, 16, INK, max_h=112)
 rect(54, 400, 748, 242, WHITE)
 text('ЭТАП / УСЛОВИЕ ПЕРЕХОДА', 78, 417, 700, 16, TEAL, True)
 for y, item in [

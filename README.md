@@ -386,7 +386,7 @@ docs/presentation (собрана 27.09, пересобирается на те�
 
 ## Материалы защиты
 
-[PDF: 14 слайдов](docs/presentation/first-90-days.pdf),
+[PDF: 15 слайдов](docs/presentation/first-90-days.pdf),
 [сборка и ограничения](docs/presentation/README.md),
 [заметки докладчика](docs/presentation/speaker-notes.md).
 Слайды демонстрации — скриншоты из MAX (docs/presentation/screens, из images/max-check).
