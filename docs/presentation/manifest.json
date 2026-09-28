@@ -13,9 +13,9 @@
     {"id": "2", "title": "КФУ: медицинская и дактилоскопическая процедуры", "url": "https://kpfu.ru/content_print?p_cid=420481", "claim": "Памятка разделяет сроки 30 и 90 дней."},
     {"id": "3", "title": "КФУ: сообщение о боте, 06.04.2021", "url": "https://media.kpfu.ru/news/v-kfu-zapustili-telegram-bot-po-priemu-inostrannykh-studentov", "claim": "Исторический пример цифрового канала миграционного учёта."},
     {"id": "4", "title": "ВШЭ: миграционный центр HSE App X, 28.08.2025", "url": "https://www.hse.ru/web/mobile/news/1079245402.html", "claim": "Документы, статусы, замечания и автоматические напоминания."},
-    {"id": "5", "title": "Федеральный закон № 115-ФЗ, статья 5", "url": "https://www.consultant.ru/document/cons_doc_LAW_37868/e9d581e7e11d7901295efd89c869ae044dd3d20f/", "claim": "Справочный текст для проверки draft-правил; независимая вычитка не пройдена."},
+    {"id": "5", "title": "Федеральный закон № 115-ФЗ, статья 5", "url": "https://www.consultant.ru/document/cons_doc_LAW_37868/e9d581e7e11d7901295efd89c869ae044dd3d20f/", "claim": "В ред. 162-ФЗ с 01.09.2026: медосвидетельствование — 30 дней, дактилоскопия — 90; ст. 31.2 — реестр. Юристом не вычитано."},
     {"id": "6", "title": "MAX: требования к webhook", "url": "https://dev.max.ru/docs-api/methods/POST/subscriptions", "claim": "Официальный контракт интеграции; бот работает по нему в MAX с 23.09.2026."},
-    {"id": "7", "title": "КФУ: оформление социальной стипендии", "url": "https://students.kpfu.ru/scholarship-commissions/academic", "claim": "Альтернатива для исследования; источник не доказывает частоту проблем."},
+    {"id": "7", "title": "ИТМО: миграционные документы", "url": "https://int.itmo.ru/ru/important_documents", "claim": "«30 дней» и на дактилоскопию, и на медосвидетельствование; по закону у дактилоскопии 90. Сверено 16.09.2026."},
     {"id": "8", "title": "Протокол проверок 27.09: прогон в MAX", "url": "https://github.com/M1hairu/MAX_GOATed_messenger/blob/main/docs/verification-2026-09-27.md", "claim": "Мобильная и веб-версия, шаги 1–24, скриншоты; развёртывание, Docker и секреты — в прежних протоколах по ссылкам."}
   ]
 }
