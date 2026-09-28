@@ -151,8 +151,8 @@ function asRule(value: unknown, path: string): DeadlineRule {
   }
 
   const days = term.days;
-  if (typeof days !== "number" || !Number.isInteger(days) || days <= 0) {
-    throw new RuleValidationError(`${path}.term.days`, "ожидается целое число больше нуля");
+  if (typeof days !== "number" || !Number.isInteger(days) || days < 1 || days > 3650) {
+    throw new RuleValidationError(`${path}.term.days`, "ожидается целое число от 1 до 3650");
   }
 
   const counting = asString(term.counting, `${path}.term.counting`);
@@ -164,8 +164,8 @@ function asRule(value: unknown, path: string): DeadlineRule {
   if (record.repeat !== undefined) {
     const raw = asRecord(record.repeat, `${path}.repeat`);
     const months = raw.months;
-    if (typeof months !== "number" || !Number.isInteger(months) || months <= 0) {
-      throw new RuleValidationError(`${path}.repeat.months`, "ожидается целое число больше нуля");
+    if (typeof months !== "number" || !Number.isInteger(months) || months < 1 || months > 120) {
+      throw new RuleValidationError(`${path}.repeat.months`, "ожидается целое число от 1 до 120");
     }
     const graceDays = raw.graceDays ?? 0;
     if (typeof graceDays !== "number" || !Number.isInteger(graceDays) || graceDays < 0 || graceDays > 366) {

@@ -142,6 +142,30 @@ describe("parseRuleSet", () => {
     }
   });
 
+  it("отвергает срок больше десяти лет до расчёта даты", () => {
+    const validBoundary = structuredClone(valid);
+    validBoundary.rules[0]!.term.days = 3650;
+    expect(parseRuleSet(validBoundary).rules[0]?.term.days).toBe(3650);
+
+    for (const days of [3651, 1_000_000_000]) {
+      const broken = structuredClone(valid);
+      broken.rules[0]!.term.days = days;
+      expect(() => parseRuleSet(broken), String(days)).toThrow(/term\.days\): ожидается целое число от 1 до 3650/);
+    }
+  });
+
+  it("отвергает слишком длинный период повторения до расчёта даты", () => {
+    const validBoundary = structuredClone(valid) as typeof valid & { rules: [{ repeat: { months: number } }] };
+    validBoundary.rules[0]!.repeat = { months: 120 };
+    expect(parseRuleSet(validBoundary).rules[0]?.repeat?.months).toBe(120);
+
+    for (const months of [121, 1_000_000_000]) {
+      const broken = structuredClone(validBoundary);
+      broken.rules[0]!.repeat.months = months;
+      expect(() => parseRuleSet(broken), String(months)).toThrow(/repeat\.months\): ожидается целое число от 1 до 120/);
+    }
+  });
+
   it("отвергает неизвестное поле условия", () => {
     const broken = structuredClone(valid) as unknown as { rules: { appliesIf: unknown[] }[] };
     broken.rules[0]!.appliesIf = [{ field: "hairColor", op: "eq", value: "рыжий" }];
