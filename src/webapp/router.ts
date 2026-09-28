@@ -145,9 +145,10 @@ async function icsFor(service: Service, user: number): Promise<string | null> {
   const ctx = service.ctx();
   // The chat has stopped a plan built on older rules (rulesChanged); no calendar for it either.
   if (!session || session.ruleVersion !== ctx.version) return null;
-  const items = plan(session, ctx).filter(i => i.status !== "done");
-  if (!items.length) return null;
-  return planToIcs(items, { lang: session.lang, texts: ctx.texts, demo: ctx.demo, uid: session.nonce, today: ctx.today });
+  const items = plan(session, ctx);
+  if (!items.some(i => i.status !== "done")) return null;
+  return planToIcs(items,
+    { lang: session.lang, texts: ctx.texts, demo: ctx.demo, uid: session.nonce, today: ctx.today, sequence: session.revision });
 }
 
 /**

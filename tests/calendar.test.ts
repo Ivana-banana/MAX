@@ -7,7 +7,7 @@ import raw from "../src/data/rules/ru-student.json" with { type: "json" };
 
 const { rules } = parseRuleSet(raw);
 const profile = { citizenship: "KZ", purpose: "study" as const, entryDate: "2026-09-01" };
-const options = { lang: "ru", texts: readTexts("src/data/i18n"), demo: true, uid: "abc123", today: "2026-09-24" };
+const options = { lang: "ru", texts: readTexts("src/data/i18n"), demo: true, uid: "abc123", today: "2026-09-24", sequence: 5 };
 const events = (ics: string) => ics.split("BEGIN:VEVENT").slice(1);
 
 describe("calendar export", () => {
@@ -29,11 +29,16 @@ describe("calendar export", () => {
     const late = planToIcs(buildPlan(rules, profile, {}, "2026-09-29"), { ...options, today: "2026-09-29" });
     expect(events(late).find(e => e.includes("20260930"))!.match(/BEGIN:VALARM/g)).toHaveLength(1);
   });
-  it("skips completed one-time procedures and exports the next round of repeating ones", () => {
+  it("cancels completed one-time procedures and exports the next round of repeating ones", () => {
     const plan = buildPlan(rules, profile, { fingerprinting: "2026-09-10", "medical-examination": "2026-09-20" }, "2026-09-24");
     const ics = planToIcs(plan, options).replaceAll("\r\n ", "");
-    expect(events(ics)).toHaveLength(1);
-    expect(ics).toContain("DTSTART;VALUE=DATE:20271020");
+    // A re-export must take the marked procedure out of the phone calendar, not leave its alarms firing.
+    const done = events(ics).find(e => e.includes("UID:fingerprinting-"))!;
+    expect(done).toContain("STATUS:CANCELLED");
+    expect(done).not.toContain("BEGIN:VALARM");
+    const next = events(ics).find(e => e.includes("UID:medical-examination-"))!;
+    expect(next).not.toContain("STATUS:CANCELLED");
+    expect(next).toContain("DTSTART;VALUE=DATE:20271020");
     expect(ics).toContain("Рекомендуемая дата: 2027-09-20");
   });
   it("marks demo data, calculated status and the legal source", () => {
@@ -54,6 +59,9 @@ describe("calendar export", () => {
     const first = planToIcs(buildPlan(rules, profile, {}, "2026-09-24"), options);
     const again = planToIcs(buildPlan(rules, profile, {}, "2026-09-25"), { ...options, today: "2026-09-25" });
     expect(uids(again)).toEqual(uids(first));
+    // A changed event carries a higher SEQUENCE, so the calendar takes it as the newer version.
+    expect(first.match(/^SEQUENCE:5$/gm)).toHaveLength(2);
+    expect(planToIcs(buildPlan(rules, profile, {}, "2026-09-25"), { ...options, sequence: 9 })).toMatch(/^SEQUENCE:9$/m);
     expect(uids(planToIcs(buildPlan(rules, profile, {}, "2026-09-24"), { ...options, uid: "other" }))).not.toEqual(uids(first));
   });
 });

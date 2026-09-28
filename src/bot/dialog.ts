@@ -123,10 +123,11 @@ function card(s: Session, ctx: DialogueContext, id: string): Reply {
       [button(t(s, ctx, overdue ? "btn.overdueHelp" : "btn.cantComplete"), `help:${id}`), button(t(s, ctx, "btn.plan"), "plan")]]);
 }
 function calendar(s: Session, ctx: DialogueContext): Reply {
-  const items = plan(s, ctx).filter(i => i.status !== "done");
-  if (!items.length) return home(s, ctx);
+  const items = plan(s, ctx);
+  if (!items.some(i => i.status !== "done")) return home(s, ctx);
   return { ...reply(s, ctx, t(s, ctx, "calendar.intro"), [[button(t(s, ctx, "btn.plan"), "plan")]]),
-    file: { name: CALENDAR_FILE, content: planToIcs(items, { lang: s.lang, texts: ctx.texts, demo: ctx.demo, uid: s.nonce, today: ctx.today }) } };
+    file: { name: CALENDAR_FILE, content: planToIcs(items,
+      { lang: s.lang, texts: ctx.texts, demo: ctx.demo, uid: s.nonce, today: ctx.today, sequence: s.revision }) } };
 }
 function help(s: Session, ctx: DialogueContext, ruleId?: string, unsupported = false): Reply {
   const item = ruleId ? plan(s, ctx).find(i => i.ruleId === ruleId) : undefined;
