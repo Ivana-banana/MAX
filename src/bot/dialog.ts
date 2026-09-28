@@ -15,6 +15,8 @@ export interface Session {
   revision: number;
   lang: Lang;
   step: "language" | "consent" | "scope" | "citizenship" | "entry" | "plan" | "completion" | "delete";
+  /** Step the delete confirmation was opened from, so "Cancel" returns there. */
+  back?: Session["step"];
   university?: string;
   citizenship?: string;
   entryDate?: string;
@@ -31,7 +33,8 @@ export interface DialogueContext {
 }
 // locale comes only with bot_started (MAX client language); a ?start= payload arrives as "/start <payload>"
 export interface Input { text: string; callback: boolean; locale?: string }
-export interface Transition { session: Session | null; reply: Reply }
+/** `expired`: a stale button was refused and nothing changed. */
+export interface Transition { session: Session | null; reply: Reply; expired?: true }
 // Every user-facing text comes from src/data/i18n/<lang>.json.
 const t = (s: Session, ctx: DialogueContext, key: string, vars?: Record<string, string | number>) => format(ctx.texts, s.lang, key, vars);
 // Sessions created before university profiles existed have no id and fall back to the default one.
@@ -121,7 +124,7 @@ function calendar(s: Session, ctx: DialogueContext): Reply {
   return { ...reply(s, ctx, t(s, ctx, "calendar.intro"), [[button(t(s, ctx, "btn.plan"), "plan")]]),
     file: { name: CALENDAR_FILE, content: planToIcs(items, { lang: s.lang, texts: ctx.texts, demo: ctx.demo, uid: s.nonce, today: ctx.today }) } };
 }
-function help(s: Session, ctx: DialogueContext, ruleId?: string): Reply {
+function help(s: Session, ctx: DialogueContext, ruleId?: string, unsupported = false): Reply {
   const item = ruleId ? plan(s, ctx).find(i => i.ruleId === ruleId) : undefined;
   const back = profile(s) ? [[button(t(s, ctx, "btn.plan"), "plan")]] : [];
   const u = uni(s, ctx), name = u.name[s.lang]!;
@@ -129,7 +132,8 @@ function help(s: Session, ctx: DialogueContext, ruleId?: string): Reply {
     [link(t(s, ctx, "btn.page", { uni: name }), u.contactUrl)], ...back];
   if (!item) {
     const draft = t(s, ctx, "help.generic.draft", { uni: name });
-    return reply(s, ctx, t(s, ctx, "help.generic", { draft, uni: name, url: u.contactUrl }), actions(draft));
+    return reply(s, ctx, (unsupported ? t(s, ctx, "help.unsupported") : "") +
+      t(s, ctx, "help.generic", { draft, uni: name, url: u.contactUrl }), actions(draft));
   }
   const who = t(s, ctx, "help.who", { citizenship: country(s, ctx, s.citizenship!), entry: date(s, s.entryDate!) });
   const overdue = item.status === "overdue";
@@ -163,21 +167,26 @@ export function transition(previous: Session | null, input: Input, ctx: Dialogue
     action = action.slice(separator + 1);
     const current = stamp === `${s.nonce}.${s.revision}`;
     if (!previous || !(current || (stamp.startsWith(`${s.nonce}.`) && navigation(action) && profile(s)))) {
-      return { session: previous, reply: reply(s, ctx, t(s, ctx, "expired")) };
+      return { session: previous, reply: reply(s, ctx, t(s, ctx, "expired")), expired: true };
     }
     if (!current) { s.step = "plan"; delete s.selected; }
   }
   s.revision++;
-  if (action === "/delete" || action === "delete") { s.step = "delete"; return { session: s, reply: prompt(s, ctx) }; }
+  if (action === "/delete" || action === "delete") {
+    if (s.step !== "delete") s.back = s.step;
+    s.step = "delete"; return { session: s, reply: prompt(s, ctx) };
+  }
   if (s.step === "delete" && action === "confirm-delete") {
     return { session: null, reply: reply(s, ctx, t(s, ctx, "deleted")) };
   }
-  if (s.step === "delete" && action === "cancel-delete") { s.step = profile(s) ? "plan" : "language"; }
+  if (s.step === "delete" && action === "cancel-delete") { s.step = s.back ?? (profile(s) ? "plan" : "language"); delete s.back; }
   if (action === "/stop") { s.reminders = false; return { session: s, reply: reply(s, ctx, t(s, ctx, "stopped")) }; }
   if (s.ruleVersion !== ctx.version) {
     s.reminders = false;
     return { session: s, reply: reply(s, ctx, t(s, ctx, "rulesChanged")) };
   }
+  // Back on the step the deletion was cancelled from: its question again, not an answer to it.
+  if (action === "cancel-delete") return { session: s, reply: prompt(s, ctx) };
   const start = /^\/start(?:\s+(\S+))?$/.exec(action);
   if (start) {
     // A university's QR code opens max.ru/<bot>?start=<id>; the choice is fixed once the plan exists.
@@ -187,7 +196,8 @@ export function transition(previous: Session | null, input: Input, ctx: Dialogue
     if (s.step === "language" && lang && ctx.texts.has(lang)) { s.lang = lang; s.step = "consent"; }
     return { session: s, reply: prompt(s, ctx) };
   }
-  if (action === "/help" || action === "help" || action === "no" || action === "OTHER" || coverage(ctx.rules).excluded.includes(action)) return { session: s, reply: help(s, ctx) };
+  if (action === "/help" || action === "help") return { session: s, reply: help(s, ctx) };
+  if (action === "no" || action === "OTHER" || coverage(ctx.rules).excluded.includes(action)) return { session: s, reply: help(s, ctx, undefined, true) };
   if (action.startsWith("help:")) return { session: s, reply: help(s, ctx, action.slice(5)) };
   if (s.step === "language" && ctx.texts.has(action)) { s.lang = action; s.step = "consent"; }
   else if (s.step === "consent" && ctx.texts.has(action)) s.lang = action;

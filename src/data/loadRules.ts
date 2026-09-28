@@ -37,6 +37,13 @@ function asString(value: unknown, path: string): string {
   return value;
 }
 
+/** Ids travel in button payloads split on ":" and in the mini app's action grammar (src/webapp/state.ts). */
+function asId(value: unknown, path: string): string {
+  const id = asString(value, path);
+  if (!/^[a-z0-9-]{1,64}$/.test(id)) throw new RuleValidationError(path, `ожидается id из a-z, 0-9 и «-», получено «${id}»`);
+  return id;
+}
+
 function asDate(value: unknown, path: string): string {
   const raw = asString(value, path);
   if (!isValidDate(raw)) {
@@ -65,7 +72,12 @@ function asCondition(value: unknown, path: string): Condition {
     if (!Array.isArray(record.values) || record.values.length === 0) {
       throw new RuleValidationError(`${path}.values`, "ожидается непустой массив");
     }
-    const values = record.values.map((v, i) => asString(v, `${path}.values[${i}]`));
+    // Profiles and universities use upper-case ISO codes; "by" would silently match nobody.
+    const values = record.values.map((v, i) => {
+      const code = asString(v, `${path}.values[${i}]`);
+      if (!/^[A-Z]{2}$/.test(code)) throw new RuleValidationError(`${path}.values[${i}]`, `ожидается код ISO 3166-1 (KZ), получено «${code}»`);
+      return code;
+    });
     return { field, op, values };
   }
 
@@ -117,7 +129,7 @@ function asLegalBasis(value: unknown, path: string): LegalBasis {
 function asDocument(value: unknown, path: string): RequiredDocument {
   const record = asRecord(value, path);
   return {
-    id: asString(record.id, `${path}.id`),
+    id: asId(record.id, `${path}.id`),
     title: asLocalized(record.title, `${path}.title`),
   };
 }
@@ -173,7 +185,7 @@ function asRule(value: unknown, path: string): DeadlineRule {
   }
 
   return {
-    id: asString(record.id, `${path}.id`),
+    id: asId(record.id, `${path}.id`),
     title: asLocalized(record.title, `${path}.title`),
     action: asLocalized(record.action, `${path}.action`),
     term: { event, days, counting },
@@ -205,6 +217,9 @@ export function parseRuleSet(raw: unknown): RuleSet {
       throw new RuleValidationError("$.rules", `повторяющийся id «${rule.id}»`);
     }
     seen.add(rule.id);
+    const docs = rule.documents.map(d => d.id);
+    const twice = docs.find((id, i) => docs.indexOf(id) !== i);
+    if (twice !== undefined) throw new RuleValidationError(`$.rules.${rule.id}.documents`, `повторяющийся id документа «${twice}»`);
   }
 
   return { version: asString(record.version, "$.version"), rules };

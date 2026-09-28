@@ -376,7 +376,8 @@ function readSession(value: unknown): Session {
   if (("university" in value && typeof value.university !== "string") ||
       ("citizenship" in value && typeof value.citizenship !== "string") ||
       ("entryDate" in value && typeof value.entryDate !== "string") ||
-      ("selected" in value && typeof value.selected !== "string")) {
+      ("selected" in value && typeof value.selected !== "string") ||
+      ("back" in value && (typeof value.back !== "string" || !sessionSteps.has(value.back)))) {
     throw invalidValue("sessions.data");
   }
   for (const completion of Object.values(value.completions)) {

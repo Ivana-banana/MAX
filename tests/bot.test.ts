@@ -330,3 +330,34 @@ describe("plan button for the mini app", () => {
     expect(() => readConfig({ ...env, WEBAPP_BOT: "https://max.ru/bot" })).toThrow(/WEBAPP_BOT/);
   });
 });
+
+describe("review fixes in the dialogue", () => {
+  it("keeps the next screen when a button is tapped twice", async () => {
+    const f = await fixture();
+    await f.input("/start"); await f.click("ru");
+    const s = (await f.store.get(1))!;
+    const stamp = `${s.nonce}.${s.revision}|accept`;
+    await f.input(stamp, 1, "tap-1", true); await f.input(stamp, 1, "tap-2", true);
+    await f.service.flush();
+    expect(f.sent.some(m => m.reply.text.includes("Сценарий:"))).toBe(true);
+  });
+  it("returns to the step the user left when a deletion is cancelled", () => {
+    let s: Session = transition(null, { text: "/start", callback: false }, ctx).session!;
+    const click = (action: string) => { s = transition(s, { text: `${s.nonce}.${s.revision}|${action}`, callback: true }, ctx).session!; };
+    for (const a of ["ru", "accept", "yes"]) click(a);
+    s = transition(s, { text: "/delete", callback: false }, ctx).session!;
+    click("cancel-delete");
+    expect(s.step).toBe("citizenship");
+  });
+  it("tells only an unsupported case that it is unsupported", () => {
+    let s: Session = transition(null, { text: "/start", callback: false }, ctx).session!;
+    const click = (action: string) => transition(s, { text: `${s.nonce}.${s.revision}|${action}`, callback: true }, ctx);
+    for (const a of ["ru", "accept", "yes", "KZ"]) s = click(a).session!;
+    expect(click("OTHER").reply.text).toContain("Для неподдержанного случая");
+    expect(click("BY").reply.text).toContain("Для неподдержанного случая");
+    s = transition(s, { text: "2026-09-01", callback: false }, ctx).session!;
+    const help = click("help").reply.text;
+    expect(help).toContain("Подготовьте вопрос");
+    expect(help).not.toContain("Для неподдержанного случая");
+  });
+});

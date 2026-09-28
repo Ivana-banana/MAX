@@ -54,8 +54,12 @@ export class Service {
       const before = await tx.get(), ctx = this.ctx();
       const outcome = transition(before, update.input, ctx);
       const university = funnelUniversity(outcome.session ?? before, ctx);
-      for (const event of funnelEvents(before, outcome.session, update.input, ctx)) await tx.count(ctx.today, university, event);
-      await tx.supersedeReplies();
+      // A refused stale button (a double tap) changed nothing: it must neither count as a step nor
+      // replace the screen the first tap queued, or the user gets only "the button is outdated".
+      if (!outcome.expired) {
+        for (const event of funnelEvents(before, outcome.session, update.input, ctx)) await tx.count(ctx.today, university, event);
+        await tx.supersedeReplies();
+      }
       await tx.cancelReminders();
       if (outcome.session) await tx.save(outcome.session, now);
       else await tx.remove();

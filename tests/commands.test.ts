@@ -27,7 +27,7 @@ describe("bot command hints (PATCH /me/commands)", () => {
     const typed = (name: string) => transition(s, { text: `/${name}`, callback: false }, ctx);
     const replies = Object.fromEntries(COMMANDS.map(name => [name, typed(name)]));
     expect(replies.plan!.reply.text).toContain("Ваш план подготовки");
-    expect(replies.help!.reply.text).toContain("Для неподдержанного случая");
+    expect(replies.help!.reply.text).toContain("Подготовьте вопрос");
     expect(replies.stop!.session!.reminders).toBe(false);
     expect(replies.delete!.reply.text).toContain("Удалить профиль");
     expect(replies.start!.session!.step).toBe("plan");

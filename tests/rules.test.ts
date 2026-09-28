@@ -162,4 +162,18 @@ describe("parseRuleSet", () => {
     delete broken.rules[0]!.title.ru;
     expect(() => parseRuleSet(broken)).toThrow(RuleValidationError);
   });
+
+  it("отвергает коды и идентификаторы, которые остальной код не узнает", () => {
+    const withCondition = structuredClone(valid) as unknown as { rules: { appliesIf: unknown[] }[] };
+    withCondition.rules[0]!.appliesIf = [{ field: "citizenship", op: "notIn", values: ["by"] }];
+    expect(() => parseRuleSet(withCondition)).toThrow(/values\[0\]/);
+    const badId = structuredClone(valid);
+    badId.rules[0]!.id = "Fingerprinting_2";
+    expect(() => parseRuleSet(badId)).toThrow(/\.id/);
+    const docs = structuredClone(valid) as unknown as { rules: { documents: unknown[] }[] };
+    docs.rules[0]!.documents = [{ id: "pass:port", title: { ru: "П", en: "P" } }];
+    expect(() => parseRuleSet(docs)).toThrow(/documents\[0\]\.id/);
+    docs.rules[0]!.documents = [{ id: "passport", title: { ru: "П", en: "P" } }, { id: "passport", title: { ru: "П", en: "P" } }];
+    expect(() => parseRuleSet(docs)).toThrow(/повторяющийся id/);
+  });
 });

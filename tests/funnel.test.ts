@@ -83,3 +83,18 @@ describe("anonymous funnel counters", () => {
     expect(funnelReport([])).toContain("Счётчиков пока нет");
   });
 });
+
+describe("funnel and expired buttons", () => {
+  it("counts no return from a reminder whose button the dialogue refused", async () => {
+    const f = await fixture();
+    await f.onboard(1);
+    const old = (await f.store.get(1))!;
+    await f.click("delete"); await f.click("confirm-delete");
+    await f.onboard(1);
+    await f.input(`${old.nonce}.${old.revision}|card:medical-examination:reminder`, 1, true);
+    await f.input(`${old.nonce}.${old.revision}|help:medical-examination`, 1, true);
+    const totals = await f.totals();
+    expect(totals["kfu:reminder_opened"]).toBeUndefined();
+    expect(totals["kfu:help_opened"]).toBeUndefined();
+  });
+});
