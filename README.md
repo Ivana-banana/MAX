@@ -142,6 +142,11 @@ BY и въезд до сентября не получают нормативн�
 | UNIVERSITIES_PATH | ./src/data/universities | каталог профилей вузов (JSON) |
 | DEFAULT_UNIVERSITY | kfu | профиль для входа без диплинка |
 | TEXTS_PATH | ./src/data/i18n | каталог текстов интерфейса, файл на язык |
+| WEBAPP_BOT | пусто | имя бота для кнопки `open_app` под планом; пусто — кнопки нет |
+| WEBAPP_DIR | ./web/dist | каталог собранного мини-приложения, которое отдаёт сервер |
+| WEBAPP_DEV_ORIGIN | пусто | origin Vite для локального демо; при `TRANSPORT=max` запрещён |
+| BOT_LINK | https://max.ru/t149_hakaton_max_bot | базовая ссылка для QR-плакатов вузов |
+| POSTERS_DIR | ./posters | каталог SVG-плакатов, созданных `npm run qr` |
 
 Для изменения HOST/RULES_PATH в контейнере используйте Compose override.
 DEBUG при max запрещён: SDK-диагностика может содержать персональные сведения.
