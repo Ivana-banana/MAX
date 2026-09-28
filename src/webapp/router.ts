@@ -220,6 +220,7 @@ export function webappRouter(service: Service, options: WebappOptions) {
         }
         if (path === "/api/calendar-ticket") {
           if (req.method !== "POST") throw new HttpError(405, "method_not_allowed");
+          if (await icsFor(service, caller.user) === null) throw new HttpError(404, "nothing_to_export");
           send(200, {
             url: `api/calendar.ics?ticket=${issueTicket(ticketSecret, caller.user, service.clock())}`,
             fileName: CALENDAR_FILE, expiresIn: TICKET_TTL,

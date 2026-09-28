@@ -104,6 +104,7 @@ paths:
           description: "`AppTicket`: relative url, fileName, expiresIn (seconds, 300)"
           content: {application/json: {schema: {type: object, required: [url, fileName, expiresIn]}}}
         '401': {description: Missing, forged or expired MAX launch data}
+        '404': {description: Nothing to export — no plan, a plan on older rules, or no unfinished procedures}
   /api/calendar.ics:
     get:
       summary: The plan as an RFC 5545 calendar file

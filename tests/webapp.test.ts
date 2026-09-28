@@ -308,6 +308,8 @@ describe("mini app HTTP surface", () => {
     const url = await serve(f.router, f.service);
     const value = genuine();
     expect((await fetch(`${url}/api/calendar.ics`, { headers: auth(value) })).status).toBe(404);
+    // No ticket either: the app has to say "nothing to export" before handing MAX a dead link.
+    expect((await fetch(`${url}/api/calendar-ticket`, { method: "POST", headers: auth(value) })).status).toBe(404);
     for (const action of ONBOARDING) await act(url, value, { action });
     const ics = await fetch(`${url}/api/calendar.ics`, { headers: auth(value) });
     expect(ics.headers.get("content-disposition")).toContain("first-90-days.ics");
