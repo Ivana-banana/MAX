@@ -11,7 +11,7 @@ import type { AppPlanItem, AppSession } from "../api.js";
 import { openLink, tap } from "../bridge.js";
 import { universityPhoto } from "../photos.js";
 import { text, type Texts } from "../texts.js";
-import { Button, Switch, dotted } from "../ui.js";
+import { Button, Switch, dotted, ordinal } from "../ui.js";
 
 interface Props {
   session: AppSession;
@@ -92,9 +92,10 @@ export function Plan({ session, texts, pending, onAction, onOpen, onCalendar, ca
               <summary className="t">{item.title}</summary>
               <p className="prose">{item.action}</p>
               <p className="prose small">{item.when}</p>
-              {item.documents.map(document => (
+              {item.documents.map((document, index) => (
                 <button key={document.id} type="button" role="checkbox" aria-checked={document.checked} className="doc"
                   disabled={pending !== null} onClick={() => { tap(); onAction(`doc:${item.id}:${document.id}`); }}>
+                  <span className="num">{ordinal(index)}</span>
                   <span className="txt">{document.title}</span>
                   <span className="box" aria-hidden="true" />
                 </button>
