@@ -24,6 +24,7 @@
     "commands": "node --env-file-if-exists=.env dist/commands.js",
     "funnel": "node --env-file-if-exists=.env dist/report.js",
     "qr": "node --env-file-if-exists=.env dist/qr.js",
+    "university:check": "npm run build --silent && node dist/university-check.js",
     "demo:export": "npm run build && node scripts/export-demo.mjs",
     "demo:export:check": "npm run build && node scripts/export-demo.mjs --check",
     "db:import-sqlite": "npm run build --silent && node --env-file-if-exists=.env dist/db/import-sqlite.js"
