@@ -41,6 +41,8 @@ export function isAppAction(action: string): boolean {
   return action === "/start" || /^\/start [a-z0-9_-]{1,32}$/.test(action)
     || /^[a-z]{2}$/.test(action)
     || action === "accept" || action === "yes"
+    // demo-only example entry date: outside the demo the dialogue treats it as an invalid date
+    || action === "example"
     || action === "plan" || action === "reminders" || action === "/today"
     || action === "/delete" || action === "confirm-delete" || action === "cancel-delete"
     || /^[A-Z]{2}$/.test(action) || action === "OTHER"
@@ -81,6 +83,12 @@ function withoutBanner(text: string, ctx: DialogueContext): string {
 const languages = (ctx: DialogueContext) => [...ctx.texts.keys()]
   .map(code => ({ code, name: format(ctx.texts, code, "language.name") }));
 
+/** The chat's own "show an example" button, when the dialogue offers it (demo, entry step). */
+function exampleLabel(session: Session, ctx: DialogueContext): { example?: string } {
+  const button = prompt(session, ctx).buttons.flat().find(b => "action" in b && b.action.endsWith("|example"));
+  return button === undefined ? {} : { example: button.text };
+}
+
 /** `hint`: the MAX interface language, for the screen shown before a session exists. */
 function view(session: Session | null, ctx: DialogueContext, mocked: boolean, hint?: string): AppState {
   const hinted = hint?.slice(0, 2).toLowerCase();
@@ -101,6 +109,7 @@ function view(session: Session | null, ctx: DialogueContext, mocked: boolean, hi
       reminders: session.reminders,
       stale,
       prompt: withoutBanner(prompt(session, ctx).text, ctx),
+      ...exampleLabel(session, ctx),
       plan: profile(session) && !stale ? plan(session, ctx).map(item => ({
         ruleId: item.ruleId,
         title: localized(item.title),

@@ -212,8 +212,11 @@ describe("mini app shows what the chat shows", () => {
     expect(state.session?.stale).toBe(true);
     expect(state.session?.plan).toEqual([]);
     const url = await serve(f.router, f.service);
-    const issued = await (await fetch(`${url}/api/calendar-ticket`, { method: "POST", headers: auth(genuine()) })).json() as { url: string };
-    expect((await fetch(`${url}/${issued.url}`)).status).toBe(404);
+    // No ticket is issued at all; checking the ticket request itself keeps the test independent of
+    // whether web/dist is built (a built bundle answers unknown paths with the app page).
+    const ticket = await fetch(`${url}/api/calendar-ticket`, { method: "POST", headers: auth(genuine()) });
+    expect(ticket.status).toBe(404);
+    expect(await ticket.json()).toEqual({ error: "nothing_to_export" });
   });
   it("says where each checklist comes from, or that there is no official one", async () => {
     const f = await fixture();
@@ -237,6 +240,21 @@ describe("mini app shows what the chat shows", () => {
     expect(first.state.texts["app.start.action"]).toBe(texts.get("en")!["app.start.action"]);
     const started = await (await act(url, value, { action: "/start" })).json() as { state: { session: { step: string; lang: string } } };
     expect(started.state.session).toMatchObject({ step: "consent", lang: "en" });
+  });
+  it("offers the chat's example entry date in the demo, and builds the plan from it", async () => {
+    const f = await fixture();
+    for (const action of ["/start kfu", ...ONBOARDING.slice(1, -1)]) await applyAction(f.service, 7, action, false);
+    const entry = await readState(f.service, 7, false);
+    expect(entry.session?.step).toBe("entry");
+    expect(entry.session?.example).toContain("2 сентября 2026");
+    expect(isAppAction("example")).toBe(true);
+    await applyAction(f.service, 7, "example", false);
+    const state = await readState(f.service, 7, false);
+    expect(state.session?.entryDate).toBe("2026-09-02");
+    expect(state.session?.plan[0]?.status).toBe("dueSoon");
+    const live = new Service(f.store, { ...ctx, demo: false }, { async send() {} }, () => NOW);
+    for (const action of ["/start kfu", ...ONBOARDING.slice(1, -1)]) await applyAction(live, 8, action, false);
+    expect((await readState(live, 8, false)).session?.example).toBeUndefined();
   });
   it("takes the first entry date of the app screens from the rules", async () => {
     const f = await fixture();

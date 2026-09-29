@@ -51,6 +51,8 @@ export interface AppSession {
   stale: boolean;
   /** The dialogue's own wording of the current step (consent, scope, delete), without the demo banner. */
   prompt: string;
+  /** Demo only, on the entry step: label of the chat's "show an example" button; the app sends `example`. */
+  example?: string;
   plan: AppPlanItem[];
 }
 

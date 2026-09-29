@@ -114,11 +114,14 @@ export function Onboarding({ session, texts, languages, message, copy, today, pe
     );
   }
 
-  return <EntryDate texts={texts} today={today} message={message} pending={pending} onAction={onAction} />;
+  return <EntryDate texts={texts} today={today} message={message} pending={pending} onAction={onAction}
+    {...(session.example === undefined ? {} : { example: session.example })} />;
 }
 
-function EntryDate({ texts, today, message, pending, onAction }: {
+function EntryDate({ texts, today, message, pending, onAction, example }: {
   texts: Texts; today: string; message: string; pending: string | null; onAction: (action: string) => void;
+  /** Demo only: the chat's "show an example" label; the date itself is chosen by the server. */
+  example?: string;
 }) {
   const [value, setValue] = useState("");
   const [typed, setTyped] = useState("");
@@ -148,6 +151,12 @@ function EntryDate({ texts, today, message, pending, onAction }: {
         onClick={() => { setEdited(false); onAction(value); }}>
         {t("app.save")}
       </Button>
+      {example !== undefined && (
+        <Button className="in d3" tone="outline" disabled={pending !== null}
+          onClick={() => { setEdited(false); onAction("example"); }}>
+          {example}
+        </Button>
+      )}
     </div>
   );
 }
