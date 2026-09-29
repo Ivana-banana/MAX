@@ -17,7 +17,7 @@
   "app.undated": "Hisoblangan muddatsiz",
   "card.procedureSource": "Tartib {uni} sahifasi boʻyicha: {url} (tekshirilgan: {date}). Bu universitet qoidasi, bot hisobi emas.",
   "card.when": "Qachon: ",
-  "home.undated": "\n\nHisoblangan muddatsiz — muddat joylashish sanasiga bogʻliq, kartani koʻring:\n",
+  "home.undated": "\n\nHisoblangan muddatsiz — universitet qoidalari; muddat bot bilmaydigan sanaga bogʻliq (joylashish, roʻyxatga olish yoki viza tugashi), kartani koʻring:\n",
   "home.reminders.on": "\nEslatmalar: yoqilgan",
   "home.reminders.off": "\nEslatmalar: oʻchirilgan. Yoqing — bot har bir muddatdan 7, 3 va 1 kun oldin Moskva vaqti bilan 09:00 da hamda muddatdan keyingi kuni bir marta yozadi.",
   "btn.remindersOn": "🔔 Eslatmalarni yoqish",

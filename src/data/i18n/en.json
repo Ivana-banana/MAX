@@ -17,7 +17,7 @@
   "app.undated": "No calculated deadline",
   "card.procedureSource": "Procedure per the {uni} page: {url} (checked {date}). This is the university's rule, not the bot's calculation.",
   "card.when": "When: ",
-  "home.undated": "\n\nNo calculated deadline: it depends on your move-in date, see the card:\n",
+  "home.undated": "\n\nNo calculated deadline — the university's own rules; the deadline depends on a date the bot does not know (move-in, end of registration or visa), see the card:\n",
   "home.reminders.on": "\nReminders: on",
   "home.reminders.off": "\nReminders: off. Turn them on — the bot will write 7, 3 and 1 day before each date at 09:00 Moscow time and once the day after it.",
   "btn.remindersOn": "🔔 Turn on reminders",
