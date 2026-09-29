@@ -18,6 +18,8 @@ interface Props {
   session: AppSession;
   texts: Texts;
   languages: AppState["languages"];
+  /** The catalogue of university profiles: a student without a deep link picks theirs on the scope step. */
+  universities: AppState["universities"];
   message: string;
   /** The ready question to the university when the last answer led out of the scenario. */
   copy: string;
@@ -38,7 +40,57 @@ function Unsupported({ session, texts, copy }: { session: AppSession; texts: Tex
   );
 }
 
-export function Onboarding({ session, texts, languages, message, copy, today, pending, onAction }: Props) {
+/** The scope question, and the chat's "I study at another university" branch as a list on the same screen. */
+function Scope({ session, texts, universities, copy, pending, onAction }: Pick<Props, "session" | "texts" | "universities" | "copy" | "pending" | "onAction">) {
+  const t = (key: string) => text(texts, key);
+  const busy = pending !== null;
+  const [choosing, setChoosing] = useState(false);
+  const [missing, setMissing] = useState(false);
+  const others = universities.filter(u => u.id !== session.university.id);
+
+  if (choosing) {
+    return (
+      <div className="stack">
+        <h1 className="heading in">{t("app.scopeTitle")}</h1>
+        <p className="prose in d1" role={missing ? "status" : undefined}>{t(missing ? "university.missing" : "university.choose")}</p>
+        {!missing && (
+          <div className="tiles in d2">
+            {others.map(u => (
+              <button key={u.id} type="button" className="tile tile-wide" disabled={busy}
+                onClick={() => { setChoosing(false); onAction(`uni:${u.id}`); }}>
+                <span className="name">{u.name}</span>
+              </button>
+            ))}
+          </div>
+        )}
+        <button type="button" className="link in d3" disabled={busy} onClick={() => setMissing(!missing)}>
+          {t(missing ? "btn.universities" : "btn.noUniversity")}
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="stack">
+      <h1 className="heading in">{t("app.scopeTitle")}</h1>
+      <p className="prose in d1">{session.prompt}</p>
+      <Button className="in d2" loading={pending === "yes"} disabled={busy} onClick={() => onAction("yes")}>
+        {t("btn.yes")}
+      </Button>
+      <Button className="in d3" tone="outline" arrow="×" loading={pending === "OTHER"} disabled={busy} onClick={() => onAction("OTHER")}>
+        {t("btn.no")}
+      </Button>
+      {others.length > 0 && (
+        <button type="button" className="link in d3" disabled={busy} onClick={() => { setMissing(false); setChoosing(true); }}>
+          {t("btn.otherUniversity")}
+        </button>
+      )}
+      {copy !== "" && <Unsupported session={session} texts={texts} copy={copy} />}
+    </div>
+  );
+}
+
+export function Onboarding({ session, texts, languages, universities, message, copy, today, pending, onAction }: Props) {
   const t = (key: string) => text(texts, key);
   const busy = pending !== null;
 
@@ -77,19 +129,7 @@ export function Onboarding({ session, texts, languages, message, copy, today, pe
   }
 
   if (session.step === "scope") {
-    return (
-      <div className="stack">
-        <h1 className="heading in">{t("app.scopeTitle")}</h1>
-        <p className="prose in d1">{session.prompt}</p>
-        <Button className="in d2" loading={pending === "yes"} disabled={busy} onClick={() => onAction("yes")}>
-          {t("btn.yes")}
-        </Button>
-        <Button className="in d3" tone="outline" arrow="×" loading={pending === "OTHER"} disabled={busy} onClick={() => onAction("OTHER")}>
-          {t("btn.no")}
-        </Button>
-        {copy !== "" && <Unsupported session={session} texts={texts} copy={copy} />}
-      </div>
-    );
+    return <Scope session={session} texts={texts} universities={universities} copy={copy} pending={pending} onAction={onAction} />;
   }
 
   if (session.step === "citizenship") {

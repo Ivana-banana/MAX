@@ -41,6 +41,7 @@ export function isAppAction(action: string): boolean {
   return action === "/start" || /^\/start [a-z0-9_-]{1,32}$/.test(action)
     || /^[a-z]{2}$/.test(action)
     || action === "accept" || action === "yes"
+    || action === "universities" || action === "uni-missing" || /^uni:[a-z0-9_-]{1,32}$/.test(action)
     // demo-only example entry date: outside the demo the dialogue treats it as an invalid date
     || action === "example"
     || action === "plan" || action === "reminders" || action === "/today"

@@ -136,7 +136,7 @@ export function App() {
     }
     if (session.step !== "plan") {
       return <Onboarding session={session} texts={texts} languages={status.state.languages}
-        message={status.message} copy={status.copy} today={status.state.today} pending={status.pending} onAction={act} />;
+        universities={status.state.universities} message={status.message} copy={status.copy} today={status.state.today} pending={status.pending} onAction={act} />;
     }
     const item = openCard === null ? undefined : session.plan.find(i => i.ruleId === openCard);
     if (item !== undefined) {

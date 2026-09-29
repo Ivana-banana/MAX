@@ -166,6 +166,13 @@ function procedureCard(s: Session, ctx: DialogueContext, note: UniversityProcedu
       [link(pageLabel(s, ctx), note.source.url)],
       [button(t(s, ctx, "btn.plan"), "plan")]]);
 }
+/** The catalogue of university profiles, offered on the scope question; the current one is not repeated. */
+function universityList(s: Session, ctx: DialogueContext): Reply {
+  const others = ctx.universities.filter(u => u.id !== uni(s, ctx).id);
+  return reply(s, ctx, t(s, ctx, "university.choose"),
+    [...rows(others.map(u => button(u.name[s.lang] ?? u.name.ru!, `uni:${u.id}`)), 2),
+      [button(t(s, ctx, "btn.noUniversity"), "uni-missing")]]);
+}
 function calendar(s: Session, ctx: DialogueContext): Reply {
   const items = plan(s, ctx);
   if (!items.some(i => i.status !== "done")) return home(s, ctx);
@@ -196,7 +203,9 @@ export function prompt(s: Session, ctx: DialogueContext): Reply {
     case "consent": return reply(s, ctx, t(s, ctx, "consent"),
       [[button(t(s, ctx, "btn.continue"), "accept")], ...languages(ctx, s.lang), [button(t(s, ctx, "btn.leave"), "delete")]]);
     case "scope": return reply(s, ctx, t(s, ctx, "scope", { uni: uni(s, ctx).name[s.lang]!, from: date(s, coverage(ctx.rules).from) }),
-      [[button(t(s, ctx, "btn.yes"), "yes"), button(t(s, ctx, "btn.no"), "no")]]);
+      [[button(t(s, ctx, "btn.yes"), "yes"), button(t(s, ctx, "btn.no"), "no")],
+        // Without a deep link the default university is assumed; a student of another one says so here.
+        ...(ctx.universities.length > 1 ? [[button(t(s, ctx, "btn.otherUniversity"), "universities")]] : [])]);
     case "citizenship": return reply(s, ctx, t(s, ctx, "citizenship"),
       // Citizenships the rules exclude stay as buttons: they lead to the help branch, not to a dead end.
       [...rows(uni(s, ctx).citizenships, 2), ...rows([...coverage(ctx.rules).excluded, "OTHER"], 2)]
@@ -245,6 +254,15 @@ export function transition(previous: Session | null, input: Input, ctx: Dialogue
     const lang = input.locale?.slice(0, 2).toLowerCase();
     if (s.step === "language" && lang && ctx.texts.has(lang)) { s.lang = lang; s.step = "consent"; }
     return { session: s, reply: prompt(s, ctx) };
+  }
+  // The university can be changed only before the plan exists, like the ?start= choice.
+  if (s.step === "scope" && !profile(s)) {
+    if (action === "universities") return { session: s, reply: universityList(s, ctx) };
+    if (action === "uni-missing") {
+      return { session: s, reply: reply(s, ctx, t(s, ctx, "university.missing"), [[button(t(s, ctx, "btn.universities"), "universities")]]) };
+    }
+    const chosen = /^uni:([a-z0-9_-]{1,32})$/.exec(action)?.[1];
+    if (chosen !== undefined && ctx.universities.some(u => u.id === chosen)) s.university = chosen;
   }
   if (action === "/help" || action === "help") return { session: s, reply: help(s, ctx) };
   if (action === "no" || action === "OTHER" || coverage(ctx.rules).excluded.includes(action)) return { session: s, reply: help(s, ctx, undefined, true) };
