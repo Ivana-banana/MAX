@@ -392,3 +392,4 @@ body {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+.share-text { white-space: pre-wrap; font-family: var(--text); margin: 0; }

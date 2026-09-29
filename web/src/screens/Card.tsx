@@ -22,7 +22,7 @@ interface Props {
 }
 
 /** Clipboard where the webview allows it; otherwise the text stays selectable on screen. */
-async function copyText(value: string): Promise<boolean> {
+export async function copyText(value: string): Promise<boolean> {
   try {
     await navigator.clipboard.writeText(value);
     return true;

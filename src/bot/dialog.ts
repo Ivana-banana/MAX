@@ -120,6 +120,19 @@ function home(s: Session, ctx: DialogueContext, prefix = ""): Reply {
       [button(t(s, ctx, "btn.help"), "help")],
       [button(t(s, ctx, "btn.delete"), "delete")]]);
 }
+/**
+ * The plan as a message the student forwards themselves (the mini app's shareMaxContent): procedures
+ * and deadlines only — no citizenship, entry date or MAX ID — with the demo banner and the caveat
+ * that the rules are not reviewed, so a forwarded copy does not look more certain than the plan.
+ */
+export function shareText(s: Session, ctx: DialogueContext): string {
+  const items = plan(s, ctx);
+  if (!items.length) return "";
+  const name = uni(s, ctx).name[s.lang]!;
+  const lines = items.map(i => t(s, ctx, i.status === "done" ? "share.done" : "share.item", { title: i.title[s.lang]!, due: date(s, i.dueDate) }));
+  return (ctx.demo ? t(s, ctx, "banner.demo") : "") + t(s, ctx, "share.plan", { uni: name, lines: lines.join("\n") }) +
+    (items.some(i => i.provisional && i.status !== "done") ? t(s, ctx, "share.provisional", { uni: name }) : "");
+}
 /** Where the checklist comes from, or that no official list is published (D-027); the app shows it too. */
 export function documentsNote(s: Session, ctx: DialogueContext, item: PlanItem): string {
   return item.documentsSource

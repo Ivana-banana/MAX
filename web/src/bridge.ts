@@ -32,6 +32,7 @@ interface MaxWebApp {
   openLink?: (url: string) => void;
   openMaxLink?: (url: string) => void;
   downloadFile?: (url: string, fileName: string) => Promise<unknown> | unknown;
+  shareMaxContent?: (params: { text?: string; link?: string }) => Promise<unknown> | unknown;
   enableClosingConfirmation?: () => void;
   disableClosingConfirmation?: () => void;
 }
@@ -43,7 +44,7 @@ declare global {
 
 const app = (): MaxWebApp | undefined => (typeof window === "undefined" ? undefined : window.WebApp);
 
-/** True when the page really runs inside a MAX client. */
+/** True when the page really runs inside a MAX client: outside it the bridge script still loads, with `initData` null. */
 export const insideMax = (): boolean => typeof app()?.initData === "string";
 
 export const platform = (): Platform => {
@@ -69,7 +70,8 @@ export function openLink(url: string): void {
  */
 export async function downloadFile(url: string, fileName: string): Promise<void> {
   const bridge = app();
-  if (bridge?.downloadFile) { await bridge.downloadFile(url, fileName); return; }
+  // The bridge script loads in a plain browser too, where its calls never settle: MAX only.
+  if (insideMax() && bridge?.downloadFile) { await bridge.downloadFile(url, fileName); return; }
   const link = document.createElement("a");
   link.href = url;
   link.download = fileName;
@@ -77,6 +79,18 @@ export async function downloadFile(url: string, fileName: string): Promise<void>
   document.body.append(link);
   link.click();
   link.remove();
+}
+
+/**
+ * Forwards a text to a MAX chat the user picks. `shareMaxContent` works in every MAX client,
+ * web included, and needs a user's click (https://dev.max.ru/docs/webapps/bridge, checked
+ * 29.09.2026). Outside MAX — false, and the caller copies the text instead.
+ */
+export async function shareInMax(text: string): Promise<boolean> {
+  const bridge = app();
+  if (!insideMax() || !bridge?.shareMaxContent) return false;
+  await bridge.shareMaxContent({ text });
+  return true;
 }
 
 /** Wires the native back button; returns a cleanup. Does nothing where the button is absent. */

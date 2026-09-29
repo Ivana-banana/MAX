@@ -8,10 +8,12 @@
  */
 
 import type { AppPlanItem, AppSession } from "../api.js";
-import { openLink, tap } from "../bridge.js";
+import { useState } from "react";
+import { openLink, shareInMax, tap } from "../bridge.js";
 import { universityPhoto } from "../photos.js";
 import { text, type Texts } from "../texts.js";
 import { Button, Switch, dotted, ordinal } from "../ui.js";
+import { copyText } from "./Card.js";
 
 interface Props {
   session: AppSession;
@@ -56,6 +58,13 @@ export function Plan({ session, texts, pending, onAction, onOpen, onCalendar, ca
   const firstRound = session.plan.filter(item => !item.isRepeat);
   const finished = session.plan.length > 0 && firstRound.every(item => item.status === "done");
   const photo = universityPhoto(session.university.id);
+  // Outside MAX the plan text goes to the clipboard; null until the first press.
+  const [copied, setCopied] = useState<boolean | null>(null);
+  const share = async () => {
+    if (await shareInMax(session.share).catch(() => false)) { tap("success"); return; }
+    const ok = await copyText(session.share);
+    setCopied(ok); tap(ok ? "success" : "warning");
+  };
 
   return (
     <div className="stack">
@@ -118,6 +127,13 @@ export function Plan({ session, texts, pending, onAction, onOpen, onCalendar, ca
           {t("app.calendar")}
         </Button>
       )}
+
+      {session.share !== "" && (
+        <Button className="in d5" tone="outline" arrow={copied ? "✓" : "↗"} disabled={pending !== null} onClick={() => void share()}>
+          {copied ? t("app.copied") : t("app.share")}
+        </Button>
+      )}
+      {copied === false && <pre className="small prose share-text">{session.share}</pre>}
 
       <p className="small muted prose in d6">{t("app.selfReported")}</p>
 

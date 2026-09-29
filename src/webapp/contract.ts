@@ -73,6 +73,8 @@ export interface AppSession {
   plan: AppPlanItem[];
   /** The university's procedures without a calculated deadline (`AppUndatedItem`); empty for most profiles. */
   undated: AppUndatedItem[];
+  /** The plan as a message to forward (`shareText`): procedures and deadlines only; empty without a plan. */
+  share: string;
 }
 
 export interface AppState {

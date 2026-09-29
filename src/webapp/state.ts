@@ -12,7 +12,7 @@ import { coverage } from "../core/deadlines.js";
 import { isValidDate } from "../core/dates.js";
 import type { Lang } from "../core/types.js";
 import {
-  countdown, documentsNote, pageLabel, plan, procedureSource, profile, prompt, transition, undated, type DialogueContext, type Input, type Session,
+  countdown, documentsNote, pageLabel, plan, procedureSource, profile, prompt, shareText, transition, undated, type DialogueContext, type Input, type Session,
 } from "../bot/dialog.js";
 import { funnelEvents, funnelUniversity } from "../bot/funnel.js";
 import { BASE_LANG, format } from "../data/loadTexts.js";
@@ -142,6 +142,7 @@ function view(session: Session | null, ctx: DialogueContext, mocked: boolean, hi
         sourceNote: procedureSource(session, ctx, note),
         sourceLabel: pageLabel(session, ctx),
       })) : [],
+      share: profile(session) && !stale ? shareText(session, ctx) : "",
     },
     universities: ctx.universities.map(u => ({ id: u.id, name: localized(u.name), contactUrl: u.contactUrl })),
     texts: texts(ctx, lang),

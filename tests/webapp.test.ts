@@ -256,6 +256,15 @@ describe("mini app shows what the chat shows", () => {
     for (const action of ["/start kfu", ...ONBOARDING.slice(1, -1)]) await applyAction(live, 8, action, false);
     expect((await readState(live, 8, false)).session?.example).toBeUndefined();
   });
+  it("hands the app the plan as a message to forward, only once there is a plan", async () => {
+    const f = await fixture();
+    for (const action of ONBOARDING.slice(0, -1)) await applyAction(f.service, 7, action, false);
+    expect((await readState(f.service, 7, false)).session?.share).toBe("");
+    await applyAction(f.service, 7, ONBOARDING.at(-1)!, false);
+    const share = (await readState(f.service, 7, false)).session?.share ?? "";
+    expect(share).toContain("Мой план подготовки — КФУ");
+    expect(share).toContain("Медицинское освидетельствование — до 30 сентября 2026 г.");
+  });
   it("shows the university's undated procedure apart from the plan, with the chat's source line", async () => {
     const f = await fixture();
     for (const action of ["/start kfu", ...ONBOARDING.slice(1)]) await applyAction(f.service, 7, action, false);
