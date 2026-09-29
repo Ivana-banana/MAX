@@ -1,8 +1,192 @@
 {
-  "$comment": "Профиль вуза: всё, что меняется при переносе сценария в другой вуз. КФУ — кандидат в пилот, не партнёр (D-011). Контакт — публичная страница, не интеграция.",
+  "$comment": "Профиль вуза: всё, что меняется при переносе сценария в другой вуз. КФУ — кандидат в пилот, не партнёр (D-011). Контакт — публичная страница, не интеграция. procedures — правила самого КФУ (страницы «Миграционный учёт — безвизовый / визовый въезд», 2026/27), а не федеральные нормы: срок отсчитывается от заселения, поэтому бот его не считает (docs/product/plan-vs-studroute.md, пп. 1 и 5).",
   "id": "kfu",
-  "name": { "ru": "КФУ", "en": "KFU", "zh": "喀山联邦大学", "uz": "KFU" },
+  "name": {
+    "ru": "КФУ",
+    "en": "KFU",
+    "zh": "喀山联邦大学",
+    "uz": "KFU"
+  },
   "contactUrl": "https://admissions.kpfu.ru/adaptacziya-inostrannyh-grazhdan/viza-i-migraczionnyj-uchyot/",
-  "citizenships": ["KZ", "UZ", "TJ", "KG", "CN", "IN", "EG", "TR"],
-  "checkedAt": "2026-09-23"
+  "citizenships": [
+    "KZ",
+    "UZ",
+    "TJ",
+    "KG",
+    "CN",
+    "IN",
+    "EG",
+    "TR"
+  ],
+  "checkedAt": "2026-09-23",
+  "procedures": [
+    {
+      "id": "migration-registration",
+      "title": {
+        "ru": "Миграционный учёт (регистрация)",
+        "en": "Migration registration",
+        "uz": "Migratsiya hisobi (roʻyxatga olish)",
+        "zh": "移民登记（居留登记）"
+      },
+      "action": {
+        "ru": "Если вы живёте в общежитии КФУ, миграционный учёт оформляет университет. Лично придите в Департамент внешних связей КФУ: ул. Гвардейская, 9, зал А (пн–пт 9:00–17:00, электронная очередь) — с оригиналами документов ниже.",
+        "en": "If you live in a KFU dormitory, the university handles your migration registration. Come in person to the KFU Department of External Relations: 9 Gvardeyskaya St., hall A (Mon–Fri 9:00–17:00, electronic queue), with the original documents below.",
+        "uz": "Agar KFU yotoqxonasida yashasangiz, migratsiya hisobini universitet rasmiylashtiradi. KFU Tashqi aloqalar departamentiga shaxsan keling: Gvardeyskaya koʻch., 9, A zal (du–ju 9:00–17:00, elektron navbat) — quyidagi hujjatlarning asl nusxalari bilan.",
+        "zh": "如果您住在喀山联邦大学宿舍，移民登记由大学办理。请本人携带以下文件原件前往喀山联邦大学对外联络部：Gvardeyskaya 街 9 号 A 厅（周一至周五 9:00–17:00，电子排队）。"
+      },
+      "when": {
+        "ru": "В течение следующего рабочего дня после заселения в общежитие (кроме выходных и праздников). Бот не знает дату заселения, поэтому этот срок не считает и о нём не напоминает.",
+        "en": "Within the next working day after moving into the dormitory (weekends and holidays excluded). The bot does not know your move-in date, so it neither calculates this deadline nor reminds you of it.",
+        "uz": "Yotoqxonaga joylashgandan keyingi ish kuni ichida (dam olish va bayram kunlari bundan mustasno). Bot joylashish sanasini bilmaydi, shuning uchun bu muddatni hisoblamaydi va eslatmaydi.",
+        "zh": "入住宿舍后的下一个工作日内（周末和节假日除外）。机器人不知道您的入住日期，因此不计算此期限，也不会提醒。"
+      },
+      "documents": [
+        {
+          "id": "passport",
+          "title": {
+            "ru": "Паспорт (оригинал)",
+            "en": "Passport (original)",
+            "uz": "Pasport (asl nusxa)",
+            "zh": "护照（原件）"
+          }
+        },
+        {
+          "id": "migration-card",
+          "title": {
+            "ru": "Миграционная карта (оригинал)",
+            "en": "Migration card (original)",
+            "uz": "Migratsiya kartasi (asl nusxa)",
+            "zh": "移民卡（原件）"
+          }
+        },
+        {
+          "id": "dorm-contract",
+          "title": {
+            "ru": "Договор найма в общежитии (оригинал)",
+            "en": "Dormitory tenancy agreement (original)",
+            "uz": "Yotoqxona ijara shartnomasi (asl nusxa)",
+            "zh": "宿舍租住合同（原件）"
+          }
+        },
+        {
+          "id": "study-certificate",
+          "title": {
+            "ru": "Справка об обучении (не старше 14 дней)",
+            "en": "Certificate of enrolment (not older than 14 days)",
+            "uz": "Oʻqish haqida maʼlumotnoma (14 kundan eski emas)",
+            "zh": "在读证明（开具不超过 14 天）"
+          }
+        }
+      ],
+      "appliesIf": [
+        {
+          "field": "citizenship",
+          "op": "in",
+          "values": [
+            "KZ",
+            "UZ",
+            "TJ",
+            "KG"
+          ]
+        }
+      ],
+      "source": {
+        "url": "https://kpfu.ru/international/migracionnoe-soprovozhdenie-inostrannyh-grazhdan/bezvizovyi-vjezd",
+        "checkedAt": "2026-09-29"
+      }
+    },
+    {
+      "id": "migration-registration-visa",
+      "title": {
+        "ru": "Миграционный учёт (регистрация)",
+        "en": "Migration registration",
+        "uz": "Migratsiya hisobi (roʻyxatga olish)",
+        "zh": "移民登记（居留登记）"
+      },
+      "action": {
+        "ru": "Если вы живёте в общежитии КФУ, миграционный учёт оформляет университет. Лично придите в Департамент внешних связей КФУ: ул. Гвардейская, 9, зал А (пн–пт 9:00–17:00, электронная очередь) — с оригиналами документов ниже.",
+        "en": "If you live in a KFU dormitory, the university handles your migration registration. Come in person to the KFU Department of External Relations: 9 Gvardeyskaya St., hall A (Mon–Fri 9:00–17:00, electronic queue), with the original documents below.",
+        "uz": "Agar KFU yotoqxonasida yashasangiz, migratsiya hisobini universitet rasmiylashtiradi. KFU Tashqi aloqalar departamentiga shaxsan keling: Gvardeyskaya koʻch., 9, A zal (du–ju 9:00–17:00, elektron navbat) — quyidagi hujjatlarning asl nusxalari bilan.",
+        "zh": "如果您住在喀山联邦大学宿舍，移民登记由大学办理。请本人携带以下文件原件前往喀山联邦大学对外联络部：Gvardeyskaya 街 9 号 A 厅（周一至周五 9:00–17:00，电子排队）。"
+      },
+      "when": {
+        "ru": "В течение следующего рабочего дня после заселения в общежитие (кроме выходных и праздников). Бот не знает дату заселения, поэтому этот срок не считает и о нём не напоминает.",
+        "en": "Within the next working day after moving into the dormitory (weekends and holidays excluded). The bot does not know your move-in date, so it neither calculates this deadline nor reminds you of it.",
+        "uz": "Yotoqxonaga joylashgandan keyingi ish kuni ichida (dam olish va bayram kunlari bundan mustasno). Bot joylashish sanasini bilmaydi, shuning uchun bu muddatni hisoblamaydi va eslatmaydi.",
+        "zh": "入住宿舍后的下一个工作日内（周末和节假日除外）。机器人不知道您的入住日期，因此不计算此期限，也不会提醒。"
+      },
+      "documents": [
+        {
+          "id": "passport",
+          "title": {
+            "ru": "Паспорт (оригинал)",
+            "en": "Passport (original)",
+            "uz": "Pasport (asl nusxa)",
+            "zh": "护照（原件）"
+          }
+        },
+        {
+          "id": "visa",
+          "title": {
+            "ru": "Виза (оригинал) — если въезжали по визе",
+            "en": "Visa (original), if you entered on a visa",
+            "uz": "Viza (asl nusxa) — agar viza bilan kirgan boʻlsangiz",
+            "zh": "签证（原件）——如持签证入境"
+          }
+        },
+        {
+          "id": "migration-card",
+          "title": {
+            "ru": "Миграционная карта (оригинал)",
+            "en": "Migration card (original)",
+            "uz": "Migratsiya kartasi (asl nusxa)",
+            "zh": "移民卡（原件）"
+          }
+        },
+        {
+          "id": "dorm-contract",
+          "title": {
+            "ru": "Договор найма в общежитии (оригинал)",
+            "en": "Dormitory tenancy agreement (original)",
+            "uz": "Yotoqxona ijara shartnomasi (asl nusxa)",
+            "zh": "宿舍租住合同（原件）"
+          }
+        },
+        {
+          "id": "study-certificate",
+          "title": {
+            "ru": "Справка об обучении (не старше 14 дней)",
+            "en": "Certificate of enrolment (not older than 14 days)",
+            "uz": "Oʻqish haqida maʼlumotnoma (14 kundan eski emas)",
+            "zh": "在读证明（开具不超过 14 天）"
+          }
+        },
+        {
+          "id": "previous-registration",
+          "title": {
+            "ru": "Прежняя регистрация — если была до заселения",
+            "en": "Previous registration, if you had one before moving in",
+            "uz": "Oldingi roʻyxatga olish — agar joylashishdan oldin boʻlgan boʻlsa",
+            "zh": "此前的登记——如入住前曾登记"
+          }
+        }
+      ],
+      "appliesIf": [
+        {
+          "field": "citizenship",
+          "op": "in",
+          "values": [
+            "CN",
+            "IN",
+            "EG",
+            "TR"
+          ]
+        }
+      ],
+      "source": {
+        "url": "https://kpfu.ru/international/migracionnoe-soprovozhdenie-inostrannyh-grazhdan/vizovyi-vjezd",
+        "checkedAt": "2026-09-29"
+      }
+    }
+  ]
 }

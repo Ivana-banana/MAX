@@ -8,6 +8,7 @@
  */
 
 import type { AppPlanItem, AppSession } from "../api.js";
+import { openLink, tap } from "../bridge.js";
 import { universityPhoto } from "../photos.js";
 import { text, type Texts } from "../texts.js";
 import { Button, Switch, dotted } from "../ui.js";
@@ -80,6 +81,29 @@ export function Plan({ session, texts, pending, onAction, onOpen, onCalendar, ca
       {/* Said once for the whole list rather than on every card. */}
       {session.plan.some(item => item.provisional && item.status !== "done") && (
         <p className="small muted prose">{t("app.provisional")}</p>
+      )}
+
+      {/* The university's own procedures: no countdown, since the deadline counts from the move-in date. */}
+      {session.undated.length > 0 && (
+        <div className="in d4">
+          <h2 className="section"><span>{t("app.undated")}</span></h2>
+          {session.undated.map(item => (
+            <details key={item.id} className="undated">
+              <summary className="t">{item.title}</summary>
+              <p className="prose">{item.action}</p>
+              <p className="prose small">{item.when}</p>
+              {item.documents.map(document => (
+                <button key={document.id} type="button" role="checkbox" aria-checked={document.checked} className="doc"
+                  disabled={pending !== null} onClick={() => { tap(); onAction(`doc:${item.id}:${document.id}`); }}>
+                  <span className="txt">{document.title}</span>
+                  <span className="box" aria-hidden="true" />
+                </button>
+              ))}
+              <p className="small muted">{item.sourceNote}</p>
+              <button type="button" className="link" onClick={() => openLink(item.sourceUrl)}>{item.sourceLabel}</button>
+            </details>
+          ))}
+        </div>
       )}
 
       <div className="toggle in d4">

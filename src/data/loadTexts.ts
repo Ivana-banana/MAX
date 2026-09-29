@@ -79,6 +79,9 @@ export function checkTranslated(texts: Texts, rules: DeadlineRule[], universitie
     ...rules.flatMap(r => [[`${r.id}.title`, r.title], [`${r.id}.action`, r.action],
       ...r.documents.map(d => [`${r.id}.documents.${d.id}`, d.title])]),
     ...universities.map(u => [`${u.id}.name`, u.name]),
+    ...universities.flatMap(u => u.procedures.flatMap(p => [[`${u.id}.${p.id}.title`, p.title],
+      [`${u.id}.${p.id}.action`, p.action], [`${u.id}.${p.id}.when`, p.when],
+      ...p.documents.map(d => [`${u.id}.${p.id}.documents.${d.id}`, d.title])])),
   ] as [string, Record<string, string>][];
   for (const lang of texts.keys()) {
     const hole = localized.find(([, value]) => !value[lang]?.trim());

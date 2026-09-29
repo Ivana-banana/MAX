@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto";
-import { buildPlan, coverage, REMINDER_OFFSETS } from "../core/deadlines.js";
+import { buildPlan, coverage, matchesCondition, REMINDER_OFFSETS } from "../core/deadlines.js";
 import { addDays, compareDates, isValidDate } from "../core/dates.js";
 import type { Completions, DeadlineRule, Lang, PlanItem, UserProfile } from "../core/types.js";
-import type { University } from "../data/loadUniversities.js";
+import type { University, UniversityProcedure } from "../data/loadUniversities.js";
 import { format, type Texts } from "../data/loadTexts.js";
 import { CALENDAR_FILE, planToIcs } from "./calendar.js";
 
@@ -76,6 +76,15 @@ export function plan(s: Session, ctx: DialogueContext): PlanItem[] {
   const p = profile(s);
   return p ? buildPlan(ctx.rules, p, s.completions, ctx.today) : [];
 }
+/**
+ * The university's own procedures whose deadline the bot cannot calculate (it counts from the
+ * move-in date, which the bot does not know). No reminders, no calendar event: the plan lists
+ * them apart, with the deadline in the source's words.
+ */
+export function undated(s: Session, ctx: DialogueContext): UniversityProcedure[] {
+  const p = profile(s);
+  return p ? uni(s, ctx).procedures.filter(pr => pr.appliesIf.every(c => matchesCondition(c, p))) : [];
+}
 function reply(s: Session, ctx: DialogueContext, text: string, rows: Button[][] = []): Reply {
   const banner = ctx.demo ? t(s, ctx, "banner.demo") : "";
   return { text: banner + text, ruleVersion: ctx.version, buttons: rows.map(row => row.map(b => "action" in b ? {
@@ -96,11 +105,14 @@ const navigation = (action: string) => action === "plan" || action === "help" ||
 function home(s: Session, ctx: DialogueContext, prefix = ""): Reply {
   const items = plan(s, ctx);
   const lines = items.map(i => `• ${i.title[s.lang]}: ${date(s, i.dueDate)} — ${countdown(s, ctx, i)}`);
+  const notes = undated(s, ctx);
+  const noteLines = notes.length ? t(s, ctx, "home.undated") + notes.map(n => `• ${n.title[s.lang]}`).join("\n") : "";
   // Reminders are the core mechanic, so while they are off the switch comes first, right under the text.
   const toggle = [button(t(s, ctx, s.reminders ? "btn.remindersOff" : "btn.remindersOn"), "reminders")];
-  return reply(s, ctx, prefix + t(s, ctx, "home.title") + lines.join("\n") + t(s, ctx, "home.scope") +
+  return reply(s, ctx, prefix + t(s, ctx, "home.title") + lines.join("\n") + noteLines + t(s, ctx, "home.scope") +
     t(s, ctx, s.reminders ? "home.reminders.on" : "home.reminders.off"),
     [...(s.reminders ? [] : [toggle]), ...items.map(i => [button(i.title[s.lang]!, `card:${i.ruleId}`)]),
+      ...notes.map(n => [button(n.title[s.lang]!, `card:${n.id}`)]),
       ...(s.reminders ? [toggle] : []),
       ...(items.some(i => i.status !== "done") ? [[button(t(s, ctx, "btn.calendar"), "calendar")]] : []),
       // The same plan as a screen; the payload picks the university the way ?start= does.
@@ -116,7 +128,10 @@ export function documentsNote(s: Session, ctx: DialogueContext, item: PlanItem):
 }
 function card(s: Session, ctx: DialogueContext, id: string): Reply {
   const item = plan(s, ctx).find(i => i.ruleId === id);
-  if (!item) return home(s, ctx);
+  if (!item) {
+    const note = undated(s, ctx).find(n => n.id === id);
+    return note ? procedureCard(s, ctx, note) : home(s, ctx);
+  }
   const key = `${item.ruleId}:${item.dueDate}`;
   const docs = item.documents.map(d => `${s.documents[`${key}:${d.id}`] ? "✓" : "□"} ${d.title[s.lang]}`);
   const target = item.recommendedDate ? t(s, ctx, "card.recommended") + date(s, item.recommendedDate) : "";
@@ -132,6 +147,24 @@ function card(s: Session, ctx: DialogueContext, id: string): Reply {
       ...(item.status === "done" ? [] : [[button(t(s, ctx, "btn.done"), `done:${id}`)]]),
       [link(t(s, ctx, "btn.law"), item.legal.url)],
       [button(t(s, ctx, overdue ? "btn.overdueHelp" : "btn.cantComplete"), `help:${id}`), button(t(s, ctx, "btn.plan"), "plan")]]);
+}
+/** Where the procedure comes from; the app shows the same line. */
+export function procedureSource(s: Session, ctx: DialogueContext, note: UniversityProcedure): string {
+  return t(s, ctx, "card.procedureSource", { uni: uni(s, ctx).name[s.lang]!, url: note.source.url, date: date(s, note.source.checkedAt) });
+}
+/** Label of the link to the university's page, as on the chat card. */
+export function pageLabel(s: Session, ctx: DialogueContext): string {
+  return t(s, ctx, "btn.page", { uni: uni(s, ctx).name[s.lang]! });
+}
+/** A procedure without a calculated deadline: what to do, when in the source's words, the checklist, the source. */
+function procedureCard(s: Session, ctx: DialogueContext, note: UniversityProcedure): Reply {
+  const checked = (doc: string) => s.documents[`${note.id}:${doc}`] === true;
+  const docs = note.documents.map(d => `${checked(d.id) ? "✓" : "□"} ${d.title[s.lang]}`);
+  return reply(s, ctx, `${note.title[s.lang]}\n${note.action[s.lang]}\n` + t(s, ctx, "card.when") + note.when[s.lang] +
+    "\n\n" + docs.join("\n") + "\n\n" + procedureSource(s, ctx, note),
+    [...note.documents.map(d => [button((checked(d.id) ? "✓ " : "□ ") + d.title[s.lang], `doc:${note.id}:${d.id}`)]),
+      [link(pageLabel(s, ctx), note.source.url)],
+      [button(t(s, ctx, "btn.plan"), "plan")]]);
 }
 function calendar(s: Session, ctx: DialogueContext): Reply {
   const items = plan(s, ctx);
@@ -245,6 +278,11 @@ export function transition(previous: Session | null, input: Input, ctx: Dialogue
       if (item && item.documents.some(d => d.id === doc)) {
         const key = `${id}:${item.dueDate}:${doc}`; s.documents[key] = !s.documents[key];
         return { session: s, reply: card(s, ctx, id!) };
+      }
+      const note = item ? undefined : undated(s, ctx).find(n => n.id === id);
+      if (note && note.documents.some(d => d.id === doc)) {
+        const key = `${id}:${doc}`; s.documents[key] = !s.documents[key];
+        return { session: s, reply: procedureCard(s, ctx, note) };
       }
     } else if (action.startsWith("done:")) {
       const id = action.slice(5);

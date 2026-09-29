@@ -256,6 +256,24 @@ describe("mini app shows what the chat shows", () => {
     for (const action of ["/start kfu", ...ONBOARDING.slice(1, -1)]) await applyAction(live, 8, action, false);
     expect((await readState(live, 8, false)).session?.example).toBeUndefined();
   });
+  it("shows the university's undated procedure apart from the plan, with the chat's source line", async () => {
+    const f = await fixture();
+    for (const action of ["/start kfu", ...ONBOARDING.slice(1)]) await applyAction(f.service, 7, action, false);
+    const state = await readState(f.service, 7, false);
+    expect(state.session?.plan.map(i => i.ruleId)).toEqual(["medical-examination", "fingerprinting"]);
+    const [note] = state.session?.undated ?? [];
+    expect(note?.id).toBe("migration-registration");
+    expect(note?.when).toContain("следующего рабочего дня после заселения");
+    expect(note?.sourceUrl).toContain("bezvizovyi-vjezd");
+    expect(note?.sourceNote).toContain("Это правило вуза, а не расчёт бота");
+    expect(note?.sourceLabel).toBe("Открыть страницу КФУ");
+    await applyAction(f.service, 7, "doc:migration-registration:dorm-contract", false);
+    const after = await readState(f.service, 7, false);
+    expect(after.session?.undated[0]?.documents.find(d => d.id === "dorm-contract")?.checked).toBe(true);
+    const old = new Service(f.store, { ...ctx, version: "old-version" }, { async send() {} }, () => NOW);
+    for (const action of ONBOARDING) await applyAction(old, 8, action, false);
+    expect((await readState(f.service, 8, false)).session?.undated).toEqual([]);
+  });
   it("takes the first entry date of the app screens from the rules", async () => {
     const f = await fixture();
     const shifted = parseRuleSet(JSON.parse(JSON.stringify(raw).replaceAll("2026-09-01", "2027-09-01")));

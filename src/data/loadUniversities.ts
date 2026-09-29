@@ -7,7 +7,7 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { isValidDate } from "../core/dates.js";
-import type { Localized } from "../core/types.js";
+import type { Condition, Localized, RequiredDocument } from "../core/types.js";
 
 export interface University {
   /** Deep-link payload: https://max.ru/<bot>?start=<id> */
@@ -17,6 +17,25 @@ export interface University {
   contactUrl: string;
   citizenships: string[];
   checkedAt: string;
+  /**
+   * The university's own procedures whose deadline the bot cannot calculate — e.g. migration
+   * registration "the next working day after moving into the dormitory": the bot does not know
+   * that date. Shown with the deadline in the source's words, without reminders or a calendar
+   * event (docs/product/plan-vs-studroute.md, items 1 and 5). Empty when the profile has none.
+   */
+  procedures: UniversityProcedure[];
+}
+
+export interface UniversityProcedure {
+  id: string;
+  title: Localized;
+  action: Localized;
+  /** The deadline in the source's words; never turned into a date. */
+  when: Localized;
+  documents: RequiredDocument[];
+  /** Only citizenship conditions: which students of this university it concerns. */
+  appliesIf: Extract<Condition, { field: "citizenship" }>[];
+  source: { url: string; checkedAt: string };
 }
 
 export class UniversityValidationError extends Error {
@@ -30,6 +49,49 @@ const text = (value: unknown, path: string): string => {
   if (typeof value !== "string" || value.trim().length === 0) throw new UniversityValidationError(path, "ожидается непустая строка");
   return value;
 };
+const record = (value: unknown, path: string): Record<string, unknown> => {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) throw new UniversityValidationError(path, "ожидается объект");
+  return value as Record<string, unknown>;
+};
+/** Every language of the interface is checked where the texts are loaded (tests/university.test.ts). */
+const localized = (value: unknown, path: string): Localized => {
+  const r = record(value, path);
+  text(r.ru, `${path}.ru`);
+  return Object.fromEntries(Object.entries(r).filter(([lang]) => /^[a-z]{2}$/.test(lang))
+    .map(([lang, v]) => [lang, text(v, `${path}.${lang}`)]));
+};
+const slug = (value: unknown, path: string): string => {
+  const v = text(value, path);
+  if (!/^[a-z0-9-]{1,64}$/.test(v)) throw new UniversityValidationError(path, "латиница в нижнем регистре, цифры и -, до 64 символов");
+  return v;
+};
+
+function parseProcedure(raw: unknown, path: string): UniversityProcedure {
+  const p = record(raw, path);
+  if (!Array.isArray(p.documents)) throw new UniversityValidationError(`${path}.documents`, "ожидается массив");
+  const documents = p.documents.map((d, i) => {
+    const doc = record(d, `${path}.documents[${i}]`);
+    return { id: slug(doc.id, `${path}.documents[${i}].id`), title: localized(doc.title, `${path}.documents[${i}].title`) };
+  });
+  const twice = documents.map(d => d.id).find((id, i, all) => all.indexOf(id) !== i);
+  if (twice !== undefined) throw new UniversityValidationError(`${path}.documents`, `повторяющийся id документа «${twice}»`);
+  if (!Array.isArray(p.appliesIf)) throw new UniversityValidationError(`${path}.appliesIf`, "ожидается массив (пустой — для всех)");
+  const appliesIf = p.appliesIf.map((c, i) => {
+    const cond = record(c, `${path}.appliesIf[${i}]`);
+    if (cond.field !== "citizenship" || (cond.op !== "in" && cond.op !== "notIn") || !Array.isArray(cond.values) ||
+        cond.values.length === 0 || !cond.values.every(v => typeof v === "string" && /^[A-Z]{2}$/.test(v))) {
+      throw new UniversityValidationError(`${path}.appliesIf[${i}]`, "поддерживается только citizenship in/notIn со списком кодов ISO");
+    }
+    return { field: "citizenship" as const, op: cond.op as "in" | "notIn", values: cond.values as string[] };
+  });
+  const source = record(p.source, `${path}.source`);
+  const url = text(source.url, `${path}.source.url`);
+  if (!url.startsWith("https://")) throw new UniversityValidationError(`${path}.source.url`, "нужна ссылка https://");
+  const checkedAt = text(source.checkedAt, `${path}.source.checkedAt`);
+  if (!isValidDate(checkedAt)) throw new UniversityValidationError(`${path}.source.checkedAt`, "ожидается дата ГГГГ-ММ-ДД");
+  return { id: slug(p.id, `${path}.id`), title: localized(p.title, `${path}.title`), action: localized(p.action, `${path}.action`),
+    when: localized(p.when, `${path}.when`), documents, appliesIf, source: { url, checkedAt } };
+}
 
 export function parseUniversity(raw: unknown, path = "university"): University {
   if (typeof raw !== "object" || raw === null || Array.isArray(raw)) throw new UniversityValidationError(path, "ожидается объект");
@@ -49,8 +111,12 @@ export function parseUniversity(raw: unknown, path = "university"): University {
   text(name?.ru, `${path}.name.ru`);
   const names = Object.fromEntries(Object.entries(name ?? {}).filter(([lang]) => /^[a-z]{2}$/.test(lang))
     .map(([lang, value]) => [lang, text(value, `${path}.name.${lang}`)]));
+  if (u.procedures !== undefined && !Array.isArray(u.procedures)) throw new UniversityValidationError(`${path}.procedures`, "ожидается массив");
+  const procedures = ((u.procedures ?? []) as unknown[]).map((p, i) => parseProcedure(p, `${path}.procedures[${i}]`));
+  const repeated = procedures.map(p => p.id).find((id, i, all) => all.indexOf(id) !== i);
+  if (repeated !== undefined) throw new UniversityValidationError(`${path}.procedures`, `повторяющийся id «${repeated}»`);
   return { id, name: names,
-    contactUrl, citizenships: [...new Set(u.citizenships as string[])], checkedAt };
+    contactUrl, citizenships: [...new Set(u.citizenships as string[])], checkedAt, procedures };
 }
 
 /** All profiles from a directory; the default university comes first. */
@@ -62,6 +128,14 @@ export function readUniversities(dir: string, defaultId: string): University[] {
   const first = list.find(u => u.id === defaultId);
   if (!first) throw new UniversityValidationError(dir, `нет профиля по умолчанию «${defaultId}»`);
   return [first, ...list.filter(u => u !== first)];
+}
+
+/** A university procedure shares the card namespace with the rules (`card:<id>`), so ids must not clash. */
+export function checkProcedures(universities: University[], ruleIds: string[]): void {
+  for (const u of universities) {
+    const clash = u.procedures.find(p => ruleIds.includes(p.id));
+    if (clash) throw new UniversityValidationError(`${u.id}.procedures`, `id «${clash.id}» совпадает с id нормы`);
+  }
 }
 
 /** A citizenship the rules exclude must not look covered: it is offered separately and leads to help. */

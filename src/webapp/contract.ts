@@ -32,6 +32,23 @@ export interface AppPlanItem {
   legal: LegalBasis;
 }
 
+/**
+ * A university procedure whose deadline the bot cannot calculate (it counts from the move-in date).
+ * Shown apart from the plan, without a countdown; `when` is the source's own wording.
+ */
+export interface AppUndatedItem {
+  id: string;
+  title: string;
+  action: string;
+  when: string;
+  documents: { id: string; title: string; checked: boolean }[];
+  sourceUrl: string;
+  /** The chat's line on where the procedure comes from. */
+  sourceNote: string;
+  /** The chat's label of the link to the university page. */
+  sourceLabel: string;
+}
+
 export interface AppUniversity { id: string; name: string; contactUrl: string }
 
 export interface AppSession {
@@ -54,6 +71,8 @@ export interface AppSession {
   /** Demo only, on the entry step: label of the chat's "show an example" button; the app sends `example`. */
   example?: string;
   plan: AppPlanItem[];
+  /** The university's procedures without a calculated deadline (`AppUndatedItem`); empty for most profiles. */
+  undated: AppUndatedItem[];
 }
 
 export interface AppState {

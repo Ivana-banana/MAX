@@ -18,7 +18,9 @@ function withKazakh(): DialogueContext {
   const tr = (l: Record<string, string>) => ({ ...l, kk: `[kk] ${l.en}` });
   const kkRules = rules.rules.map(r => ({ ...r, title: tr(r.title), action: tr(r.action),
     documents: r.documents.map(d => ({ ...d, title: tr(d.title) })) }));
-  const kkUniversities = universities.map(u => ({ ...u, name: tr(u.name) }));
+  const kkUniversities = universities.map(u => ({ ...u, name: tr(u.name),
+    procedures: u.procedures.map(p => ({ ...p, title: tr(p.title), action: tr(p.action), when: tr(p.when),
+      documents: p.documents.map(d => ({ ...d, title: tr(d.title) })) })) }));
   checkTexts(all); checkTranslated(all, kkRules, kkUniversities);
   return { rules: kkRules, universities: kkUniversities, texts: all, version: rules.version, demo: true, today: "2026-09-24" };
 }
