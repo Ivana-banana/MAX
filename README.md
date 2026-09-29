@@ -398,6 +398,11 @@ docs/presentation (пересобрана 28.09 по `8bcb1cd`, пересоби
 [24.09](docs/verification-2026-09-24.md), [25.09](docs/verification-2026-09-25.md),
 [27.09](docs/verification-2026-09-27.md), [28.09](docs/verification-2026-09-28.md).
 
+## Лицензия
+
+Код — [MIT](LICENSE). Зависимости сервера — MIT и ISC, мини-приложения — MIT, шрифты —
+OFL-1.1 (`web/FONTS-OFL.txt`); закрытых библиотек нет.
+
 ## Материалы защиты
 
 [PDF: 17 слайдов](docs/presentation/first-90-days.pdf),
