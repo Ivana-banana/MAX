@@ -1,0 +1,236 @@
+{
+  "$comment": "Профиль по официальной странице «Отдел по работе с иностранными учащимися» СПбГЭУ (сверено 29.09.2026). СПбГЭУ не партнёр; контакт — публичная страница, не интеграция. procedures — правила самого вуза без расчётного срока (D-034, D-036). Страница даёт 90 дней и на медосвидетельствование (редакция до 162-ФЗ), по закону с 01.09.2026 — 30: расчёт бота идёт по норме (src/data/rules). Визовые гражданства в appliesIf — не входящие в перечень безвизовых на странице ИТМО (тот же город, 2026); своего перечня страница СПбГЭУ не даёт.",
+  "id": "spbgeu",
+  "name": {
+    "ru": "СПбГЭУ",
+    "en": "UNECON",
+    "uz": "SPbGEU",
+    "zh": "圣彼得堡国立经济大学"
+  },
+  "contactUrl": "https://unecon.ru/mezhdunarodnye-svyazi/upravlenie-mezhdunarodnogo-sotrudnichestva/otdel-po-rabote-s-inostrannymi-uchashhimisya/",
+  "citizenships": [
+    "KZ",
+    "UZ",
+    "TJ",
+    "KG",
+    "CN",
+    "IN",
+    "EG",
+    "TR"
+  ],
+  "checkedAt": "2026-09-29",
+  "procedures": [
+    {
+      "id": "migration-registration",
+      "title": {
+        "ru": "Миграционный учёт (регистрация)",
+        "en": "Migration registration",
+        "uz": "Migratsiya hisobi (roʻyxatga olish)",
+        "zh": "移民登记（居留登记）"
+      },
+      "action": {
+        "ru": "Если вы живёте в общежитии СПбГЭУ, регистрацию оформляет Отдел виз и регистраций СПбГЭУ: наб. канала Грибоедова, 30–32, 2-я лестница, 1 этаж, каб. 3-1-7, +7 (812) 315-81-36. Если живёте на частном адресе — регистрацию оформляет собственник жилья.",
+        "en": "If you live in a UNECON dormitory, your registration is handled by the UNECON Visa and Registration Office: 30–32 Griboyedov Canal Emb., staircase 2, 1st floor, room 3-1-7, +7 (812) 315-81-36. If you live at a private address, the owner of the flat registers you.",
+        "uz": "Agar SPbGEU yotoqxonasida yashasangiz, roʻyxatga olishni SPbGEU vizalar va roʻyxatga olish boʻlimi: Griboyedov kanali sohili, 30–32, 2-zina, 1-qavat, 3-1-7-xona, +7 (812) 315-81-36 rasmiylashtiradi. Xususiy manzilda yashasangiz — uy egasi rasmiylashtiradi.",
+        "zh": "如果您住在圣彼得堡国立经济大学宿舍，居留登记由圣彼得堡国立经济大学签证与登记处：格里博耶多夫运河沿岸街30–32号，2号楼梯，1楼，3-1-7室，+7 (812) 315-81-36办理。如果您住在私人住址，由房东为您办理登记。"
+      },
+      "when": {
+        "ru": "В течение трёх рабочих дней со дня прибытия. Бот не знает дату прибытия в общежитие — она может отличаться от даты въезда в Россию, — поэтому этот срок не считает и о нём не напоминает.",
+        "en": "Within three working days of arrival. The bot does not know the date you arrived at the dormitory — it may differ from your entry into Russia — so it neither calculates this deadline nor reminds you of it.",
+        "uz": "Kelgan kundan boshlab uch ish kuni ichida. Bot yotoqxonaga kelgan sanangizni bilmaydi — u Rossiyaga kirgan sanadan farq qilishi mumkin, — shuning uchun bu muddatni hisoblamaydi va eslatmaydi.",
+        "zh": "抵达之日起三个工作日内。机器人不知道您抵达宿舍的日期（可能与入境俄罗斯的日期不同），因此不计算此期限，也不会提醒。"
+      },
+      "documents": [
+        {
+          "id": "passport",
+          "title": {
+            "ru": "Паспорт (оригинал)",
+            "en": "Passport (original)",
+            "uz": "Pasport (asl nusxa)",
+            "zh": "护照（原件）"
+          }
+        },
+        {
+          "id": "migration-card",
+          "title": {
+            "ru": "Миграционная карта",
+            "en": "Migration card",
+            "uz": "Migratsiya kartasi",
+            "zh": "移民卡"
+          }
+        }
+      ],
+      "appliesIf": [],
+      "source": {
+        "url": "https://unecon.ru/mezhdunarodnye-svyazi/upravlenie-mezhdunarodnogo-sotrudnichestva/otdel-po-rabote-s-inostrannymi-uchashhimisya/",
+        "checkedAt": "2026-09-29"
+      }
+    },
+    {
+      "id": "registration-change",
+      "title": {
+        "ru": "Переоформить регистрацию при изменениях",
+        "en": "Re-register after a change",
+        "uz": "Oʻzgarishdan keyin qayta roʻyxatdan oʻtish",
+        "zh": "情况变化后重新办理登记"
+      },
+      "action": {
+        "ru": "Если вы пересекли границу России, находились в гостинице или больнице, переехали в другое общежитие или на частный адрес, получили новый паспорт — обратитесь: Отдел виз и регистраций СПбГЭУ: наб. канала Грибоедова, 30–32, 2-я лестница, 1 этаж, каб. 3-1-7, +7 (812) 315-81-36.",
+        "en": "If you crossed the Russian border, stayed at a hotel or hospital, moved to another dormitory or a private address, or got a new passport, contact the UNECON Visa and Registration Office: 30–32 Griboyedov Canal Emb., staircase 2, 1st floor, room 3-1-7, +7 (812) 315-81-36.",
+        "uz": "Agar Rossiya chegarasini kesib oʻtgan boʻlsangiz, mehmonxona yoki kasalxonada boʻlgan boʻlsangiz, boshqa yotoqxonaga yoki xususiy manzilga koʻchgan boʻlsangiz yoki yangi pasport olgan boʻlsangiz — murojaat qiling: SPbGEU vizalar va roʻyxatga olish boʻlimi: Griboyedov kanali sohili, 30–32, 2-zina, 1-qavat, 3-1-7-xona, +7 (812) 315-81-36.",
+        "zh": "如果您出入过俄罗斯国境、住过酒店或医院、搬到其他宿舍或私人住址，或获得了新护照，请联系圣彼得堡国立经济大学签证与登记处：格里博耶多夫运河沿岸街30–32号，2号楼梯，1楼，3-1-7室，+7 (812) 315-81-36。"
+      },
+      "when": {
+        "ru": "В течение 1 рабочего дня после изменения. Бот не знает о таких изменениях, поэтому о сроке не напоминает.",
+        "en": "Within 1 working day after the change. The bot does not know about such changes, so it does not remind you.",
+        "uz": "Oʻzgarishdan keyin 1 ish kuni ichida. Bot bunday oʻzgarishlarni bilmaydi, shuning uchun eslatmaydi.",
+        "zh": "变化发生后1个工作日内。机器人不知道此类变化，因此不会提醒。"
+      },
+      "documents": [],
+      "appliesIf": [],
+      "source": {
+        "url": "https://unecon.ru/mezhdunarodnye-svyazi/upravlenie-mezhdunarodnogo-sotrudnichestva/otdel-po-rabote-s-inostrannymi-uchashhimisya/",
+        "checkedAt": "2026-09-29"
+      }
+    },
+    {
+      "id": "registration-extension",
+      "title": {
+        "ru": "Продление регистрации",
+        "en": "Extending registration",
+        "uz": "Roʻyxatga olishni uzaytirish",
+        "zh": "延长居留登记"
+      },
+      "action": {
+        "ru": "Подайте документы: Отдел виз и регистраций СПбГЭУ: наб. канала Грибоедова, 30–32, 2-я лестница, 1 этаж, каб. 3-1-7, +7 (812) 315-81-36. К этому моменту медосвидетельствование и дактилоскопия должны быть пройдены.",
+        "en": "Submit the documents to the UNECON Visa and Registration Office: 30–32 Griboyedov Canal Emb., staircase 2, 1st floor, room 3-1-7, +7 (812) 315-81-36. By then your medical examination and fingerprinting must be completed.",
+        "uz": "Hujjatlarni topshiring: SPbGEU vizalar va roʻyxatga olish boʻlimi: Griboyedov kanali sohili, 30–32, 2-zina, 1-qavat, 3-1-7-xona, +7 (812) 315-81-36. Bu vaqtga kelib tibbiy koʻrik va daktiloskopiyadan oʻtgan boʻlishingiz kerak.",
+        "zh": "请向圣彼得堡国立经济大学签证与登记处：格里博耶多夫运河沿岸街30–32号，2号楼梯，1楼，3-1-7室，+7 (812) 315-81-36提交文件。届时须已完成体检和指纹登记。"
+      },
+      "when": {
+        "ru": "Не менее чем за 45 дней до окончания регистрации. Бот не знает дату окончания вашей регистрации, поэтому этот срок не считает и о нём не напоминает.",
+        "en": "At least 45 days before your registration ends. The bot does not know when your registration ends, so it neither calculates this deadline nor reminds you of it.",
+        "uz": "Roʻyxatga olish tugashidan kamida 45 kun oldin. Bot roʻyxatga olishingiz qachon tugashini bilmaydi, shuning uchun bu muddatni hisoblamaydi va eslatmaydi.",
+        "zh": "至少在居留登记到期前45天。机器人不知道您的居留登记何时到期，因此不计算此期限，也不会提醒。"
+      },
+      "documents": [
+        {
+          "id": "medical-fingerprint",
+          "title": {
+            "ru": "Пройденные медосвидетельствование и дактилоскопия («зелёная карта»)",
+            "en": "Completed medical examination and fingerprinting (the “green card”)",
+            "uz": "Oʻtilgan tibbiy koʻrik va daktiloskopiya («yashil karta»)",
+            "zh": "已完成的体检和指纹登记（“绿卡”）"
+          }
+        }
+      ],
+      "appliesIf": [],
+      "source": {
+        "url": "https://unecon.ru/mezhdunarodnye-svyazi/upravlenie-mezhdunarodnogo-sotrudnichestva/otdel-po-rabote-s-inostrannymi-uchashhimisya/",
+        "checkedAt": "2026-09-29"
+      }
+    },
+    {
+      "id": "visa-extension",
+      "title": {
+        "ru": "Продление визы",
+        "en": "Visa extension",
+        "uz": "Vizani uzaytirish",
+        "zh": "签证延期"
+      },
+      "action": {
+        "ru": "Однократная учебная виза выдаётся на 90 дней. Документы на продление принимает Отдел виз и регистраций СПбГЭУ: наб. канала Грибоедова, 30–32, 2-я лестница, 1 этаж, каб. 3-1-7, +7 (812) 315-81-36.",
+        "en": "A single-entry study visa is issued for 90 days. Extension documents are accepted by the UNECON Visa and Registration Office: 30–32 Griboyedov Canal Emb., staircase 2, 1st floor, room 3-1-7, +7 (812) 315-81-36.",
+        "uz": "Bir martalik oʻquv vizasi 90 kunga beriladi. Uzaytirish uchun hujjatlarni SPbGEU vizalar va roʻyxatga olish boʻlimi: Griboyedov kanali sohili, 30–32, 2-zina, 1-qavat, 3-1-7-xona, +7 (812) 315-81-36 qabul qiladi.",
+        "zh": "一次性学习签证有效期为90天。延期文件由圣彼得堡国立经济大学签证与登记处：格里博耶多夫运河沿岸街30–32号，2号楼梯，1楼，3-1-7室，+7 (812) 315-81-36受理。"
+      },
+      "when": {
+        "ru": "Не менее чем за 45 дней до окончания визы. Бот не знает дату окончания вашей визы, поэтому этот срок не считает и о нём не напоминает.",
+        "en": "At least 45 days before your visa expires. The bot does not know when your visa expires, so it neither calculates this deadline nor reminds you of it.",
+        "uz": "Viza tugashidan kamida 45 kun oldin. Bot vizangiz qachon tugashini bilmaydi, shuning uchun bu muddatni hisoblamaydi va eslatmaydi.",
+        "zh": "至少在签证到期前45天。机器人不知道您的签证何时到期，因此不计算此期限，也不会提醒。"
+      },
+      "documents": [
+        {
+          "id": "passport",
+          "title": {
+            "ru": "Паспорт (оригинал)",
+            "en": "Passport (original)",
+            "uz": "Pasport (asl nusxa)",
+            "zh": "护照（原件）"
+          }
+        },
+        {
+          "id": "migration-card",
+          "title": {
+            "ru": "Миграционная карта",
+            "en": "Migration card",
+            "uz": "Migratsiya kartasi",
+            "zh": "移民卡"
+          }
+        },
+        {
+          "id": "registration",
+          "title": {
+            "ru": "Постановка на миграционный учёт (регистрация)",
+            "en": "Migration registration",
+            "uz": "Migratsiya hisobiga qoʻyilganlik (roʻyxatga olish)",
+            "zh": "移民登记（居留登记）"
+          }
+        },
+        {
+          "id": "medical-fingerprint",
+          "title": {
+            "ru": "Пройденные медосвидетельствование и дактилоскопия («зелёная карта»)",
+            "en": "Completed medical examination and fingerprinting (the “green card”)",
+            "uz": "Oʻtilgan tibbiy koʻrik va daktiloskopiya («yashil karta»)",
+            "zh": "已完成的体检和指纹登记（“绿卡”）"
+          }
+        }
+      ],
+      "appliesIf": [
+        {
+          "field": "citizenship",
+          "op": "in",
+          "values": [
+            "CN",
+            "IN",
+            "EG",
+            "TR"
+          ]
+        }
+      ],
+      "source": {
+        "url": "https://unecon.ru/mezhdunarodnye-svyazi/upravlenie-mezhdunarodnogo-sotrudnichestva/otdel-po-rabote-s-inostrannymi-uchashhimisya/",
+        "checkedAt": "2026-09-29"
+      }
+    },
+    {
+      "id": "health-insurance",
+      "title": {
+        "ru": "Полис ДМС",
+        "en": "Voluntary health insurance policy",
+        "uz": "Ixtiyoriy tibbiy sugʻurta polisi",
+        "zh": "自愿医疗保险单"
+      },
+      "action": {
+        "ru": "Полис ДМС обязателен для всех иностранных студентов. Оформите его в Санкт-Петербурге на 1 год: амбулаторное и стационарное лечение, помощь при несчастных случаях и репатриация.",
+        "en": "A voluntary health insurance policy is mandatory for all international students. Buy it in Saint Petersburg for 1 year, covering outpatient and inpatient care, accidents and repatriation.",
+        "uz": "Ixtiyoriy tibbiy sugʻurta polisi barcha xorijiy talabalar uchun majburiy. Uni Sankt-Peterburgda 1 yilga rasmiylashtiring: ambulator va statsionar davolanish, baxtsiz hodisalarda yordam va repatriatsiya.",
+        "zh": "所有外国留学生都必须持有自愿医疗保险单。请在圣彼得堡办理为期1年的保险，涵盖门诊、住院、意外事故救助和遣返。"
+      },
+      "when": {
+        "ru": "Срок оформления на странице вуза не указан — уточните в отделе.",
+        "en": "The page does not give a deadline — ask the office.",
+        "uz": "Sahifada muddat koʻrsatilmagan — boʻlimdan aniqlang.",
+        "zh": "页面未注明办理期限，请向该处咨询。"
+      },
+      "documents": [],
+      "appliesIf": [],
+      "source": {
+        "url": "https://unecon.ru/mezhdunarodnye-svyazi/upravlenie-mezhdunarodnogo-sotrudnichestva/otdel-po-rabote-s-inostrannymi-uchashhimisya/",
+        "checkedAt": "2026-09-29"
+      }
+    }
+  ]
+}

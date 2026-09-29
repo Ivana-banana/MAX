@@ -1,8 +1,281 @@
 {
-  "$comment": "Демо-профиль второго вуза: показывает перенос сценария одним файлом. ИТМО не партнёр и не участвовал в проекте. Контакт — публичная страница отдела миграционного учёта, не интеграция. Открывается диплинком ?start=itmo.",
+  "$comment": "Профиль по официальной странице «Миграционные документы» международного офиса ИТМО (данные на сентябрь 2026, сверено 29.09.2026). ИТМО не партнёр и не участвовал в проекте; контакт — публичная страница, не интеграция. procedures — правила самого ИТМО без расчётного срока (D-034, D-036). Страница даёт 30 дней и на дактилоскопию, по закону у неё 90 — расчёт бота идёт по норме (src/data/rules). Визовые гражданства в appliesIf — не входящие в перечень безвизовых на той же странице.",
   "id": "itmo",
-  "name": { "ru": "ИТМО", "en": "ITMO", "zh": "ITMO大学", "uz": "ITMO" },
+  "name": {
+    "ru": "ИТМО",
+    "en": "ITMO",
+    "uz": "ITMO",
+    "zh": "ITMO大学"
+  },
   "contactUrl": "https://int.itmo.ru/ru/important_documents",
-  "citizenships": ["KZ", "UZ", "TJ", "KG", "CN", "IN", "EG", "TR"],
-  "checkedAt": "2026-09-23"
+  "citizenships": [
+    "KZ",
+    "UZ",
+    "TJ",
+    "KG",
+    "CN",
+    "IN",
+    "EG",
+    "TR"
+  ],
+  "checkedAt": "2026-09-29",
+  "procedures": [
+    {
+      "id": "migration-registration",
+      "title": {
+        "ru": "Миграционный учёт (регистрация)",
+        "en": "Migration registration",
+        "uz": "Migratsiya hisobi (roʻyxatga olish)",
+        "zh": "移民登记（居留登记）"
+      },
+      "action": {
+        "ru": "Если вы живёте в общежитии ИТМО, регистрацию оформляет Отдел миграционного учёта ИТМО: ул. Ломоносова, 9, оф. 2139d, omu@itmo.ru, +7 (812) 480-09-17. Если живёте на частном адресе — регистрацию оформляет собственник жилья.",
+        "en": "If you live in an ITMO dormitory, your registration is handled by the ITMO Migration Registration Office: 9 Lomonosova St., office 2139d, omu@itmo.ru, +7 (812) 480-09-17. If you live at a private address, the owner of the flat registers you.",
+        "uz": "Agar ITMO yotoqxonasida yashasangiz, roʻyxatga olishni ITMO migratsiya hisobi boʻlimi: Lomonosov koʻch., 9, 2139d-xona, omu@itmo.ru, +7 (812) 480-09-17 rasmiylashtiradi. Xususiy manzilda yashasangiz — uy egasi rasmiylashtiradi.",
+        "zh": "如果您住在ITMO大学宿舍，居留登记由ITMO大学移民登记处：Lomonosova街9号，2139d室，omu@itmo.ru，+7 (812) 480-09-17办理。如果您住在私人住址，由房东为您办理登记。"
+      },
+      "when": {
+        "ru": "В течение 3 рабочих дней со дня прибытия. Бот не знает дату прибытия в общежитие — она может отличаться от даты въезда в Россию, — поэтому этот срок не считает и о нём не напоминает.",
+        "en": "Within 3 working days of arrival. The bot does not know the date you arrived at the dormitory — it may differ from your entry into Russia — so it neither calculates this deadline nor reminds you of it.",
+        "uz": "Kelgan kundan boshlab 3 ish kuni ichida. Bot yotoqxonaga kelgan sanangizni bilmaydi — u Rossiyaga kirgan sanadan farq qilishi mumkin, — shuning uchun bu muddatni hisoblamaydi va eslatmaydi.",
+        "zh": "抵达之日起3个工作日内。机器人不知道您抵达宿舍的日期（可能与入境俄罗斯的日期不同），因此不计算此期限，也不会提醒。"
+      },
+      "documents": [
+        {
+          "id": "passport",
+          "title": {
+            "ru": "Паспорт (оригинал)",
+            "en": "Passport (original)",
+            "uz": "Pasport (asl nusxa)",
+            "zh": "护照（原件）"
+          }
+        },
+        {
+          "id": "migration-card",
+          "title": {
+            "ru": "Миграционная карта",
+            "en": "Migration card",
+            "uz": "Migratsiya kartasi",
+            "zh": "移民卡"
+          }
+        },
+        {
+          "id": "contract",
+          "title": {
+            "ru": "Договор на платное обучение (если учитесь по договору)",
+            "en": "Paid tuition contract (if you study on a contract basis)",
+            "uz": "Pullik taʼlim shartnomasi (shartnoma asosida oʻqisangiz)",
+            "zh": "付费教育合同（如为合同制学生）"
+          }
+        }
+      ],
+      "appliesIf": [],
+      "source": {
+        "url": "https://int.itmo.ru/ru/important_documents",
+        "checkedAt": "2026-09-29"
+      }
+    },
+    {
+      "id": "registration-change",
+      "title": {
+        "ru": "Переоформить регистрацию при изменениях",
+        "en": "Re-register after a change",
+        "uz": "Oʻzgarishdan keyin qayta roʻyxatdan oʻtish",
+        "zh": "情况变化后重新办理登记"
+      },
+      "action": {
+        "ru": "Если вы пересекли границу России, находились в гостинице или больнице, переехали в другое общежитие или на частный адрес, получили новый паспорт или гражданство, РВП, РВПО или ВНЖ — обратитесь: Отдел миграционного учёта ИТМО: ул. Ломоносова, 9, оф. 2139d, omu@itmo.ru, +7 (812) 480-09-17.",
+        "en": "If you crossed the Russian border, stayed at a hotel or hospital, moved to another dormitory or a private address, got a new passport or citizenship, a temporary residence permit or a residence permit, contact the ITMO Migration Registration Office: 9 Lomonosova St., office 2139d, omu@itmo.ru, +7 (812) 480-09-17.",
+        "uz": "Agar Rossiya chegarasini kesib oʻtgan boʻlsangiz, mehmonxona yoki kasalxonada boʻlgan boʻlsangiz, boshqa yotoqxonaga yoki xususiy manzilga koʻchgan boʻlsangiz, yangi pasport yoki fuqarolik, vaqtincha yashash ruxsati yoki yashash guvohnomasini olgan boʻlsangiz — murojaat qiling: ITMO migratsiya hisobi boʻlimi: Lomonosov koʻch., 9, 2139d-xona, omu@itmo.ru, +7 (812) 480-09-17.",
+        "zh": "如果您出入过俄罗斯国境、住过酒店或医院、搬到其他宿舍或私人住址、获得新护照或新国籍、临时居留许可或居留证，请联系ITMO大学移民登记处：Lomonosova街9号，2139d室，omu@itmo.ru，+7 (812) 480-09-17。"
+      },
+      "when": {
+        "ru": "В течение 1 рабочего дня после изменения. Бот не знает о таких изменениях, поэтому о сроке не напоминает.",
+        "en": "Within 1 working day after the change. The bot does not know about such changes, so it does not remind you.",
+        "uz": "Oʻzgarishdan keyin 1 ish kuni ichida. Bot bunday oʻzgarishlarni bilmaydi, shuning uchun eslatmaydi.",
+        "zh": "变化发生后1个工作日内。机器人不知道此类变化，因此不会提醒。"
+      },
+      "documents": [],
+      "appliesIf": [],
+      "source": {
+        "url": "https://int.itmo.ru/ru/important_documents",
+        "checkedAt": "2026-09-29"
+      }
+    },
+    {
+      "id": "registration-extension",
+      "title": {
+        "ru": "Продление регистрации и срока пребывания",
+        "en": "Extending registration and the period of stay",
+        "uz": "Roʻyxatga olish va yashash muddatini uzaytirish",
+        "zh": "延长居留登记和停留期限"
+      },
+      "action": {
+        "ru": "Подайте документы: Отдел миграционного учёта ИТМО: ул. Ломоносова, 9, оф. 2139d, omu@itmo.ru, +7 (812) 480-09-17. Без визы можно находиться в России 90 дней суммарно в календарном году без продления; при каждом новом въезде срок пребывания нужно продлить.",
+        "en": "Submit the documents to the ITMO Migration Registration Office: 9 Lomonosova St., office 2139d, omu@itmo.ru, +7 (812) 480-09-17. Without a visa you may stay in Russia 90 days in total per calendar year without an extension; after every new entry the period of stay must be extended.",
+        "uz": "Hujjatlarni topshiring: ITMO migratsiya hisobi boʻlimi: Lomonosov koʻch., 9, 2139d-xona, omu@itmo.ru, +7 (812) 480-09-17. Vizasiz Rossiyada kalendar yili davomida jami 90 kun uzaytirmasdan boʻlish mumkin; har bir yangi kirishda yashash muddatini uzaytirish kerak.",
+        "zh": "请向ITMO大学移民登记处：Lomonosova街9号，2139d室，omu@itmo.ru，+7 (812) 480-09-17提交文件。免签人员每个日历年在俄累计可停留90天而无需延期；每次重新入境后都需延长停留期限。"
+      },
+      "when": {
+        "ru": "Не позднее чем за 45 дней до окончания регистрации. Бот не знает дату окончания вашей регистрации, поэтому этот срок не считает и о нём не напоминает.",
+        "en": "No later than 45 days before your registration ends. The bot does not know when your registration ends, so it neither calculates this deadline nor reminds you of it.",
+        "uz": "Roʻyxatga olish tugashidan kamida 45 kun oldin. Bot roʻyxatga olishingiz qachon tugashini bilmaydi, shuning uchun bu muddatni hisoblamaydi va eslatmaydi.",
+        "zh": "最迟在居留登记到期前45天。机器人不知道您的居留登记何时到期，因此不计算此期限，也不会提醒。"
+      },
+      "documents": [
+        {
+          "id": "passport",
+          "title": {
+            "ru": "Паспорт (оригинал)",
+            "en": "Passport (original)",
+            "uz": "Pasport (asl nusxa)",
+            "zh": "护照（原件）"
+          }
+        },
+        {
+          "id": "migration-card",
+          "title": {
+            "ru": "Миграционная карта",
+            "en": "Migration card",
+            "uz": "Migratsiya kartasi",
+            "zh": "移民卡"
+          }
+        },
+        {
+          "id": "registration",
+          "title": {
+            "ru": "Действующая регистрация (отрывная часть уведомления о прибытии)",
+            "en": "Current registration (tear-off part of the arrival notice)",
+            "uz": "Amaldagi roʻyxatga olish (kelish haqidagi bildirishnomaning ajratma qismi)",
+            "zh": "有效的居留登记（抵达通知的回执联）"
+          }
+        },
+        {
+          "id": "contract",
+          "title": {
+            "ru": "Договор на платное обучение (если учитесь по договору)",
+            "en": "Paid tuition contract (if you study on a contract basis)",
+            "uz": "Pullik taʼlim shartnomasi (shartnoma asosida oʻqisangiz)",
+            "zh": "付费教育合同（如为合同制学生）"
+          }
+        },
+        {
+          "id": "medical-fingerprint",
+          "title": {
+            "ru": "Медицинское заключение, справка о внесении данных в базу МВД и карта дактилоскопии",
+            "en": "Medical certificate, certificate of entry into the Interior Ministry database and fingerprint card",
+            "uz": "Tibbiy xulosa, IIV bazasiga kiritilganlik haqida maʼlumotnoma va daktiloskopiya kartasi",
+            "zh": "体检结论、录入内务部数据库的证明及指纹卡"
+          }
+        }
+      ],
+      "appliesIf": [],
+      "source": {
+        "url": "https://int.itmo.ru/ru/important_documents",
+        "checkedAt": "2026-09-29"
+      }
+    },
+    {
+      "id": "visa-extension",
+      "title": {
+        "ru": "Продление визы",
+        "en": "Visa extension",
+        "uz": "Vizani uzaytirish",
+        "zh": "签证延期"
+      },
+      "action": {
+        "ru": "Однократная учебная виза выдаётся не более чем на 90 дней; для учёбы её меняют на многократную до 1 года. Обратитесь: Отдел миграционного учёта ИТМО: ул. Ломоносова, 9, оф. 2139d, omu@itmo.ru, +7 (812) 480-09-17. Паспорт должен действовать ещё не менее 6 месяцев после окончания визы.",
+        "en": "A single-entry study visa is issued for no more than 90 days; for your studies it is replaced with a multiple-entry visa for up to 1 year. Contact the ITMO Migration Registration Office: 9 Lomonosova St., office 2139d, omu@itmo.ru, +7 (812) 480-09-17. Your passport must remain valid for at least 6 months after the visa ends.",
+        "uz": "Bir martalik oʻquv vizasi koʻpi bilan 90 kunga beriladi; oʻqish uchun u 1 yilgacha koʻp martalik vizaga almashtiriladi. Murojaat qiling: ITMO migratsiya hisobi boʻlimi: Lomonosov koʻch., 9, 2139d-xona, omu@itmo.ru, +7 (812) 480-09-17. Pasport viza tugaganidan keyin kamida 6 oy amal qilishi kerak.",
+        "zh": "一次性学习签证最长90天；为继续学习需换发最长1年的多次入境签证。请联系ITMO大学移民登记处：Lomonosova街9号，2139d室，omu@itmo.ru，+7 (812) 480-09-17。签证到期后护照有效期须至少还有6个月。"
+      },
+      "when": {
+        "ru": "За 1,5 месяца до окончания действующей визы. Бот не знает дату окончания вашей визы, поэтому этот срок не считает и о нём не напоминает.",
+        "en": "1.5 months before your current visa expires. The bot does not know when your visa expires, so it neither calculates this deadline nor reminds you of it.",
+        "uz": "Amaldagi viza tugashidan 1,5 oy oldin. Bot vizangiz qachon tugashini bilmaydi, shuning uchun bu muddatni hisoblamaydi va eslatmaydi.",
+        "zh": "在现有签证到期前1.5个月。机器人不知道您的签证何时到期，因此不计算此期限，也不会提醒。"
+      },
+      "documents": [
+        {
+          "id": "passport",
+          "title": {
+            "ru": "Паспорт (оригинал)",
+            "en": "Passport (original)",
+            "uz": "Pasport (asl nusxa)",
+            "zh": "护照（原件）"
+          }
+        },
+        {
+          "id": "migration-card",
+          "title": {
+            "ru": "Миграционная карта",
+            "en": "Migration card",
+            "uz": "Migratsiya kartasi",
+            "zh": "移民卡"
+          }
+        },
+        {
+          "id": "registration",
+          "title": {
+            "ru": "Действующая регистрация (отрывная часть уведомления о прибытии)",
+            "en": "Current registration (tear-off part of the arrival notice)",
+            "uz": "Amaldagi roʻyxatga olish (kelish haqidagi bildirishnomaning ajratma qismi)",
+            "zh": "有效的居留登记（抵达通知的回执联）"
+          }
+        },
+        {
+          "id": "photo",
+          "title": {
+            "ru": "Одна фотография 3×4 см",
+            "en": "One 3×4 cm photo",
+            "uz": "Bitta 3×4 sm fotosurat",
+            "zh": "一张3×4厘米照片"
+          }
+        },
+        {
+          "id": "fee",
+          "title": {
+            "ru": "Квитанция об уплате госпошлины за многократную визу (реквизиты — в отделе)",
+            "en": "Receipt for the multiple-entry visa fee (payment details at the office)",
+            "uz": "Koʻp martalik viza uchun davlat boji toʻlangani haqida kvitansiya (rekvizitlar — boʻlimda)",
+            "zh": "多次入境签证国家规费缴费收据（缴费信息向该处索取）"
+          }
+        },
+        {
+          "id": "contract",
+          "title": {
+            "ru": "Договор на платное обучение (если учитесь по договору)",
+            "en": "Paid tuition contract (if you study on a contract basis)",
+            "uz": "Pullik taʼlim shartnomasi (shartnoma asosida oʻqisangiz)",
+            "zh": "付费教育合同（如为合同制学生）"
+          }
+        },
+        {
+          "id": "medical-fingerprint",
+          "title": {
+            "ru": "Медицинское заключение, справка о внесении данных в базу МВД и карта дактилоскопии",
+            "en": "Medical certificate, certificate of entry into the Interior Ministry database and fingerprint card",
+            "uz": "Tibbiy xulosa, IIV bazasiga kiritilganlik haqida maʼlumotnoma va daktiloskopiya kartasi",
+            "zh": "体检结论、录入内务部数据库的证明及指纹卡"
+          }
+        }
+      ],
+      "appliesIf": [
+        {
+          "field": "citizenship",
+          "op": "in",
+          "values": [
+            "CN",
+            "IN",
+            "EG",
+            "TR"
+          ]
+        }
+      ],
+      "source": {
+        "url": "https://int.itmo.ru/ru/important_documents",
+        "checkedAt": "2026-09-29"
+      }
+    }
+  ]
 }

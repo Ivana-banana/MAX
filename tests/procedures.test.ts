@@ -13,14 +13,14 @@ const texts = readTexts("src/data/i18n");
 const ctx = { rules: rules.rules, universities, texts, version: rules.version, demo: true, today: "2026-09-24" };
 
 /** Onboards through the chat as a student would; `start` picks the university like a QR code. */
-function onboard(citizenship: string, start = "/start") {
-  let s: Session = transition(null, { text: start, callback: false }, ctx).session!;
+function onboard(citizenship: string, start = "/start", context = ctx) {
+  let s: Session = transition(null, { text: start, callback: false }, context).session!;
   const click = (action: string): Reply => {
-    const r = transition(s, { text: `${s.nonce}.${s.revision}|${action}`, callback: true }, ctx);
+    const r = transition(s, { text: `${s.nonce}.${s.revision}|${action}`, callback: true }, context);
     s = r.session!; return r.reply;
   };
   for (const a of ["ru", "accept", "yes", citizenship]) click(a);
-  const home = transition(s, { text: "2026-09-01", callback: false }, ctx);
+  const home = transition(s, { text: "2026-09-01", callback: false }, context);
   s = home.session!;
   return { home: home.reply, click, get session() { return s; } };
 }
@@ -54,10 +54,25 @@ describe("university procedures without a calculated deadline", () => {
     expect(card.text).toContain("vizovyi-vjezd");
   });
   it("shows nothing for a university whose profile has no such procedures", () => {
-    const f = onboard("IN", "/start itmo");
+    // A profile with contacts only, as a newly added university starts out.
+    const bare = { ...ctx, universities: universities.map(u => u.id === "itmo" ? { ...u, procedures: [] } : u) };
+    const f = onboard("IN", "/start itmo", bare);
     expect(f.home.text).not.toContain("Без расчётного срока");
-    expect(undated(f.session, ctx)).toEqual([]);
+    expect(undated(f.session, bare)).toEqual([]);
     expect(f.click("card:migration-registration").text).toContain("Ваш план подготовки");
+  });
+  it("shows a university's visa procedure only to citizens of visa countries (ITMO, UNECON)", () => {
+    for (const start of ["/start itmo", "/start spbgeu"]) {
+      expect(undated(onboard("CN", start).session, ctx).map(n => n.id)).toContain("visa-extension");
+      expect(undated(onboard("KZ", start).session, ctx).map(n => n.id)).not.toContain("visa-extension");
+      // Changes of circumstances concern everyone and are due within a working day, in the source's words.
+      const change = onboard("KZ", start).click("card:registration-change");
+      expect(change.text).toContain("В течение 1 рабочего дня после изменения");
+    }
+  });
+  it("takes every university procedure from that university's own site", () => {
+    const site = (url: string) => new URL(url).hostname.split(".").slice(-2).join(".");
+    for (const u of universities) for (const p of u.procedures) expect(site(p.source.url)).toBe(site(u.contactUrl));
   });
   it("never turns the procedure into a reminder or a calendar event", () => {
     const f = onboard("KZ");

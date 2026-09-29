@@ -28,7 +28,8 @@ const copied = (r: { reply: { buttons: unknown[][] } }) => buttons(r).find(b => 
 
 describe("university profiles are data", () => {
   it("loads every profile with the default one first", () => {
-    expect(universities.map(u => u.id)).toEqual(["kfu", "itmo"]);
+    expect(universities[0]!.id).toBe("kfu");
+    expect(universities.map(u => u.id)).toEqual(expect.arrayContaining(["kfu", "itmo", "spbgeu"]));
     expect(readUniversities("src/data/universities", "itmo")[0]!.id).toBe("itmo");
   });
   it("rejects a profile that would break the dialogue or leak an unsafe link", () => {
