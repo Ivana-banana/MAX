@@ -1,5 +1,5 @@
 {
-  "$comment": "Профиль вуза: всё, что меняется при переносе сценария в другой вуз. КФУ — кандидат в пилот, не партнёр (D-011). Контакт — публичная страница, не интеграция. procedures — правила самого КФУ (страницы «Миграционный учёт — безвизовый / визовый въезд», 2026/27), а не федеральные нормы: срок отсчитывается от заселения, поэтому бот его не считает (docs/product/plan-vs-studroute.md, пп. 1 и 5).",
+  "$comment": "Профиль вуза: всё, что меняется при переносе сценария в другой вуз. КФУ — кандидат в пилот, не партнёр (D-011). Контакт — публичная страница, не интеграция. procedures — правила самого КФУ (страницы «Миграционный учёт — безвизовый / визовый въезд», 2026/27), а не федеральные нормы: срок отсчитывается от заселения, поэтому бот его не считает (docs/product/plan-vs-studroute.md, пп. 1 и 5). С 29.09 — ещё переоформление после поездок и переезда, продление срока пребывания (безвизовые) и визы (визовые) по страницам КФУ (D-036).",
   "id": "kfu",
   "name": {
     "ru": "КФУ",
@@ -185,6 +185,210 @@
       ],
       "source": {
         "url": "https://kpfu.ru/international/migracionnoe-soprovozhdenie-inostrannyh-grazhdan/vizovyi-vjezd",
+        "checkedAt": "2026-09-29"
+      }
+    },
+    {
+      "id": "registration-change",
+      "title": {
+        "ru": "Переоформить учёт после поездки, больницы или переезда",
+        "en": "Re-register after a trip, a hospital stay or a move",
+        "uz": "Sayohat, kasalxona yoki koʻchishdan keyin qayta roʻyxatdan oʻtish",
+        "zh": "旅行、住院或搬家后重新办理登记"
+      },
+      "action": {
+        "ru": "Если вы ездили по России или за границу, лежали в больнице или переехали (в том числе внутри студгородка КФУ и Деревни Универсиады), лично придите: Департамент внешних связей КФУ: ул. Гвардейская, 9 (пн–пт 9:00–17:00, +7 (843) 206-52-89, доб. 8135). Перед выездом из России предупредите заведующего общежитием.",
+        "en": "If you travelled in Russia or abroad, stayed in hospital or moved (including within the KFU campus and the Universiade Village), come in person to the KFU Department of External Relations: 9 Gvardeyskaya St. (Mon–Fri 9:00–17:00, +7 (843) 206-52-89, ext. 8135). Before leaving Russia, tell the dormitory manager.",
+        "uz": "Agar Rossiya boʻylab yoki chet elga sayohat qilgan boʻlsangiz, kasalxonada yotgan boʻlsangiz yoki koʻchgan boʻlsangiz (KFU talabalar shaharchasi va Universiada qishlogʻi ichida ham), shaxsan keling: KFU Tashqi aloqalar departamenti: Gvardeyskaya koʻch., 9 (du–ju 9:00–17:00, +7 (843) 206-52-89, 8135-qoʻshimcha). Rossiyadan chiqishdan oldin yotoqxona mudirini ogohlantiring.",
+        "zh": "如果您在俄罗斯境内或出境旅行、住院或搬家（包括在喀山联邦大学校园和大运村内搬动），请本人前往喀山联邦大学对外联络部：Gvardeyskaya街9号（周一至周五9:00–17:00，+7 (843) 206-52-89 转8135）。离开俄罗斯前请告知宿舍管理员。"
+      },
+      "when": {
+        "ru": "В течение следующего рабочего дня после возвращения или переезда (кроме выходных и праздников). Бот не знает о поездках и переездах, поэтому о сроке не напоминает.",
+        "en": "Within the next working day after your return or move (weekends and holidays excluded). The bot does not know about trips and moves, so it does not remind you.",
+        "uz": "Qaytgandan yoki koʻchgandan keyingi ish kuni ichida (dam olish va bayram kunlari bundan mustasno). Bot sayohat va koʻchishlarni bilmaydi, shuning uchun eslatmaydi.",
+        "zh": "返回或搬家后的下一个工作日内（周末和节假日除外）。机器人不知道您的旅行和搬家情况，因此不会提醒。"
+      },
+      "documents": [
+        {
+          "id": "passport",
+          "title": {
+            "ru": "Паспорт (оригинал)",
+            "en": "Passport (original)",
+            "uz": "Pasport (asl nusxa)",
+            "zh": "护照（原件）"
+          }
+        },
+        {
+          "id": "migration-card",
+          "title": {
+            "ru": "Миграционная карта (оригинал)",
+            "en": "Migration card (original)",
+            "uz": "Migratsiya kartasi (asl nusxa)",
+            "zh": "移民卡（原件）"
+          }
+        },
+        {
+          "id": "registration",
+          "title": {
+            "ru": "Документ о миграционном учёте (оригинал)",
+            "en": "Migration registration document (original)",
+            "uz": "Migratsiya hisobi hujjati (asl nusxa)",
+            "zh": "居留登记文件（原件）"
+          }
+        },
+        {
+          "id": "dorm-contract",
+          "title": {
+            "ru": "Договор найма в общежитии (оригинал)",
+            "en": "Dormitory tenancy agreement (original)",
+            "uz": "Yotoqxona ijara shartnomasi (asl nusxa)",
+            "zh": "宿舍租赁合同（原件）"
+          }
+        }
+      ],
+      "appliesIf": [],
+      "source": {
+        "url": "https://kpfu.ru/international/migracionnoe-soprovozhdenie-inostrannyh-grazhdan/bezvizovyi-vjezd",
+        "checkedAt": "2026-09-29"
+      }
+    },
+    {
+      "id": "stay-extension",
+      "title": {
+        "ru": "Продление срока пребывания",
+        "en": "Extending the period of stay",
+        "uz": "Yashash muddatini uzaytirish",
+        "zh": "延长停留期限"
+      },
+      "action": {
+        "ru": "Чтобы продлить регистрацию, безвизовому студенту нужно решение о продлении срока пребывания. Обратитесь: Департамент внешних связей КФУ: ул. Гвардейская, 9 (пн–пт 9:00–17:00, +7 (843) 206-52-89, доб. 8135). Госпошлина за продление — 1000 ₽, реквизиты — на странице КФУ.",
+        "en": "To extend your registration as a visa-free student you need a decision extending your period of stay. Contact the KFU Department of External Relations: 9 Gvardeyskaya St. (Mon–Fri 9:00–17:00, +7 (843) 206-52-89, ext. 8135). The state fee for the extension is 1,000 roubles; payment details are on the KFU page.",
+        "uz": "Roʻyxatga olishni uzaytirish uchun vizasiz talabaga yashash muddatini uzaytirish toʻgʻrisidagi qaror kerak. Murojaat qiling: KFU Tashqi aloqalar departamenti: Gvardeyskaya koʻch., 9 (du–ju 9:00–17:00, +7 (843) 206-52-89, 8135-qoʻshimcha). Uzaytirish uchun davlat boji — 1000 rubl, rekvizitlar — KFU sahifasida.",
+        "zh": "免签学生如需延长居留登记，须先获得延长停留期限的决定。请联系喀山联邦大学对外联络部：Gvardeyskaya街9号（周一至周五9:00–17:00，+7 (843) 206-52-89 转8135）。延期国家规费为1000卢布，缴费信息见喀山联邦大学页面。"
+      },
+      "when": {
+        "ru": "Не позднее чем за 45 дней до истечения регистрации. Бот не знает дату окончания вашей регистрации, поэтому этот срок не считает и о нём не напоминает.",
+        "en": "No later than 45 days before your registration expires. The bot does not know when your registration ends, so it neither calculates this deadline nor reminds you of it.",
+        "uz": "Roʻyxatga olish tugashidan kamida 45 kun oldin. Bot roʻyxatga olishingiz qachon tugashini bilmaydi, shuning uchun bu muddatni hisoblamaydi va eslatmaydi.",
+        "zh": "最迟在居留登记到期前45天。机器人不知道您的居留登记何时到期，因此不计算此期限，也不会提醒。"
+      },
+      "documents": [],
+      "appliesIf": [
+        {
+          "field": "citizenship",
+          "op": "in",
+          "values": [
+            "KZ",
+            "UZ",
+            "TJ",
+            "KG"
+          ]
+        }
+      ],
+      "source": {
+        "url": "https://kpfu.ru/international/migracionnoe-soprovozhdenie-inostrannyh-grazhdan/bezvizovyi-vjezd",
+        "checkedAt": "2026-09-29"
+      }
+    },
+    {
+      "id": "visa-extension",
+      "title": {
+        "ru": "Продление визы",
+        "en": "Visa extension",
+        "uz": "Vizani uzaytirish",
+        "zh": "签证延期"
+      },
+      "action": {
+        "ru": "Однократная учебная виза выдаётся на 90 дней; продление даёт право находиться в России до 1 года. Лично подайте полный пакет документов в паспортно-визовый отдел ДВС КФУ: ул. Гвардейская, 9. Точный перечень копий — на странице КФУ.",
+        "en": "A single-entry study visa is issued for 90 days; the extension lets you stay in Russia for up to 1 year. Submit the full set of documents in person to the passport and visa office of the KFU Department of External Relations: 9 Gvardeyskaya St. The exact list of copies is on the KFU page.",
+        "uz": "Bir martalik oʻquv vizasi 90 kunga beriladi; uzaytirish Rossiyada 1 yilgacha boʻlish huquqini beradi. Hujjatlar toʻplamini KFU Tashqi aloqalar departamentining pasport-viza boʻlimiga shaxsan topshiring: Gvardeyskaya koʻch., 9. Nusxalarning aniq roʻyxati — KFU sahifasida.",
+        "zh": "一次性学习签证有效期为90天；延期后可在俄罗斯停留最长1年。请本人向喀山联邦大学对外联络部护照签证处（Gvardeyskaya街9号）递交全套文件。所需复印件的详细清单见喀山联邦大学页面。"
+      },
+      "when": {
+        "ru": "Не ранее чем за 90 и не позднее чем за 45 дней до окончания визы. Бот не знает дату окончания вашей визы, поэтому этот срок не считает и о нём не напоминает.",
+        "en": "No earlier than 90 and no later than 45 days before your visa expires. The bot does not know when your visa expires, so it neither calculates this deadline nor reminds you of it.",
+        "uz": "Viza tugashidan 90 kundan oldin emas va 45 kundan kechiktirmay. Bot vizangiz qachon tugashini bilmaydi, shuning uchun bu muddatni hisoblamaydi va eslatmaydi.",
+        "zh": "不早于签证到期前90天，且不晚于到期前45天。机器人不知道您的签证何时到期，因此不计算此期限，也不会提醒。"
+      },
+      "documents": [
+        {
+          "id": "passport",
+          "title": {
+            "ru": "Паспорт (оригинал)",
+            "en": "Passport (original)",
+            "uz": "Pasport (asl nusxa)",
+            "zh": "护照（原件）"
+          }
+        },
+        {
+          "id": "registration",
+          "title": {
+            "ru": "Документ о миграционном учёте (оригинал)",
+            "en": "Migration registration document (original)",
+            "uz": "Migratsiya hisobi hujjati (asl nusxa)",
+            "zh": "居留登记文件（原件）"
+          }
+        },
+        {
+          "id": "migration-card",
+          "title": {
+            "ru": "Миграционная карта (оригинал)",
+            "en": "Migration card (original)",
+            "uz": "Migratsiya kartasi (asl nusxa)",
+            "zh": "移民卡（原件）"
+          }
+        },
+        {
+          "id": "study-certificate",
+          "title": {
+            "ru": "Справка об обучении из деканата (не старше 14 дней)",
+            "en": "Certificate of study from the dean's office (not older than 14 days)",
+            "uz": "Dekanatdan oʻqish haqida maʼlumotnoma (14 kundan eski boʻlmagan)",
+            "zh": "院系出具的在读证明（14天内有效）"
+          }
+        },
+        {
+          "id": "fee",
+          "title": {
+            "ru": "Квитанция об уплате госпошлины",
+            "en": "State fee receipt",
+            "uz": "Davlat boji toʻlangani haqida kvitansiya",
+            "zh": "国家规费缴费收据"
+          }
+        },
+        {
+          "id": "photos",
+          "title": {
+            "ru": "Две цветные фотографии 3×4",
+            "en": "Two colour 3×4 photos",
+            "uz": "Ikkita rangli 3×4 fotosurat",
+            "zh": "两张3×4彩色照片"
+          }
+        },
+        {
+          "id": "medical-fingerprint",
+          "title": {
+            "ru": "Документ о дактилоскопии и медосвидетельствовании (оригинал и копия)",
+            "en": "Fingerprinting and medical examination document (original and copy)",
+            "uz": "Daktiloskopiya va tibbiy koʻrik hujjati (asl nusxa va nusxa)",
+            "zh": "指纹登记和体检证明（原件及复印件）"
+          }
+        }
+      ],
+      "appliesIf": [
+        {
+          "field": "citizenship",
+          "op": "in",
+          "values": [
+            "CN",
+            "IN",
+            "EG",
+            "TR"
+          ]
+        }
+      ],
+      "source": {
+        "url": "https://kpfu.ru/international/migracionnoe-soprovozhdenie-inostrannyh-grazhdan/prodlenie-odnokratnoj-i-mnogokratnoj-vizy-118896",
         "checkedAt": "2026-09-29"
       }
     }

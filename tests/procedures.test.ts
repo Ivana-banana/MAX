@@ -61,13 +61,13 @@ describe("university procedures without a calculated deadline", () => {
     expect(undated(f.session, bare)).toEqual([]);
     expect(f.click("card:migration-registration").text).toContain("Ваш план подготовки");
   });
-  it("shows a university's visa procedure only to citizens of visa countries (ITMO, UNECON)", () => {
-    for (const start of ["/start itmo", "/start spbgeu"]) {
+  it("shows a university's visa procedure only to citizens of visa countries (KFU, ITMO, UNECON)", () => {
+    for (const start of ["/start", "/start itmo", "/start spbgeu"]) {
       expect(undated(onboard("CN", start).session, ctx).map(n => n.id)).toContain("visa-extension");
       expect(undated(onboard("KZ", start).session, ctx).map(n => n.id)).not.toContain("visa-extension");
       // Changes of circumstances concern everyone and are due within a working day, in the source's words.
       const change = onboard("KZ", start).click("card:registration-change");
-      expect(change.text).toContain("В течение 1 рабочего дня после изменения");
+      expect(change.text).toMatch(/В течение (1 рабочего дня после изменения|следующего рабочего дня после возвращения или переезда)/);
     }
   });
   it("takes every university procedure from that university's own site", () => {
