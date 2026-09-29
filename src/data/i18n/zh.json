@@ -30,6 +30,7 @@
   "btn.copy": "复制问题",
   "btn.page": "打开{uni}页面",
   "btn.continue": "继续",
+  "btn.example": "查看示例（入境日期 {date}）",
   "btn.leave": "删除 / 退出",
   "btn.yes": "是，符合",
   "btn.no": "否 / 不确定",

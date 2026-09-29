@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { once } from "node:events";
 import { parseRuleSet } from "../src/data/loadRules.js";
 import raw from "../src/data/rules/ru-student.json" with { type: "json" };
-import { transition, type Reply, type Session } from "../src/bot/dialog.js";
+import { exampleEntry, transition, type Reply, type Session } from "../src/bot/dialog.js";
 import { Service, parseUpdate } from "../src/bot/service.js";
 import { webhookServer } from "../src/bot/server.js";
 import { loadRules, readConfig } from "../src/bot/config.js";
@@ -381,5 +381,36 @@ describe("review fixes in the dialogue", () => {
     const help = click("help").reply.text;
     expect(help).toContain("Подготовьте вопрос");
     expect(help).not.toContain("Для неподдержанного случая");
+  });
+});
+describe("example profile for reviewers (demo only)", () => {
+  const actions = (r?: Reply) => (r?.buttons.flat() ?? []).flatMap(b => "action" in b ? [b.action.split("|")[1]] : []);
+  it("offers an example entry date whose first reminder is due the same day", async () => {
+    const f=await fixture(); f.time("2026-09-30T10:00:00+03:00");
+    await f.input("/start"); await f.click("ru"); await f.click("accept"); await f.click("yes"); await f.click("KZ");
+    await f.service.flush();
+    const prompt=f.sent.at(-1)?.reply;
+    expect(actions(prompt)).toContain("example");
+    expect(prompt?.buttons.flat().map(b=>b.text).join()).toContain("8 сентября 2026");
+    await f.click("example");
+    expect(await f.store.get(1)).toMatchObject({ entryDate: "2026-09-08", step: "plan" });
+    await f.click("reminders"); await f.service.flush();
+    expect(f.sent.some(x=>x.reply.text.includes("Напоминание:"))).toBe(true);
+  });
+  it("has no example outside the demo and treats the word as an invalid date", () => {
+    const live={...ctx, demo:false};
+    let state:Session|null=null, reply:Reply|undefined;
+    for (const text of ["/start","ru","accept","yes","KZ"]) {
+      const r=transition(state,{text,callback:false},live); state=r.session; reply=r.reply;
+    }
+    expect(state?.step).toBe("entry");
+    expect(actions(reply)).not.toContain("example");
+    const r=transition(state,{text:"example",callback:false},live);
+    expect(r.session?.step).toBe("entry"); expect(r.session?.entryDate).toBeUndefined();
+  });
+  it("derives the date from the rules and never goes before the scenario start", () => {
+    expect(exampleEntry({ rules: rules.rules, today: "2026-09-30" })).toBe("2026-09-08");
+    expect(exampleEntry({ rules: rules.rules, today: "2026-10-14" })).toBe("2026-09-22");
+    expect(exampleEntry({ rules: rules.rules, today: "2026-09-10" })).toBe("2026-09-01");
   });
 });

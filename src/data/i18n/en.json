@@ -32,6 +32,7 @@
   "btn.copy": "Copy the question",
   "btn.page": "Open the {uni} page",
   "btn.continue": "Continue",
+  "btn.example": "Show an example (entry {date})",
   "btn.leave": "Delete / leave",
   "btn.yes": "Yes",
   "btn.no": "No / unsure",

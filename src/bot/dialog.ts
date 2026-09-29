@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
-import { buildPlan, coverage } from "../core/deadlines.js";
-import { compareDates, isValidDate } from "../core/dates.js";
+import { buildPlan, coverage, REMINDER_OFFSETS } from "../core/deadlines.js";
+import { addDays, compareDates, isValidDate } from "../core/dates.js";
 import type { Completions, DeadlineRule, Lang, PlanItem, UserProfile } from "../core/types.js";
 import type { University } from "../data/loadUniversities.js";
 import { format, type Texts } from "../data/loadTexts.js";
@@ -47,6 +47,17 @@ const country = (s: Session, ctx: DialogueContext, code: string) =>
 function typedDate(text: string): string {
   const dotted = /^(\d{1,2})\.(\d{1,2})\.(\d{4})$/.exec(text);
   return dotted ? `${dotted[3]}-${dotted[2]!.padStart(2, "0")}-${dotted[1]!.padStart(2, "0")}` : text;
+}
+/**
+ * Demo only: an entry date whose earliest reminder falls on today, so a reviewer sees the
+ * plan and a reminder at once. Derived from the rules, not hard-coded: the shortest term
+ * minus the first reminder offset (30 days counted from the entry day − 7 = 22 days ago).
+ */
+export function exampleEntry(ctx: Pick<DialogueContext, "rules" | "today">): string {
+  const shortest = Math.min(...ctx.rules.map(r => r.term.days - (r.term.counting === "eventDay" ? 1 : 0)));
+  const entry = addDays(ctx.today, -(shortest - Math.max(...REMINDER_OFFSETS)));
+  const from = coverage(ctx.rules).from;
+  return entry < from ? from : entry;
 }
 export function countdown(s: Session, ctx: DialogueContext, item: PlanItem): string {
   if (item.status === "done") return t(s, ctx, "countdown.done");
@@ -157,7 +168,8 @@ export function prompt(s: Session, ctx: DialogueContext): Reply {
       // Citizenships the rules exclude stay as buttons: they lead to the help branch, not to a dead end.
       [...rows(uni(s, ctx).citizenships, 2), ...rows([...coverage(ctx.rules).excluded, "OTHER"], 2)]
         .map(row => row.map(code => button(country(s, ctx, code), code))));
-    case "entry": return reply(s, ctx, t(s, ctx, "entry", { from: date(s, coverage(ctx.rules).from) }));
+    case "entry": return reply(s, ctx, t(s, ctx, "entry", { from: date(s, coverage(ctx.rules).from) }),
+      ctx.demo ? [[button(t(s, ctx, "btn.example", { date: date(s, exampleEntry(ctx)) }), "example")]] : []);
     case "completion": return reply(s, ctx, t(s, ctx, "completion"), [[button(t(s, ctx, "btn.cancel"), "plan")]]);
     case "delete": return reply(s, ctx, t(s, ctx, "delete"),
       [[button(t(s, ctx, "btn.confirmDelete"), "confirm-delete"), button(t(s, ctx, "btn.cancel"), "cancel-delete")]]);
@@ -210,7 +222,7 @@ export function transition(previous: Session | null, input: Input, ctx: Dialogue
   else if (s.step === "scope" && action === "yes") s.step = "citizenship";
   else if (s.step === "citizenship" && uni(s, ctx).citizenships.includes(action)) { s.citizenship = action; s.step = "entry"; }
   else if (s.step === "entry") {
-    const entry = typedDate(action), from = coverage(ctx.rules).from;
+    const entry = ctx.demo && action === "example" ? exampleEntry(ctx) : typedDate(action), from = coverage(ctx.rules).from;
     if (!isValidDate(entry) || entry < from || entry > ctx.today) {
       return { session: s, reply: reply(s, ctx, t(s, ctx, "entry.invalid", { from: date(s, from) })) };
     }
