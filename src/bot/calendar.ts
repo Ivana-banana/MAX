@@ -1,4 +1,4 @@
-import { reminderDates } from "../core/deadlines.js";
+import { REMINDER_OFFSETS, reminderDates } from "../core/deadlines.js";
 import { addDays } from "../core/dates.js";
 import type { Lang, PlanItem } from "../core/types.js";
 import { format, type Texts } from "../data/loadTexts.js";
@@ -10,6 +10,8 @@ export interface CalendarOptions {
   lang: Lang; texts: Texts; demo: boolean; uid: string; today: string; sequence: number;
   /** Planned visit days (rule id → date, D-039): each is its own event with an alarm the evening before. */
   visits?: Record<string, string>;
+  /** University deadlines counted from a document end date (D-040), with the same alarms as the plan. */
+  procedures?: { id: string; title: string; due: string }[];
 }
 export const CALENDAR_FILE = "first-90-days.ics";
 const REMIND_AT = "T060000Z"; // 09:00 Moscow time, the same hour the bot reminds
@@ -63,6 +65,17 @@ export function planToIcs(items: PlanItem[], o: CalendarOptions): string {
           "DESCRIPTION:" + escape(demo + t("ics.visit") + item.title[o.lang]), "END:VALARM"] : []),
         "END:VEVENT");
     }
+  }
+  for (const p of o.procedures ?? []) {
+    lines.push("BEGIN:VEVENT", `UID:${p.id}-${o.uid}@max-first-90-days`, `DTSTAMP:${stamp}`, `SEQUENCE:${o.sequence}`,
+      `DTSTART;VALUE=DATE:${compact(p.due)}`, `DTEND;VALUE=DATE:${compact(addDays(p.due, 1))}`,
+      "SUMMARY:" + escape(demo + t("ics.university") + p.title), "DESCRIPTION:" + escape(t("ics.universityNote")), "TRANSP:TRANSPARENT");
+    for (const offset of REMINDER_OFFSETS) {
+      const day = addDays(p.due, -offset);
+      if (day >= o.today) lines.push("BEGIN:VALARM", "ACTION:DISPLAY", `TRIGGER;VALUE=DATE-TIME:${compact(day)}${REMIND_AT}`,
+        "DESCRIPTION:" + escape(demo + p.title + " — " + p.due), "END:VALARM");
+    }
+    lines.push("END:VEVENT");
   }
   lines.push("END:VCALENDAR");
   return lines.map(fold).join("\r\n") + "\r\n";

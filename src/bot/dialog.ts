@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto";
 import { buildPlan, coverage, matchesCondition, REMINDER_OFFSETS } from "../core/deadlines.js";
-import { addDays, compareDates, isValidDate } from "../core/dates.js";
+import { addDays, compareDates, daysBetween, isValidDate } from "../core/dates.js";
 import type { Completions, DeadlineRule, Lang, PlanItem, UserProfile } from "../core/types.js";
-import type { University, UniversityProcedure } from "../data/loadUniversities.js";
+import type { ProcedureCountdown, University, UniversityProcedure } from "../data/loadUniversities.js";
 import { format, type Texts } from "../data/loadTexts.js";
 import { CALENDAR_FILE, planToIcs } from "./calendar.js";
 
@@ -14,7 +14,7 @@ export interface Session {
   nonce: string;
   revision: number;
   lang: Lang;
-  step: "language" | "consent" | "scope" | "citizenship" | "entry" | "plan" | "completion" | "visit" | "delete";
+  step: "language" | "consent" | "scope" | "citizenship" | "entry" | "plan" | "completion" | "visit" | "docEnd" | "delete";
   /** Step the delete confirmation was opened from, so "Cancel" returns there. */
   back?: Session["step"];
   university?: string;
@@ -25,6 +25,8 @@ export interface Session {
   documents: Record<string, boolean>;
   /** Day the student plans to go for a procedure (rule id → date); the evening before, the bot lists missing documents. */
   visits?: Record<string, string>;
+  /** End dates of the student's documents (D-040), from which university deadlines in days are counted. */
+  ends?: Partial<Record<ProcedureCountdown["from"], string>>;
   reminders: boolean;
   ruleVersion: string;
 }
@@ -108,7 +110,10 @@ function home(s: Session, ctx: DialogueContext, prefix = ""): Reply {
   const items = plan(s, ctx);
   const lines = items.map(i => `• ${i.title[s.lang]}: ${date(s, i.dueDate)} — ${countdown(s, ctx, i)}`);
   const notes = undated(s, ctx);
-  const noteLines = notes.length ? t(s, ctx, "home.undated") + notes.map(n => `• ${n.title[s.lang]}`).join("\n") : "";
+  const noteLines = notes.length ? t(s, ctx, "home.undated") + notes.map(n => {
+    const counted = procedureDue(s, ctx, n);
+    return counted ? t(s, ctx, "home.undatedDue", { title: n.title[s.lang]!, due: date(s, counted.due) }) : `• ${n.title[s.lang]}`;
+  }).join("\n") : "";
   // Reminders are the core mechanic, so while they are off the switch comes first, right under the text.
   const toggle = [button(t(s, ctx, s.reminders ? "btn.remindersOff" : "btn.remindersOn"), "reminders")];
   return reply(s, ctx, prefix + t(s, ctx, "home.title") + lines.join("\n") + noteLines + t(s, ctx, "home.scope") +
@@ -168,6 +173,22 @@ function card(s: Session, ctx: DialogueContext, id: string, prefix = ""): Reply 
       [link(t(s, ctx, "btn.law"), item.legal.url)],
       [button(t(s, ctx, overdue ? "btn.overdueHelp" : "btn.cantComplete"), `help:${id}`), button(t(s, ctx, "btn.plan"), "plan")]]);
 }
+/** A university deadline counted from a document end date the student gave (D-040); undefined until then. */
+export function procedureDue(s: Session, _ctx: DialogueContext, note: UniversityProcedure): { end: string; due: string; from?: string } | undefined {
+  const end = note.countdown ? s.ends?.[note.countdown.from] : undefined;
+  if (!note.countdown || !end) return undefined;
+  const { daysBefore, notBeforeDays } = note.countdown;
+  return { end, due: addDays(end, -daysBefore), ...(notBeforeDays ? { from: addDays(end, -notBeforeDays) } : {}) };
+}
+/** The counted window or date with its caveat, as the chat card and the app show it. */
+export function procedureDueText(s: Session, ctx: DialogueContext, note: UniversityProcedure): string {
+  const due = procedureDue(s, ctx, note);
+  if (!due) return "";
+  const name = uni(s, ctx).name[s.lang]!;
+  if (due.due < ctx.today) return t(s, ctx, "card.endPassed", { due: date(s, due.due), uni: name });
+  return (due.from && due.from > ctx.today ? t(s, ctx, "card.window", { from: date(s, due.from), due: date(s, due.due) })
+    : t(s, ctx, "card.byDate", { due: date(s, due.due) })) + t(s, ctx, "card.endNote", { uni: name, end: date(s, due.end) });
+}
 /** Where the procedure comes from; the app shows the same line. */
 export function procedureSource(s: Session, ctx: DialogueContext, note: UniversityProcedure): string {
   return t(s, ctx, "card.procedureSource", { uni: uni(s, ctx).name[s.lang]!, url: note.source.url, date: date(s, note.source.checkedAt) });
@@ -180,9 +201,11 @@ export function pageLabel(s: Session, ctx: DialogueContext): string {
 function procedureCard(s: Session, ctx: DialogueContext, note: UniversityProcedure): Reply {
   const checked = (doc: string) => s.documents[`${note.id}:${doc}`] === true;
   const docs = note.documents.map(d => `${checked(d.id) ? "✓" : "□"} ${d.title[s.lang]}`);
+  const counted = note.countdown ? procedureDue(s, ctx, note) : undefined;
   return reply(s, ctx, `${note.title[s.lang]}\n${note.action[s.lang]}\n` + t(s, ctx, "card.when") + note.when[s.lang] +
-    "\n\n" + docs.join("\n") + "\n\n" + procedureSource(s, ctx, note),
+    procedureDueText(s, ctx, note) + "\n\n" + docs.join("\n") + "\n\n" + procedureSource(s, ctx, note),
     [...note.documents.map(d => [button((checked(d.id) ? "✓ " : "□ ") + d.title[s.lang], `doc:${note.id}:${d.id}`)]),
+      ...(note.countdown ? [[button(t(s, ctx, counted ? "btn.endChange" : `btn.end.${note.countdown.from}`), `end:${note.id}`)]] : []),
       [link(pageLabel(s, ctx), note.source.url)],
       [button(t(s, ctx, "btn.plan"), "plan")]]);
 }
@@ -198,7 +221,15 @@ function calendar(s: Session, ctx: DialogueContext): Reply {
   if (!items.some(i => i.status !== "done")) return home(s, ctx);
   return { ...reply(s, ctx, t(s, ctx, "calendar.intro"), [[button(t(s, ctx, "btn.plan"), "plan")]]),
     file: { name: CALENDAR_FILE, content: planToIcs(items,
-      { lang: s.lang, texts: ctx.texts, demo: ctx.demo, uid: s.nonce, today: ctx.today, sequence: s.revision, ...(s.visits ? { visits: s.visits } : {}) }) } };
+      { lang: s.lang, texts: ctx.texts, demo: ctx.demo, uid: s.nonce, today: ctx.today, sequence: s.revision, ...(s.visits ? { visits: s.visits } : {}),
+        procedures: countedProcedures(s, ctx) }) } };
+}
+/** University deadlines already counted from an entered end date, for the calendar file (D-040). */
+export function countedProcedures(s: Session, ctx: DialogueContext): { id: string; title: string; due: string }[] {
+  return undated(s, ctx).flatMap(n => {
+    const counted = procedureDue(s, ctx, n);
+    return counted && counted.due >= ctx.today ? [{ id: n.id, title: n.title[s.lang]!, due: counted.due }] : [];
+  });
 }
 function help(s: Session, ctx: DialogueContext, ruleId?: string, unsupported = false): Reply {
   const item = ruleId ? plan(s, ctx).find(i => i.ruleId === ruleId) : undefined;
@@ -233,6 +264,10 @@ export function prompt(s: Session, ctx: DialogueContext): Reply {
     case "entry": return reply(s, ctx, t(s, ctx, "entry", { from: date(s, coverage(ctx.rules).from) }),
       ctx.demo ? [[button(t(s, ctx, "btn.example", { date: date(s, exampleEntry(ctx)) }), "example")]] : []);
     case "completion": return reply(s, ctx, t(s, ctx, "completion"), [[button(t(s, ctx, "btn.cancel"), "plan")]]);
+    case "docEnd": {
+      const note = undated(s, ctx).find(n => n.id === s.selected);
+      return reply(s, ctx, t(s, ctx, `docEnd.${note?.countdown?.from ?? "visa-end"}`), [[button(t(s, ctx, "btn.cancel"), "plan")]]);
+    }
     case "visit": {
       const item = plan(s, ctx).find(i => i.ruleId === s.selected);
       return reply(s, ctx, t(s, ctx, "visit", { title: item?.title[s.lang] ?? "" }),
@@ -315,6 +350,14 @@ export function transition(previous: Session | null, input: Input, ctx: Dialogue
     // A marked procedure needs no visit any more; a repeat a year later gets a new one.
     if (s.visits?.[s.selected]) { const { [s.selected]: _, ...rest } = s.visits; s.visits = rest; }
     s.step = "plan"; delete s.selected;
+  } else if (s.step === "docEnd") {
+    const end = typedDate(action);
+    const note = undated(s, ctx).find(n => n.id === s.selected && n.countdown);
+    if (!note?.countdown || !isValidDate(end) || end < ctx.today || end > addDays(ctx.today, 2 * VISIT_HORIZON_DAYS)) {
+      return { session: s, reply: reply(s, ctx, t(s, ctx, "docEnd.invalid")) };
+    }
+    s.ends = { ...s.ends, [note.countdown.from]: end }; s.step = "plan"; delete s.selected;
+    return { session: s, reply: procedureCard(s, ctx, note) };
   } else if (s.step === "visit") {
     const day = typedDate(action);
     const item = plan(s, ctx).find(i => i.ruleId === s.selected && i.status !== "done");
@@ -342,6 +385,9 @@ export function transition(previous: Session | null, input: Input, ctx: Dialogue
         const key = `${id}:${doc}`; s.documents[key] = !s.documents[key];
         return { session: s, reply: procedureCard(s, ctx, note) };
       }
+    } else if (action.startsWith("end:")) {
+      const id = action.slice(4);
+      if (undated(s, ctx).some(n => n.id === id && n.countdown)) { s.selected = id; s.step = "docEnd"; }
     } else if (action.startsWith("visit:")) {
       const id = action.slice(6);
       if (plan(s, ctx).some(i => i.ruleId === id && i.status !== "done")) { s.selected = id; s.step = "visit"; }
@@ -351,6 +397,11 @@ export function transition(previous: Session | null, input: Input, ctx: Dialogue
     }
   }
   return { session: s, reply: prompt(s, ctx) };
+}
+/** A reminder before a university deadline counted from a document end date (D-040). */
+export function procedureReminderReply(s: Session, ctx: DialogueContext, note: UniversityProcedure, due: string): Reply {
+  return reply(s, ctx, t(s, ctx, "procedure.reminder", { title: note.title[s.lang]!, due: date(s, due), left: t(s, ctx, "left", { n: daysBetween(ctx.today, due) }) }),
+    [[button(t(s, ctx, "btn.details"), `card:${note.id}`)], [button(t(s, ctx, "btn.planShort"), "plan")]]);
 }
 /** The evening before a planned visit: which documents of the checklist are still unchecked. */
 export function visitReply(s: Session, ctx: DialogueContext, item: PlanItem): Reply {

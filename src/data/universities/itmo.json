@@ -117,10 +117,10 @@
         "zh": "请向ITMO大学移民登记处：Lomonosova街9号，2139d室，omu@itmo.ru，+7 (812) 480-09-17提交文件。免签人员每个日历年在俄累计可停留90天而无需延期；每次重新入境后都需延长停留期限。"
       },
       "when": {
-        "ru": "Не позднее чем за 45 дней до окончания регистрации. Бот не знает дату окончания вашей регистрации, поэтому этот срок не считает и о нём не напоминает.",
-        "en": "No later than 45 days before your registration ends. The bot does not know when your registration ends, so it neither calculates this deadline nor reminds you of it.",
-        "uz": "Roʻyxatga olish tugashidan kamida 45 kun oldin. Bot roʻyxatga olishingiz qachon tugashini bilmaydi, shuning uchun bu muddatni hisoblamaydi va eslatmaydi.",
-        "zh": "最迟在居留登记到期前45天。机器人不知道您的居留登记何时到期，因此不计算此期限，也不会提醒。"
+        "ru": "Не позднее чем за 45 дней до окончания регистрации. Укажите дату окончания регистрации — бот посчитает дату по этому правилу и напомнит.",
+        "en": "No later than 45 days before your registration ends. Enter your registration end date — the bot will count the date by this rule and remind you.",
+        "uz": "Roʻyxatga olish tugashidan kamida 45 kun oldin. Roʻyxatga olish tugash sanasini kiriting — bot shu qoida boʻyicha sanani hisoblaydi va eslatadi.",
+        "zh": "最迟在居留登记到期前45天。请输入居留登记到期日——机器人会按此规定计算日期并提醒您。"
       },
       "documents": [
         {
@@ -173,6 +173,10 @@
       "source": {
         "url": "https://int.itmo.ru/ru/important_documents",
         "checkedAt": "2026-09-29"
+      },
+      "countdown": {
+        "from": "registration-end",
+        "daysBefore": 45
       }
     },
     {

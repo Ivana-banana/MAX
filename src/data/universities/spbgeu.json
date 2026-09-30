@@ -108,10 +108,10 @@
         "zh": "请向圣彼得堡国立经济大学签证与登记处：格里博耶多夫运河沿岸街30–32号，2号楼梯，1楼，3-1-7室，+7 (812) 315-81-36提交文件。届时须已完成体检和指纹登记。"
       },
       "when": {
-        "ru": "Не менее чем за 45 дней до окончания регистрации. Бот не знает дату окончания вашей регистрации, поэтому этот срок не считает и о нём не напоминает.",
-        "en": "At least 45 days before your registration ends. The bot does not know when your registration ends, so it neither calculates this deadline nor reminds you of it.",
-        "uz": "Roʻyxatga olish tugashidan kamida 45 kun oldin. Bot roʻyxatga olishingiz qachon tugashini bilmaydi, shuning uchun bu muddatni hisoblamaydi va eslatmaydi.",
-        "zh": "至少在居留登记到期前45天。机器人不知道您的居留登记何时到期，因此不计算此期限，也不会提醒。"
+        "ru": "Не менее чем за 45 дней до окончания регистрации. Укажите дату окончания регистрации — бот посчитает дату по этому правилу и напомнит.",
+        "en": "At least 45 days before your registration ends. Enter your registration end date — the bot will count the date by this rule and remind you.",
+        "uz": "Roʻyxatga olish tugashidan kamida 45 kun oldin. Roʻyxatga olish tugash sanasini kiriting — bot shu qoida boʻyicha sanani hisoblaydi va eslatadi.",
+        "zh": "至少在居留登记到期前45天。请输入居留登记到期日——机器人会按此规定计算日期并提醒您。"
       },
       "documents": [
         {
@@ -128,6 +128,10 @@
       "source": {
         "url": "https://unecon.ru/mezhdunarodnye-svyazi/upravlenie-mezhdunarodnogo-sotrudnichestva/otdel-po-rabote-s-inostrannymi-uchashhimisya/",
         "checkedAt": "2026-09-29"
+      },
+      "countdown": {
+        "from": "registration-end",
+        "daysBefore": 45
       }
     },
     {
@@ -145,10 +149,10 @@
         "zh": "一次性学习签证有效期为90天。延期文件由圣彼得堡国立经济大学签证与登记处：格里博耶多夫运河沿岸街30–32号，2号楼梯，1楼，3-1-7室，+7 (812) 315-81-36受理。此项向签证国家公民显示：免签国家名单取自ITMO大学页面（int.itmo.ru/ru/important_documents），圣彼得堡国立经济大学页面未提供该名单。"
       },
       "when": {
-        "ru": "Не менее чем за 45 дней до окончания визы. Бот не знает дату окончания вашей визы, поэтому этот срок не считает и о нём не напоминает.",
-        "en": "At least 45 days before your visa expires. The bot does not know when your visa expires, so it neither calculates this deadline nor reminds you of it.",
-        "uz": "Viza tugashidan kamida 45 kun oldin. Bot vizangiz qachon tugashini bilmaydi, shuning uchun bu muddatni hisoblamaydi va eslatmaydi.",
-        "zh": "至少在签证到期前45天。机器人不知道您的签证何时到期，因此不计算此期限，也不会提醒。"
+        "ru": "Не менее чем за 45 дней до окончания визы. Укажите дату окончания визы — бот посчитает дату по этому правилу и напомнит.",
+        "en": "At least 45 days before your visa expires. Enter your visa end date — the bot will count the date by this rule and remind you.",
+        "uz": "Viza tugashidan kamida 45 kun oldin. Viza tugash sanasini kiriting — bot shu qoida boʻyicha sanani hisoblaydi va eslatadi.",
+        "zh": "至少在签证到期前45天。请输入签证到期日——机器人会按此规定计算日期并提醒您。"
       },
       "documents": [
         {
@@ -203,6 +207,10 @@
       "source": {
         "url": "https://unecon.ru/mezhdunarodnye-svyazi/upravlenie-mezhdunarodnogo-sotrudnichestva/otdel-po-rabote-s-inostrannymi-uchashhimisya/",
         "checkedAt": "2026-09-29"
+      },
+      "countdown": {
+        "from": "visa-end",
+        "daysBefore": 45
       }
     },
     {

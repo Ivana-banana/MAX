@@ -130,9 +130,10 @@ export function App() {
         </div>
       );
     }
-    if (session.step === "visit") {
-      return <Visit texts={texts} today={status.state.today} prompt={session.prompt} message={status.message}
-        pending={status.pending} onAction={act} />;
+    if (session.step === "visit" || session.step === "docEnd") {
+      const [title, invalid] = session.step === "visit" ? ["app.visitTitle", "visit.invalid"] : ["app.endTitle", "docEnd.invalid"];
+      return <DateStep texts={texts} today={status.state.today} prompt={session.prompt} message={status.message}
+        title={title} invalid={invalid} pending={status.pending} onAction={act} />;
     }
     if (session.step === "completion") {
       return <Completion texts={texts} today={status.state.today} message={status.message}
@@ -203,19 +204,23 @@ function Notice({ title, body, action }: { title: string; body: string; action?:
   );
 }
 
-/** The chat's "plan a visit" step: a day from today on; the server checks the range and answers with the card. */
-function Visit({ texts, today, prompt, message, pending, onAction }: {
-  texts: Texts; today: string; prompt: string; message: string; pending: string | null; onAction: (action: string) => void;
+/**
+ * The chat's steps that ask for a day from today on — a visit (D-039) or a document end date (D-040).
+ * The server checks the range and answers with the card; the wording of the question is the chat's.
+ */
+function DateStep({ texts, today, prompt, message, title, invalid: invalidKey, pending, onAction }: {
+  texts: Texts; today: string; prompt: string; message: string; title: string; invalid: string;
+  pending: string | null; onAction: (action: string) => void;
 }) {
   const [value, setValue] = useState("");
   const t = (key: string) => text(texts, key);
-  const invalid = isText(message, t("visit.invalid"));
+  const invalid = isText(message, t(invalidKey));
   return (
     <div className="stack">
-      <h1 className="heading in">{t("app.visitTitle")}</h1>
-      <p className={`prose in d1 ${invalid ? "banner banner-error" : ""}`}>{invalid ? t("visit.invalid") : prompt}</p>
+      <h1 className="heading in">{t(title)}</h1>
+      <p className={`prose in d1 ${invalid ? "banner banner-error" : ""}`}>{invalid ? t(invalidKey) : prompt}</p>
       <div className="in d2">
-        <DateField label={t("app.visitTitle")} hint={t("app.entry.hint")} onChange={setValue} />
+        <DateField label={t(title)} hint={t("app.entry.hint")} onChange={setValue} />
       </div>
       <Button className="in d3" disabled={value === "" || value < today || pending !== null} loading={pending === value}
         onClick={() => onAction(value)}>

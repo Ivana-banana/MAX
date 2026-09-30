@@ -13,6 +13,9 @@ interface PostgresReminderPayload {
   day?: string;
   // Evening-before reminder of a planned visit (D-039): the visit day.
   visit?: string;
+  // Reminder of a university deadline counted from a document end date (D-040).
+  procedure?: string;
+  end?: string;
 }
 
 export interface PostgresJob {
@@ -61,6 +64,7 @@ const sessionSteps = new Set([
   "citizenship",
   "entry",
   "visit",
+  "docEnd",
   "plan",
   "completion",
   "delete",
@@ -397,6 +401,9 @@ function readSession(value: unknown): Session {
   }
   if ("visits" in value && (!isRecord(value.visits) || !Object.values(value.visits).every(day => typeof day === "string"))) {
     throw invalidValue("sessions.data.visits");
+  }
+  if ("ends" in value && (!isRecord(value.ends) || !Object.values(value.ends).every(day => typeof day === "string"))) {
+    throw invalidValue("sessions.data.ends");
   }
   return value as unknown as Session;
 }

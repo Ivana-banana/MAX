@@ -36,6 +36,20 @@ export interface UniversityProcedure {
   /** Only citizenship conditions: which students of this university it concerns. */
   appliesIf: Extract<Condition, { field: "citizenship" }>[];
   source: { url: string; checkedAt: string };
+  /**
+   * The source words the deadline in days before the end of a document the student holds
+   * ("no later than 45 days before the visa expires"): once the student gives that date, the bot
+   * counts it (D-040). Absent when the source gives no such number — then only the words are shown.
+   */
+  countdown?: ProcedureCountdown;
+}
+
+export interface ProcedureCountdown {
+  from: "visa-end" | "registration-end";
+  /** The last day to act: this many days before the end date. */
+  daysBefore: number;
+  /** The first day to act, when the source sets one ("no earlier than 90 days before"). */
+  notBeforeDays?: number;
 }
 
 export class UniversityValidationError extends Error {
@@ -89,8 +103,23 @@ function parseProcedure(raw: unknown, path: string): UniversityProcedure {
   if (!url.startsWith("https://")) throw new UniversityValidationError(`${path}.source.url`, "нужна ссылка https://");
   const checkedAt = text(source.checkedAt, `${path}.source.checkedAt`);
   if (!isValidDate(checkedAt)) throw new UniversityValidationError(`${path}.source.checkedAt`, "ожидается дата ГГГГ-ММ-ДД");
+  const countdown = p.countdown === undefined ? undefined : parseCountdown(p.countdown, `${path}.countdown`);
   return { id: slug(p.id, `${path}.id`), title: localized(p.title, `${path}.title`), action: localized(p.action, `${path}.action`),
-    when: localized(p.when, `${path}.when`), documents, appliesIf, source: { url, checkedAt } };
+    when: localized(p.when, `${path}.when`), documents, appliesIf, source: { url, checkedAt }, ...(countdown ? { countdown } : {}) };
+}
+
+function parseCountdown(raw: unknown, path: string): ProcedureCountdown {
+  const c = record(raw, path);
+  if (c.from !== "visa-end" && c.from !== "registration-end") throw new UniversityValidationError(`${path}.from`, "visa-end или registration-end");
+  const days = (v: unknown, field: string) => {
+    if (!Number.isInteger(v) || (v as number) < 1 || (v as number) > 365) throw new UniversityValidationError(`${path}.${field}`, "целое число дней от 1 до 365");
+    return v as number;
+  };
+  const daysBefore = days(c.daysBefore, "daysBefore");
+  if (c.notBeforeDays === undefined) return { from: c.from, daysBefore };
+  const notBeforeDays = days(c.notBeforeDays, "notBeforeDays");
+  if (notBeforeDays <= daysBefore) throw new UniversityValidationError(`${path}.notBeforeDays`, "должно быть больше daysBefore");
+  return { from: c.from, daysBefore, notBeforeDays };
 }
 
 export function parseUniversity(raw: unknown, path = "university"): University {

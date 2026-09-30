@@ -100,9 +100,16 @@ export function Plan({ session, texts, pending, onAction, onOpen, onCalendar, ca
           <h2 className="section"><span>{t("app.undated")}</span></h2>
           {session.undated.map(item => (
             <details key={item.id} className="undated">
-              <summary className="t">{item.title}</summary>
+              <summary className="t">{item.title}{item.due !== undefined && ` — ${dotted(item.due)}`}</summary>
               <p className="prose">{item.action}</p>
               <p className="prose small">{item.when}</p>
+              {item.dueText !== undefined && <p className="prose">{item.dueText}</p>}
+              {item.endLabel !== undefined && (
+                <Button tone="outline" arrow="📅" loading={pending === `end:${item.id}`} disabled={pending !== null}
+                  onClick={() => onAction(`end:${item.id}`)}>
+                  {item.endLabel}
+                </Button>
+              )}
               {item.documents.map((document, index) => (
                 <button key={document.id} type="button" role="checkbox" aria-checked={document.checked} className="doc"
                   disabled={pending !== null} onClick={() => { tap(); onAction(`doc:${item.id}:${document.id}`); }}>

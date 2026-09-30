@@ -267,10 +267,10 @@
         "zh": "免签学生如需延长居留登记，须先获得延长停留期限的决定。请联系喀山联邦大学对外联络部：Gvardeyskaya街9号（周一至周五9:00–17:00，+7 (843) 206-52-89 转8135）。延期国家规费为1000卢布，缴费信息见喀山联邦大学页面。"
       },
       "when": {
-        "ru": "Не позднее чем за 45 дней до истечения регистрации. Бот не знает дату окончания вашей регистрации, поэтому этот срок не считает и о нём не напоминает.",
-        "en": "No later than 45 days before your registration expires. The bot does not know when your registration ends, so it neither calculates this deadline nor reminds you of it.",
-        "uz": "Roʻyxatga olish tugashidan kamida 45 kun oldin. Bot roʻyxatga olishingiz qachon tugashini bilmaydi, shuning uchun bu muddatni hisoblamaydi va eslatmaydi.",
-        "zh": "最迟在居留登记到期前45天。机器人不知道您的居留登记何时到期，因此不计算此期限，也不会提醒。"
+        "ru": "Не позднее чем за 45 дней до истечения регистрации. Укажите дату окончания регистрации — бот посчитает дату по этому правилу и напомнит.",
+        "en": "No later than 45 days before your registration expires. Enter your registration end date — the bot will count the date by this rule and remind you.",
+        "uz": "Roʻyxatga olish tugashidan kamida 45 kun oldin. Roʻyxatga olish tugash sanasini kiriting — bot shu qoida boʻyicha sanani hisoblaydi va eslatadi.",
+        "zh": "最迟在居留登记到期前45天。请输入居留登记到期日——机器人会按此规定计算日期并提醒您。"
       },
       "documents": [],
       "appliesIf": [
@@ -288,6 +288,10 @@
       "source": {
         "url": "https://kpfu.ru/international/migracionnoe-soprovozhdenie-inostrannyh-grazhdan/bezvizovyi-vjezd",
         "checkedAt": "2026-09-29"
+      },
+      "countdown": {
+        "from": "registration-end",
+        "daysBefore": 45
       }
     },
     {
@@ -305,10 +309,10 @@
         "zh": "一次性学习签证有效期为90天；延期后可在俄罗斯停留最长1年。请本人向喀山联邦大学对外联络部护照签证处（Gvardeyskaya街9号）递交全套文件。所需复印件的详细清单见喀山联邦大学页面。"
       },
       "when": {
-        "ru": "Не ранее чем за 90 и не позднее чем за 45 дней до окончания визы. Бот не знает дату окончания вашей визы, поэтому этот срок не считает и о нём не напоминает.",
-        "en": "No earlier than 90 and no later than 45 days before your visa expires. The bot does not know when your visa expires, so it neither calculates this deadline nor reminds you of it.",
-        "uz": "Viza tugashidan 90 kundan oldin emas va 45 kundan kechiktirmay. Bot vizangiz qachon tugashini bilmaydi, shuning uchun bu muddatni hisoblamaydi va eslatmaydi.",
-        "zh": "不早于签证到期前90天，且不晚于到期前45天。机器人不知道您的签证何时到期，因此不计算此期限，也不会提醒。"
+        "ru": "Не ранее чем за 90 и не позднее чем за 45 дней до окончания визы. Укажите дату окончания визы — бот посчитает дату по этому правилу и напомнит.",
+        "en": "No earlier than 90 and no later than 45 days before your visa expires. Enter your visa end date — the bot will count the date by this rule and remind you.",
+        "uz": "Viza tugashidan 90 kundan oldin emas va 45 kundan kechiktirmay. Viza tugash sanasini kiriting — bot shu qoida boʻyicha sanani hisoblaydi va eslatadi.",
+        "zh": "不早于签证到期前90天，且不晚于到期前45天。请输入签证到期日——机器人会按此规定计算日期并提醒您。"
       },
       "documents": [
         {
@@ -390,6 +394,11 @@
       "source": {
         "url": "https://kpfu.ru/international/migracionnoe-soprovozhdenie-inostrannyh-grazhdan/prodlenie-odnokratnoj-i-mnogokratnoj-vizy-118896",
         "checkedAt": "2026-09-29"
+      },
+      "countdown": {
+        "from": "visa-end",
+        "daysBefore": 45,
+        "notBeforeDays": 90
       }
     }
   ]

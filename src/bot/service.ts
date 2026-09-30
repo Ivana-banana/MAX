@@ -1,8 +1,8 @@
 import { createHash, randomUUID } from "node:crypto";
-import { reminderDates } from "../core/deadlines.js";
+import { REMINDER_OFFSETS, reminderDates } from "../core/deadlines.js";
 import { addDays } from "../core/dates.js";
 import type { PostgresStore, PostgresStoreTx } from "../db/postgres-store.js";
-import { plan, reminderReply, transition, visitReply, type DialogueContext, type Input, type Reply, type Session } from "./dialog.js";
+import { plan, procedureDue, procedureReminderReply, reminderReply, transition, undated, visitReply, type DialogueContext, type Input, type Reply, type Session } from "./dialog.js";
 import { funnelEvents, funnelUniversity } from "./funnel.js";
 
 export interface Incoming { id: string; user: number; input: Input; callbackId?: string }
@@ -86,6 +86,21 @@ export class Service {
         await tx.enqueue(key, { ruleId: item.ruleId, dueDate: item.dueDate, visit }, "reminder", Date.parse(addDays(visit, -1) + "T18:00:00+03:00"), now);
       }
     }
+    await this.scheduleProcedures(tx, user, state, ctx, now);
+  }
+  // D-040: a university deadline counted from a document end date, reminded 7, 3 and 1 days before at 09:00.
+  private async scheduleProcedures(tx: PostgresStoreTx, user: number, state: Session, ctx: DialogueContext, now: number): Promise<void> {
+    for (const note of undated(state, ctx)) {
+      const counted = procedureDue(state, ctx, note);
+      if (!counted) continue;
+      for (const offset of REMINDER_OFFSETS) {
+        const day = addDays(counted.due, -offset);
+        if (day < ctx.today) continue;
+        const key = createHash("sha256").update(JSON.stringify([state.nonce, user, ctx.version, "procedure", note.id, counted.end, day])).digest("hex");
+        await tx.enqueue(key, { ruleId: note.id, dueDate: counted.due, procedure: note.id, end: counted.end, day }, "reminder",
+          Date.parse(day + "T09:00:00+03:00"), now);
+      }
+    }
   }
   // One user at a time under the same lock as receive(): a concurrent update cannot interleave.
   async maintain(): Promise<void> {
@@ -114,7 +129,19 @@ export class Service {
         let message: Reply;
         if (job.kind === "reminder") {
           const state = await this.store.get(job.user_id);
-          const ref = JSON.parse(job.payload) as {ruleId:string;dueDate:string;day?:string;visit?:string};
+          const ref = JSON.parse(job.payload) as {ruleId:string;dueDate:string;day?:string;visit?:string;procedure?:string;end?:string};
+          if (ref.procedure !== undefined) {
+            const ctx = this.ctx();
+            const note = state && state.ruleVersion === this.context.version && state.reminders
+              ? undated(state, ctx).find(n => n.id === ref.procedure) : undefined;
+            const counted = note && state ? procedureDue(state, ctx, note) : undefined;
+            // Only for the end date still entered, and not after the counted date.
+            if (!state || !note || !counted || counted.end !== ref.end || counted.due < ctx.today) { await this.store.cancel(job.id, job.lease_token); continue; }
+            message = procedureReminderReply(state, ctx, note, counted.due);
+            try { await this.transport.send(job.user_id, message); await this.store.finish(job.id, job.lease_token); }
+            catch { await this.store.retry(job, this.clock()); }
+            continue;
+          }
           const item = state && state.ruleVersion === this.context.version && state.reminders
             ? plan(state, this.ctx()).find(i => i.ruleId === ref.ruleId && i.dueDate === ref.dueDate && i.status !== "done") : undefined;
           if (ref.visit !== undefined) {

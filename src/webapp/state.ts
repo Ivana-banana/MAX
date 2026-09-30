@@ -12,7 +12,7 @@ import { coverage } from "../core/deadlines.js";
 import { isValidDate } from "../core/dates.js";
 import type { Lang } from "../core/types.js";
 import {
-  countdown, documentsNote, pageLabel, plan, procedureSource, profile, prompt, shareText, transition, undated, type DialogueContext, type Input, type Session,
+  countdown, documentsNote, pageLabel, plan, procedureDue, procedureDueText, procedureSource, profile, prompt, shareText, transition, undated, type DialogueContext, type Input, type Session,
 } from "../bot/dialog.js";
 import { funnelEvents, funnelUniversity } from "../bot/funnel.js";
 import { BASE_LANG, format } from "../data/loadTexts.js";
@@ -51,6 +51,7 @@ export function isAppAction(action: string): boolean {
     || /^doc:[a-z0-9-]{1,64}:[a-z0-9-]{1,64}$/.test(action)
     || /^done:[a-z0-9-]{1,64}$/.test(action)
     || /^visit:[a-z0-9-]{1,64}$/.test(action)
+    || /^end:[a-z0-9-]{1,64}$/.test(action)
     || /^help:[a-z0-9-]{1,64}$/.test(action);
 }
 
@@ -89,6 +90,15 @@ const languages = (ctx: DialogueContext) => [...ctx.texts.keys()]
 function exampleLabel(session: Session, ctx: DialogueContext): { example?: string } {
   const button = prompt(session, ctx).buttons.flat().find(b => "action" in b && b.action.endsWith("|example"));
   return button === undefined ? {} : { example: button.text };
+}
+
+/** D-040 fields of an undated procedure: the button to enter the end date, and the counted dates once entered. */
+function countdownView(session: Session, ctx: DialogueContext, note: ReturnType<typeof undated>[number]) {
+  if (!note.countdown) return {};
+  const due = procedureDue(session, ctx, note);
+  const label = format(ctx.texts, session.lang, due ? "btn.endChange" : `btn.end.${note.countdown.from}`);
+  return due ? { endLabel: label, end: due.end, due: due.due, ...(due.from ? { from: due.from } : {}), dueText: procedureDueText(session, ctx, note).trim() }
+    : { endLabel: label };
 }
 
 /** `hint`: the MAX interface language, for the screen shown before a session exists. */
@@ -143,6 +153,7 @@ function view(session: Session | null, ctx: DialogueContext, mocked: boolean, hi
         sourceUrl: note.source.url,
         sourceNote: procedureSource(session, ctx, note),
         sourceLabel: pageLabel(session, ctx),
+        ...countdownView(session, ctx, note),
       })) : [],
       share: profile(session) && !stale ? shareText(session, ctx) : "",
     },

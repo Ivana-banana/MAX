@@ -13,7 +13,7 @@ import { stat } from "node:fs/promises";
 import { pipeline } from "node:stream/promises";
 import { join, normalize, resolve, sep } from "node:path";
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { plan } from "../bot/dialog.js";
+import { countedProcedures, plan } from "../bot/dialog.js";
 import { CALENDAR_FILE, planToIcs } from "../bot/calendar.js";
 import type { Service } from "../bot/service.js";
 import { LaunchError, verifyLaunch } from "./initData.js";
@@ -149,7 +149,7 @@ async function icsFor(service: Service, user: number): Promise<string | null> {
   if (!items.some(i => i.status !== "done")) return null;
   return planToIcs(items,
     { lang: session.lang, texts: ctx.texts, demo: ctx.demo, uid: session.nonce, today: ctx.today, sequence: session.revision,
-      ...(session.visits ? { visits: session.visits } : {}) });
+      ...(session.visits ? { visits: session.visits } : {}), procedures: countedProcedures(session, ctx) });
 }
 
 /**

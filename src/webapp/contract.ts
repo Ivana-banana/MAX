@@ -8,7 +8,7 @@
 import type { Lang, LegalBasis, PlanItemStatus } from "../core/types.js";
 
 /** Steps of the shared dialogue (src/bot/dialog.ts); the app renders a screen per step. */
-export type AppStep = "language" | "consent" | "scope" | "citizenship" | "entry" | "plan" | "completion" | "visit" | "delete";
+export type AppStep = "language" | "consent" | "scope" | "citizenship" | "entry" | "plan" | "completion" | "visit" | "docEnd" | "delete";
 
 export interface AppDocument { id: string; title: string; checked: boolean }
 
@@ -49,6 +49,13 @@ export interface AppUndatedItem {
   sourceNote: string;
   /** The chat's label of the link to the university page. */
   sourceLabel: string;
+  /** D-040: the procedure's deadline can be counted from a document end date; the chat's button label to enter it. */
+  endLabel?: string;
+  /** The entered end date and the counted last (and first) day to act, with the chat's wording of them. */
+  end?: string;
+  due?: string;
+  from?: string;
+  dueText?: string;
 }
 
 export interface AppUniversity { id: string; name: string; contactUrl: string }
