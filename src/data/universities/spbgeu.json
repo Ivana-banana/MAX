@@ -139,10 +139,10 @@
         "zh": "签证延期"
       },
       "action": {
-        "ru": "Однократная учебная виза выдаётся на 90 дней. Документы на продление принимает Отдел виз и регистраций СПбГЭУ: наб. канала Грибоедова, 30–32, 2-я лестница, 1 этаж, каб. 3-1-7, +7 (812) 315-81-36.",
-        "en": "A single-entry study visa is issued for 90 days. Extension documents are accepted by the UNECON Visa and Registration Office: 30–32 Griboyedov Canal Emb., staircase 2, 1st floor, room 3-1-7, +7 (812) 315-81-36.",
-        "uz": "Bir martalik oʻquv vizasi 90 kunga beriladi. Uzaytirish uchun hujjatlarni SPbGEU vizalar va roʻyxatga olish boʻlimi: Griboyedov kanali sohili, 30–32, 2-zina, 1-qavat, 3-1-7-xona, +7 (812) 315-81-36 qabul qiladi.",
-        "zh": "一次性学习签证有效期为90天。延期文件由圣彼得堡国立经济大学签证与登记处：格里博耶多夫运河沿岸街30–32号，2号楼梯，1楼，3-1-7室，+7 (812) 315-81-36受理。"
+        "ru": "Однократная учебная виза выдаётся на 90 дней. Документы на продление принимает Отдел виз и регистраций СПбГЭУ: наб. канала Грибоедова, 30–32, 2-я лестница, 1 этаж, каб. 3-1-7, +7 (812) 315-81-36. Показано гражданам визовых стран: перечень безвизовых стран взят со страницы ИТМО (int.itmo.ru/ru/important_documents), своего перечня страница СПбГЭУ не даёт.",
+        "en": "A single-entry study visa is issued for 90 days. Extension documents are accepted by the UNECON Visa and Registration Office: 30–32 Griboyedov Canal Emb., staircase 2, 1st floor, room 3-1-7, +7 (812) 315-81-36. Shown to citizens of visa countries: the list of visa-free countries is taken from the ITMO page (int.itmo.ru/ru/important_documents), as the UNECON page gives none.",
+        "uz": "Bir martalik oʻquv vizasi 90 kunga beriladi. Uzaytirish uchun hujjatlarni SPbGEU vizalar va roʻyxatga olish boʻlimi: Griboyedov kanali sohili, 30–32, 2-zina, 1-qavat, 3-1-7-xona, +7 (812) 315-81-36 qabul qiladi. Vizali mamlakatlar fuqarolariga koʻrsatiladi: vizasiz mamlakatlar roʻyxati ITMO sahifasidan olingan (int.itmo.ru/ru/important_documents), SPbGEU sahifasida bunday roʻyxat yoʻq.",
+        "zh": "一次性学习签证有效期为90天。延期文件由圣彼得堡国立经济大学签证与登记处：格里博耶多夫运河沿岸街30–32号，2号楼梯，1楼，3-1-7室，+7 (812) 315-81-36受理。此项向签证国家公民显示：免签国家名单取自ITMO大学页面（int.itmo.ru/ru/important_documents），圣彼得堡国立经济大学页面未提供该名单。"
       },
       "when": {
         "ru": "Не менее чем за 45 дней до окончания визы. Бот не знает дату окончания вашей визы, поэтому этот срок не считает и о нём не напоминает.",

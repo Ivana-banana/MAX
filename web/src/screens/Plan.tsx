@@ -61,7 +61,9 @@ export function Plan({ session, texts, pending, onAction, onOpen, onCalendar, ca
   // Outside MAX the plan text goes to the clipboard; null until the first press.
   const [copied, setCopied] = useState<boolean | null>(null);
   const share = async () => {
-    if (await shareInMax(session.share).catch(() => false)) { tap("success"); return; }
+    // The bridge's promise settles when the chat picker closes, whether or not a chat was chosen
+    // (the docs give no result to tell them apart), so no "success" here — MAX shows its own outcome.
+    if (await shareInMax(session.share).catch(() => false)) return;
     const ok = await copyText(session.share);
     setCopied(ok); tap(ok ? "success" : "warning");
   };
