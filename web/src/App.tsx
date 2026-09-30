@@ -130,6 +130,10 @@ export function App() {
         </div>
       );
     }
+    if (session.step === "visit") {
+      return <Visit texts={texts} today={status.state.today} prompt={session.prompt} message={status.message}
+        pending={status.pending} onAction={act} />;
+    }
     if (session.step === "completion") {
       return <Completion texts={texts} today={status.state.today} message={status.message}
         pending={status.pending} onAction={act} />;
@@ -195,6 +199,31 @@ function Notice({ title, body, action }: { title: string; body: string; action?:
       <h1 className="display title">{title}</h1>
       <p className="prose">{body}</p>
       {action !== undefined && <Button arrow="↻" onClick={action.onClick}>{action.label}</Button>}
+    </div>
+  );
+}
+
+/** The chat's "plan a visit" step: a day from today on; the server checks the range and answers with the card. */
+function Visit({ texts, today, prompt, message, pending, onAction }: {
+  texts: Texts; today: string; prompt: string; message: string; pending: string | null; onAction: (action: string) => void;
+}) {
+  const [value, setValue] = useState("");
+  const t = (key: string) => text(texts, key);
+  const invalid = isText(message, t("visit.invalid"));
+  return (
+    <div className="stack">
+      <h1 className="heading in">{t("app.visitTitle")}</h1>
+      <p className={`prose in d1 ${invalid ? "banner banner-error" : ""}`}>{invalid ? t("visit.invalid") : prompt}</p>
+      <div className="in d2">
+        <DateField label={t("app.visitTitle")} hint={t("app.entry.hint")} onChange={setValue} />
+      </div>
+      <Button className="in d3" disabled={value === "" || value < today || pending !== null} loading={pending === value}
+        onClick={() => onAction(value)}>
+        {t("app.save")}
+      </Button>
+      <button type="button" className="link in d5" disabled={pending !== null} onClick={() => onAction("plan")}>
+        {t("btn.cancel")}
+      </button>
     </div>
   );
 }

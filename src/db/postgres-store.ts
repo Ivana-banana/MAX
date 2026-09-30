@@ -11,6 +11,8 @@ interface PostgresReminderPayload {
   dueDate: string;
   // Reminder day since D-021; jobs queued earlier have none.
   day?: string;
+  // Evening-before reminder of a planned visit (D-039): the visit day.
+  visit?: string;
 }
 
 export interface PostgresJob {
@@ -58,6 +60,7 @@ const sessionSteps = new Set([
   "scope",
   "citizenship",
   "entry",
+  "visit",
   "plan",
   "completion",
   "delete",
@@ -391,6 +394,9 @@ function readSession(value: unknown): Session {
   }
   for (const checked of Object.values(value.documents)) {
     if (typeof checked !== "boolean") throw invalidValue("sessions.data.documents");
+  }
+  if ("visits" in value && (!isRecord(value.visits) || !Object.values(value.visits).every(day => typeof day === "string"))) {
+    throw invalidValue("sessions.data.visits");
   }
   return value as unknown as Session;
 }

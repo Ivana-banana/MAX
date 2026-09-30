@@ -2,7 +2,7 @@ import { createHash, randomUUID } from "node:crypto";
 import { reminderDates } from "../core/deadlines.js";
 import { addDays } from "../core/dates.js";
 import type { PostgresStore, PostgresStoreTx } from "../db/postgres-store.js";
-import { plan, reminderReply, transition, type DialogueContext, type Input, type Reply, type Session } from "./dialog.js";
+import { plan, reminderReply, transition, visitReply, type DialogueContext, type Input, type Reply, type Session } from "./dialog.js";
 import { funnelEvents, funnelUniversity } from "./funnel.js";
 
 export interface Incoming { id: string; user: number; input: Input; callbackId?: string }
@@ -79,6 +79,12 @@ export class Service {
         const key = createHash("sha256").update(JSON.stringify([state.nonce, user, ctx.version, item.ruleId, item.dueDate, day])).digest("hex");
         await tx.enqueue(key, { ruleId: item.ruleId, dueDate: item.dueDate, day }, "reminder", when, now);
       }
+      // The evening before a planned visit (18:00 Moscow time): what is still missing from the checklist.
+      const visit = item.status === "done" ? undefined : state.visits?.[item.ruleId];
+      if (visit && addDays(visit, -1) >= ctx.today) {
+        const key = createHash("sha256").update(JSON.stringify([state.nonce, user, ctx.version, item.ruleId, item.dueDate, "visit", visit])).digest("hex");
+        await tx.enqueue(key, { ruleId: item.ruleId, dueDate: item.dueDate, visit }, "reminder", Date.parse(addDays(visit, -1) + "T18:00:00+03:00"), now);
+      }
     }
   }
   // One user at a time under the same lock as receive(): a concurrent update cannot interleave.
@@ -108,9 +114,17 @@ export class Service {
         let message: Reply;
         if (job.kind === "reminder") {
           const state = await this.store.get(job.user_id);
-          const ref = JSON.parse(job.payload) as {ruleId:string;dueDate:string;day?:string};
+          const ref = JSON.parse(job.payload) as {ruleId:string;dueDate:string;day?:string;visit?:string};
           const item = state && state.ruleVersion === this.context.version && state.reminders
             ? plan(state, this.ctx()).find(i => i.ruleId === ref.ruleId && i.dueDate === ref.dueDate && i.status !== "done") : undefined;
+          if (ref.visit !== undefined) {
+            // Only the visit still planned for that day, and not once it has passed.
+            if (!state || !item || state.visits?.[item.ruleId] !== ref.visit || ref.visit < this.ctx().today) { await this.store.cancel(job.id, job.lease_token); continue; }
+            message = visitReply(state, this.ctx(), item);
+            try { await this.transport.send(job.user_id, message); await this.store.finish(job.id, job.lease_token); }
+            catch { await this.store.retry(job, this.clock()); }
+            continue;
+          }
           // Before the date a late reminder is still useful; the follow-up after it goes only on its own day.
           const today = this.ctx().today, followUp = ref.day !== undefined && ref.day > ref.dueDate;
           if (!state || !item || (followUp ? ref.day !== today : item.dueDate < today)) { await this.store.cancel(job.id, job.lease_token); continue; }

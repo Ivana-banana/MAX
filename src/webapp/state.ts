@@ -50,6 +50,7 @@ export function isAppAction(action: string): boolean {
     || isValidDate(action)
     || /^doc:[a-z0-9-]{1,64}:[a-z0-9-]{1,64}$/.test(action)
     || /^done:[a-z0-9-]{1,64}$/.test(action)
+    || /^visit:[a-z0-9-]{1,64}$/.test(action)
     || /^help:[a-z0-9-]{1,64}$/.test(action);
 }
 
@@ -129,6 +130,7 @@ function view(session: Session | null, ctx: DialogueContext, mocked: boolean, hi
         })),
         documentsNote: documentsNote(session, ctx, item),
         legal: item.legal,
+        ...(item.status === "done" || session.visits?.[item.ruleId] === undefined ? {} : { visit: session.visits[item.ruleId] }),
       })) : [],
       undated: profile(session) && !stale ? undated(session, ctx).map(note => ({
         id: note.id,

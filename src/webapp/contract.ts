@@ -8,7 +8,7 @@
 import type { Lang, LegalBasis, PlanItemStatus } from "../core/types.js";
 
 /** Steps of the shared dialogue (src/bot/dialog.ts); the app renders a screen per step. */
-export type AppStep = "language" | "consent" | "scope" | "citizenship" | "entry" | "plan" | "completion" | "delete";
+export type AppStep = "language" | "consent" | "scope" | "citizenship" | "entry" | "plan" | "completion" | "visit" | "delete";
 
 export interface AppDocument { id: string; title: string; checked: boolean }
 
@@ -30,6 +30,8 @@ export interface AppPlanItem {
   /** The chat's line on where the checklist comes from, or that no official list exists (D-027). */
   documentsNote: string;
   legal: LegalBasis;
+  /** Planned visit day (D-039); absent when none or the procedure is done. */
+  visit?: string;
 }
 
 /**

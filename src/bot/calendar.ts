@@ -6,9 +6,14 @@ import { format, type Texts } from "../data/loadTexts.js";
 // iCalendar (RFC 5545) export of the personal plan: deadlines land in the phone's own
 // calendar with alarms, so they keep working even if the bot is muted or offline.
 // sequence: grows with every change of the session (its revision), so a re-import replaces the older event.
-export interface CalendarOptions { lang: Lang; texts: Texts; demo: boolean; uid: string; today: string; sequence: number }
+export interface CalendarOptions {
+  lang: Lang; texts: Texts; demo: boolean; uid: string; today: string; sequence: number;
+  /** Planned visit days (rule id → date, D-039): each is its own event with an alarm the evening before. */
+  visits?: Record<string, string>;
+}
 export const CALENDAR_FILE = "first-90-days.ics";
 const REMIND_AT = "T060000Z"; // 09:00 Moscow time, the same hour the bot reminds
+const VISIT_EVE_AT = "T150000Z"; // 18:00 Moscow time the day before a visit, as the bot does
 
 const escape = (v: string) => v.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n");
 const compact = (date: string) => date.replaceAll("-", "");
@@ -48,6 +53,16 @@ export function planToIcs(items: PlanItem[], o: CalendarOptions): string {
         "DESCRIPTION:" + escape(demo + item.title[o.lang] + " — " + item.dueDate), "END:VALARM");
     }
     lines.push("END:VEVENT");
+    const visit = done ? undefined : o.visits?.[item.ruleId];
+    if (visit) {
+      lines.push("BEGIN:VEVENT", `UID:${item.ruleId}-visit-${o.uid}@max-first-90-days`, `DTSTAMP:${stamp}`, `SEQUENCE:${o.sequence}`,
+        `DTSTART;VALUE=DATE:${compact(visit)}`, `DTEND;VALUE=DATE:${compact(addDays(visit, 1))}`,
+        "SUMMARY:" + escape(demo + t("ics.visit") + item.title[o.lang]),
+        "DESCRIPTION:" + escape(item.documents.map(d => "□ " + d.title[o.lang]).join("\n")), "TRANSP:TRANSPARENT",
+        ...(addDays(visit, -1) >= o.today ? ["BEGIN:VALARM", "ACTION:DISPLAY", `TRIGGER;VALUE=DATE-TIME:${compact(addDays(visit, -1))}${VISIT_EVE_AT}`,
+          "DESCRIPTION:" + escape(demo + t("ics.visit") + item.title[o.lang]), "END:VALARM"] : []),
+        "END:VEVENT");
+    }
   }
   lines.push("END:VCALENDAR");
   return lines.map(fold).join("\r\n") + "\r\n";

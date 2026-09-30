@@ -67,6 +67,7 @@ export function Card({ session, texts, item, pending, copy, onAction }: Props) {
       <div className="facts in d1">
         {item.recommendedDate !== undefined && <span>{`${t("app.recommended")}: ${dotted(item.recommendedDate)}`}</span>}
         {item.provisional && <span>{t("app.provisional")}</span>}
+        {item.visit !== undefined && <span>{`${t("app.visit")}: ${dotted(item.visit)}`}</span>}
       </div>
 
       <p className="prose in d2">{item.action}</p>
@@ -102,6 +103,13 @@ export function Card({ session, texts, item, pending, copy, onAction }: Props) {
         <Button className="in d5" arrow="✓" loading={pending === `done:${item.ruleId}`} disabled={pending !== null}
           onClick={() => onAction(`done:${item.ruleId}`)}>
           {t("btn.done")}
+        </Button>
+      )}
+
+      {item.status !== "done" && (
+        <Button className="in d5" tone="outline" arrow="🗓" loading={pending === `visit:${item.ruleId}`} disabled={pending !== null}
+          onClick={() => onAction(`visit:${item.ruleId}`)}>
+          {t(item.visit === undefined ? "app.visitPlan" : "app.visitChange")}
         </Button>
       )}
 

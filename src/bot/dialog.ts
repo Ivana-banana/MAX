@@ -14,7 +14,7 @@ export interface Session {
   nonce: string;
   revision: number;
   lang: Lang;
-  step: "language" | "consent" | "scope" | "citizenship" | "entry" | "plan" | "completion" | "delete";
+  step: "language" | "consent" | "scope" | "citizenship" | "entry" | "plan" | "completion" | "visit" | "delete";
   /** Step the delete confirmation was opened from, so "Cancel" returns there. */
   back?: Session["step"];
   university?: string;
@@ -23,6 +23,8 @@ export interface Session {
   selected?: string;
   completions: Completions;
   documents: Record<string, boolean>;
+  /** Day the student plans to go for a procedure (rule id → date); the evening before, the bot lists missing documents. */
+  visits?: Record<string, string>;
   reminders: boolean;
   ruleVersion: string;
 }
@@ -139,7 +141,9 @@ export function documentsNote(s: Session, ctx: DialogueContext, item: PlanItem):
     ? t(s, ctx, "card.docsSource", { url: item.documentsSource.url, date: date(s, item.documentsSource.checkedAt) })
     : t(s, ctx, "card.docsNoSource", { uni: uni(s, ctx).name[s.lang]! });
 }
-function card(s: Session, ctx: DialogueContext, id: string): Reply {
+/** A visit can be planned from today up to a year ahead. */
+const VISIT_HORIZON_DAYS = 365;
+function card(s: Session, ctx: DialogueContext, id: string, prefix = ""): Reply {
   const item = plan(s, ctx).find(i => i.ruleId === id);
   if (!item) {
     const note = undated(s, ctx).find(n => n.id === id);
@@ -151,13 +155,16 @@ function card(s: Session, ctx: DialogueContext, id: string): Reply {
   const u = uni(s, ctx), overdue = item.status === "overdue";
   // No consequences or fines here: the law text on liability is not reviewed (docs/legal-review.md).
   const late = overdue ? t(s, ctx, "card.overdue", { uni: u.name[s.lang]! }) : "";
-  return reply(s, ctx, `${item.title[s.lang]}\n${item.action[s.lang]}\n` + t(s, ctx, "card.deadline") + date(s, item.dueDate) +
+  const visit = item.status === "done" ? undefined : s.visits?.[id];
+  return reply(s, ctx, prefix + `${item.title[s.lang]}\n${item.action[s.lang]}\n` + t(s, ctx, "card.deadline") + date(s, item.dueDate) +
     (item.status === "done" ? "" : ` (${countdown(s, ctx, item)})`) + target + late +
+    (visit ? t(s, ctx, "card.visit", { date: date(s, visit) }) : "") +
     "\n\n" + docs.join("\n") + "\n" + documentsNote(s, ctx, item) + "\n\n" + item.legal.act + ", " + item.legal.article +
     "\n" + item.legal.url + t(s, ctx, "card.checked") + item.legal.checkedAt +
     t(s, ctx, "card.confirm", { uni: u.name[s.lang]! }) + u.contactUrl,
     [...item.documents.map(d => [button((s.documents[`${key}:${d.id}`] ? "✓ " : "□ ") + d.title[s.lang], `doc:${id}:${d.id}`)]),
-      ...(item.status === "done" ? [] : [[button(t(s, ctx, "btn.done"), `done:${id}`)]]),
+      ...(item.status === "done" ? [] : [[button(t(s, ctx, "btn.done"), `done:${id}`)],
+        [button(t(s, ctx, visit ? "btn.visitChange" : "btn.visit"), `visit:${id}`)]]),
       [link(t(s, ctx, "btn.law"), item.legal.url)],
       [button(t(s, ctx, overdue ? "btn.overdueHelp" : "btn.cantComplete"), `help:${id}`), button(t(s, ctx, "btn.plan"), "plan")]]);
 }
@@ -191,7 +198,7 @@ function calendar(s: Session, ctx: DialogueContext): Reply {
   if (!items.some(i => i.status !== "done")) return home(s, ctx);
   return { ...reply(s, ctx, t(s, ctx, "calendar.intro"), [[button(t(s, ctx, "btn.plan"), "plan")]]),
     file: { name: CALENDAR_FILE, content: planToIcs(items,
-      { lang: s.lang, texts: ctx.texts, demo: ctx.demo, uid: s.nonce, today: ctx.today, sequence: s.revision }) } };
+      { lang: s.lang, texts: ctx.texts, demo: ctx.demo, uid: s.nonce, today: ctx.today, sequence: s.revision, ...(s.visits ? { visits: s.visits } : {}) }) } };
 }
 function help(s: Session, ctx: DialogueContext, ruleId?: string, unsupported = false): Reply {
   const item = ruleId ? plan(s, ctx).find(i => i.ruleId === ruleId) : undefined;
@@ -226,6 +233,12 @@ export function prompt(s: Session, ctx: DialogueContext): Reply {
     case "entry": return reply(s, ctx, t(s, ctx, "entry", { from: date(s, coverage(ctx.rules).from) }),
       ctx.demo ? [[button(t(s, ctx, "btn.example", { date: date(s, exampleEntry(ctx)) }), "example")]] : []);
     case "completion": return reply(s, ctx, t(s, ctx, "completion"), [[button(t(s, ctx, "btn.cancel"), "plan")]]);
+    case "visit": {
+      const item = plan(s, ctx).find(i => i.ruleId === s.selected);
+      return reply(s, ctx, t(s, ctx, "visit", { title: item?.title[s.lang] ?? "" }),
+        [[button(t(s, ctx, "btn.today"), ctx.today), button(t(s, ctx, "btn.tomorrow"), addDays(ctx.today, 1))],
+          [button(t(s, ctx, "btn.cancel"), "plan")]]);
+    }
     case "delete": return reply(s, ctx, t(s, ctx, "delete"),
       [[button(t(s, ctx, "btn.confirmDelete"), "confirm-delete"), button(t(s, ctx, "btn.cancel"), "cancel-delete")]]);
     case "plan": return home(s, ctx);
@@ -298,7 +311,21 @@ export function transition(previous: Session | null, input: Input, ctx: Dialogue
     if (!s.selected || !isValidDate(done) || done > ctx.today || done < s.entryDate! || (last && compareDates(done, last) <= 0)) {
       return { session: s, reply: reply(s, ctx, t(s, ctx, "completion.invalid")) };
     }
-    s.completions[s.selected] = done; s.step = "plan"; delete s.selected;
+    s.completions[s.selected] = done;
+    // A marked procedure needs no visit any more; a repeat a year later gets a new one.
+    if (s.visits?.[s.selected]) { const { [s.selected]: _, ...rest } = s.visits; s.visits = rest; }
+    s.step = "plan"; delete s.selected;
+  } else if (s.step === "visit") {
+    const day = typedDate(action);
+    const item = plan(s, ctx).find(i => i.ruleId === s.selected && i.status !== "done");
+    if (!item || !isValidDate(day) || day < ctx.today || day > addDays(ctx.today, VISIT_HORIZON_DAYS)) {
+      return { session: s, reply: reply(s, ctx, t(s, ctx, "visit.invalid")) };
+    }
+    s.visits = { ...s.visits, [item.ruleId]: day }; s.step = "plan"; delete s.selected;
+    const note = t(s, ctx, "visit.saved", { date: date(s, day) }) +
+      (day > item.dueDate ? t(s, ctx, "visit.late", { due: date(s, item.dueDate) }) : "") +
+      t(s, ctx, s.reminders ? "visit.remindOn" : "visit.remindOff");
+    return { session: s, reply: card(s, ctx, item.ruleId, note) };
   } else if (s.step === "plan") {
     if (action === "reminders") { s.reminders = !s.reminders; }
     else if (action.startsWith("card:")) return { session: s, reply: card(s, ctx, action.slice(5).replace(FROM_REMINDER, "")) };
@@ -315,12 +342,22 @@ export function transition(previous: Session | null, input: Input, ctx: Dialogue
         const key = `${id}:${doc}`; s.documents[key] = !s.documents[key];
         return { session: s, reply: procedureCard(s, ctx, note) };
       }
+    } else if (action.startsWith("visit:")) {
+      const id = action.slice(6);
+      if (plan(s, ctx).some(i => i.ruleId === id && i.status !== "done")) { s.selected = id; s.step = "visit"; }
     } else if (action.startsWith("done:")) {
       const id = action.slice(5);
       if (plan(s, ctx).some(i => i.ruleId === id && i.status !== "done")) { s.selected = id; s.step = "completion"; }
     }
   }
   return { session: s, reply: prompt(s, ctx) };
+}
+/** The evening before a planned visit: which documents of the checklist are still unchecked. */
+export function visitReply(s: Session, ctx: DialogueContext, item: PlanItem): Reply {
+  const missing = item.documents.filter(d => !s.documents[`${item.ruleId}:${item.dueDate}:${d.id}`]);
+  return reply(s, ctx, t(s, ctx, "visit.reminder", { title: item.title[s.lang]!, due: date(s, item.dueDate) }) +
+    (missing.length ? t(s, ctx, "visit.missing", { docs: missing.map(d => `□ ${d.title[s.lang]}`).join("\n") }) : t(s, ctx, "visit.ready")),
+    [[button(t(s, ctx, "btn.details"), `card:${item.ruleId}`)], [button(t(s, ctx, "btn.planShort"), "plan")]]);
 }
 export function reminderReply(s: Session, ctx: DialogueContext, item: PlanItem): Reply {
   return reply(s, ctx, t(s, ctx, item.status === "overdue" ? "reminder.overdue" : "reminder", { title: item.title[s.lang]!, due: date(s, item.dueDate), countdown: countdown(s, ctx, item) }),

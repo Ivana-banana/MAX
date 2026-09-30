@@ -148,7 +148,8 @@ async function icsFor(service: Service, user: number): Promise<string | null> {
   const items = plan(session, ctx);
   if (!items.some(i => i.status !== "done")) return null;
   return planToIcs(items,
-    { lang: session.lang, texts: ctx.texts, demo: ctx.demo, uid: session.nonce, today: ctx.today, sequence: session.revision });
+    { lang: session.lang, texts: ctx.texts, demo: ctx.demo, uid: session.nonce, today: ctx.today, sequence: session.revision,
+      ...(session.visits ? { visits: session.visits } : {}) });
 }
 
 /**
