@@ -78,7 +78,8 @@ export function profile(s: Session): UserProfile | undefined {
 }
 export function plan(s: Session, ctx: DialogueContext): PlanItem[] {
   const p = profile(s);
-  return p ? buildPlan(ctx.rules, p, s.completions, ctx.today) : [];
+  const targets = Object.fromEntries(Object.entries(uni(s, ctx).ruleTargets).map(([id, target]) => [id, target.days]));
+  return p ? buildPlan(ctx.rules, p, s.completions, ctx.today, targets) : [];
 }
 /**
  * The university's own procedures whose deadline the bot cannot calculate (it counts from the
@@ -147,6 +148,12 @@ export function placeText(s: Session, ctx: DialogueContext, ruleId: string): str
   const place = uni(s, ctx).rulePlaces[ruleId];
   return place ? t(s, ctx, "card.place", { where: place.where[s.lang]!, uni: uni(s, ctx).name[s.lang]!, date: date(s, place.source.checkedAt) }) : "";
 }
+/** D-043: the university's earlier date for a federal procedure, with its source; the legal deadline stays as is. */
+export function targetText(s: Session, ctx: DialogueContext, item: PlanItem): string {
+  const target = uni(s, ctx).ruleTargets[item.ruleId];
+  if (!target || item.isRepeat || !item.recommendedDate) return "";
+  return t(s, ctx, "card.uniTarget", { uni: uni(s, ctx).name[s.lang]!, date: date(s, item.recommendedDate), checked: date(s, target.source.checkedAt) });
+}
 /** Where the checklist comes from, or that no official list is published (D-027); the app shows it too. */
 export function documentsNote(s: Session, ctx: DialogueContext, item: PlanItem): string {
   return item.documentsSource
@@ -163,7 +170,7 @@ function card(s: Session, ctx: DialogueContext, id: string, prefix = ""): Reply 
   }
   const key = `${item.ruleId}:${item.dueDate}`;
   const docs = item.documents.map(d => `${s.documents[`${key}:${d.id}`] ? "✓" : "□"} ${d.title[s.lang]}`);
-  const target = item.recommendedDate ? t(s, ctx, "card.recommended") + date(s, item.recommendedDate) : "";
+  const target = targetText(s, ctx, item) || (item.recommendedDate ? t(s, ctx, "card.recommended") + date(s, item.recommendedDate) : "");
   const u = uni(s, ctx), overdue = item.status === "overdue";
   // No consequences or fines here: the law text on liability is not reviewed (docs/legal-review.md).
   const late = overdue ? t(s, ctx, "card.overdue", { uni: u.name[s.lang]! }) : "";

@@ -74,6 +74,7 @@
   "completion.invalid": "Use a date between entry and today, later than the previous completion. /plan to cancel.",
   "btn.map": "🗺 How to get there",
   "card.place": "\nWhere: {where} — according to the {uni} page (checked {date})",
+  "card.uniTarget": "\n{uni} asks for it sooner: by {date}, according to the {uni} page (checked {checked}); the deadline above is the legal one",
   "btn.end.visa-end": "📅 Enter the visa end date",
   "btn.end.registration-end": "📅 Enter the registration end date",
   "btn.endChange": "📅 Change the end date",

@@ -61,9 +61,9 @@ export function isApplicable(rule: DeadlineRule, profile: UserProfile): boolean 
  * question, not a coding one, so each rule carries the answer and a lawyer confirms
  * it; the engine only applies what the data says.
  */
-export function computeDueDate(rule: DeadlineRule, profile: UserProfile): PlainDate {
+export function computeDueDate(rule: DeadlineRule, profile: UserProfile, days = rule.term.days): PlainDate {
   parseDate(profile.entryDate);
-  const offset = rule.term.counting === "eventDay" ? rule.term.days - 1 : rule.term.days;
+  const offset = rule.term.counting === "eventDay" ? days - 1 : days;
   return addDays(profile.entryDate, offset);
 }
 
@@ -82,12 +82,17 @@ function statusFor(dueDate: PlainDate, today: PlainDate, done: boolean): PlanIte
  * completion date: that is the case nobody currently reminds anyone about
  * (docs/product/as-is-to-be.md, step 10). A completed rule that does not repeat
  * stays in the plan as `done` so the user can see what is already closed.
+ *
+ * `earlierDays` (rule id → days) is an earlier target set by someone other than the law, e.g. the
+ * university: counted like the rule's own term, it becomes `recommendedDate`, while `dueDate` and the
+ * reminders stay on the legal term.
  */
 export function buildPlan(
   rules: readonly DeadlineRule[],
   profile: UserProfile,
   completions: Completions,
   today: PlainDate,
+  earlierDays: Readonly<Record<string, number>> = {},
 ): PlanItem[] {
   const items: PlanItem[] = [];
 
@@ -97,12 +102,13 @@ export function buildPlan(
     const completedAt = completions[rule.id];
     const isRepeat = completedAt !== undefined && rule.repeat !== undefined;
 
-    const recommendedDate = isRepeat ? addMonths(completedAt, rule.repeat!.months) : undefined;
+    const done = completedAt !== undefined && !isRepeat;
+    const earlier = earlierDays[rule.id];
+    const recommendedDate = isRepeat ? addMonths(completedAt, rule.repeat!.months)
+      : earlier !== undefined && !done ? computeDueDate(rule, profile, earlier) : undefined;
     const dueDate = isRepeat
       ? addDays(recommendedDate!, rule.repeat!.graceDays ?? 0)
       : computeDueDate(rule, profile);
-
-    const done = completedAt !== undefined && !isRepeat;
 
     items.push({
       ruleId: rule.id,

@@ -7,7 +7,7 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { isValidDate } from "../core/dates.js";
-import type { Condition, Localized, RequiredDocument } from "../core/types.js";
+import type { Condition, DeadlineRule, Localized, RequiredDocument } from "../core/types.js";
 
 export interface University {
   /** Deep-link payload: https://max.ru/<bot>?start=<id> */
@@ -29,6 +29,17 @@ export interface University {
    * university's own page (D-041). The rule and its deadline stay federal; only the address is local.
    */
   rulePlaces: Record<string, RulePlace>;
+  /**
+   * The university asks for a federal procedure sooner than the law (rule id → days, counted like the
+   * rule's own term), from its own page (D-043). Shown as the university's date next to the legal
+   * deadline, which stays in force; a term that is not earlier than the law is refused (checkRuleTargets).
+   */
+  ruleTargets: Record<string, RuleTarget>;
+}
+
+export interface RuleTarget {
+  days: number;
+  source: { url: string; checkedAt: string };
 }
 
 export interface RulePlace {
@@ -147,6 +158,15 @@ function parseRulePlaces(raw: unknown, path: string): Record<string, RulePlace> 
   }));
 }
 
+function parseRuleTargets(raw: unknown, path: string): Record<string, RuleTarget> {
+  if (raw === undefined) return {};
+  return Object.fromEntries(Object.entries(record(raw, path)).map(([id, value]) => {
+    const t = record(value, `${path}.${id}`);
+    if (!Number.isInteger(t.days) || (t.days as number) < 1) throw new UniversityValidationError(`${path}.${id}.days`, "целое число дней от 1");
+    return [id, { days: t.days as number, source: parseSource(t.source, `${path}.${id}.source`) }];
+  }));
+}
+
 function parseCountdown(raw: unknown, path: string): ProcedureCountdown {
   const c = record(raw, path);
   if (c.from !== "visa-end" && c.from !== "registration-end") throw new UniversityValidationError(`${path}.from`, "visa-end или registration-end");
@@ -185,7 +205,7 @@ export function parseUniversity(raw: unknown, path = "university"): University {
   if (repeated !== undefined) throw new UniversityValidationError(`${path}.procedures`, `повторяющийся id «${repeated}»`);
   return { id, name: names,
     contactUrl, citizenships: [...new Set(u.citizenships as string[])], checkedAt, procedures,
-    rulePlaces: parseRulePlaces(u.rulePlaces, `${path}.rulePlaces`) };
+    rulePlaces: parseRulePlaces(u.rulePlaces, `${path}.rulePlaces`), ruleTargets: parseRuleTargets(u.ruleTargets, `${path}.ruleTargets`) };
 }
 
 /** All profiles from a directory; the default university comes first. */
@@ -206,6 +226,19 @@ export function checkProcedures(universities: University[], ruleIds: string[]): 
     if (clash) throw new UniversityValidationError(`${u.id}.procedures`, `id «${clash.id}» совпадает с id нормы`);
     const unknown = Object.keys(u.rulePlaces).find(id => !ruleIds.includes(id));
     if (unknown) throw new UniversityValidationError(`${u.id}.rulePlaces`, `нет нормы «${unknown}»`);
+  }
+}
+
+/** A university may ask for a federal procedure sooner, never later: a profile must not weaken the law (D-043). */
+export function checkRuleTargets(universities: University[], rules: readonly DeadlineRule[]): void {
+  for (const u of universities) {
+    for (const [id, target] of Object.entries(u.ruleTargets)) {
+      const rule = rules.find(r => r.id === id);
+      if (!rule) throw new UniversityValidationError(`${u.id}.ruleTargets`, `нет нормы «${id}»`);
+      if (target.days >= rule.term.days) {
+        throw new UniversityValidationError(`${u.id}.ruleTargets.${id}`, `${target.days} дн. не раньше срока по норме (${rule.term.days} дн.): профиль вуза не может ослабить федеральный срок`);
+      }
+    }
   }
 }
 

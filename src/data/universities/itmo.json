@@ -294,6 +294,15 @@
       }
     }
   ],
+  "ruleTargets": {
+    "fingerprinting": {
+      "days": 30,
+      "source": {
+        "url": "https://int.itmo.ru/ru/important_documents",
+        "checkedAt": "2026-09-30"
+      }
+    }
+  },
   "rulePlaces": {
     "medical-examination": {
       "where": {

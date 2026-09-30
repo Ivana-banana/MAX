@@ -34,6 +34,8 @@ export interface AppPlanItem {
   visit?: string;
   /** D-041: where the university sends its students for this procedure (the chat's line) and a map link. */
   place?: { text: string; mapUrl: string };
+  /** D-043: the university asks for this procedure sooner than the law — the chat's line; replaces the recommended date. */
+  target?: string;
 }
 
 /**

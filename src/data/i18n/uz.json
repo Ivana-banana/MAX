@@ -74,6 +74,7 @@
   "completion.invalid": "Sana kirgan kun bilan bugun oraligʻida va oldingi belgidan keyin boʻlishi kerak. /plan — bekor qilish.",
   "btn.map": "🗺 Qanday borish mumkin",
   "card.place": "\nQayerda: {where} — {uni} sahifasiga koʻra (tekshirilgan: {date})",
+  "card.uniTarget": "\n{uni} ertaroq soʻraydi: {date} gacha — {uni} sahifasiga koʻra (tekshirilgan: {checked}); yuqoridagi muddat — qonun boʻyicha",
   "btn.end.visa-end": "📅 Viza tugash sanasini kiritish",
   "btn.end.registration-end": "📅 Roʻyxatga olish tugash sanasini kiritish",
   "btn.endChange": "📅 Tugash sanasini oʻzgartirish",

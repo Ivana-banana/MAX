@@ -2,7 +2,7 @@ import { createInterface } from "node:readline/promises";
 import { randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { parseRuleSet } from "./data/loadRules.js";
-import { checkCitizenships, checkProcedures, readUniversities } from "./data/loadUniversities.js";
+import { checkCitizenships, checkProcedures, checkRuleTargets, readUniversities } from "./data/loadUniversities.js";
 import { coverage } from "./core/deadlines.js";
 import { checkTranslated, readTexts } from "./data/loadTexts.js";
 import { scratchSchema, startDevPostgres } from "./db/dev-postgres.js";
@@ -17,6 +17,7 @@ const texts = readTexts("./src/data/i18n");
 checkTranslated(texts, rules.rules, universities);
 checkCitizenships(universities, coverage(rules.rules).excluded);
 checkProcedures(universities, rules.rules.map(r => r.id));
+checkRuleTargets(universities, rules.rules);
 // Synthetic profile in a temporary schema, dropped on exit: inside Compose it is the bot's DATABASE_URL,
 // locally a throwaway PostgreSQL (embedded-postgres, dev dependency).
 const dev = process.env.DATABASE_URL ? undefined : await startDevPostgres();

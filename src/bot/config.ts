@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { parseRuleSet, type RuleSet } from "../data/loadRules.js";
 import type { DeadlineRule } from "../core/types.js";
-import { checkCitizenships, checkProcedures, readUniversities, type University } from "../data/loadUniversities.js";
+import { checkCitizenships, checkProcedures, checkRuleTargets, readUniversities, type University } from "../data/loadUniversities.js";
 import { coverage } from "../core/deadlines.js";
 import { checkTranslated, readTexts, type Texts } from "../data/loadTexts.js";
 export interface Config {
@@ -71,5 +71,6 @@ export function loadTexts(config: Pick<Config, "textsPath">, rules: DeadlineRule
   checkTranslated(texts, rules, universities);
   checkCitizenships(universities, coverage(rules).excluded);
   checkProcedures(universities, rules.map(r => r.id));
+  checkRuleTargets(universities, rules);
   return texts;
 }

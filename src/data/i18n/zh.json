@@ -72,6 +72,7 @@
   "completion.invalid": "日期需在入境日期和今天之间，并晚于上一次标记。/plan — 取消。",
   "btn.map": "🗺 如何前往",
   "card.place": "\n地点：{where}——依据{uni}页面（核对日期：{date}）",
+  "card.uniTarget": "\n{uni}要求提前完成：{date}之前——依据{uni}页面（核对日期：{checked}）；上方期限为法定期限",
   "btn.end.visa-end": "📅 输入签证到期日",
   "btn.end.registration-end": "📅 输入居留登记到期日",
   "btn.endChange": "📅 更改到期日",
