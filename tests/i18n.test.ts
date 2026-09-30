@@ -20,7 +20,8 @@ function withKazakh(): DialogueContext {
     documents: r.documents.map(d => ({ ...d, title: tr(d.title) })) }));
   const kkUniversities = universities.map(u => ({ ...u, name: tr(u.name),
     procedures: u.procedures.map(p => ({ ...p, title: tr(p.title), action: tr(p.action), when: tr(p.when),
-      documents: p.documents.map(d => ({ ...d, title: tr(d.title) })) })) }));
+      documents: p.documents.map(d => ({ ...d, title: tr(d.title) })) })),
+    rulePlaces: Object.fromEntries(Object.entries(u.rulePlaces).map(([id, place]) => [id, { ...place, where: tr(place.where) }])) }));
   checkTexts(all); checkTranslated(all, kkRules, kkUniversities);
   return { rules: kkRules, universities: kkUniversities, texts: all, version: rules.version, demo: true, today: "2026-09-24" };
 }

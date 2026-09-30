@@ -140,6 +140,13 @@ export function shareText(s: Session, ctx: DialogueContext): string {
   return (ctx.demo ? t(s, ctx, "banner.demo") : "") + t(s, ctx, "share.plan", { uni: name, lines: lines.join("\n") }) +
     (items.some(i => i.provisional && i.status !== "done") ? t(s, ctx, "share.provisional", { uni: name }) : "");
 }
+/** "How to get there": a Yandex Maps search for the address — a public link, no API and no location data (D-041). */
+export const mapUrl = (address: string) => `https://yandex.ru/maps/?text=${encodeURIComponent(address)}`;
+/** Where the student's university sends them for a federal procedure, with the source; empty when it does not say. */
+export function placeText(s: Session, ctx: DialogueContext, ruleId: string): string {
+  const place = uni(s, ctx).rulePlaces[ruleId];
+  return place ? t(s, ctx, "card.place", { where: place.where[s.lang]!, uni: uni(s, ctx).name[s.lang]!, date: date(s, place.source.checkedAt) }) : "";
+}
 /** Where the checklist comes from, or that no official list is published (D-027); the app shows it too. */
 export function documentsNote(s: Session, ctx: DialogueContext, item: PlanItem): string {
   return item.documentsSource
@@ -163,7 +170,7 @@ function card(s: Session, ctx: DialogueContext, id: string, prefix = ""): Reply 
   const visit = item.status === "done" ? undefined : s.visits?.[id];
   return reply(s, ctx, prefix + `${item.title[s.lang]}\n${item.action[s.lang]}\n` + t(s, ctx, "card.deadline") + date(s, item.dueDate) +
     (item.status === "done" ? "" : ` (${countdown(s, ctx, item)})`) + target + late +
-    (visit ? t(s, ctx, "card.visit", { date: date(s, visit) }) : "") +
+    (visit ? t(s, ctx, "card.visit", { date: date(s, visit) }) : "") + placeText(s, ctx, id) +
     "\n\n" + docs.join("\n") + "\n" + documentsNote(s, ctx, item) + "\n\n" + item.legal.act + ", " + item.legal.article +
     "\n" + item.legal.url + t(s, ctx, "card.checked") + item.legal.checkedAt +
     t(s, ctx, "card.confirm", { uni: u.name[s.lang]! }) + u.contactUrl,
@@ -171,6 +178,7 @@ function card(s: Session, ctx: DialogueContext, id: string, prefix = ""): Reply 
       ...(item.status === "done" ? [] : [[button(t(s, ctx, "btn.done"), `done:${id}`)],
         [button(t(s, ctx, visit ? "btn.visitChange" : "btn.visit"), `visit:${id}`)]]),
       [link(t(s, ctx, "btn.law"), item.legal.url)],
+      ...(u.rulePlaces[id] ? [[link(t(s, ctx, "btn.map"), mapUrl(u.rulePlaces[id]!.map))]] : []),
       [button(t(s, ctx, overdue ? "btn.overdueHelp" : "btn.cantComplete"), `help:${id}`), button(t(s, ctx, "btn.plan"), "plan")]]);
 }
 /** A university deadline counted from a document end date the student gave (D-040); undefined until then. */
@@ -206,6 +214,7 @@ function procedureCard(s: Session, ctx: DialogueContext, note: UniversityProcedu
     procedureDueText(s, ctx, note) + "\n\n" + docs.join("\n") + "\n\n" + procedureSource(s, ctx, note),
     [...note.documents.map(d => [button((checked(d.id) ? "✓ " : "□ ") + d.title[s.lang], `doc:${note.id}:${d.id}`)]),
       ...(note.countdown ? [[button(t(s, ctx, counted ? "btn.endChange" : `btn.end.${note.countdown.from}`), `end:${note.id}`)]] : []),
+      ...(note.place ? [[link(t(s, ctx, "btn.map"), mapUrl(note.place.map))]] : []),
       [link(pageLabel(s, ctx), note.source.url)],
       [button(t(s, ctx, "btn.plan"), "plan")]]);
 }

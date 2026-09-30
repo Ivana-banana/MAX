@@ -97,6 +97,13 @@ export function Card({ session, texts, item, pending, copy, onAction }: Props) {
         <p className="law">{item.legal.act}<small>{`${item.legal.article} · ${t("app.checkedAt")}: ${dotted(item.legal.checkedAt)}`}</small></p>
       </div>
 
+      {item.place !== undefined && (
+        <div className="in d4">
+          <p className="prose">{item.place.text}</p>
+          <Button tone="outline" arrow="🗺" onClick={() => openLink(item.place!.mapUrl)}>{t("app.map")}</Button>
+        </div>
+      )}
+
       <Button className="in d5" tone="outline" arrow="↗" onClick={() => openLink(item.legal.url)}>{t("btn.law")}</Button>
 
       {item.status !== "done" && (

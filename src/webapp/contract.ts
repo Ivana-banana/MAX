@@ -32,6 +32,8 @@ export interface AppPlanItem {
   legal: LegalBasis;
   /** Planned visit day (D-039); absent when none or the procedure is done. */
   visit?: string;
+  /** D-041: where the university sends its students for this procedure (the chat's line) and a map link. */
+  place?: { text: string; mapUrl: string };
 }
 
 /**
@@ -51,6 +53,8 @@ export interface AppUndatedItem {
   sourceLabel: string;
   /** D-040: the procedure's deadline can be counted from a document end date; the chat's button label to enter it. */
   endLabel?: string;
+  /** D-041: map search for the office named in `action`. */
+  mapUrl?: string;
   /** The entered end date and the counted last (and first) day to act, with the chat's wording of them. */
   end?: string;
   due?: string;

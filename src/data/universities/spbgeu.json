@@ -64,6 +64,9 @@
       "source": {
         "url": "https://unecon.ru/mezhdunarodnye-svyazi/upravlenie-mezhdunarodnogo-sotrudnichestva/otdel-po-rabote-s-inostrannymi-uchashhimisya/",
         "checkedAt": "2026-09-29"
+      },
+      "place": {
+        "map": "Санкт-Петербург, наб. канала Грибоедова, 30-32"
       }
     },
     {
@@ -91,6 +94,9 @@
       "source": {
         "url": "https://unecon.ru/mezhdunarodnye-svyazi/upravlenie-mezhdunarodnogo-sotrudnichestva/otdel-po-rabote-s-inostrannymi-uchashhimisya/",
         "checkedAt": "2026-09-29"
+      },
+      "place": {
+        "map": "Санкт-Петербург, наб. канала Грибоедова, 30-32"
       }
     },
     {
@@ -132,6 +138,9 @@
       "countdown": {
         "from": "registration-end",
         "daysBefore": 45
+      },
+      "place": {
+        "map": "Санкт-Петербург, наб. канала Грибоедова, 30-32"
       }
     },
     {
@@ -211,6 +220,9 @@
       "countdown": {
         "from": "visa-end",
         "daysBefore": 45
+      },
+      "place": {
+        "map": "Санкт-Петербург, наб. канала Грибоедова, 30-32"
       }
     },
     {
@@ -240,5 +252,33 @@
         "checkedAt": "2026-09-29"
       }
     }
-  ]
+  ],
+  "rulePlaces": {
+    "medical-examination": {
+      "where": {
+        "ru": "ФГУП «ПВС» МВД России, филиал по Санкт-Петербургу и Ленинградской области: ул. Красного Текстильщика, 10–12, лит. В, вход № 2 со двора",
+        "en": "FSUE «PVS» of the Russian Interior Ministry, Saint Petersburg and Leningrad Region branch: 10–12 Krasnogo Tekstilshchika St., building V, entrance 2 from the courtyard",
+        "uz": "Rossiya IIV «PVS» FDUK, Sankt-Peterburg va Leningrad viloyati filiali: Krasnogo Tekstilshchika koʻch., 10–12, V bino, hovlidan 2-kirish",
+        "zh": "俄罗斯内务部“PVS”联邦国有单一制企业圣彼得堡及列宁格勒州分部：Krasnogo Tekstilshchika街10–12号V栋，从院内2号入口进入"
+      },
+      "map": "Санкт-Петербург, ул. Красного Текстильщика, 10-12",
+      "source": {
+        "url": "https://unecon.ru/mezhdunarodnye-svyazi/upravlenie-mezhdunarodnogo-sotrudnichestva/otdel-po-rabote-s-inostrannymi-uchashhimisya/",
+        "checkedAt": "2026-09-30"
+      }
+    },
+    "fingerprinting": {
+      "where": {
+        "ru": "ФГУП «ПВС» МВД России, филиал по Санкт-Петербургу и Ленинградской области: ул. Красного Текстильщика, 10–12, лит. В, вход № 2 со двора",
+        "en": "FSUE «PVS» of the Russian Interior Ministry, Saint Petersburg and Leningrad Region branch: 10–12 Krasnogo Tekstilshchika St., building V, entrance 2 from the courtyard",
+        "uz": "Rossiya IIV «PVS» FDUK, Sankt-Peterburg va Leningrad viloyati filiali: Krasnogo Tekstilshchika koʻch., 10–12, V bino, hovlidan 2-kirish",
+        "zh": "俄罗斯内务部“PVS”联邦国有单一制企业圣彼得堡及列宁格勒州分部：Krasnogo Tekstilshchika街10–12号V栋，从院内2号入口进入"
+      },
+      "map": "Санкт-Петербург, ул. Красного Текстильщика, 10-12",
+      "source": {
+        "url": "https://unecon.ru/mezhdunarodnye-svyazi/upravlenie-mezhdunarodnogo-sotrudnichestva/otdel-po-rabote-s-inostrannymi-uchashhimisya/",
+        "checkedAt": "2026-09-30"
+      }
+    }
+  }
 }

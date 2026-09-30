@@ -12,7 +12,7 @@ import { coverage } from "../core/deadlines.js";
 import { isValidDate } from "../core/dates.js";
 import type { Lang } from "../core/types.js";
 import {
-  countdown, documentsNote, pageLabel, plan, procedureDue, procedureDueText, procedureSource, profile, prompt, shareText, transition, undated, type DialogueContext, type Input, type Session,
+  countdown, documentsNote, mapUrl, pageLabel, placeText, plan, procedureDue, procedureDueText, procedureSource, profile, prompt, shareText, transition, undated, type DialogueContext, type Input, type Session,
 } from "../bot/dialog.js";
 import { funnelEvents, funnelUniversity } from "../bot/funnel.js";
 import { BASE_LANG, format } from "../data/loadTexts.js";
@@ -92,6 +92,12 @@ function exampleLabel(session: Session, ctx: DialogueContext): { example?: strin
   return button === undefined ? {} : { example: button.text };
 }
 
+/** D-041: the university's place for a federal procedure, worded as in the chat card. */
+function placeView(session: Session, ctx: DialogueContext, ruleId: string): { place?: { text: string; mapUrl: string } } {
+  const place = (ctx.universities.find(u => u.id === session.university) ?? ctx.universities[0]!).rulePlaces[ruleId];
+  return place ? { place: { text: placeText(session, ctx, ruleId).trim(), mapUrl: mapUrl(place.map) } } : {};
+}
+
 /** D-040 fields of an undated procedure: the button to enter the end date, and the counted dates once entered. */
 function countdownView(session: Session, ctx: DialogueContext, note: ReturnType<typeof undated>[number]) {
   if (!note.countdown) return {};
@@ -141,6 +147,7 @@ function view(session: Session | null, ctx: DialogueContext, mocked: boolean, hi
         documentsNote: documentsNote(session, ctx, item),
         legal: item.legal,
         ...(item.status === "done" || session.visits?.[item.ruleId] === undefined ? {} : { visit: session.visits[item.ruleId] }),
+        ...placeView(session, ctx, item.ruleId),
       })) : [],
       undated: profile(session) && !stale ? undated(session, ctx).map(note => ({
         id: note.id,
@@ -154,6 +161,7 @@ function view(session: Session | null, ctx: DialogueContext, mocked: boolean, hi
         sourceNote: procedureSource(session, ctx, note),
         sourceLabel: pageLabel(session, ctx),
         ...countdownView(session, ctx, note),
+        ...(note.place ? { mapUrl: mapUrl(note.place.map) } : {}),
       })) : [],
       share: profile(session) && !stale ? shareText(session, ctx) : "",
     },

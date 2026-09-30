@@ -24,6 +24,18 @@ export interface University {
    * event (docs/product/plan-vs-studroute.md, items 1 and 5). Empty when the profile has none.
    */
   procedures: UniversityProcedure[];
+  /**
+   * Where the university sends its students for a federal procedure (rule id → place), from the
+   * university's own page (D-041). The rule and its deadline stay federal; only the address is local.
+   */
+  rulePlaces: Record<string, RulePlace>;
+}
+
+export interface RulePlace {
+  where: Localized;
+  /** Address as a map search query, in Russian: "Казань, ул. Вишневского, 2а". */
+  map: string;
+  source: { url: string; checkedAt: string };
 }
 
 export interface UniversityProcedure {
@@ -42,6 +54,8 @@ export interface UniversityProcedure {
    * counts it (D-040). Absent when the source gives no such number — then only the words are shown.
    */
   countdown?: ProcedureCountdown;
+  /** Address of the office for a map link ("How to get there"); the text of `action` already names it. */
+  place?: { map: string };
 }
 
 export interface ProcedureCountdown {
@@ -104,8 +118,33 @@ function parseProcedure(raw: unknown, path: string): UniversityProcedure {
   const checkedAt = text(source.checkedAt, `${path}.source.checkedAt`);
   if (!isValidDate(checkedAt)) throw new UniversityValidationError(`${path}.source.checkedAt`, "ожидается дата ГГГГ-ММ-ДД");
   const countdown = p.countdown === undefined ? undefined : parseCountdown(p.countdown, `${path}.countdown`);
+  const place = p.place === undefined ? undefined : { map: mapQuery(record(p.place, `${path}.place`).map, `${path}.place.map`) };
   return { id: slug(p.id, `${path}.id`), title: localized(p.title, `${path}.title`), action: localized(p.action, `${path}.action`),
-    when: localized(p.when, `${path}.when`), documents, appliesIf, source: { url, checkedAt }, ...(countdown ? { countdown } : {}) };
+    when: localized(p.when, `${path}.when`), documents, appliesIf, source: { url, checkedAt }, ...(countdown ? { countdown } : {}),
+    ...(place ? { place } : {}) };
+}
+
+const mapQuery = (value: unknown, path: string): string => {
+  const v = text(value, path);
+  if (v.length > 200) throw new UniversityValidationError(path, "адрес для карты до 200 символов");
+  return v;
+};
+
+function parseSource(raw: unknown, path: string): { url: string; checkedAt: string } {
+  const source = record(raw, path);
+  const url = text(source.url, `${path}.url`);
+  if (!url.startsWith("https://")) throw new UniversityValidationError(`${path}.url`, "нужна ссылка https://");
+  const checkedAt = text(source.checkedAt, `${path}.checkedAt`);
+  if (!isValidDate(checkedAt)) throw new UniversityValidationError(`${path}.checkedAt`, "ожидается дата ГГГГ-ММ-ДД");
+  return { url, checkedAt };
+}
+
+function parseRulePlaces(raw: unknown, path: string): Record<string, RulePlace> {
+  if (raw === undefined) return {};
+  return Object.fromEntries(Object.entries(record(raw, path)).map(([id, value]) => {
+    const p = record(value, `${path}.${id}`);
+    return [id, { where: localized(p.where, `${path}.${id}.where`), map: mapQuery(p.map, `${path}.${id}.map`), source: parseSource(p.source, `${path}.${id}.source`) }];
+  }));
 }
 
 function parseCountdown(raw: unknown, path: string): ProcedureCountdown {
@@ -145,7 +184,8 @@ export function parseUniversity(raw: unknown, path = "university"): University {
   const repeated = procedures.map(p => p.id).find((id, i, all) => all.indexOf(id) !== i);
   if (repeated !== undefined) throw new UniversityValidationError(`${path}.procedures`, `повторяющийся id «${repeated}»`);
   return { id, name: names,
-    contactUrl, citizenships: [...new Set(u.citizenships as string[])], checkedAt, procedures };
+    contactUrl, citizenships: [...new Set(u.citizenships as string[])], checkedAt, procedures,
+    rulePlaces: parseRulePlaces(u.rulePlaces, `${path}.rulePlaces`) };
 }
 
 /** All profiles from a directory; the default university comes first. */
@@ -164,6 +204,8 @@ export function checkProcedures(universities: University[], ruleIds: string[]): 
   for (const u of universities) {
     const clash = u.procedures.find(p => ruleIds.includes(p.id));
     if (clash) throw new UniversityValidationError(`${u.id}.procedures`, `id «${clash.id}» совпадает с id нормы`);
+    const unknown = Object.keys(u.rulePlaces).find(id => !ruleIds.includes(id));
+    if (unknown) throw new UniversityValidationError(`${u.id}.rulePlaces`, `нет нормы «${unknown}»`);
   }
 }
 

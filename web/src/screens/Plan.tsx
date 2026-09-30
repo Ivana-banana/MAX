@@ -119,6 +119,9 @@ export function Plan({ session, texts, pending, onAction, onOpen, onCalendar, ca
                 </button>
               ))}
               <p className="small muted">{item.sourceNote}</p>
+              {item.mapUrl !== undefined && (
+                <button type="button" className="link" onClick={() => openLink(item.mapUrl!)}>{t("app.map")}</button>
+              )}
               <button type="button" className="link" onClick={() => openLink(item.sourceUrl)}>{item.sourceLabel}</button>
             </details>
           ))}

@@ -93,6 +93,9 @@
       "source": {
         "url": "https://kpfu.ru/international/migracionnoe-soprovozhdenie-inostrannyh-grazhdan/bezvizovyi-vjezd",
         "checkedAt": "2026-09-29"
+      },
+      "place": {
+        "map": "Казань, ул. Гвардейская, 9"
       }
     },
     {
@@ -186,6 +189,9 @@
       "source": {
         "url": "https://kpfu.ru/international/migracionnoe-soprovozhdenie-inostrannyh-grazhdan/vizovyi-vjezd",
         "checkedAt": "2026-09-29"
+      },
+      "place": {
+        "map": "Казань, ул. Гвардейская, 9"
       }
     },
     {
@@ -250,6 +256,9 @@
       "source": {
         "url": "https://kpfu.ru/international/migracionnoe-soprovozhdenie-inostrannyh-grazhdan/bezvizovyi-vjezd",
         "checkedAt": "2026-09-29"
+      },
+      "place": {
+        "map": "Казань, ул. Гвардейская, 9"
       }
     },
     {
@@ -292,6 +301,9 @@
       "countdown": {
         "from": "registration-end",
         "daysBefore": 45
+      },
+      "place": {
+        "map": "Казань, ул. Гвардейская, 9"
       }
     },
     {
@@ -399,7 +411,25 @@
         "from": "visa-end",
         "daysBefore": 45,
         "notBeforeDays": 90
+      },
+      "place": {
+        "map": "Казань, ул. Гвардейская, 9"
       }
     }
-  ]
+  ],
+  "rulePlaces": {
+    "medical-examination": {
+      "where": {
+        "ru": "Медико-санитарная часть КФУ, ул. Вишневского, 2а, 4 этаж (первый день — ср или пт 12:00–17:00, второй — вт 15:00–18:00)",
+        "en": "KFU medical unit, 2a Vishnevskogo St., 4th floor (first day — Wed or Fri 12:00–17:00, second — Tue 15:00–18:00)",
+        "uz": "KFU tibbiy-sanitariya qismi, Vishnevskiy koʻch., 2a, 4-qavat (birinchi kun — chor yoki jum 12:00–17:00, ikkinchi — sesh 15:00–18:00)",
+        "zh": "喀山联邦大学医疗卫生部：Vishnevskogo街2a号4楼（第一天——周三或周五12:00–17:00，第二天——周二15:00–18:00）"
+      },
+      "map": "Казань, ул. Вишневского, 2а",
+      "source": {
+        "url": "https://kpfu.ru/international/migracionnoe-soprovozhdenie-inostrannyh-grazhdan/daktiloskopiya-i-medicinskoe-osvidetelstvovanie",
+        "checkedAt": "2026-09-30"
+      }
+    }
+  }
 }
