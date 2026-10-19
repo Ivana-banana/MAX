@@ -132,7 +132,7 @@ describe("the evening before the visit", () => {
     const f = await fixture();
     await f.click("reminders");
     await f.click("card:fingerprinting");
-    await f.click("doc:fingerprinting:passport"); await f.click("doc:fingerprinting:migration-card");
+    await f.click("doc:fingerprinting:passport"); await f.click("doc:fingerprinting:passport-translation");
     await f.click("visit:fingerprinting"); await f.input("2026-09-26");
     f.at("2026-09-25T18:00:00+03:00"); await f.service.flush();
     expect(visitReminders(f.sent).at(-1)?.text).toContain("Все документы из списка отмечены");

@@ -2,7 +2,7 @@
   "$comment": "Interface texts in English. Same keys and placeholders as ru.json.",
   "language.name": "English",
   "language.choose": "Choose your language",
-  "banner.demo": "DEMO · practice data, rules not approved.\n",
+  "banner.demo": "DEMO · practice data.\n",
   "days#one": "{n} day",
   "days#other": "{n} days",
   "left#one": "{n} day left",

@@ -2,7 +2,7 @@
   "$comment": "Interfeys matnlari (oʻzbekcha, lotin yozuvi). Mashina tarjimasi, inson qarori bilan ruxsat etilgan (D-020). Kalitlar va oʻrinbosarlar ru.json bilan bir xil.",
   "language.name": "Oʻzbekcha",
   "language.choose": "Tilni tanlang",
-  "banner.demo": "DEMO · oʻquv maʼlumotlari, qoidalar tasdiqlanmagan.\n",
+  "banner.demo": "DEMO · oʻquv maʼlumotlari.\n",
   "days#one": "{n} kun",
   "days#other": "{n} kun",
   "left#one": "{n} kun qoldi",

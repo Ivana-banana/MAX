@@ -23,7 +23,7 @@ describe("sharing the plan from the mini app (shareMaxContent)", () => {
     expect(text).toContain("КФУ");
     expect(text).toContain("Медицинское освидетельствование — до 30 сентября 2026 г.");
     expect(text).toContain("Дактилоскопия и фотографирование — до 29 ноября 2026 г.");
-    expect(text).toContain("не вычитаны юристом");
+    expect(text).not.toContain("не вычитаны юристом");
   });
 
   it("says a one-off procedure is done once marked, instead of repeating its deadline", () => {

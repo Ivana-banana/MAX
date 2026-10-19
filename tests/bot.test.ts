@@ -1,5 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { once } from "node:events";
+import { mkdtempSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { parseRuleSet } from "../src/data/loadRules.js";
 import raw from "../src/data/rules/ru-student.json" with { type: "json" };
 import { exampleEntry, transition, type Reply, type Session } from "../src/bot/dialog.js";
@@ -194,7 +197,9 @@ describe("webhook boundary and release guards", () => {
   it("requires real configuration for MAX and blocks draft rules in live mode", () => {
     expect(()=>readConfig({TRANSPORT:"max"})).toThrow(/TOKEN/);
     expect(()=>readConfig({APP_MODE:"live"})).toThrow(/MAX/);
-    expect(()=>loadRules({mode:"live",rulesPath:"src/data/rules/ru-student.json"})).toThrow(/review/);
+    const draftPath=join(mkdtempSync(join(tmpdir(),"rules-")),"draft.json");
+    writeFileSync(draftPath,JSON.stringify({...raw,rules:raw.rules.map(r=>({...r,legal:{...r.legal,status:"draft"}}))}));
+    expect(()=>loadRules({mode:"live",rulesPath:draftPath})).toThrow(/review/);
     expect(()=>readConfig({})).toThrow(/DATABASE_URL/);
     expect(()=>readConfig({TRANSPORT:"max",MAX_BOT_TOKEN:"t",WEBHOOK_SECRET:"your-demo-secret-change-before-deploy",
       DATABASE_URL:"postgresql://bot:local-demo-only-not-for-deployment@postgres:5432/bot"})).toThrow(/POSTGRES_PASSWORD/);

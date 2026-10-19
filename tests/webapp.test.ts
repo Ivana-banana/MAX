@@ -115,7 +115,7 @@ describe("mini app actions on the shared session", () => {
     expect(state.session?.plan.map(i => [i.ruleId, i.dueDate]))
       .toEqual([["medical-examination", "2026-09-30"], ["fingerprinting", "2026-11-29"]]);
     // The legal basis travels with every item: a screen must never show a date without its source.
-    expect(state.session?.plan[0]?.provisional).toBe(true);
+    expect(state.session?.plan[0]?.provisional).toBe(false);
     expect(state.session?.plan[0]?.legal.url).toContain("consultant.ru");
     expect(state.demo).toBe(true);
   });
@@ -223,7 +223,7 @@ describe("mini app shows what the chat shows", () => {
     for (const action of ONBOARDING) await applyAction(f.service, 7, action, false);
     const items = (await readState(f.service, 7, false)).session!.plan;
     expect(items.find(i => i.ruleId === "medical-examination")?.documentsNote).toContain("Комплект — по странице https://");
-    expect(items.find(i => i.ruleId === "fingerprinting")?.documentsNote).toContain("Официальный перечень документов не опубликован");
+    expect(items.find(i => i.ruleId === "fingerprinting")?.documentsNote).toContain("Комплект — по странице https://www.consultant.ru/");
   });
   it("offers the citizenships the rules exclude, which lead to help as in the chat", async () => {
     const f = await fixture();

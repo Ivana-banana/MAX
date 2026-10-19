@@ -36,7 +36,7 @@ describe("university QR poster", () => {
     const svg = posterSvg(kfu, texts, { botLink, demo: true });
     expect(svg).toContain(">https://max.ru/t149_hakaton_max_bot?start=kfu<");
     for (const line of ["Первые 90 дней в России", "Your first 90 days in Russia", "Rossiyadagi dastlabki 90 kun", "在俄罗斯的最初90天", ">КФУ<", "готовит вопрос в КФУ.", "drafts a question to"]) expect(svg).toContain(line);
-    expect(svg).toContain("ДЕМО · учебные данные, нормы не утверждены.");
+    expect(svg).toContain("ДЕМО · учебные данные.");
     expect(posterSvg(kfu, texts, { botLink, demo: false })).not.toContain("ДЕМО");
   });
   it("escapes names from data so a profile cannot break the SVG", () => {

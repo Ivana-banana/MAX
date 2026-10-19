@@ -1,14 +1,13 @@
 {
   "$comment": [
     "Нормативные сроки для иностранного студента, въехавшего в РФ на срок свыше 90 дней.",
-    "ВСЕ правила здесь имеют legal.status = draft: юрист их не утверждал.",
-    "Продукт обязан показывать такие сроки как предварительные (PlanItem.provisional).",
-    "Сверка с текстом ФЗ-115 и 162-ФЗ 23.09.2026 — docs/legal-review.md; открытые вопросы юристу там же.",
+    "Правила утверждены командой 19.10.2026 по сверке с первоисточниками (legal.status = approved). Юрист не привлекался — это записано в reviewedBy и D-044.",
+    "Сверка с ФЗ-115, 162-ФЗ, КоАП, ГК и Приказом МВД № 288 — docs/legal-review.md; открытый вопрос (въехавшие до 01.09.2026) там же.",
     "Миграционный учёт сюда сознательно не включён: проверенного источника по сроку для",
     "студентов у нас нет, а выдуманный срок здесь опаснее отсутствующего.",
     "Ветка въезда до 01.09.2026 исключена: 162-ФЗ не содержит переходных положений, порядок для въехавших до этой даты не установлен нами по первоисточнику."
   ],
-  "version": "2026-09-24.2-draft",
+  "version": "2026-10-19.1",
   "rules": [
     {
       "id": "medical-examination",
@@ -99,8 +98,9 @@
         "article": "ст. 5, п. 18 (первично), п. 19 (повторно); порядок — ст. 4.2",
         "url": "https://www.consultant.ru/document/cons_doc_LAW_37868/e9d581e7e11d7901295efd89c869ae044dd3d20f/",
         "edition": "ред. от 26.06.2026; пп. 18–19 в ред. ФЗ от 10.06.2026 № 162-ФЗ, в силе с 01.09.2026",
-        "checkedAt": "2026-09-23",
-        "status": "draft"
+        "checkedAt": "2026-10-19",
+        "status": "approved",
+        "reviewedBy": "Команда (IR630) по сверке с первоисточниками, выполненной Claude Code 19.10.2026; юрист не привлекался (docs/legal-review.md, D-044)"
       }
     },
     {
@@ -152,22 +152,27 @@
           }
         },
         {
-          "id": "migration-card",
+          "id": "passport-translation",
           "title": {
-            "ru": "Миграционная карта",
-            "en": "Migration card",
-            "zh": "移民卡",
-            "uz": "Migratsiya kartasi"
+            "ru": "Нотариальный перевод паспорта — если в паспорте нет текста на русском",
+            "en": "Notarised translation of the passport, if the passport has no Russian text",
+            "zh": "经公证的护照翻译件（如护照中没有俄语内容）",
+            "uz": "Pasportning notarial tarjimasi — agar pasportda rus tilidagi matn boʻlmasa"
           }
         }
       ],
+      "documentsSource": {
+        "url": "https://www.consultant.ru/document/cons_doc_LAW_479155/297329e0d4d3d3cbcf7c187f5ce3af4795c3ac73/",
+        "checkedAt": "2026-10-19"
+      },
       "legal": {
         "act": "Федеральный закон от 25.07.2002 № 115-ФЗ",
         "article": "ст. 5, п. 13, абз. 1 (срок), абз. 7 (однократно)",
         "url": "https://www.consultant.ru/document/cons_doc_LAW_37868/e9d581e7e11d7901295efd89c869ae044dd3d20f/",
         "edition": "ред. от 26.06.2026; п. 13 в ред. ФЗ от 25.12.2023 № 648-ФЗ",
-        "checkedAt": "2026-09-23",
-        "status": "draft"
+        "checkedAt": "2026-10-19",
+        "status": "approved",
+        "reviewedBy": "Команда (IR630) по сверке с первоисточниками, выполненной Claude Code 19.10.2026; юрист не привлекался (docs/legal-review.md, D-044)"
       }
     }
   ]

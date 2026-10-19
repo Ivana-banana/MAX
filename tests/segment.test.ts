@@ -66,7 +66,8 @@ describe("where the checklist comes from", () => {
     expect(card("medical-examination")).toContain("Комплект — по странице https://kpfu.ru/international/migracionnoe-soprovozhdenie-inostrannyh-grazhdan/daktiloskopiya-i-medicinskoe-osvidetelstvovanie (сверено 24 сентября 2026 г.)");
     expect(card("medical-examination")).toContain("Результаты ранее пройденных обследований — если есть");
     expect(card("medical-examination")).not.toContain("Миграционная карта");
-    expect(card("fingerprinting")).toContain("Официальный перечень документов не опубликован: паспорт нужен всегда, остальное уточните у КФУ.");
+    expect(card("fingerprinting")).toContain("Комплект — по странице https://www.consultant.ru/document/cons_doc_LAW_479155/297329e0d4d3d3cbcf7c187f5ce3af4795c3ac73/ (сверено 19 октября 2026 г.)");
+    expect(card("fingerprinting")).not.toContain("Миграционная карта");
   });
   it("rejects a checklist source that is not an https page", () => {
     const broken = structuredClone(raw) as { rules: { documentsSource?: { url: string } }[] };
