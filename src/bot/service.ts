@@ -3,7 +3,7 @@ import { REMINDER_OFFSETS, reminderDates } from "../core/deadlines.js";
 import { addDays } from "../core/dates.js";
 import type { PostgresStore, PostgresStoreTx } from "../db/postgres-store.js";
 import { limitedReply, plan, procedureDue, procedureReminderReply, reminderReply, transition, undated, visitReply, type DialogueContext, type Input, type Reply, type Session } from "./dialog.js";
-import { funnelEvents, funnelUniversity } from "./funnel.js";
+import { funnelEvents, funnelUniversity, type FunnelEvent } from "./funnel.js";
 import { RateLimit } from "./rate.js";
 
 export interface Incoming { id: string; user: number; input: Input; callbackId?: string }
@@ -42,6 +42,17 @@ export function parseUpdate(raw: unknown): Incoming | null {
 export function moscowDate(now: number): string {
   return new Date(now + 3 * 3600000).toISOString().slice(0, 10);
 }
+/**
+ * D-047: started and deleted count once per user a day, so a /start → /delete loop cannot inflate them.
+ * The mark is a hash in the events table (kept 7 days like update ids); the funnel itself gets no MAX ID.
+ */
+export async function countEvents(tx: PostgresStoreTx, user: number, day: string, university: string, events: FunnelEvent[], now: number): Promise<void> {
+  for (const event of events) {
+    if ((event === "started" || event === "deleted") &&
+        await tx.seen(createHash("sha256").update(JSON.stringify(["funnel", user, day, event])).digest("hex"), now)) continue;
+    await tx.count(day, university, event);
+  }
+}
 export class Service {
   private sending = false;
   private maintained = -Infinity;
@@ -51,23 +62,22 @@ export class Service {
   // Resolves after COMMIT: the webhook answers 200 only for a stored update.
   async receive(update: Incoming): Promise<void> {
     const now = this.clock();
-    // Over the limit the update is dropped, not refused: MAX would retry a non-200 answer. One notice a minute.
-    const over = this.limit.take(update.user, now);
-    if (over > 0) {
-      if (over === 1) await this.store.transaction(update.user, async tx => {
-        if (!await tx.seen(update.id, now)) await tx.enqueue(update.id, limitedReply(await tx.get(), update.input, this.ctx()), "reply", now, now);
-      });
-      return;
-    }
     await this.store.transaction(update.user, async tx => {
       if (await tx.seen(update.id, now)) return;
+      // After seen(): a redelivered update must not spend the limit. Over it the update is dropped, not
+      // refused: MAX would retry a non-200 answer. One notice a minute.
+      const over = this.limit.take(update.user, now);
+      if (over > 0) {
+        if (over === 1) await tx.enqueue(update.id, limitedReply(await tx.get(), update.input, this.ctx()), "reply", now, now);
+        return;
+      }
       const before = await tx.get(), ctx = this.ctx();
       const outcome = transition(before, update.input, ctx);
       const university = funnelUniversity(outcome.session ?? before, ctx);
       // A refused stale button (a double tap) changed nothing: it must neither count as a step nor
       // replace the screen the first tap queued, or the user gets only "the button is outdated".
       if (!outcome.expired) {
-        for (const event of funnelEvents(before, outcome.session, update.input, ctx)) await tx.count(ctx.today, university, event);
+        await countEvents(tx, update.user, ctx.today, university, funnelEvents(before, outcome.session, update.input, ctx), now);
         await tx.supersedeReplies();
       }
       await tx.cancelReminders();
