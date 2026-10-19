@@ -280,5 +280,64 @@
         "checkedAt": "2026-09-30"
       }
     }
-  }
+  },
+  "beforeEntry": [
+    {
+      "id": "invitation",
+      "title": {
+        "ru": "Приглашение и виза",
+        "en": "Invitation and visa",
+        "zh": "邀请函和签证",
+        "uz": "Taklifnoma va viza"
+      },
+      "text": {
+        "ru": "Приглашение оформляется после вступительных испытаний и заключения договора на обучение. Оно приходит в электронном виде на вашу почту. По нему в консульстве России оформляют однократную визу на 90 дней.",
+        "en": "The invitation is issued after the entrance tests and the study contract. It comes electronically to your e-mail. With it, the Russian consulate issues a single-entry visa for 90 days.",
+        "zh": "邀请函在通过入学考试并签订学习合同后办理，以电子形式发送到您的电子邮箱。凭邀请函可在俄罗斯领事馆办理90天一次性签证。",
+        "uz": "Taklifnoma kirish sinovlaridan va oʻqish shartnomasi tuzilgandan keyin rasmiylashtiriladi. U elektron shaklda pochtangizga keladi. U bilan Rossiya konsulligida 90 kunlik bir martalik viza olinadi."
+      },
+      "appliesIf": [
+        {
+          "field": "citizenship",
+          "op": "in",
+          "values": [
+            "CN",
+            "IN",
+            "EG",
+            "TR"
+          ]
+        }
+      ],
+      "source": {
+        "url": "https://unecon.ru/mezhdunarodnye-svyazi/upravlenie-mezhdunarodnogo-sotrudnichestva/otdel-po-rabote-s-inostrannymi-uchashhimisya/",
+        "checkedAt": "2026-10-19"
+      },
+      "assumption": {
+        "ru": "ваше гражданство отнесено к визовым странам по списку профиля вуза, а не по документу ведомства. Требования консульства России в вашей стране бот не проверял.",
+        "en": "your citizenship is treated as a visa country by the university profile's list, not by an official document. The bot has not checked the requirements of the Russian consulate in your country.",
+        "zh": "您的国籍是按学校资料中的名单被归为需签证国家，而非依据官方文件。机器人未核对俄罗斯驻贵国领事馆的要求。",
+        "uz": "fuqaroligingiz idora hujjati boʻyicha emas, universitet profilidagi roʻyxat boʻyicha vizali davlatlarga kiritilgan. Bot mamlakatingizdagi Rossiya konsulligi talablarini tekshirmagan."
+      }
+    },
+    {
+      "id": "dormitory",
+      "title": {
+        "ru": "Документы для заселения в общежитие",
+        "en": "Documents to move into the dormitory",
+        "zh": "入住宿舍所需文件",
+        "uz": "Yotoqxonaga joylashish uchun hujjatlar"
+      },
+      "text": {
+        "ru": "Для заселения СПбГЭУ просит: паспорт с нотариально заверенным переводом на русский язык (или переводом, заверенным УМС), медицинскую справку с результатами флюорографии и её копию, документ о зачислении. До 18 лет — нотариально заверенное согласие родителей (опекунов).",
+        "en": "To move in, UNECON asks for: your passport with a notarised translation into Russian (or a translation certified by the migration office), a medical certificate with chest X-ray (fluorography) results and its copy, and a document confirming enrolment. Under 18: notarised consent of your parents (guardians).",
+        "zh": "入住时圣彼得堡国立经济大学要求提供：护照及其经公证的俄文译本（或经移民局认证的译本）、附胸部X光（荧光透视）检查结果的医疗证明及其复印件、录取证明文件。未满18岁者——父母（监护人）经公证的同意书。",
+        "uz": "Joylashish uchun SPbGEU soʻraydi: rus tiliga notarial tasdiqlangan tarjimasi bilan pasport (yoki migratsiya xizmati tasdiqlagan tarjima), flyuorografiya natijalari bilan tibbiy maʼlumotnoma va uning nusxasi, oʻqishga qabul qilinganlik haqidagi hujjat. 18 yoshgacha — ota-onaning (vasiylarning) notarial tasdiqlangan roziligi."
+      },
+      "appliesIf": [],
+      "source": {
+        "url": "https://unecon.ru/ob-universitete/organy-upravleniya-i-struktura/struct/obshchezhitiya/poselenie-v-obshchezhitie-zachislennyh-studentov/",
+        "checkedAt": "2026-10-19"
+      }
+    }
+  ]
 }

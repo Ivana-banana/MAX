@@ -182,5 +182,10 @@
   "app.deadline": "Muddat",
   "app.question": "Universitetga savol",
   "app.copied": "Nusxa olindi",
-  "app.copyManual": "Nusxa olib boʻlmadi — yuqoridagi matnni belgilab, qoʻlda nusxa oling."
+  "app.copyManual": "Nusxa olib boʻlmadi — yuqoridagi matnni belgilab, qoʻlda nusxa oling.",
+  "btn.beforeEntry": "Hali kirmadim — nimani tayyorlash kerak",
+  "beforeEntry.title": "Kirishdan oldin uyda nimani tayyorlash kerak — {uni} talabasi uchun. Bu yerda muddat hisoblanmaydi: kirish sanasi hali nomaʼlum.\n\n",
+  "beforeEntry.fact": "Universitet fakti — {uni} sahifasi: {url} (tekshirilgan: {date}).",
+  "beforeEntry.assumption": "\nBot farazi: {text}",
+  "beforeEntry.next": "\n\nKirganingizdan keyin kirish sanasini yuboring — bot muddatlar rejasini tuzadi."
 }

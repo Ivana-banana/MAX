@@ -330,5 +330,81 @@
         "checkedAt": "2026-09-30"
       }
     }
-  }
+  },
+  "beforeEntry": [
+    {
+      "id": "study-visa",
+      "title": {
+        "ru": "Учебная виза",
+        "en": "Study visa",
+        "zh": "学习签证",
+        "uz": "Oʻquv vizasi"
+      },
+      "text": {
+        "ru": "Студенты из визовых стран въезжают по учебной визе (обыкновенная учебная — ОУ) по приглашению ИТМО или Минобрнауки.",
+        "en": "Students from visa countries enter on a study visa (ordinary study visa, OU) issued on an invitation from ITMO or the Ministry of Science and Higher Education.",
+        "zh": "来自需签证国家的学生须持学习签证（普通学习签证，OU）入境，签证依据ITMO大学或俄罗斯科学与高等教育部的邀请函办理。",
+        "uz": "Vizali davlatlardan kelgan talabalar ITMO yoki Fan va oliy taʼlim vazirligi taklifnomasi boʻyicha oʻquv vizasi (oddiy oʻquv — OU) bilan kiradi."
+      },
+      "appliesIf": [
+        {
+          "field": "citizenship",
+          "op": "in",
+          "values": [
+            "CN",
+            "IN",
+            "EG",
+            "TR"
+          ]
+        }
+      ],
+      "source": {
+        "url": "https://int.itmo.ru/ru/important_documents",
+        "checkedAt": "2026-10-19"
+      },
+      "assumption": {
+        "ru": "ваше гражданство отнесено к визовым странам по списку профиля вуза, а не по документу ведомства. Требования консульства России в вашей стране бот не проверял.",
+        "en": "your citizenship is treated as a visa country by the university profile's list, not by an official document. The bot has not checked the requirements of the Russian consulate in your country.",
+        "zh": "您的国籍是按学校资料中的名单被归为需签证国家，而非依据官方文件。机器人未核对俄罗斯驻贵国领事馆的要求。",
+        "uz": "fuqaroligingiz idora hujjati boʻyicha emas, universitet profilidagi roʻyxat boʻyicha vizali davlatlarga kiritilgan. Bot mamlakatingizdagi Rossiya konsulligi talablarini tekshirmagan."
+      }
+    },
+    {
+      "id": "ruid",
+      "title": {
+        "ru": "«Госуслуги RuID» до въезда",
+        "en": "Gosuslugi RuID before entry",
+        "zh": "入境前使用“Gosuslugi RuID”",
+        "uz": "Kirishdan oldin «Gosuslugi RuID»"
+      },
+      "text": {
+        "ru": "Граждане безвизовых стран (кроме Беларуси) до въезда регистрируются в приложении «Госуслуги RuID» и подают заявление не позднее чем за 72 часа до въезда. На границе нужен уникальный код из приложения.",
+        "en": "Citizens of visa-free countries (except Belarus) register in the Gosuslugi RuID app before entry and submit the application no later than 72 hours before entry. At the border you need the unique code from the app.",
+        "zh": "免签国家公民（白俄罗斯除外）须在入境前注册“Gosuslugi RuID”应用，并在计划入境前至少72小时提交申请。过境时需出示应用中的唯一代码。",
+        "uz": "Vizasiz davlatlar fuqarolari (Belarusdan tashqari) kirishdan oldin «Gosuslugi RuID» ilovasida roʻyxatdan oʻtadi va arizani kirishdan kamida 72 soat oldin topshiradi. Chegarada ilovadagi noyob kod kerak boʻladi."
+      },
+      "appliesIf": [
+        {
+          "field": "citizenship",
+          "op": "in",
+          "values": [
+            "KZ",
+            "UZ",
+            "TJ",
+            "KG"
+          ]
+        }
+      ],
+      "source": {
+        "url": "https://int.itmo.ru/ru/important_documents",
+        "checkedAt": "2026-10-19"
+      },
+      "assumption": {
+        "ru": "ваше гражданство отнесено к безвизовым странам по списку профиля вуза, а не по документу ведомства.",
+        "en": "your citizenship is treated as a visa-free country by the university profile's list, not by an official document.",
+        "zh": "您的国籍是按学校资料中的名单被归为免签国家，而非依据官方文件。",
+        "uz": "fuqaroligingiz idora hujjati boʻyicha emas, universitet profilidagi roʻyxat boʻyicha vizasiz davlatlarga kiritilgan."
+      }
+    }
+  ]
 }

@@ -182,5 +182,10 @@
   "command.plan": "my plan and dates",
   "command.help": "I need help",
   "command.stop": "turn off reminders",
-  "command.delete": "delete my data"
+  "command.delete": "delete my data",
+  "btn.beforeEntry": "Not in Russia yet — what to prepare",
+  "beforeEntry.title": "What to prepare at home before entry — for a {uni} student. No deadline is counted here: the entry date is not known yet.\n\n",
+  "beforeEntry.fact": "University fact — {uni} page: {url} (checked {date}).",
+  "beforeEntry.assumption": "\nBot's assumption: {text}",
+  "beforeEntry.next": "\n\nOnce you have entered, send your entry date — the bot will build your deadline plan."
 }

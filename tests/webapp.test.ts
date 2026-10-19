@@ -272,6 +272,15 @@ describe("mini app shows what the chat shows", () => {
     for (const action of ["/start kfu", ...ONBOARDING.slice(1, -1)]) await applyAction(live, 8, action, false);
     expect((await readState(live, 8, false)).session?.example).toBeUndefined();
   });
+  it("shows the before-entry cards on the entry step only (#25)", async () => {
+    const f = await fixture();
+    for (const action of ONBOARDING.slice(0, -1)) await applyAction(f.service, 7, action, false);
+    const cards = (await readState(f.service, 7, false)).session?.beforeEntry ?? [];
+    expect(cards.map(c => c.id)).toEqual(["ruid", "passport-translation", "translation-bureau"]);
+    expect(cards[0]?.note).toContain("Допущение бота");
+    await applyAction(f.service, 7, ONBOARDING.at(-1)!, false);
+    expect((await readState(f.service, 7, false)).session?.beforeEntry).toEqual([]);
+  });
   it("hands the app the plan as a message to forward, only once there is a plan", async () => {
     const f = await fixture();
     for (const action of ONBOARDING.slice(0, -1)) await applyAction(f.service, 7, action, false);

@@ -28,7 +28,7 @@ export function parseSources(raw: unknown): Source[] {
 export function dataUrls(rules: DeadlineRule[], universities: University[]): string[] {
   const urls = [
     ...rules.flatMap(r => [r.legal.url, ...(r.documentsSource ? [r.documentsSource.url] : [])]),
-    ...universities.flatMap(u => [u.contactUrl, ...u.procedures.map(p => p.source.url)]),
+    ...universities.flatMap(u => [u.contactUrl, ...u.procedures.map(p => p.source.url), ...u.beforeEntry.map(c => c.source.url)]),
   ];
   return [...new Set(urls)];
 }

@@ -180,5 +180,10 @@
   "app.deadline": "期限",
   "app.question": "给学校的问题",
   "app.copied": "已复制",
-  "app.copyManual": "无法复制——请选中上方文字手动复制。"
+  "app.copyManual": "无法复制——请选中上方文字手动复制。",
+  "btn.beforeEntry": "尚未入境——需要准备什么",
+  "beforeEntry.title": "入境前在家需要准备的事项——{uni}学生适用。此处不计算期限：入境日期尚不确定。\n\n",
+  "beforeEntry.fact": "学校事实——{uni}页面：{url}（核对日期 {date}）。",
+  "beforeEntry.assumption": "\n机器人的假设：{text}",
+  "beforeEntry.next": "\n\n入境后请发送入境日期——机器人将为您制定期限计划。"
 }

@@ -155,11 +155,30 @@ export function Onboarding({ session, texts, languages, universities, message, c
   }
 
   return <EntryDate texts={texts} today={today} message={message} pending={pending} onAction={onAction}
-    {...(session.example === undefined ? {} : { example: session.example })} />;
+    cards={session.beforeEntry} {...(session.example === undefined ? {} : { example: session.example })} />;
 }
 
-function EntryDate({ texts, today, message, pending, onAction, example }: {
+/** #25: not entered yet — what the university asks to prepare at home, each card with its "fact / assumption" line. */
+function BeforeEntry({ cards, texts }: { cards: AppSession["beforeEntry"]; texts: Texts }) {
+  const [open, setOpen] = useState(false);
+  if (cards.length === 0) return null;
+  return (
+    <div className="in d3">
+      <button type="button" className="link" aria-expanded={open} onClick={() => setOpen(!open)}>{text(texts, "btn.beforeEntry")}</button>
+      {open && cards.map(card => (
+        <details key={card.id} className="undated">
+          <summary className="t">{card.title}</summary>
+          <p className="prose">{card.text}</p>
+          <p className="small muted">{card.note}</p>
+        </details>
+      ))}
+    </div>
+  );
+}
+
+function EntryDate({ texts, today, message, pending, onAction, example, cards }: {
   texts: Texts; today: string; message: string; pending: string | null; onAction: (action: string) => void;
+  cards: AppSession["beforeEntry"];
   /** Demo only: the chat's "show an example" label; the date itself is chosen by the server. */
   example?: string;
 }) {
@@ -197,6 +216,7 @@ function EntryDate({ texts, today, message, pending, onAction, example }: {
           {example}
         </Button>
       )}
+      <BeforeEntry cards={cards} texts={texts} />
     </div>
   );
 }

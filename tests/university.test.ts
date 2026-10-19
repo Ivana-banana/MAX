@@ -130,3 +130,32 @@ describe("days left and a missed date", () => {
     expect(click(s, "card:fingerprinting", c).reply.text).not.toContain("Расчётный срок прошёл");
   });
 });
+
+describe("a student who has not entered yet (#25)", () => {
+  function toEntry(start: string, citizenship: string): Session {
+    let r = step(null, { text: start, callback: false });
+    for (const a of ["ru", "accept", "yes", citizenship]) r = click(r.session!, a);
+    return r.session!;
+  }
+  it("sees what the university asks to prepare, marked as a university fact or an assumption, and can still enter the date", () => {
+    const s = toEntry("/start kfu", "KZ");
+    expect(s.step).toBe("entry");
+    const r = click(s, "before-entry");
+    expect(r.session!.step).toBe("entry");
+    expect(r.reply.text).toContain("«Госуслуги RuID»");
+    expect(r.reply.text).toContain("Нотариальный перевод паспорта");
+    // A card for visa countries is not shown to a citizen of Kazakhstan.
+    expect(r.reply.text).not.toContain("Приглашение на учебную визу");
+    expect(r.reply.text).toContain("Факт вуза — страница КФУ: https://kpfu.ru/international/dokumenty/shablony-perevodov");
+    expect(r.reply.text).toContain("Допущение бота: ваше гражданство отнесено к безвизовым странам");
+    const planned = step(r.session, { text: "2026-09-01", callback: false });
+    expect(planned.session!.step).toBe("plan");
+    expect(plan(planned.session!, ctx).length).toBeGreaterThan(0);
+  });
+  it("does not offer the branch when the profile has no cards for the student", () => {
+    const c = { ...ctx, universities: universities.map(u => ({ ...u, beforeEntry: [] })) };
+    let r = step(null, { text: "/start kfu", callback: false }, c);
+    for (const a of ["ru", "accept", "yes", "KZ"]) r = click(r.session!, a, c);
+    expect(buttons(r).map(b => b.action?.split("|")[1])).not.toContain("before-entry");
+  });
+});
