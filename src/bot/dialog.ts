@@ -41,8 +41,18 @@ export interface Input { text: string; callback: boolean; locale?: string }
 export interface Transition { session: Session | null; reply: Reply; expired?: true }
 // Every user-facing text comes from src/data/i18n/<lang>.json.
 const t = (s: Session, ctx: DialogueContext, key: string, vars?: Record<string, string | number>) => format(ctx.texts, s.lang, key, vars);
-// Sessions created before university profiles existed have no id and fall back to the default one.
+// Only sessions created before university profiles existed (no id) fall back to the default one.
+// An id the catalogue does not have is handled before this point: see `universityLost`.
 const uni = (s: Session, ctx: DialogueContext) => ctx.universities.find(u => u.id === s.university) ?? ctx.universities[0]!;
+const universityMissing = (s: Session, ctx: DialogueContext) =>
+  s.university !== undefined && !ctx.universities.some(u => u.id === s.university);
+/**
+ * The session names a university the catalogue no longer has (profile removed or renamed): its
+ * addresses and contacts are unknown, so the student must choose again. Not before consent, and not
+ * on the delete confirmation: nothing is built on the university there.
+ */
+export const universityLost = (s: Session, ctx: DialogueContext) =>
+  universityMissing(s, ctx) && s.step !== "language" && s.step !== "consent" && s.step !== "delete";
 /** Dates in replies are written out in the user's language (Intl), not as ISO strings. */
 const date = (s: Session, iso: string) => new Intl.DateTimeFormat(s.lang, { dateStyle: "long", timeZone: "UTC" }).format(new Date(`${iso}T00:00:00Z`));
 const country = (s: Session, ctx: DialogueContext, code: string) =>
@@ -78,6 +88,7 @@ export function profile(s: Session): UserProfile | undefined {
 }
 export function plan(s: Session, ctx: DialogueContext): PlanItem[] {
   const p = profile(s);
+  if (universityMissing(s, ctx)) return [];
   const targets = Object.fromEntries(Object.entries(uni(s, ctx).ruleTargets).map(([id, target]) => [id, target.days]));
   return p ? buildPlan(ctx.rules, p, s.completions, ctx.today, targets) : [];
 }
@@ -88,7 +99,7 @@ export function plan(s: Session, ctx: DialogueContext): PlanItem[] {
  */
 export function undated(s: Session, ctx: DialogueContext): UniversityProcedure[] {
   const p = profile(s);
-  return p ? uni(s, ctx).procedures.filter(pr => pr.appliesIf.every(c => matchesCondition(c, p))) : [];
+  return p && !universityMissing(s, ctx) ? uni(s, ctx).procedures.filter(pr => pr.appliesIf.every(c => matchesCondition(c, p))) : [];
 }
 function reply(s: Session, ctx: DialogueContext, text: string, rows: Button[][] = []): Reply {
   const banner = ctx.demo ? t(s, ctx, "banner.demo") : "";
@@ -225,10 +236,13 @@ function procedureCard(s: Session, ctx: DialogueContext, note: UniversityProcedu
       [link(pageLabel(s, ctx), note.source.url)],
       [button(t(s, ctx, "btn.plan"), "plan")]]);
 }
-/** The catalogue of university profiles, offered on the scope question; the current one is not repeated. */
-function universityList(s: Session, ctx: DialogueContext): Reply {
-  const others = ctx.universities.filter(u => u.id !== uni(s, ctx).id);
-  return reply(s, ctx, t(s, ctx, "university.choose"),
+/**
+ * The catalogue of university profiles, offered on the scope question; the current one is not
+ * repeated. `lost`: the student's own is gone, so every profile is offered and the reason is said.
+ */
+function universityList(s: Session, ctx: DialogueContext, lost = false): Reply {
+  const others = ctx.universities.filter(u => lost || u.id !== uni(s, ctx).id);
+  return reply(s, ctx, (lost ? t(s, ctx, "university.gone") : "") + t(s, ctx, "university.choose"),
     [...rows(others.map(u => button(u.name[s.lang] ?? u.name.ru!, `uni:${u.id}`)), 2),
       [button(t(s, ctx, "btn.noUniversity"), "uni-missing")]]);
 }
@@ -265,6 +279,7 @@ function help(s: Session, ctx: DialogueContext, ruleId?: string, unsupported = f
     t(s, ctx, "help.contacts", { uni: name, url: u.contactUrl }), actions(draft));
 }
 export function prompt(s: Session, ctx: DialogueContext): Reply {
+  if (universityLost(s, ctx)) return universityList(s, ctx, true);
   switch (s.step) {
     case "language": return reply(s, ctx, [...ctx.texts.keys()].map(l => format(ctx.texts, l, "language.choose")).join(" / "), languages(ctx));
     case "consent": return reply(s, ctx, t(s, ctx, "consent"),
@@ -323,6 +338,15 @@ export function transition(previous: Session | null, input: Input, ctx: Dialogue
   }
   // Back on the step the deletion was cancelled from: its question again, not an answer to it.
   if (action === "cancel-delete") return { session: s, reply: prompt(s, ctx) };
+  if (universityLost(s, ctx)) {
+    // Until the student picks a university again nothing else is answered; the pick starts the scenario over.
+    const chosen = /^uni:([a-z0-9_-]{1,32})$/.exec(action)?.[1];
+    if (action !== "uni-missing" && !(chosen !== undefined && ctx.universities.some(u => u.id === chosen))) {
+      return { session: s, reply: universityList(s, ctx, true) };
+    }
+    delete s.university; delete s.citizenship; delete s.entryDate; delete s.selected; delete s.back; delete s.visits; delete s.ends;
+    s.completions = {}; s.documents = {}; s.reminders = false; s.step = "scope";
+  }
   const start = /^\/start(?:\s+(\S+))?$/.exec(action);
   if (start) {
     // A university's QR code opens max.ru/<bot>?start=<id>; the choice is fixed once the plan exists.

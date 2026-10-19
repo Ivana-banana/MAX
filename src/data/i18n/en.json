@@ -65,6 +65,7 @@
   "btn.otherUniversity": "🏫 I study at another university",
   "btn.universities": "← Back to the list",
   "btn.noUniversity": "My university is not listed",
+  "university.gone": "The university you chose is no longer in the bot's list. Calculations are paused: the bot will not show another university's addresses and contacts instead of yours. After you choose a university, answer the questions again.\n\n",
   "university.choose": "Choose your university. The deadlines are the same for everyone, but addresses, documents and contacts differ from one university to another.",
   "university.missing": "So far the bot only knows the universities on the list: without the university's address, documents and contacts the plan would be incomplete. Ask your university's international office about the deadlines.",
   "citizenship": "Choose the profile's citizenship.",

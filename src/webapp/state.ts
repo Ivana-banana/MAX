@@ -12,7 +12,7 @@ import { coverage } from "../core/deadlines.js";
 import { isValidDate } from "../core/dates.js";
 import type { Lang } from "../core/types.js";
 import {
-  countdown, documentsNote, mapUrl, pageLabel, placeText, plan, targetText, procedureDue, procedureDueText, procedureSource, profile, prompt, shareText, transition, undated, type DialogueContext, type Input, type Session,
+  countdown, documentsNote, mapUrl, pageLabel, placeText, plan, targetText, procedureDue, procedureDueText, procedureSource, profile, prompt, shareText, transition, undated, universityLost, type DialogueContext, type Input, type Session,
 } from "../bot/dialog.js";
 import { funnelEvents, funnelUniversity } from "../bot/funnel.js";
 import { BASE_LANG, format } from "../data/loadTexts.js";
@@ -55,6 +55,7 @@ export function isAppAction(action: string): boolean {
     || /^help:[a-z0-9-]{1,64}$/.test(action);
 }
 
+// An id the catalogue lacks gets the default profile only as a placeholder: `universityGone` tells the app to ask again.
 const university = (id: string | undefined, ctx: DialogueContext, lang: Lang): AppUniversity => {
   const found = ctx.universities.find(u => u.id === id) ?? ctx.universities[0]!;
   return { id: found.id, name: found.name[lang] ?? found.name[BASE_LANG]!, contactUrl: found.contactUrl };
@@ -126,6 +127,7 @@ function view(session: Session | null, ctx: DialogueContext, mocked: boolean, hi
       ...(session.selected === undefined ? {} : { selected: session.selected }),
       reminders: session.reminders,
       stale,
+      universityGone: universityLost(session, ctx),
       prompt: withoutBanner(prompt(session, ctx).text, ctx),
       ...exampleLabel(session, ctx),
       plan: profile(session) && !stale ? plan(session, ctx).map(item => ({

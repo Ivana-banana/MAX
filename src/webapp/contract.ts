@@ -81,6 +81,11 @@ export interface AppSession {
   reminders: boolean;
   /** The rules changed after this plan was built: the chat has stopped it (`rulesChanged`), and `plan` is empty. */
   stale: boolean;
+  /**
+   * The stored university is not in the catalogue any more: `plan` is empty and `prompt` asks to choose again
+   * (`uni:<id>`). `university` is then only the default profile as a placeholder; the app must not show it.
+   */
+  universityGone: boolean;
   /** The dialogue's own wording of the current step (consent, scope, delete), without the demo banner. */
   prompt: string;
   /** Demo only, on the entry step: label of the chat's "show an example" button; the app sends `example`. */

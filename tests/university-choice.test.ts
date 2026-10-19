@@ -3,7 +3,7 @@ import { parseRuleSet } from "../src/data/loadRules.js";
 import raw from "../src/data/rules/ru-student.json" with { type: "json" };
 import { readTexts } from "../src/data/loadTexts.js";
 import { readUniversities } from "../src/data/loadUniversities.js";
-import { transition, type Reply, type Session } from "../src/bot/dialog.js";
+import { plan, transition, type Reply, type Session } from "../src/bot/dialog.js";
 import { isAppAction } from "../src/webapp/state.js";
 
 const rules = parseRuleSet(raw);
@@ -76,5 +76,46 @@ describe("choosing a university without a deep link", () => {
   it("lets the mini app send the same actions", () => {
     for (const action of ["universities", "uni:itmo", "uni-missing"]) expect(isAppAction(action)).toBe(true);
     expect(isAppAction("uni:ITMO")).toBe(false);
+  });
+});
+
+describe("a session whose university is no longer in the catalogue", () => {
+  const without = { ...ctx, universities: universities.filter(u => u.id !== "itmo") };
+  /** A finished ITMO plan, as it was stored before the profile was removed. */
+  function itmoPlan(): Session {
+    const f = atScope();
+    f.click("universities"); f.click("uni:itmo");
+    for (const a of ["yes", "KZ"]) f.click(a);
+    return transition(f.session, { text: "2026-09-01", callback: false }, ctx).session!;
+  }
+
+  it("asks to choose the university again instead of showing the default one's addresses", () => {
+    const stored = itmoPlan();
+    expect(stored.step).toBe("plan");
+    expect(plan(stored, without)).toEqual([]);
+    const r = transition(stored, { text: "plan", callback: false }, without);
+    expect(r.reply.text).toContain("больше нет в списке");
+    expect(r.reply.text).not.toContain("КФУ");
+    expect(actions(r.reply)).toEqual(expect.arrayContaining(without.universities.map(u => `uni:${u.id}`)));
+    expect(actions(r.reply).some(a => a.startsWith("card:") || a === "reminders")).toBe(false);
+    expect(r.session!.university).toBe("itmo");
+  });
+
+  it("starts the scenario over with the university the student picks", () => {
+    const stored = itmoPlan();
+    const asked = transition(stored, { text: "/plan", callback: false }, without).session!;
+    const r = transition(asked, { text: `${asked.nonce}.${asked.revision}|uni:kfu`, callback: true }, without);
+    expect(r.session).toMatchObject({ university: "kfu", step: "scope", reminders: false, completions: {} });
+    expect(r.session!.citizenship).toBeUndefined();
+    expect(r.session!.entryDate).toBeUndefined();
+    expect(r.reply.text).toContain("общежитие КФУ");
+  });
+
+  it("keeps the old behaviour for a session saved before universities had ids", () => {
+    const old = itmoPlan();
+    delete old.university;
+    expect(plan(old, without).length).toBeGreaterThan(0);
+    const home = transition(old, { text: "plan", callback: false }, without).reply;
+    expect(actions(home).some(a => a.startsWith("card:"))).toBe(true);
   });
 });

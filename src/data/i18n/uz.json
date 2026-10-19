@@ -65,6 +65,7 @@
   "btn.otherUniversity": "🏫 Men boshqa universitetda oʻqiyman",
   "btn.universities": "← Roʻyxatga qaytish",
   "btn.noUniversity": "Mening universitetim roʻyxatda yoʻq",
+  "university.gone": "Siz tanlagan universitet endi botning roʻyxatida yoʻq. Hisob-kitob toʻxtatildi: bot sizning universitetingiz oʻrniga boshqa universitetning manzillari va aloqa maʼlumotlarini koʻrsatmaydi. Universitetni tanlagach, savollarga yana javob bering.\n\n",
   "university.choose": "Universitetingizni tanlang. Muddatlar hamma uchun bir xil, lekin manzil, hujjatlar va aloqa maʼlumotlari har bir universitetda oʻzgacha.",
   "university.missing": "Hozircha bot faqat roʻyxatdagi universitetlarni biladi: universitet manzili, hujjatlari va aloqa maʼlumotlarisiz reja toʻliq boʻlmaydi. Muddatlar haqida universitetingizning xalqaro boʻlimidan soʻrang.",
   "citizenship": "Oʻquv profilining fuqaroligini tanlang.",

@@ -135,6 +135,23 @@ export function App() {
         </div>
       );
     }
+    if (session.universityGone) {
+      // The profile was removed from the catalogue: no plan, and no other university's contacts in its place.
+      return (
+        <div className="stack">
+          <h1 className="heading in">{t("app.scopeTitle")}</h1>
+          <p className="prose in d1" role="status">{session.prompt}</p>
+          <div className="tiles in d2">
+            {status.state.universities.map(u => (
+              <button key={u.id} type="button" className="tile tile-wide" disabled={status.pending !== null}
+                onClick={() => act(`uni:${u.id}`)}>
+                <span className="name">{u.name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      );
+    }
     if (session.step === "visit" || session.step === "docEnd") {
       const [title, invalid] = session.step === "visit" ? ["app.visitTitle", "visit.invalid"] : ["app.endTitle", "docEnd.invalid"];
       return <DateStep texts={texts} today={status.state.today} prompt={session.prompt} message={status.message}

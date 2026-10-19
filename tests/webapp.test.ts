@@ -219,6 +219,21 @@ describe("mini app shows what the chat shows", () => {
     expect(ticket.status).toBe(404);
     expect(await ticket.json()).toEqual({ error: "nothing_to_export" });
   });
+  it("asks to choose the university again when the stored one left the catalogue", async () => {
+    const f = await fixture();
+    for (const action of ["/start itmo", ...ONBOARDING.slice(1)]) await applyAction(f.service, 7, action, false);
+    expect((await readState(f.service, 7, false)).session?.universityGone).toBe(false);
+    const without = new Service(f.store, { ...ctx, universities: universities.filter(u => u.id !== "itmo") }, { async send() {} }, () => NOW);
+    const session = (await readState(without, 7, false)).session!;
+    expect(session.universityGone).toBe(true);
+    expect(session.plan).toEqual([]);
+    expect(session.undated).toEqual([]);
+    expect(session.share).toBe("");
+    expect(session.prompt).toContain("больше нет в списке");
+    expect(session.prompt).not.toContain("КФУ");
+    const chosen = await applyAction(without, 7, "uni:kfu", false);
+    expect(chosen.state.session).toMatchObject({ universityGone: false, step: "scope", university: { id: "kfu" } });
+  });
   it("says where each checklist comes from, or that there is no official one", async () => {
     const f = await fixture();
     for (const action of ONBOARDING) await applyAction(f.service, 7, action, false);
