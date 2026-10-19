@@ -84,7 +84,7 @@ describe("deep link ?start= and client language", () => {
   it("falls back to the default university for unknown links and keeps the choice once the plan exists", () => {
     const s = onboard("/start unknown");
     expect(s.university).toBeUndefined();
-    expect(click(s, "card:fingerprinting").reply.text).toContain("admissions.kpfu.ru");
+    expect(click(s, "card:fingerprinting").reply.text).toContain("kpfu.ru/international/migracionnoe-soprovozhdenie-inostrannyh-grazhdan");
     expect(step(s, { text: "/start itmo", callback: false }).session!.university).toBeUndefined();
   });
   it("skips the language question when MAX reports ru or en, and still lets the user switch", () => {
