@@ -28,4 +28,6 @@ __pycache__/
 # Логи и служебное
 *.log
 .DS_Store
-.claude/
+.claude/.last-green-test-run
+.claude/settings.local.json
+.claude/worktrees/

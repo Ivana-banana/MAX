@@ -45,6 +45,6 @@ jobs:
           cache-dependency-path: docs/presentation/requirements.txt
       - run: pip install -r docs/presentation/requirements.txt
       - run: python scripts/build-presentation.py --check
-      - run: bash scripts/check-secrets.sh
+      - run: test -z "$(bash .claude/hooks/check-secrets.sh)"
       - run: docker compose build
       - run: git diff --exit-code

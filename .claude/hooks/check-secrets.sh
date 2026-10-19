@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
-# Проверка на секреты: падает, если в файлах, которые могут попасть в коммит
-# (tracked + untracked, не игнорируемые), лежит похожее на секрет значение.
-# Секреты — только в .env (в .gitignore), в репозитории — .env.example с плейсхолдерами.
-# Запускается в CI (.github/workflows/check.yml) и локально: bash scripts/check-secrets.sh
+# Stop hook: ход не считается завершённым, если в файлах, которые могут попасть
+# в коммит (tracked + untracked, не игнорируемые), лежит похожее на секрет значение.
+# Секрет в репозитории — нарушение п. 8 ограничений хакатона. См. CLAUDE.md.
 # Ложное срабатывание: дописать в строку комментарий `secret-scan: allow`.
 set -uo pipefail
 
-mapfile -t FILES < <(git ls-files -co --exclude-standard 2>/dev/null | grep -v '^scripts/check-secrets\.sh$')
+mapfile -t FILES < <(git ls-files -co --exclude-standard 2>/dev/null | grep -v '^\.claude/hooks/')
 [ "${#FILES[@]}" -eq 0 ] && exit 0
 
 FOUND=""
@@ -35,6 +34,6 @@ fi
 
 [ -z "$FOUND" ] && exit 0
 
-printf 'Возможные секреты в файлах, которые попадут в коммит (значения не выводятся):\n%s' "$FOUND"
-echo 'Вынести в .env (в .gitignore) и .env.example с плейсхолдером. Ложное срабатывание — пометить строку `secret-scan: allow`.'
-exit 1
+jq -n --arg found "$FOUND" \
+  '{decision: "block", reason: ("Возможные секреты в файлах, которые попадут в коммит (значения не выводятся):\n" + $found + "Вынести в .env (в .gitignore) и .env.example с плейсхолдером. Ложное срабатывание — пометить строку `secret-scan: allow`.")}'
+exit 0
