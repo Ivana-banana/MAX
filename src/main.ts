@@ -17,7 +17,7 @@ pool.on("error", () => { console.error("PostgreSQL connection lost; the pool wil
 // Migrates the schema before the webhook accepts anything; a failure exits and Docker restarts the bot.
 const store = await PostgresStore.open(pool);
 const service = new Service(store, { rules: rules.rules, universities, texts, version: rules.version, demo: config.mode === "demo",
-  ...(config.webappBot ? { webApp: config.webappBot } : {}) }, createTransport(config), Date.now, new RateLimit(config.rateLimit));
+  ...(config.webappBot ? { webApp: config.webappBot } : {}) }, createTransport(config), Date.now, new RateLimit(config.rateLimit), config.sendTimeoutMs);
 const webapp = webappRouter(service, { token: config.token, dir: config.webappDir,
   devLaunch: webappDevLaunch(config), devOrigin: config.webappDevOrigin });
 const server = webhookServer(service, config.secret, webapp, config.deployedCommit);

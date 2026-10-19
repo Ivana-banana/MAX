@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { parseRuleSet } from "../src/data/loadRules.js";
 import raw from "../src/data/rules/ru-student.json" with { type: "json" };
 import { readUniversities } from "../src/data/loadUniversities.js";
@@ -84,6 +84,31 @@ describe("the background loop", () => {
       [JSON.stringify({ step: "written-by-a-newer-build" }), Date.parse("2026-09-24T10:00:00+03:00")]);
     await service.receive({ id: "1", user: 1, input: { text: "/start", callback: false } });
     await service.tick();
+    expect(sent).toHaveLength(1);
+  });
+  it("does not let a hung send stop the tick; the message stays queued and is sent later", async () => {
+    const schema = await testSchema(); cleanups.push(schema.drop);
+    const { store } = await schema.open();
+    cleanups.push(() => store.close());
+    let now = Date.parse("2026-09-24T10:00:00+03:00"), hang = true, calls = 0;
+    const sent: Reply[] = [];
+    const service = new Service(store, context, { send(_u, reply) {
+      calls++;
+      if (hang) return new Promise<void>(() => {});
+      sent.push(reply); return Promise.resolve();
+    } }, () => now, undefined, 50);
+    const prune = vi.spyOn(store, "prune");
+    const logged = vi.spyOn(console, "error").mockImplementation(() => {});
+    cleanups.push(() => { logged.mockRestore(); return Promise.resolve(); });
+    await service.receive({ id: "1", user: 1, input: { text: "/start", callback: false } });
+    const guard = new Promise<never>((_, reject) => setTimeout(() => reject(new Error("tick is stuck")), 2000));
+    await Promise.race([service.tick(), guard]);
+    expect(calls).toBe(1);
+    expect((await store.counts()).pending).toBe(1);
+    expect(logged.mock.calls.some(([m]) => String(m).includes("timed out"))).toBe(true);
+    hang = false; now += 61_000;
+    await Promise.race([service.tick(), guard]);
+    expect(prune).toHaveBeenCalledTimes(2);
     expect(sent).toHaveLength(1);
   });
 });
