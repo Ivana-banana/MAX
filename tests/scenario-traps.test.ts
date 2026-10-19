@@ -39,7 +39,7 @@ describe("scenario traps: what the bot answers", () => {
     for (const a of ["ru", "accept"]) s = click(a).session!;
     const no = click("no");
     expect(no.reply.text).toContain("Для неподдержанного случая расчёт не выполняем");
-    expect(no.reply.text).toContain("admissions.kpfu.ru");
+    expect(no.reply.text).toContain("kpfu.ru/international/migracionnoe-soprovozhdenie-inostrannyh-grazhdan");
     expect(no.session!.step).toBe("scope");
   });
 
