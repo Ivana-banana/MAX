@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Для всех, кто коммитит: люди, Codex, IDE. Подключение: git config core.hooksPath .githooks
+# (GIT.md, «Git-хуки»). Проверки:
+#   1. секреты в индексе (.claude/hooks/check-secrets.sh --git);
+#   2. без взятой задачи не коммитим (scripts/issues.sh check).
+# Обход (--no-verify) — только по явной просьбе человека.
+top="$(git rev-parse --show-toplevel)"
+bash "$top/.claude/hooks/check-secrets.sh" --git || exit 1
+script="$top/scripts/issues.sh"
+if [ ! -f "$script" ]; then
+  echo "[issues] в этой ветке нет scripts/issues.sh — влейте origin/main; работа без задачи запрещена" >&2
+  exit 1
+fi
+bash "$script" check . || exit 1

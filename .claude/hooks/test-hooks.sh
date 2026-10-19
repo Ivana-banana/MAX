@@ -157,4 +157,43 @@ else echo "FAIL: upstream post: сработал раньше 5 минут, вы
 git remote set-url origin "$TMP/nope.git"
 expect_up pass  "upstream: сеть недоступна — молчит"
 
+# --- .githooks/pre-commit и pre-push (без сети: проверка задачи по ветке и кешу issue-check)
+cd "$TMP" && git init -q -b main gh && cd gh
+mkdir -p scripts .claude
+cp "$HOOKS/../../scripts/issues.sh" scripts/ && cp -r "$HOOKS/../../.githooks" . && cp -r "$HOOKS" .claude/hooks
+git config core.hooksPath .githooks && git config user.name t && git config user.email t@t
+expect_git() { # expect_git <0|1> <описание> <команда...>
+  local want="$1" desc="$2" out code
+  shift 2
+  out="$("$@" 2>&1)"; code=$?
+  if { [ "$want" = 0 ] && [ "$code" != 0 ]; } || { [ "$want" != 0 ] && [ "$code" = 0 ]; }; then
+    echo "FAIL: $desc — код $code, ожидался $want, вывод: $out"; FAIL=1
+  else echo "ok:   $desc"; fi
+}
+echo ok > a.txt && git add a.txt scripts .githooks .claude
+expect_git 1 "pre-commit: основная копия — отказ" git commit -q -m x
+git -c core.hooksPath=/dev/null commit -q -m init   # без хуков: нужен первый коммит для worktree
+git worktree add -q wt-nonum -b feature-x
+git worktree add -q wt-7 -b worktree-7-x
+printf 7 > "$(git -C wt-7 rev-parse --git-dir)/issue-check"   # кеш: задача #7 проверена
+echo ok > wt-nonum/b.txt && git -C wt-nonum add b.txt
+expect_git 1 "pre-commit: ветка без номера задачи — отказ" git -C wt-nonum commit -q -m x
+echo 'BOT_TOKEN=abc' > wt-7/.env && git -C wt-7 add -f .env
+expect_git 1 "pre-commit: .env в индексе — отказ" git -C wt-7 commit -q -m x
+git -C wt-7 rm -q --cached .env && rm wt-7/.env
+echo 'const token = "f9a8Xc72kLmQ01zYvB3n4dHs"' > wt-7/bot.js && git -C wt-7 add bot.js
+expect_git 1 "pre-commit: токен в индексе — отказ" git -C wt-7 commit -q -m x
+git -C wt-7 rm -q -f --cached bot.js
+echo 'BOT_TOKEN=your_bot_token_here' > wt-7/.env.example && git -C wt-7 add .env.example
+expect_git 0 "pre-commit: чистый индекс в worktree задачи — можно" git -C wt-7 commit -q -m x
+push_in() { # push_in <каталог> <строки stdin>: как git вызывает pre-push
+  (cd "$1" && printf '%s\n' "$2" | bash "$TMP/gh/.githooks/pre-push" origin url)
+}
+Z=0000000000000000000000000000000000000000
+S=1111111111111111111111111111111111111111
+expect_git 0 "pre-push: только удаление ветки — проходит даже из основной копии" push_in "$TMP/gh" "(delete) $Z refs/heads/worktree-7-x $S"
+expect_git 1 "pre-push: обновление ветки из основной копии — отказ" push_in "$TMP/gh" "refs/heads/main $S refs/heads/main $Z"
+expect_git 1 "pre-push: ветка без номера задачи — отказ" push_in "$TMP/gh/wt-nonum" "refs/heads/feature-x $S refs/heads/feature-x $Z"
+expect_git 0 "pre-push: worktree взятой задачи — можно" push_in "$TMP/gh/wt-7" "refs/heads/worktree-7-x $S refs/heads/worktree-7-x $Z"
+
 exit $FAIL
