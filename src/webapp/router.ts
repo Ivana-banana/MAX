@@ -179,7 +179,8 @@ export function webappRouter(service: Service, options: WebappOptions) {
       ...extra,
     });
     const send = (status: number, value: object) => {
-      res.writeHead(status, head({ "content-type": "application/json; charset=utf-8", "cache-control": "no-store" }));
+      res.writeHead(status, head({ "content-type": "application/json; charset=utf-8", "cache-control": "no-store",
+        "x-content-type-options": "nosniff" }));
       res.end(JSON.stringify(value));
     };
     if (api && req.method === "OPTIONS") { res.writeHead(cors ? 204 : 405, head()); res.end(); return true; }
@@ -235,6 +236,7 @@ export function webappRouter(service: Service, options: WebappOptions) {
           "content-type": "text/calendar; charset=utf-8",
           "content-disposition": `attachment; filename="${CALENDAR_FILE}"`,
           "cache-control": "no-store",
+          "x-content-type-options": "nosniff",
         }));
         res.end(ics);
         return true;
