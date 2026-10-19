@@ -189,5 +189,6 @@
   "beforeEntry.title": "What to prepare at home before entry — for a {uni} student. No deadline is counted here: the entry date is not known yet.\n\n",
   "beforeEntry.fact": "University fact — {uni} page: {url} (checked {date}).",
   "beforeEntry.assumption": "\nBot's assumption: {text}",
+  "beforeEntry.scope": "\n\nThis is not a full list: it shows only what the university writes on its own pages. Check the general rules of entry to Russia for your country (a visa or the Gosuslugi RuID app) with the Russian consulate or the university's international office.",
   "beforeEntry.next": "\n\nOnce you have entered, send your entry date — the bot will build your deadline plan."
 }

@@ -187,5 +187,6 @@
   "beforeEntry.title": "入境前在家需要准备的事项——{uni}学生适用。此处不计算期限：入境日期尚不确定。\n\n",
   "beforeEntry.fact": "学校事实——{uni}页面：{url}（核对日期 {date}）。",
   "beforeEntry.assumption": "\n机器人的假设：{text}",
+  "beforeEntry.scope": "\n\n这不是完整清单：这里只列出学校在其网页上写明的内容。贵国公民入境俄罗斯的一般规定（签证或“Gosuslugi RuID”应用）请向俄罗斯领事馆或学校国际事务部门核实。",
   "beforeEntry.next": "\n\n入境后请发送入境日期——机器人将为您制定期限计划。"
 }

@@ -169,10 +169,24 @@ function BeforeEntry({ cards, texts }: { cards: AppSession["beforeEntry"]; texts
         <details key={card.id} className="undated">
           <summary className="t">{card.title}</summary>
           <p className="prose">{card.text}</p>
-          <p className="small muted">{card.note}</p>
+          <SourceNote note={card.note} url={card.url} />
         </details>
       ))}
+      {open && <p className="small muted">{text(texts, "beforeEntry.scope").trim()}</p>}
     </div>
+  );
+}
+
+/** The "university fact / assumption" line with its page as a link; the assumption starts on its own line. */
+function SourceNote({ note, url }: { note: string; url: string }) {
+  const at = note.indexOf(url);
+  if (at < 0) return <p className="small muted prose">{note}</p>;
+  return (
+    <p className="small muted prose">
+      {note.slice(0, at)}
+      <a href={url} onClick={event => { event.preventDefault(); openLink(url); }}>{url}</a>
+      {note.slice(at + url.length)}
+    </p>
   );
 }
 

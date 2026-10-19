@@ -152,6 +152,19 @@ describe("a student who has not entered yet (#25)", () => {
     expect(planned.session!.step).toBe("plan");
     expect(plan(planned.session!, ctx).length).toBeGreaterThan(0);
   });
+  it("tells a citizen of a country with suspended invitations so, instead of how to get one (KFU page)", () => {
+    const r = click(toEntry("/start kfu", "EG"), "before-entry");
+    expect(r.reply.text).toContain("оформление приглашений для граждан Египта временно приостановлено");
+    expect(r.reply.text).not.toContain("не менее 45 календарных дней");
+  });
+  it("keeps the demo example working after the cards: the reply with the cards carries the step's button again", () => {
+    const r = click(toEntry("/start kfu", "KZ"), "before-entry");
+    const example = buttons(r).find(b => b.action?.endsWith("|example"));
+    expect(example).toBeDefined();
+    const planned = step(r.session, { text: example!.action!, callback: true });
+    expect(planned.expired).toBeUndefined();
+    expect(planned.session!.step).toBe("plan");
+  });
   it("does not offer the branch when the profile has no cards for the student", () => {
     const c = { ...ctx, universities: universities.map(u => ({ ...u, beforeEntry: [] })) };
     let r = step(null, { text: "/start kfu", callback: false }, c);
