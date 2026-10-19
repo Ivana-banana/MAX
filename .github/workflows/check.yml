@@ -34,6 +34,18 @@ jobs:
       - run: npm run typecheck
       - run: npm run build
       - run: npm run demo:check
+      - run: npm run web:install
+      - run: npx playwright install --with-deps chromium
+      - run: npm run e2e
+        env:
+          DATABASE_URL: postgresql://postgres@localhost:5432/postgres
+      - name: Mini app e2e screenshots
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: e2e-screenshots
+          path: test-results/**/*.png
+          if-no-files-found: warn
       # Informational: src changes in parallel streams must not wait for a deck rebuild; re-export before submission (D-017).
       - name: Presentation scenes match src (re-export before submission)
         continue-on-error: true

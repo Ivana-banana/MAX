@@ -1,0 +1,96 @@
+import { expect, test, type Page } from "@playwright/test";
+
+// The student's path through the mini app: language → consent → scope → citizenship → entry date → plan.
+// MAX Bridge is replaced by a stub; the server runs in APP_MODE=demo and accepts `?demo=<id>` as the launch.
+
+/** Moscow calendar date `daysAgo` days back, as DD.MM.YYYY: the server counts "today" in Moscow time. */
+function moscowDate(daysAgo: number): string {
+  const day = new Date(Date.now() - daysAgo * 86_400_000);
+  return new Intl.DateTimeFormat("ru-RU", { timeZone: "Europe/Moscow", day: "2-digit", month: "2-digit", year: "numeric" }).format(day);
+}
+
+test.beforeEach(async ({ page }, testInfo) => {
+  // The real bridge script lives on st.max.ru; the stub says "inside MAX" with empty launch data, so the demo id is used.
+  await page.route("https://st.max.ru/**", route => route.fulfill({ contentType: "text/javascript", body: "" }));
+  await page.addInitScript(() => {
+    const w = globalThis as unknown as { WebApp: object; closingConfirmation: boolean[] };
+    w.closingConfirmation = [];
+    w.WebApp = {
+      initData: "", platform: "android", version: "26.0",
+      enableClosingConfirmation: () => w.closingConfirmation.push(true),
+      disableClosingConfirmation: () => w.closingConfirmation.push(false),
+    };
+  });
+  // A fresh demo user per test: sessions live in the shared database.
+  await page.goto(`/?demo=${testInfo.workerIndex * 1_000_000 + Math.floor(Math.random() * 1_000_000) + 1}`);
+});
+
+/** Start → Русский → consent → scope → KZ; stops on the entry date screen. */
+async function toEntryDate(page: Page) {
+  await page.getByRole("button", { name: "Начать" }).click();
+  await page.getByRole("button", { name: /Русский/ }).click();
+  await page.getByRole("button", { name: "Продолжить" }).click();
+  await page.getByRole("button", { name: "Да, совпадает" }).click();
+  await page.getByRole("button", { name: /KZ/ }).click();
+  await expect(page.getByRole("heading", { name: "Дата въезда" })).toBeVisible();
+}
+
+const dateField = (page: Page) => page.getByRole("textbox", { name: "Дата въезда" });
+const save = (page: Page) => page.getByRole("button", { name: "Сохранить" });
+
+test("entry date → plan with deadlines", async ({ page }, testInfo) => {
+  await toEntryDate(page);
+  await dateField(page).pressSequentially(moscowDate(7).replaceAll(".", ""));
+  await expect(dateField(page)).toHaveValue(moscowDate(7)); // the mask inserted the dots
+  expect(await page.evaluate(() => (globalThis as unknown as { closingConfirmation: boolean[] }).closingConfirmation.at(-1))).toBe(true);
+  await save(page).click();
+  await expect(page.getByRole("heading", { name: "Ваш план" })).toBeVisible();
+  await expect(page.getByRole("button", { name: /Медицинское освидетельствование/ })).toContainText("Срок:");
+  await page.screenshot({ path: testInfo.outputPath("1-plan.png"), fullPage: true, animations: "disabled" });
+});
+
+test("API failure → clear message, retry works without a restart", async ({ page }, testInfo) => {
+  await toEntryDate(page);
+  await dateField(page).fill(moscowDate(7));
+
+  await page.route("**/api/action", route => route.fulfill({ status: 500, body: "{}" }));
+  await save(page).click();
+  await expect(page.getByRole("alert")).toContainText("Сервер не смог обработать действие");
+  await expect(dateField(page)).toHaveValue(moscowDate(7)); // the screen and the input survive
+
+  await page.unroute("**/api/action");
+  await page.route("**/api/action", route => route.abort("connectionrefused"));
+  await save(page).click();
+  await expect(page.getByRole("alert")).toContainText("Нет связи с сервером");
+  await page.screenshot({ path: testInfo.outputPath("2-api-error.png"), fullPage: true, animations: "disabled" });
+
+  await page.unroute("**/api/action");
+  await save(page).click();
+  await expect(page.getByRole("heading", { name: "Ваш план" })).toBeVisible();
+  await expect(page.getByRole("alert")).toHaveCount(0);
+});
+
+test("empty and invalid date: Save stays off or the reason is shown", async ({ page }, testInfo) => {
+  await toEntryDate(page);
+  await expect(save(page)).toBeDisabled(); // empty
+
+  await dateField(page).pressSequentially("1203");
+  await expect(save(page)).toBeDisabled(); // incomplete
+
+  await dateField(page).fill("");
+  await dateField(page).pressSequentially("31022026");
+  await expect(save(page)).toBeDisabled(); // 31 February is not a day
+
+  await dateField(page).fill("");
+  await dateField(page).pressSequentially("01012020");
+  await expect(save(page)).toBeEnabled(); // a real day; only the server knows the supported period
+  await save(page).click();
+  await expect(page.getByRole("alert")).toContainText("Дата вне сценария");
+  await expect(page.getByRole("heading", { name: "Ваш план" })).toHaveCount(0);
+  await page.screenshot({ path: testInfo.outputPath("3-invalid-date.png"), fullPage: true, animations: "disabled" });
+
+  await dateField(page).fill("");
+  await dateField(page).pressSequentially(moscowDate(-3).replaceAll(".", ""));
+  await expect(page.getByRole("alert")).toContainText("не может быть в будущем");
+  await expect(save(page)).toBeDisabled(); // the future
+});
