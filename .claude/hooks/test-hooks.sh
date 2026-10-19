@@ -220,4 +220,54 @@ expect_git 1 "pre-push: обновление ветки из основной к
 expect_git 1 "pre-push: ветка без номера задачи — отказ" push_in "$TMP/gh/wt-nonum" "refs/heads/feature-x $S refs/heads/feature-x $Z"
 expect_git 0 "pre-push: worktree взятой задачи — можно" push_in "$TMP/gh/wt-7" "refs/heads/worktree-7-x $S refs/heads/worktree-7-x $Z"
 
+# --- scripts/finish.sh: финиш задачи в worktree (npm и gh подменены заглушками в PATH)
+cd "$TMP" && git init -q --bare -b main fin-remote.git
+git clone -q fin-remote.git fin 2>/dev/null
+export GIT_AUTHOR_NAME=t GIT_AUTHOR_EMAIL=t@t GIT_COMMITTER_NAME=t GIT_COMMITTER_EMAIL=t@t
+mkdir -p "$TMP/fakebin" fin/scripts
+cat > "$TMP/fakebin/npm" <<'EOF2'
+#!/usr/bin/env bash
+echo "npm $*" >> "$FAKE_LOG"
+[ -z "${FAKE_NPM_FAIL:-}" ]
+EOF2
+cat > "$TMP/fakebin/gh" <<'EOF2'
+#!/usr/bin/env bash
+echo "gh $*" >> "$FAKE_LOG"
+EOF2
+chmod +x "$TMP/fakebin/npm" "$TMP/fakebin/gh"
+export FAKE_LOG="$TMP/fake.log"
+cp "$HOOKS/../../scripts/finish.sh" fin/scripts/finish.sh 2>/dev/null
+(cd fin && echo a > a.txt && git add . && git commit -q -m init && git push -q origin HEAD:main)
+git -C fin worktree add -q .claude/worktrees/9-t -b worktree-9-t origin/main
+W="$TMP/fin/.claude/worktrees/9-t"
+expect_fin() { # expect_fin <код> <описание> <каталог>
+  local out code
+  out="$(cd "$3" && PATH="$TMP/fakebin:$PATH" bash scripts/finish.sh 2>&1)"; code=$?
+  if [ "$code" != "$1" ]; then echo "FAIL: $2 — код $code, ожидался $1, вывод: $out"; FAIL=1
+  else echo "ok:   $2"; fi
+}
+expect_fin 1 "finish: основная копия — отказ" "$TMP/fin"
+expect_fin 1 "finish: нет своих коммитов — отказ" "$W"
+echo b > "$W/b.txt" && git -C "$W" add b.txt && git -C "$W" commit -q -m "feat: b"
+echo dirty >> "$W/b.txt"
+expect_fin 1 "finish: незакоммиченные правки — отказ" "$W"
+git -C "$W" checkout -q b.txt
+FAKE_NPM_FAIL=1 expect_fin 1 "finish: проверка красная — отказ" "$W"
+[ "$(git -C "$TMP/fin-remote.git" rev-parse main)" = "$(git -C "$TMP/fin" rev-parse origin/main)" ] \
+  && ! git -C "$TMP/fin-remote.git" log main --format=%s | grep -q "feat: b" \
+  && echo "ok:   finish: красная проверка — main не тронут" || { echo "FAIL: finish: main тронут при красной проверке"; FAIL=1; }
+mate_push_fin() { (cd "$TMP/fin-remote.git" && git clone -q . "$TMP/fin-mate" 2>/dev/null; cd "$TMP/fin-mate" && echo m > m.txt && git add m.txt && git commit -q -m "mate" && git push -q origin HEAD:main); }
+mate_push_fin
+: > "$FAKE_LOG"
+expect_fin 0 "finish: main ушёл вперёд — merge, проверки, push, закрытие" "$W"
+git -C "$TMP/fin-remote.git" log main --format=%s | grep -q "feat: b" && git -C "$TMP/fin-remote.git" log main --format=%s | grep -q "^mate$" \
+  && echo "ok:   finish: в main есть и своё, и чужое" || { echo "FAIL: finish: в main нет коммитов"; FAIL=1; }
+grep -q "^npm test" "$FAKE_LOG" && grep -q "typecheck" "$FAKE_LOG" && grep -q "run build" "$FAKE_LOG" && grep -q "demo:check" "$FAKE_LOG" \
+  && echo "ok:   finish: все четыре проверки запущены" || { echo "FAIL: finish: проверки не все"; FAIL=1; }
+grep -q "^gh issue close 9" "$FAKE_LOG" && echo "ok:   finish: задача закрыта" || { echo "FAIL: finish: issue не закрыта"; FAIL=1; }
+[ ! -e "$W" ] && ! git -C "$TMP/fin" rev-parse -q --verify worktree-9-t >/dev/null \
+  && ! git -C "$TMP/fin-remote.git" rev-parse -q --verify worktree-9-t >/dev/null \
+  && echo "ok:   finish: worktree и ветка убраны" || { echo "FAIL: finish: уборка не прошла"; FAIL=1; }
+[ -f "$TMP/fin/m.txt" ] && [ -f "$TMP/fin/b.txt" ] && echo "ok:   finish: основная копия подтянута" || { echo "FAIL: finish: основная копия не обновлена"; FAIL=1; }
+
 exit $FAIL
