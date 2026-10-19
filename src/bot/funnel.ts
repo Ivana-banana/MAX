@@ -5,10 +5,10 @@
  * so the counters are not linked to a person and survive /delete.
  */
 
-import { FROM_REMINDER, plan, profile, type DialogueContext, type Input, type Session } from "./dialog.js";
+import { beforeEntry, FROM_REMINDER, plan, profile, type DialogueContext, type Input, type Session } from "./dialog.js";
 
 export const FUNNEL_EVENTS = ["started", "plan_ready", "reminders_on", "reminder_sent", "reminder_opened", "checklist_completed",
-  "marked_done", "help_opened", "deleted"] as const;
+  "marked_done", "help_opened", "before_entry_opened", "deleted"] as const;
 export type FunnelEvent = typeof FUNNEL_EVENTS[number];
 export interface FunnelCount { day: string; university: string; event: FunnelEvent; n: number }
 
@@ -27,6 +27,8 @@ export function funnelEvents(before: Session | null, after: Session | null, inpu
   if (!before?.reminders && after.reminders) events.push("reminders_on");
   if (input.callback && action.startsWith("card:") && action.endsWith(FROM_REMINDER)) events.push("reminder_opened");
   if (action === "help" || action === "/help" || action.startsWith("help:")) events.push("help_opened");
+  // #25: the chat's "not entered yet" cards; the mini app opens them on the screen, without a request.
+  if (action === "before-entry" && before?.step === "entry" && beforeEntry(before, ctx).length) events.push("before_entry_opened");
   const was = before ? ready(before, ctx) : new Set<string>();
   for (const id of ready(after, ctx)) if (!was.has(id)) events.push("checklist_completed");
   for (const id of Object.keys(after.completions)) if (after.completions[id] !== before?.completions[id]) events.push("marked_done");

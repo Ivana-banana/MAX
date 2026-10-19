@@ -64,6 +64,9 @@ export interface AppUndatedItem {
   dueText?: string;
 }
 
+/** #25: what the university asks to prepare before entry; `note` is the chat's "university fact / assumption" line. */
+export interface AppBeforeEntryItem { id: string; title: string; text: string; note: string; url: string }
+
 export interface AppUniversity { id: string; name: string; contactUrl: string }
 
 export interface AppSession {
@@ -93,6 +96,8 @@ export interface AppSession {
   plan: AppPlanItem[];
   /** The university's procedures without a calculated deadline (`AppUndatedItem`); empty for most profiles. */
   undated: AppUndatedItem[];
+  /** On the entry step: cards for a student who has not entered yet; empty when the profile has none. */
+  beforeEntry: AppBeforeEntryItem[];
   /** The plan as a message to forward (`shareText`): procedures and deadlines only; empty without a plan. */
   share: string;
 }

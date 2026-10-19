@@ -35,6 +35,23 @@ export interface University {
    * deadline, which stays in force; a term that is not earlier than the law is refused (checkRuleTargets).
    */
   ruleTargets: Record<string, RuleTarget>;
+  /**
+   * What the university asks a student to prepare at home, before entry (#24, #25): shown while the
+   * student has no entry date yet. Each card is the university's fact with its page; an `assumption`
+   * says what the bot assumes on top of it. Empty when the profile has none.
+   */
+  beforeEntry: BeforeEntryCard[];
+}
+
+export interface BeforeEntryCard {
+  id: string;
+  title: Localized;
+  text: Localized;
+  /** Only citizenship conditions, as for procedures. */
+  appliesIf: Extract<Condition, { field: "citizenship" }>[];
+  source: { url: string; checkedAt: string };
+  /** What the bot assumes beyond the page (e.g. that the citizenship needs a visa); absent when nothing. */
+  assumption?: Localized;
 }
 
 export interface RuleTarget {
@@ -105,6 +122,18 @@ const slug = (value: unknown, path: string): string => {
   return v;
 };
 
+function citizenshipConditions(raw: unknown, path: string): UniversityProcedure["appliesIf"] {
+  if (!Array.isArray(raw)) throw new UniversityValidationError(path, "ожидается массив (пустой — для всех)");
+  return raw.map((c, i): UniversityProcedure["appliesIf"][number] => {
+    const cond = record(c, `${path}[${i}]`);
+    if (cond.field !== "citizenship" || (cond.op !== "in" && cond.op !== "notIn") || !Array.isArray(cond.values) ||
+        cond.values.length === 0 || !cond.values.every(v => typeof v === "string" && /^[A-Z]{2}$/.test(v))) {
+      throw new UniversityValidationError(`${path}[${i}]`, "поддерживается только citizenship in/notIn со списком кодов ISO");
+    }
+    return { field: "citizenship", op: cond.op, values: cond.values as string[] };
+  });
+}
+
 function parseProcedure(raw: unknown, path: string): UniversityProcedure {
   const p = record(raw, path);
   if (!Array.isArray(p.documents)) throw new UniversityValidationError(`${path}.documents`, "ожидается массив");
@@ -114,15 +143,7 @@ function parseProcedure(raw: unknown, path: string): UniversityProcedure {
   });
   const twice = documents.map(d => d.id).find((id, i, all) => all.indexOf(id) !== i);
   if (twice !== undefined) throw new UniversityValidationError(`${path}.documents`, `повторяющийся id документа «${twice}»`);
-  if (!Array.isArray(p.appliesIf)) throw new UniversityValidationError(`${path}.appliesIf`, "ожидается массив (пустой — для всех)");
-  const appliesIf = p.appliesIf.map((c, i): UniversityProcedure["appliesIf"][number] => {
-    const cond = record(c, `${path}.appliesIf[${i}]`);
-    if (cond.field !== "citizenship" || (cond.op !== "in" && cond.op !== "notIn") || !Array.isArray(cond.values) ||
-        cond.values.length === 0 || !cond.values.every(v => typeof v === "string" && /^[A-Z]{2}$/.test(v))) {
-      throw new UniversityValidationError(`${path}.appliesIf[${i}]`, "поддерживается только citizenship in/notIn со списком кодов ISO");
-    }
-    return { field: "citizenship", op: cond.op, values: cond.values as string[] };
-  });
+  const appliesIf = citizenshipConditions(p.appliesIf, `${path}.appliesIf`);
   const source = record(p.source, `${path}.source`);
   const url = text(source.url, `${path}.source.url`);
   if (!url.startsWith("https://")) throw new UniversityValidationError(`${path}.source.url`, "нужна ссылка https://");
@@ -167,6 +188,20 @@ function parseRuleTargets(raw: unknown, path: string): Record<string, RuleTarget
   }));
 }
 
+function parseBeforeEntry(raw: unknown, path: string): BeforeEntryCard[] {
+  if (raw === undefined) return [];
+  if (!Array.isArray(raw)) throw new UniversityValidationError(path, "ожидается массив");
+  const cards = raw.map((value, i): BeforeEntryCard => {
+    const c = record(value, `${path}[${i}]`), at = `${path}[${i}]`;
+    return { id: slug(c.id, `${at}.id`), title: localized(c.title, `${at}.title`), text: localized(c.text, `${at}.text`),
+      appliesIf: citizenshipConditions(c.appliesIf, `${at}.appliesIf`), source: parseSource(c.source, `${at}.source`),
+      ...(c.assumption === undefined ? {} : { assumption: localized(c.assumption, `${at}.assumption`) }) };
+  });
+  const twice = cards.map(c => c.id).find((id, i, all) => all.indexOf(id) !== i);
+  if (twice !== undefined) throw new UniversityValidationError(path, `повторяющийся id «${twice}»`);
+  return cards;
+}
+
 function parseCountdown(raw: unknown, path: string): ProcedureCountdown {
   const c = record(raw, path);
   if (c.from !== "visa-end" && c.from !== "registration-end") throw new UniversityValidationError(`${path}.from`, "visa-end или registration-end");
@@ -205,7 +240,8 @@ export function parseUniversity(raw: unknown, path = "university"): University {
   if (repeated !== undefined) throw new UniversityValidationError(`${path}.procedures`, `повторяющийся id «${repeated}»`);
   return { id, name: names,
     contactUrl, citizenships: [...new Set(u.citizenships as string[])], checkedAt, procedures,
-    rulePlaces: parseRulePlaces(u.rulePlaces, `${path}.rulePlaces`), ruleTargets: parseRuleTargets(u.ruleTargets, `${path}.ruleTargets`) };
+    rulePlaces: parseRulePlaces(u.rulePlaces, `${path}.rulePlaces`), ruleTargets: parseRuleTargets(u.ruleTargets, `${path}.ruleTargets`),
+    beforeEntry: parseBeforeEntry(u.beforeEntry, `${path}.beforeEntry`) };
 }
 
 /** All profiles from a directory; the default university comes first. */

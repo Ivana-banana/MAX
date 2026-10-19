@@ -431,5 +431,148 @@
         "checkedAt": "2026-09-30"
       }
     }
-  }
+  },
+  "beforeEntry": [
+    {
+      "id": "invitation",
+      "title": {
+        "ru": "Приглашение на учебную визу",
+        "en": "Invitation for a study visa",
+        "zh": "学习签证邀请函",
+        "uz": "Oʻquv vizasi uchun taklifnoma"
+      },
+      "text": {
+        "ru": "Приглашение оформляет МВД по ходатайству КФУ — не менее 45 календарных дней. Заявление на приглашение доступно в личном кабинете только после приказа о зачислении. Паспорт должен действовать не менее 18 месяцев с даты въезда. Не покупайте билет, пока не получите приглашение. Если вы поступили по квоте (гослиния), вместо приглашения оформляют визовое указание через Минобрнауки России — не менее 30 календарных дней.",
+        "en": "The Ministry of Internal Affairs issues the invitation at KFU's request; it takes at least 45 calendar days. The invitation application opens in your personal account only after the enrolment order. Your passport must be valid for at least 18 months from the entry date. Do not buy a ticket until you have the invitation. If you were admitted under the government quota, a visa authorisation is issued through the Ministry of Science and Higher Education instead of an invitation; it takes at least 30 calendar days.",
+        "zh": "邀请函由内务部根据喀山联邦大学的申请办理，至少需要45个日历日。只有在录取令发布后，个人账户中才会开放邀请函申请。护照自入境之日起须至少有效18个月。收到邀请函之前请不要购买机票。如果您是按政府配额（公费名额）录取的，则不办理邀请函，而是通过俄罗斯科学与高等教育部办理签证指示，至少需要30个日历日。",
+        "uz": "Taklifnomani KFU iltimosnomasi boʻyicha IIV rasmiylashtiradi — kamida 45 kalendar kun. Taklifnoma uchun ariza shaxsiy kabinetda faqat oʻqishga qabul qilish buyrugʻidan keyin ochiladi. Pasport kirgan kundan boshlab kamida 18 oy amal qilishi kerak. Taklifnoma olmaguningizcha chipta sotib olmang. Agar kvota (davlat liniyasi) boʻyicha qabul qilingan boʻlsangiz, taklifnoma oʻrniga Rossiya Fan va oliy taʼlim vazirligi orqali viza koʻrsatmasi rasmiylashtiriladi — kamida 30 kalendar kun."
+      },
+      "appliesIf": [
+        {
+          "field": "citizenship",
+          "op": "in",
+          "values": [
+            "CN",
+            "IN",
+            "TR"
+          ]
+        }
+      ],
+      "source": {
+        "url": "https://kpfu.ru/invitations",
+        "checkedAt": "2026-10-19"
+      },
+      "assumption": {
+        "ru": "ваше гражданство отнесено к визовым странам по списку профиля вуза, а не по документу ведомства. Требования консульства России в вашей стране бот не проверял.",
+        "en": "your citizenship is treated as a visa country by the university profile's list, not by an official document. The bot has not checked the requirements of the Russian consulate in your country.",
+        "zh": "您的国籍是按学校资料中的名单被归为需签证国家，而非依据官方文件。机器人未核对俄罗斯驻贵国领事馆的要求。",
+        "uz": "fuqaroligingiz idora hujjati boʻyicha emas, universitet profilidagi roʻyxat boʻyicha vizali davlatlarga kiritilgan. Bot mamlakatingizdagi Rossiya konsulligi talablarini tekshirmagan."
+      }
+    },
+    {
+      "id": "invitation-suspended",
+      "title": {
+        "ru": "Приглашение: оформление приостановлено",
+        "en": "Invitation: issuing is suspended",
+        "zh": "邀请函：暂停办理",
+        "uz": "Taklifnoma: rasmiylashtirish toʻxtatilgan"
+      },
+      "text": {
+        "ru": "На странице КФУ сказано: оформление приглашений для граждан Египта временно приостановлено. Бот не знает, когда это изменится и касается ли это визового указания по квоте (гослиния). До поездки и покупки билета уточните в Департаменте внешних связей КФУ: +7 (843) 206-52-89, доб. 8609.",
+        "en": "The KFU page says that issuing invitations for citizens of Egypt is temporarily suspended. The bot does not know when this will change, or whether it also applies to a visa authorisation under the government quota. Before the trip and before you buy a ticket, ask the KFU Department of External Relations: +7 (843) 206-52-89, ext. 8609.",
+        "zh": "喀山联邦大学页面写明：暂停为埃及公民办理邀请函。机器人不知道何时会恢复，也不知道这是否同样适用于按政府配额（公费名额）办理的签证指示。出行和购买机票之前，请向喀山联邦大学对外联络部咨询：+7 (843) 206-52-89，分机8609。",
+        "uz": "KFU sahifasida yozilgan: Misr fuqarolari uchun taklifnoma rasmiylashtirish vaqtincha toʻxtatilgan. Bot bu qachon oʻzgarishini va kvota (davlat liniyasi) boʻyicha viza koʻrsatmasiga ham taalluqli yoki yoʻqligini bilmaydi. Safar va chipta sotib olishdan oldin KFU Tashqi aloqalar departamentidan soʻrang: +7 (843) 206-52-89, qoʻshimcha 8609."
+      },
+      "appliesIf": [
+        {
+          "field": "citizenship",
+          "op": "in",
+          "values": [
+            "EG"
+          ]
+        }
+      ],
+      "source": {
+        "url": "https://kpfu.ru/invitations",
+        "checkedAt": "2026-10-19"
+      }
+    },
+    {
+      "id": "ruid",
+      "title": {
+        "ru": "Новые правила въезда: «Госуслуги RuID»",
+        "en": "New entry rules: Gosuslugi RuID",
+        "zh": "新入境规定：“Gosuslugi RuID”应用",
+        "uz": "Yangi kirish qoidalari: «Gosuslugi RuID»"
+      },
+      "text": {
+        "ru": "С 30 июня 2025 года для граждан безвизовых стран действуют новые правила въезда — через приложение «Госуслуги RuID». До поездки прочитайте порядок и памятки на странице КФУ.",
+        "en": "Since 30 June 2025, citizens of visa-free countries enter Russia under new rules, through the Gosuslugi RuID app. Before the trip, read the procedure and leaflets on the KFU page.",
+        "zh": "自2025年6月30日起，免签国家公民须按新规定入境——通过“Gosuslugi RuID”应用。出行前请阅读喀山联邦大学页面上的办理流程和说明手册。",
+        "uz": "2025-yil 30-iyundan vizasiz davlatlar fuqarolari uchun yangi kirish qoidalari amal qiladi — «Gosuslugi RuID» ilovasi orqali. Safardan oldin KFU sahifasidagi tartib va eslatmalarni oʻqing."
+      },
+      "appliesIf": [
+        {
+          "field": "citizenship",
+          "op": "in",
+          "values": [
+            "KZ",
+            "UZ",
+            "TJ",
+            "KG"
+          ]
+        }
+      ],
+      "source": {
+        "url": "https://kpfu.ru/international/migracionnoe-soprovozhdenie-inostrannyh-grazhdan/novye-pravila-vezda-prilozhenie-ruid",
+        "checkedAt": "2026-10-19"
+      },
+      "assumption": {
+        "ru": "ваше гражданство отнесено к безвизовым странам по списку профиля вуза, а не по документу ведомства.",
+        "en": "your citizenship is treated as a visa-free country by the university profile's list, not by an official document.",
+        "zh": "您的国籍是按学校资料中的名单被归为免签国家，而非依据官方文件。",
+        "uz": "fuqaroligingiz idora hujjati boʻyicha emas, universitet profilidagi roʻyxat boʻyicha vizasiz davlatlarga kiritilgan."
+      }
+    },
+    {
+      "id": "passport-translation",
+      "title": {
+        "ru": "Нотариальный перевод паспорта",
+        "en": "Notarised translation of your passport",
+        "zh": "护照公证翻译",
+        "uz": "Pasportning notarial tarjimasi"
+      },
+      "text": {
+        "ru": "Для медосвидетельствования в КФУ нужны паспорт и его нотариально заверенный перевод на русский язык. Возьмите также результаты прежних обследований, если они есть.",
+        "en": "For the medical examination at KFU you need your passport and its notarised translation into Russian. Also bring the results of earlier examinations, if you have any.",
+        "zh": "在喀山联邦大学进行体检需要护照及其经公证的俄文译本。如有以往的检查结果，也请一并带上。",
+        "uz": "KFUda tibbiy koʻrikdan oʻtish uchun pasport va uning rus tiliga notarial tasdiqlangan tarjimasi kerak. Oldingi tekshiruv natijalari boʻlsa, ularni ham olib keling."
+      },
+      "appliesIf": [],
+      "source": {
+        "url": "https://kpfu.ru/international/migracionnoe-soprovozhdenie-inostrannyh-grazhdan/daktiloskopiya-i-medicinskoe-osvidetelstvovanie",
+        "checkedAt": "2026-10-19"
+      }
+    },
+    {
+      "id": "translation-bureau",
+      "title": {
+        "ru": "Где заверить перевод",
+        "en": "Where to certify a translation",
+        "zh": "在哪里办理翻译公证",
+        "uz": "Tarjimani qayerda tasdiqlash kerak"
+      },
+      "text": {
+        "ru": "Департамент внешних связей КФУ не заверяет переводы у нотариуса. Если нужен нотариально заверенный перевод, сразу обращайтесь в бюро переводов.",
+        "en": "The KFU Department of External Relations does not notarise translations. If you need a notarised translation, go straight to a translation agency.",
+        "zh": "喀山联邦大学对外联络部不办理翻译公证。如需经公证的译本，请直接到翻译机构办理。",
+        "uz": "KFU Tashqi aloqalar departamenti tarjimalarni notarial tasdiqlamaydi. Notarial tasdiqlangan tarjima kerak boʻlsa, darhol tarjima byurosiga murojaat qiling."
+      },
+      "appliesIf": [],
+      "source": {
+        "url": "https://kpfu.ru/international/dokumenty/shablony-perevodov",
+        "checkedAt": "2026-10-19"
+      }
+    }
+  ]
 }

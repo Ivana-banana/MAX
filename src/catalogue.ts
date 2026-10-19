@@ -28,9 +28,11 @@ export function catalogueReport(rules: DeadlineRule[], universities: University[
       `  контакты: ${u.contactUrl} (сверено ${u.checkedAt})`,
       `  гражданства: ${u.citizenships.join(", ")}`,
       `  без расчётного срока: ${u.procedures.length ? u.procedures.map(p => `${p.id} (${p.source.url})`).join(", ") : "нет"}`,
-      `  раньше закона: ${Object.keys(u.ruleTargets).length ? Object.entries(u.ruleTargets).map(([id, t]) => `${id} — ${t.days} дн. (${t.source.url})`).join(", ") : "нет"}`);
+      `  раньше закона: ${Object.keys(u.ruleTargets).length ? Object.entries(u.ruleTargets).map(([id, t]) => `${id} — ${t.days} дн. (${t.source.url})`).join(", ") : "нет"}`,
+      `  до въезда: ${u.beforeEntry.length ? u.beforeEntry.map(c => `${c.id} (${c.source.url})`).join(", ") : "нет"}`);
     age(u.id, "контакты", u.checkedAt);
     for (const p of u.procedures) age(u.id, `источник «${p.id}»`, p.source.checkedAt);
+    for (const c of u.beforeEntry) age(u.id, `источник «${c.id}» (до въезда)`, c.source.checkedAt);
     for (const citizenship of u.citizenships) {
       const items = buildPlan(rules, { citizenship, entryDate: from, purpose: "study" }, {}, from);
       if (!items.length) warnings.push(`${u.id}: для гражданства ${citizenship} не применяется ни одна норма — студент получит пустой план`);

@@ -272,6 +272,15 @@ describe("mini app shows what the chat shows", () => {
     for (const action of ["/start kfu", ...ONBOARDING.slice(1, -1)]) await applyAction(live, 8, action, false);
     expect((await readState(live, 8, false)).session?.example).toBeUndefined();
   });
+  it("shows the before-entry cards on the entry step only (#25)", async () => {
+    const f = await fixture();
+    for (const action of ONBOARDING.slice(0, -1)) await applyAction(f.service, 7, action, false);
+    const cards = (await readState(f.service, 7, false)).session?.beforeEntry ?? [];
+    expect(cards.map(c => c.id)).toEqual(["ruid", "passport-translation", "translation-bureau"]);
+    expect(cards[0]?.note).toContain("Допущение бота");
+    await applyAction(f.service, 7, ONBOARDING.at(-1)!, false);
+    expect((await readState(f.service, 7, false)).session?.beforeEntry).toEqual([]);
+  });
   it("hands the app the plan as a message to forward, only once there is a plan", async () => {
     const f = await fixture();
     for (const action of ONBOARDING.slice(0, -1)) await applyAction(f.service, 7, action, false);
@@ -490,6 +499,64 @@ describe("mini app HTTP surface", () => {
     const url = await serve(f.router, f.service);
     expect((await fetch(url)).status).toBe(404);
     expect((await fetch(`${url}/api/state`, { headers: auth(genuine()) })).status).toBe(200);
+  });
+  it("keeps one person's session out of another's reach, whatever the body says", async () => {
+    const f = await fixture("./web/dist", false); // the production config: no unsigned demo launch
+    const url = await serve(f.router, f.service);
+    const owner = genuine(), stranger = genuine({ user: person(8) });
+    for (const action of ONBOARDING) await act(url, owner, { action });
+    // A user id in the body is not an identity: only the signed launch is.
+    expect((await act(url, stranger, { action: "/start", user: 7, user_id: 7 })).status).toBe(200);
+    expect((await f.store.get(7))?.step).toBe("plan");
+    const seen = await (await fetch(`${url}/api/state`, { headers: auth(stranger) })).json() as
+      { state: { session: { step: string; plan: unknown[] } } };
+    expect(seen.state.session.step).not.toBe("plan");
+    expect(seen.state.session.plan).toEqual([]);
+    expect((await fetch(`${url}/api/calendar.ics`, { headers: auth(stranger) })).status).toBe(404);
+  });
+  it("forbids MIME sniffing on every API and webhook answer, not only on the bundle", async () => {
+    const f = await fixture();
+    const url = await serve(f.router, f.service);
+    const value = genuine();
+    for (const action of ONBOARDING) await act(url, value, { action });
+    const answers = [
+      await fetch(`${url}/api/state`, { headers: auth(value) }),
+      await fetch(`${url}/api/state`),
+      await act(url, value, { action: "plan" }),
+      await fetch(`${url}/api/calendar.ics`, { headers: auth(value) }),
+      await fetch(`${url}/webhook`, { method: "POST" }),
+      await fetch(`${url}/health`),
+      await fetch(`${url}/api/state`, { method: "OPTIONS" }),
+      await fetch(`${url}/api/other`, { method: "OPTIONS" }),
+      await fetch(`${url}/nothing-here.exe`),
+      await fetch(`${url}/%00`),
+      await fetch(`${url}/no-such-route`, { method: "DELETE" }),
+    ];
+    expect(answers.map(a => a.status)).toEqual([200, 401, 200, 200, 401, 200, 405, 404, 403, 400, 404]);
+    for (const answer of answers) expect(answer.headers.get("x-content-type-options"), answer.url).toBe("nosniff");
+  });
+  it("answers 404 JSON, not the app shell, for unknown API and webhook paths", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "webapp-"));
+    cleanups.push(() => rm(dir, { recursive: true, force: true }));
+    writeFileSync(join(dir, "index.html"), "<!doctype html><title>app</title>");
+    const f = await fixture(dir);
+    const url = await serve(f.router, f.service);
+    expect((await fetch(`${url}/`)).status).toBe(200);
+    expect((await fetch(`${url}/some/route`)).status).toBe(200);
+    for (const path of ["/api", "/api/", "/api/foo", "/api/state/", "/webhook"]) {
+      const answer = await fetch(`${url}${path}`, { headers: auth(genuine()) });
+      expect([path, answer.status, answer.headers.get("content-type")]).toEqual([path, 404, "application/json"]);
+      expect(await answer.json()).toEqual({ error: "not_found" });
+    }
+  });
+  it("answers /health to GET and HEAD, with or without a query", async () => {
+    const f = await fixture();
+    const url = await serve(f.router, f.service);
+    for (const [method, path] of [["GET", "/health"], ["GET", "/health?x=1"], ["HEAD", "/health"], ["HEAD", "/health?x=1"]] as const) {
+      const answer = await fetch(`${url}${path}`, { method });
+      expect([method, path, answer.status, answer.headers.get("content-type")])
+        .toEqual([method, path, 200, "application/json"]);
+    }
   });
   it("lets the chat and the app act on one session in turn", async () => {
     const f = await fixture();

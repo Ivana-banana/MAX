@@ -12,15 +12,15 @@ import { coverage } from "../core/deadlines.js";
 import { isValidDate } from "../core/dates.js";
 import type { Lang } from "../core/types.js";
 import {
-  countdown, documentsNote, mapUrl, pageLabel, placeText, plan, targetText, procedureDue, procedureDueText, procedureSource, profile, prompt, shareText, transition, undated, universityLost, type DialogueContext, type Input, type Session,
+  beforeEntry, beforeEntryNote, countdown, documentsNote, mapUrl, pageLabel, placeText, plan, targetText, procedureDue, procedureDueText, procedureSource, profile, prompt, shareText, transition, undated, universityLost, type DialogueContext, type Input, type Session,
 } from "../bot/dialog.js";
 import { funnelEvents, funnelUniversity } from "../bot/funnel.js";
 import { BASE_LANG, format } from "../data/loadTexts.js";
-import type { Service } from "../bot/service.js";
+import { countEvents, type Service } from "../bot/service.js";
 import type { AppResult, AppState, AppUniversity } from "./contract.js";
 
 export type {
-  AppDocument, AppLaunch, AppPlanItem, AppResult, AppSession, AppState, AppStateResponse, AppStep, AppTicket, AppUniversity,
+  AppBeforeEntryItem, AppDocument, AppLaunch, AppPlanItem, AppResult, AppSession, AppState, AppStateResponse, AppStep, AppTicket, AppUniversity,
 } from "./contract.js";
 
 /** Another tab (or the chat) moved the session on while this screen was open. */
@@ -167,6 +167,9 @@ function view(session: Session | null, ctx: DialogueContext, mocked: boolean, hi
         ...(note.place ? { mapUrl: mapUrl(note.place.map) } : {}),
       })) : [],
       share: profile(session) && !stale ? shareText(session, ctx) : "",
+      beforeEntry: session.step === "entry" && !stale ? beforeEntry(session, ctx).map(card => ({
+        id: card.id, title: localized(card.title), text: localized(card.text), note: beforeEntryNote(session, ctx, card).trim(), url: card.source.url,
+      })) : [],
     },
     universities: ctx.universities.map(u => ({ id: u.id, name: localized(u.name), contactUrl: u.contactUrl })),
     texts: texts(ctx, lang),
@@ -204,7 +207,7 @@ export async function applyAction(
     const input: Input = { text: action, callback: false, ...(locale === undefined ? {} : { locale }) };
     const outcome = transition(before, input, ctx);
     const target = funnelUniversity(outcome.session ?? before, ctx);
-    for (const event of funnelEvents(before, outcome.session, input, ctx)) await tx.count(ctx.today, target, event);
+    await countEvents(tx, user, ctx.today, target, funnelEvents(before, outcome.session, input, ctx), service.clock());
     // A chat reply queued earlier carries buttons stamped with the previous revision. The dialogue
     // already refuses them, so drop them rather than leave the user a dead button in the chat.
     await tx.supersedeReplies();

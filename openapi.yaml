@@ -72,6 +72,7 @@ paths:
           description: "`AppStateResponse`: state (session or null, texts, languages, today, demo flags) and launch hints (startParam, languageCode)"
           content: {application/json: {schema: {type: object, required: [state, launch]}}}
         '401': {description: Missing, forged or expired MAX launch data (the reason is not disclosed)}
+        '429': {$ref: '#/components/responses/RateLimited'}
         '503': {description: Storage failure; nothing changed}
   /api/action:
     post:
@@ -95,6 +96,7 @@ paths:
         '400': {description: Invalid JSON, unsupported action or revision}
         '401': {description: Missing, forged or expired MAX launch data}
         '409': {description: "The session moved on (chat or another window); body carries the current revision"}
+        '429': {$ref: '#/components/responses/RateLimited'}
         '503': {description: Storage failure; nothing changed}
   /api/calendar-ticket:
     post:
@@ -106,16 +108,33 @@ paths:
           content: {application/json: {schema: {type: object, required: [url, fileName, expiresIn]}}}
         '401': {description: Missing, forged or expired MAX launch data}
         '404': {description: Nothing to export — no plan, a plan on older rules, or no unfinished procedures}
+        '429': {$ref: '#/components/responses/RateLimited'}
   /api/calendar.ics:
     get:
       summary: The plan as an RFC 5545 calendar file
+      security: [{}, {MaxLaunch: []}]
       parameters:
-        - {name: ticket, in: query, required: true, schema: {type: string}, description: Ticket from /api/calendar-ticket}
+        - {name: ticket, in: query, required: false, schema: {type: string}, description: "Ticket from /api/calendar-ticket; without it the Authorization header is required"}
       responses:
         '200': {description: text/calendar attachment first-90-days.ics}
-        '401': {description: Missing, forged or expired ticket}
+        '401': {description: Missing, forged or expired ticket or MAX launch data}
+        '429': {$ref: '#/components/responses/RateLimited'}
         '404': {description: Nothing to export — no unfinished procedures}
 components:
+  responses:
+    RateLimited:
+      description: "Over RATE_LIMIT_PER_MINUTE requests in the user's fixed 60-second window, which opens with the first one; shared with the chat, nothing changed. A ticketed calendar download is not counted"
+      headers:
+        retry-after:
+          description: Whole seconds until the window ends
+          schema: {type: integer, minimum: 1}
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [error]
+            properties:
+              error: {type: string, const: rate_limited}
   securitySchemes:
     WebhookSecret:
       type: apiKey

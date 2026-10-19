@@ -130,3 +130,67 @@ describe("days left and a missed date", () => {
     expect(click(s, "card:fingerprinting", c).reply.text).not.toContain("Расчётный срок прошёл");
   });
 });
+
+describe("a student who has not entered yet (#25)", () => {
+  function toEntry(start: string, citizenship: string): Session {
+    let r = step(null, { text: start, callback: false });
+    for (const a of ["ru", "accept", "yes", citizenship]) r = click(r.session!, a);
+    return r.session!;
+  }
+  it("sees what the university asks to prepare, marked as a university fact or an assumption, and can still enter the date", () => {
+    const s = toEntry("/start kfu", "KZ");
+    expect(s.step).toBe("entry");
+    const r = click(s, "before-entry");
+    expect(r.session!.step).toBe("entry");
+    expect(r.reply.text).toContain("«Госуслуги RuID»");
+    expect(r.reply.text).toContain("Нотариальный перевод паспорта");
+    // A card for visa countries is not shown to a citizen of Kazakhstan.
+    expect(r.reply.text).not.toContain("Приглашение на учебную визу");
+    expect(r.reply.text).toContain("Факт вуза — страница КФУ: https://kpfu.ru/international/dokumenty/shablony-perevodov");
+    expect(r.reply.text).toContain("Допущение бота: ваше гражданство отнесено к безвизовым странам");
+    const planned = step(r.session, { text: "2026-09-01", callback: false });
+    expect(planned.session!.step).toBe("plan");
+    expect(plan(planned.session!, ctx).length).toBeGreaterThan(0);
+  });
+  it("tells a citizen of a country with suspended invitations so, instead of how to get one (KFU page)", () => {
+    const r = click(toEntry("/start kfu", "EG"), "before-entry");
+    expect(r.reply.text).toContain("оформление приглашений для граждан Египта временно приостановлено");
+    expect(r.reply.text).not.toContain("не менее 45 календарных дней");
+  });
+  it("keeps the demo example working after the cards: the reply with the cards carries the step's button again", () => {
+    const r = click(toEntry("/start kfu", "KZ"), "before-entry");
+    const example = buttons(r).find(b => b.action?.endsWith("|example"));
+    expect(example).toBeDefined();
+    const planned = step(r.session, { text: example!.action!, callback: true });
+    expect(planned.expired).toBeUndefined();
+    expect(planned.session!.step).toBe("plan");
+  });
+  it("keeps the step's buttons working after a wrong entry date (#67)", () => {
+    const wrong = step(toEntry("/start kfu", "KZ"), { text: "15.11.2026", callback: false });
+    expect(buttons(wrong).map(b => b.action?.split("|")[1])).toEqual(["before-entry", "example"]);
+    const before = buttons(wrong).find(b => b.action?.endsWith("|before-entry"))!;
+    const r = step(wrong.session, { text: before.action!, callback: true });
+    expect(r.expired).toBeUndefined();
+    expect(r.reply.text).toContain("«Госуслуги RuID»");
+  });
+  it("says a future entry date is not counted yet and points to the branch (#67)", () => {
+    const r = step(toEntry("/start kfu", "KZ"), { text: "15.11.2026", callback: false });
+    expect(r.reply.text).toContain("Дата въезда не может быть в будущем");
+    expect(r.reply.text).toContain("Ещё не въехали");
+  });
+  it("says a date before the period is outside the scenario (#67)", () => {
+    const r = step(toEntry("/start kfu", "KZ"), { text: "31.08.2026", callback: false });
+    expect(r.reply.text).toContain("раньше 1 сентября 2026 г.");
+  });
+  it("says a date it cannot read has a wrong format (#67)", () => {
+    for (const text of ["30.02.2026", "вчера", "03.09.26"]) {
+      expect(step(toEntry("/start kfu", "KZ"), { text, callback: false }).reply.text).toContain("Не удалось прочитать дату");
+    }
+  });
+  it("does not offer the branch when the profile has no cards for the student", () => {
+    const c = { ...ctx, universities: universities.map(u => ({ ...u, beforeEntry: [] })) };
+    let r = step(null, { text: "/start kfu", callback: false }, c);
+    for (const a of ["ru", "accept", "yes", "KZ"]) r = click(r.session!, a, c);
+    expect(buttons(r).map(b => b.action?.split("|")[1])).not.toContain("before-entry");
+  });
+});

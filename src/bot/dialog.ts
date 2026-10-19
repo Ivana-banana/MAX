@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { buildPlan, coverage, matchesCondition, REMINDER_OFFSETS } from "../core/deadlines.js";
 import { addDays, compareDates, daysBetween, isValidDate } from "../core/dates.js";
 import type { Completions, DeadlineRule, Lang, PlanItem, UserProfile } from "../core/types.js";
-import type { ProcedureCountdown, University, UniversityProcedure } from "../data/loadUniversities.js";
+import type { BeforeEntryCard, ProcedureCountdown, University, UniversityProcedure } from "../data/loadUniversities.js";
 import { format, type Texts } from "../data/loadTexts.js";
 import { CALENDAR_FILE, planToIcs } from "./calendar.js";
 
@@ -101,11 +101,44 @@ export function undated(s: Session, ctx: DialogueContext): UniversityProcedure[]
   const p = profile(s);
   return p && !universityMissing(s, ctx) ? uni(s, ctx).procedures.filter(pr => pr.appliesIf.every(c => matchesCondition(c, p))) : [];
 }
+/**
+ * What the student's university asks to prepare at home (#25): for a student who has chosen a
+ * citizenship but has not entered yet. Only citizenship conditions, so no entry date is needed.
+ */
+export function beforeEntry(s: Session, ctx: DialogueContext): BeforeEntryCard[] {
+  if (!s.citizenship || universityMissing(s, ctx)) return [];
+  const p: UserProfile = { citizenship: s.citizenship, entryDate: ctx.today, purpose: "study" };
+  return uni(s, ctx).beforeEntry.filter(c => c.appliesIf.every(cond => matchesCondition(cond, p)));
+}
+/** Under each card: the university's page it is a fact of, and what the bot assumes beyond it. */
+export function beforeEntryNote(s: Session, ctx: DialogueContext, card: BeforeEntryCard): string {
+  return t(s, ctx, "beforeEntry.fact", { uni: uni(s, ctx).name[s.lang]!, url: card.source.url, date: date(s, card.source.checkedAt) }) +
+    (card.assumption ? t(s, ctx, "beforeEntry.assumption", { text: card.assumption[s.lang]! }) : "");
+}
+function beforeEntryReply(s: Session, ctx: DialogueContext): Reply {
+  const cards = beforeEntry(s, ctx).map(c => `${c.title[s.lang]}\n${c.text[s.lang]}\n${beforeEntryNote(s, ctx, c)}`);
+  // The button press made the entry prompt's buttons stale, so the demo example comes again here.
+  return reply(s, ctx, t(s, ctx, "beforeEntry.title", { uni: uni(s, ctx).name[s.lang]! }) + cards.join("\n\n") +
+    t(s, ctx, "beforeEntry.scope") + t(s, ctx, "beforeEntry.next"), [[link(pageLabel(s, ctx), uni(s, ctx).contactUrl)], ...exampleRow(s, ctx)]);
+}
+/** The entry step's buttons: on its question and on a wrong date, so they never go stale there (#67). */
+function entryRows(s: Session, ctx: DialogueContext): Button[][] {
+  return [...(beforeEntry(s, ctx).length ? [[button(t(s, ctx, "btn.beforeEntry"), "before-entry")]] : []), ...exampleRow(s, ctx)];
+}
+function exampleRow(s: Session, ctx: DialogueContext): Button[][] {
+  return ctx.demo ? [[button(t(s, ctx, "btn.example", { date: date(s, exampleEntry(ctx)) }), "example")]] : [];
+}
 function reply(s: Session, ctx: DialogueContext, text: string, rows: Button[][] = []): Reply {
   const banner = ctx.demo ? t(s, ctx, "banner.demo") : "";
   return { text: banner + text, ruleVersion: ctx.version, buttons: rows.map(row => row.map(b => "action" in b ? {
     text: b.text, action: `${s.nonce}.${s.revision}|${b.action}`,
   } : b)) };
+}
+/** #59: an update over the per-minute limit was dropped. In the session's language, or the MAX one before a session. */
+export function limitedReply(s: Session | null, input: Input, ctx: DialogueContext): Reply {
+  const hinted = input.locale?.slice(0, 2).toLowerCase();
+  const lang = s?.lang ?? (hinted !== undefined && ctx.texts.has(hinted) ? hinted : initialSession(ctx.version).lang);
+  return { text: (ctx.demo ? format(ctx.texts, lang, "banner.demo") : "") + format(ctx.texts, lang, "limited"), buttons: [], ruleVersion: ctx.version };
 }
 const button = (text: string, action: string): Button => ({ text, action });
 /** Suffix of the reminder's "Details" button: tells a return from a reminder apart from a card opened in the plan (funnel.ts). */
@@ -292,8 +325,7 @@ export function prompt(s: Session, ctx: DialogueContext): Reply {
       // Citizenships the rules exclude stay as buttons: they lead to the help branch, not to a dead end.
       [...rows(uni(s, ctx).citizenships, 2), ...rows([...coverage(ctx.rules).excluded, "OTHER"], 2)]
         .map(row => row.map(code => button(country(s, ctx, code), code))));
-    case "entry": return reply(s, ctx, t(s, ctx, "entry", { from: date(s, coverage(ctx.rules).from) }),
-      ctx.demo ? [[button(t(s, ctx, "btn.example", { date: date(s, exampleEntry(ctx)) }), "example")]] : []);
+    case "entry": return reply(s, ctx, t(s, ctx, "entry", { from: date(s, coverage(ctx.rules).from) }), entryRows(s, ctx));
     case "completion": return reply(s, ctx, t(s, ctx, "completion"), [[button(t(s, ctx, "btn.cancel"), "plan")]]);
     case "docEnd": {
       const note = undated(s, ctx).find(n => n.id === s.selected);
@@ -373,10 +405,16 @@ export function transition(previous: Session | null, input: Input, ctx: Dialogue
   else if (s.step === "consent" && action === "accept") s.step = "scope";
   else if (s.step === "scope" && action === "yes") s.step = "citizenship";
   else if (s.step === "citizenship" && uni(s, ctx).citizenships.includes(action)) { s.citizenship = action; s.step = "entry"; }
+  // Not entered yet: what to prepare at home; the step stays, so the entry date can still be sent.
+  else if (s.step === "entry" && action === "before-entry" && beforeEntry(s, ctx).length) return { session: s, reply: beforeEntryReply(s, ctx) };
   else if (s.step === "entry") {
     const entry = ctx.demo && action === "example" ? exampleEntry(ctx) : typedDate(action), from = coverage(ctx.rules).from;
     if (!isValidDate(entry) || entry < from || entry > ctx.today) {
-      return { session: s, reply: reply(s, ctx, t(s, ctx, "entry.invalid", { from: date(s, from) })) };
+      // "entry.invalid" stays the key of a date before the period: the mini app matches it (Onboarding.tsx).
+      const text = !isValidDate(entry) ? t(s, ctx, "entry.format")
+        : entry > ctx.today ? t(s, ctx, "entry.future") + (beforeEntry(s, ctx).length ? t(s, ctx, "entry.future.beforeEntry") : "")
+        : t(s, ctx, "entry.invalid", { from: date(s, from) });
+      return { session: s, reply: reply(s, ctx, text, entryRows(s, ctx)) };
     }
     s.entryDate = entry; s.step = "plan";
   } else if (profile(s) && (action === "plan" || action === "/plan")) { s.step = "plan"; delete s.selected; }

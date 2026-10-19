@@ -168,6 +168,8 @@ export function webappRouter(service: Service, options: WebappOptions) {
     const api = path === "/api/state" || path === "/api/action"
       || path === "/api/calendar.ics" || path === "/api/calendar-ticket";
     if (!api && !(req.method === "GET" || req.method === "HEAD")) return false;
+    // Unknown API and webhook paths are not app routes: the webhook server answers 404 for them.
+    if (!api && (path === "/api" || path.startsWith("/api/") || path === "/webhook")) return false;
 
     const cors = options.devOrigin !== "" && req.headers.origin === options.devOrigin;
     const head = (extra: Record<string, string> = {}) => ({
@@ -194,8 +196,14 @@ export function webappRouter(service: Service, options: WebappOptions) {
         const caller = ticketUser === null
           ? authenticate(req, options, service.clock())
           : { user: ticketUser, mocked: false };
+        if (req.method !== (path === "/api/action" || path === "/api/calendar-ticket" ? "POST" : "GET")) throw new HttpError(405, "method_not_allowed");
+        // #59: every request by launch data shares the chat's per-user counter, after the method check so a
+        // 405 spends nothing. Only the ticketed download is free: the ticket itself was counted.
+        if (ticketUser === null && service.limit.take(caller.user, service.clock()) > 0) {
+          res.setHeader("retry-after", String(service.limit.retryAfter(caller.user, service.clock())));
+          throw new HttpError(429, "rate_limited");
+        }
         if (path === "/api/state") {
-          if (req.method !== "GET") throw new HttpError(405, "method_not_allowed");
           send(200, {
             state: await readState(service, caller.user, caller.mocked, caller.languageCode),
             // The client turns these into the first action: the university a QR poster chose and
@@ -208,7 +216,6 @@ export function webappRouter(service: Service, options: WebappOptions) {
           return true;
         }
         if (path === "/api/action") {
-          if (req.method !== "POST") throw new HttpError(405, "method_not_allowed");
           const body = await readJson(req);
           const action = body.action;
           if (typeof action !== "string" || !isAppAction(action)) throw new HttpError(400, "unsupported_action");
@@ -221,7 +228,6 @@ export function webappRouter(service: Service, options: WebappOptions) {
           return true;
         }
         if (path === "/api/calendar-ticket") {
-          if (req.method !== "POST") throw new HttpError(405, "method_not_allowed");
           if (await icsFor(service, caller.user) === null) throw new HttpError(404, "nothing_to_export");
           send(200, {
             url: `api/calendar.ics?ticket=${issueTicket(ticketSecret, caller.user, service.clock())}`,
@@ -229,7 +235,6 @@ export function webappRouter(service: Service, options: WebappOptions) {
           });
           return true;
         }
-        if (req.method !== "GET") throw new HttpError(405, "method_not_allowed");
         const ics = await icsFor(service, caller.user);
         if (ics === null) throw new HttpError(404, "nothing_to_export");
         res.writeHead(200, head({
@@ -275,7 +280,6 @@ export function webappRouter(service: Service, options: WebappOptions) {
       "content-length": String(size),
       "cache-control": immutable ? "public, max-age=31536000, immutable" : "no-cache",
       "content-security-policy": CSP,
-      "x-content-type-options": "nosniff",
       "referrer-policy": "no-referrer",
     }));
     if (req.method === "HEAD") { res.end(); return true; }

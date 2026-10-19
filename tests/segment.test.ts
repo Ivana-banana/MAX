@@ -33,7 +33,7 @@ describe("segment bounds come from the rules, not from the dialogue code", () =>
     const entry = walk(ctx, "entry");
     expect(entry.reply.text).toContain("с 15 января 2027 г. по сегодня");
     entry.type("2027-01-10");
-    expect(entry.reply.text).toContain("Дата вне сценария");
+    expect(entry.reply.text).toContain("Дата раньше 15 января 2027 г.");
     entry.type("20.01.2027");
     expect(entry.s.entryDate).toBe("2027-01-20");
     const help = walk(ctx, "citizenship");

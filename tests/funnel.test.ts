@@ -66,6 +66,11 @@ describe("anonymous funnel counters", () => {
     await f.input("/plan"); await f.click("card:medical-examination"); await f.input("/start");
     expect(await f.totals()).toEqual({ "kfu:started": 1, "kfu:plan_ready": 1 });
   });
+  it("counts opening the before-entry cards (#25)", async () => {
+    const f = await fixture();
+    await f.input("/start"); for (const a of ["ru", "accept", "yes", "KZ", "before-entry"]) await f.click(a);
+    expect(await f.totals()).toEqual({ "kfu:started": 1, "kfu:before_entry_opened": 1 });
+  });
   it("drops counters older than the profile retention period", async () => {
     const f = await fixture(); await f.onboard();
     f.time("2027-11-01T10:00:00+03:00"); await f.service.maintain();

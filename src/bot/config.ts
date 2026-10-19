@@ -14,6 +14,10 @@ export interface Config {
   /** Bot name for the plan's `open_app` button; empty keeps the button off until MAX knows the app URL. */
   webappBot: string;
   deployedCommit: string;
+  /** Chat updates plus mini app actions per user per minute (#59). */
+  rateLimit: number;
+  /** Upper bound for delivering one queued message; on expiry it goes back to the outbox for a retry (#65). */
+  sendTimeoutMs: number;
 }
 
 /**
@@ -49,7 +53,12 @@ export function readConfig(env: NodeJS.ProcessEnv = process.env): Config {
   if (webappBot && !/^[A-Za-z0-9_]{1,64}$/.test(webappBot)) throw new Error("WEBAPP_BOT must be the bot name, e.g. t149_hakaton_max_bot");
   // Diagnostics only: a malformed value is dropped rather than keeping the bot from starting.
   const deployedCommit = /^[a-fA-F0-9]{7,40}$/.test(env.DEPLOYED_COMMIT ?? "") ? env.DEPLOYED_COMMIT! : "";
-  return { mode, transport, token, secret, port, host: env.HOST ?? "127.0.0.1", databaseUrl,
+  const rateLimit = Number(env.RATE_LIMIT_PER_MINUTE ?? 30);
+  if (!Number.isInteger(rateLimit) || rateLimit < 1) throw new Error("RATE_LIMIT_PER_MINUTE must be a positive integer");
+  // Below the 60 s outbox lease, or a slow send could be claimed a second time.
+  const sendTimeoutMs = Number(env.SEND_TIMEOUT_MS ?? 30000);
+  if (!Number.isInteger(sendTimeoutMs) || sendTimeoutMs < 1000 || sendTimeoutMs > 50000) throw new Error("SEND_TIMEOUT_MS must be an integer from 1000 to 50000");
+  return { mode, transport, token, secret, port, rateLimit, sendTimeoutMs, host: env.HOST ?? "127.0.0.1", databaseUrl,
     webappDir: env.WEBAPP_DIR ?? "./web/dist", webappDevOrigin, webappBot, deployedCommit,
     rulesPath: env.RULES_PATH ?? "./src/data/rules/ru-student.json",
     universitiesPath: env.UNIVERSITIES_PATH ?? "./src/data/universities", defaultUniversity: env.DEFAULT_UNIVERSITY ?? "kfu",

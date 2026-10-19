@@ -3,8 +3,9 @@ import { REMINDER_OFFSETS, reminderDates } from "../core/deadlines.js";
 import { addDays } from "../core/dates.js";
 import type { PostgresJob, PostgresStore, PostgresStoreTx } from "../db/postgres-store.js";
 import { errorInfo } from "../log.js";
-import { plan, procedureDue, procedureReminderReply, reminderReply, transition, undated, visitReply, type DialogueContext, type Input, type Reply, type Session } from "./dialog.js";
-import { funnelEvents, funnelUniversity } from "./funnel.js";
+import { limitedReply, plan, procedureDue, procedureReminderReply, reminderReply, transition, undated, visitReply, type DialogueContext, type Input, type Reply, type Session } from "./dialog.js";
+import { funnelEvents, funnelUniversity, type FunnelEvent } from "./funnel.js";
+import { RateLimit } from "./rate.js";
 
 export interface Incoming { id: string; user: number; input: Input; callbackId?: string }
 export interface Transport { send(user: number, reply: Reply): Promise<void>; answer?(id: string): Promise<void> }
@@ -42,23 +43,42 @@ export function parseUpdate(raw: unknown): Incoming | null {
 export function moscowDate(now: number): string {
   return new Date(now + 3 * 3600000).toISOString().slice(0, 10);
 }
+/**
+ * D-047: started and deleted count once per user a day, so a /start → /delete loop cannot inflate them.
+ * The mark is a hash in the events table (kept 7 days like update ids); the funnel itself gets no MAX ID.
+ */
+export async function countEvents(tx: PostgresStoreTx, user: number, day: string, university: string, events: FunnelEvent[], now: number): Promise<void> {
+  for (const event of events) {
+    if ((event === "started" || event === "deleted") &&
+        await tx.seen(createHash("sha256").update(JSON.stringify(["funnel", user, day, event])).digest("hex"), now)) continue;
+    await tx.count(day, university, event);
+  }
+}
 export class Service {
   private sending = false;
   private maintained = -Infinity;
-  constructor(readonly store: PostgresStore, readonly context: Omit<DialogueContext, "today">, readonly transport: Transport, readonly clock: () => number = Date.now) {}
+  constructor(readonly store: PostgresStore, readonly context: Omit<DialogueContext, "today">, readonly transport: Transport, readonly clock: () => number = Date.now,
+    readonly limit = new RateLimit(Infinity), readonly sendTimeoutMs = 30_000) {}
   ctx(): DialogueContext { return { ...this.context, today: moscowDate(this.clock()) }; }
   // Resolves after COMMIT: the webhook answers 200 only for a stored update.
   async receive(update: Incoming): Promise<void> {
     const now = this.clock();
     await this.store.transaction(update.user, async tx => {
       if (await tx.seen(update.id, now)) return;
+      // After seen(): a redelivered update must not spend the limit. Over it the update is dropped, not
+      // refused: MAX would retry a non-200 answer. One notice a minute.
+      const over = this.limit.take(update.user, now);
+      if (over > 0) {
+        if (over === 1) await tx.enqueue(update.id, limitedReply(await tx.get(), update.input, this.ctx()), "reply", now, now);
+        return;
+      }
       const before = await tx.get(), ctx = this.ctx();
       const outcome = transition(before, update.input, ctx);
       const university = funnelUniversity(outcome.session ?? before, ctx);
       // A refused stale button (a double tap) changed nothing: it must neither count as a step nor
       // replace the screen the first tap queued, or the user gets only "the button is outdated".
       if (!outcome.expired) {
-        for (const event of funnelEvents(before, outcome.session, update.input, ctx)) await tx.count(ctx.today, university, event);
+        await countEvents(tx, update.user, ctx.today, university, funnelEvents(before, outcome.session, update.input, ctx), now);
         await tx.supersedeReplies();
       }
       await tx.cancelReminders();
@@ -105,10 +125,19 @@ export class Service {
   }
   // One user at a time under the same lock as receive(): a concurrent update cannot interleave.
   async maintain(): Promise<void> {
+    this.limit.prune(this.clock());
     await this.store.prune(this.clock());
     for (const { user } of await this.store.sessions()) {
       await this.store.transaction(user, async tx => this.scheduleUser(tx, user, await tx.get()));
     }
+  }
+  // #65: a hung request must not hold the tick. On timeout the caller takes its usual failure path (retry).
+  private async deliver(user: number, message: Reply): Promise<void> {
+    let timer: NodeJS.Timeout | undefined;
+    const timeout = new Promise<never>((_, reject) => {
+      timer = setTimeout(() => { console.error("Send timed out; the message stays in the outbox for a retry."); reject(new Error("send timeout")); }, this.sendTimeoutMs);
+    });
+    try { await Promise.race([this.transport.send(user, message), timeout]); } finally { clearTimeout(timer); }
   }
   /** One pass of the background loop: maintenance once a minute, then the queue. */
   async tick(): Promise<void> {
@@ -144,7 +173,7 @@ export class Service {
             // Only for the end date still entered, and not after the counted date.
             if (!state || !note || !counted || counted.end !== ref.end || counted.due < ctx.today) { await this.store.cancel(job.id, job.lease_token); continue; }
             message = procedureReminderReply(state, ctx, note, counted.due);
-            try { await this.transport.send(job.user_id, message); await this.store.finish(job.id, job.lease_token); }
+            try { await this.deliver(job.user_id, message); await this.store.finish(job.id, job.lease_token); }
             catch (e) { await this.failed(job, e); }
             continue;
           }
@@ -154,7 +183,7 @@ export class Service {
             // Only the visit still planned for that day, and not once it has passed.
             if (!state || !item || state.visits?.[item.ruleId] !== ref.visit || ref.visit < this.ctx().today) { await this.store.cancel(job.id, job.lease_token); continue; }
             message = visitReply(state, this.ctx(), item);
-            try { await this.transport.send(job.user_id, message); await this.store.finish(job.id, job.lease_token); }
+            try { await this.deliver(job.user_id, message); await this.store.finish(job.id, job.lease_token); }
             catch (e) { await this.failed(job, e); }
             continue;
           }
@@ -166,7 +195,7 @@ export class Service {
           message = JSON.parse(job.payload) as Reply;
           if (message.ruleVersion !== this.context.version) { await this.store.cancel(job.id, job.lease_token); continue; }
         }
-        try { await this.transport.send(job.user_id, message); await this.store.finish(job.id, job.lease_token); }
+        try { await this.deliver(job.user_id, message); await this.store.finish(job.id, job.lease_token); }
         catch (e) { await this.failed(job, e); continue; }
         // Outside the send block: a failed counter must not resend the reminder.
         if (job.kind === "reminder") {

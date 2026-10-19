@@ -6,11 +6,13 @@ import { errorInfo } from "../log.js";
 export type ExtraRoutes = (req: IncomingMessage, res: ServerResponse) => Promise<boolean>;
 export function webhookServer(service: Service, secret: string, extra?: ExtraRoutes, commit = "") {
   const handle = async (req: IncomingMessage, res: ServerResponse) => {
+    // Set once for every answer, including the ones the mini app router writes itself.
+    res.setHeader("x-content-type-options", "nosniff");
     const send = (status: number, value: object) => {
       res.writeHead(status, { "content-type": "application/json", "cache-control": "no-store" });
       res.end(JSON.stringify(value));
     };
-    if (req.method === "GET" && req.url === "/health") {
+    if ((req.method === "GET" || req.method === "HEAD") && req.url?.split("?")[0] === "/health") {
       try { send(200, { status: "ok", mode: service.context.demo ? "demo" : "live", queue: await service.store.counts(),
         ...(commit ? { commit } : {}) }); }
       catch (e) { console.error(`Health check failed (${errorInfo(e)}).`); send(503, { error: "storage_unavailable" }); }
