@@ -51,6 +51,22 @@ bash scripts/issues.sh create <заголовок> <метки> <файл|->   #
 - Коммит ссылается на задачу: `<поток>: <что закончено> (#N)`; последний коммит
   задачи — `Closes #N` в теле, или закрыть задачу с комментарием о проверке.
 
+## Git-хуки (для людей и Codex)
+
+Хуки Claude Code (`.claude/hooks/`) видят только Claude Code. Для всех остальных, кто
+коммитит, есть git-хуки в `.githooks/`. Подключить один раз в клоне:
+
+```bash
+git config core.hooksPath .githooks
+```
+
+- `pre-commit` — секреты в индексе (`.claude/hooks/check-secrets.sh --git`), затем
+  `scripts/issues.sh check .`: коммит только в worktree взятой задачи.
+- `pre-push` — `scripts/issues.sh check .`. Push, который только удаляет ветки (уборка),
+  не проверяется.
+- Обход `--no-verify` — только по явной просьбе человека.
+- Проверка хуков без сети: `bash .claude/hooks/test-hooks.sh`.
+
 ## Worktree по умолчанию
 
 Основная копия (клон репозитория на ветке `main`; путь у каждого свой, ниже —
