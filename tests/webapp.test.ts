@@ -501,7 +501,7 @@ describe("mini app HTTP surface", () => {
     expect((await fetch(`${url}/api/state`, { headers: auth(genuine()) })).status).toBe(200);
   });
   it("keeps one person's session out of another's reach, whatever the body says", async () => {
-    const f = await fixture();
+    const f = await fixture("./web/dist", false); // the production config: no unsigned demo launch
     const url = await serve(f.router, f.service);
     const owner = genuine(), stranger = genuine({ user: person(8) });
     for (const action of ONBOARDING) await act(url, owner, { action });
@@ -526,8 +526,37 @@ describe("mini app HTTP surface", () => {
       await fetch(`${url}/api/calendar.ics`, { headers: auth(value) }),
       await fetch(`${url}/webhook`, { method: "POST" }),
       await fetch(`${url}/health`),
+      await fetch(`${url}/api/state`, { method: "OPTIONS" }),
+      await fetch(`${url}/api/other`, { method: "OPTIONS" }),
+      await fetch(`${url}/nothing-here.exe`),
+      await fetch(`${url}/%00`),
+      await fetch(`${url}/no-such-route`, { method: "DELETE" }),
     ];
+    expect(answers.map(a => a.status)).toEqual([200, 401, 200, 200, 401, 200, 405, 404, 403, 400, 404]);
     for (const answer of answers) expect(answer.headers.get("x-content-type-options"), answer.url).toBe("nosniff");
+  });
+  it("answers 404 JSON, not the app shell, for unknown API and webhook paths", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "webapp-"));
+    cleanups.push(() => rm(dir, { recursive: true, force: true }));
+    writeFileSync(join(dir, "index.html"), "<!doctype html><title>app</title>");
+    const f = await fixture(dir);
+    const url = await serve(f.router, f.service);
+    expect((await fetch(`${url}/`)).status).toBe(200);
+    expect((await fetch(`${url}/some/route`)).status).toBe(200);
+    for (const path of ["/api", "/api/", "/api/foo", "/api/state/", "/webhook"]) {
+      const answer = await fetch(`${url}${path}`, { headers: auth(genuine()) });
+      expect([path, answer.status, answer.headers.get("content-type")]).toEqual([path, 404, "application/json"]);
+      expect(await answer.json()).toEqual({ error: "not_found" });
+    }
+  });
+  it("answers /health to GET and HEAD, with or without a query", async () => {
+    const f = await fixture();
+    const url = await serve(f.router, f.service);
+    for (const [method, path] of [["GET", "/health"], ["GET", "/health?x=1"], ["HEAD", "/health"], ["HEAD", "/health?x=1"]] as const) {
+      const answer = await fetch(`${url}${path}`, { method });
+      expect([method, path, answer.status, answer.headers.get("content-type")])
+        .toEqual([method, path, 200, "application/json"]);
+    }
   });
   it("lets the chat and the app act on one session in turn", async () => {
     const f = await fixture();

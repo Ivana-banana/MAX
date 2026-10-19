@@ -167,6 +167,8 @@ export function webappRouter(service: Service, options: WebappOptions) {
     const api = path === "/api/state" || path === "/api/action"
       || path === "/api/calendar.ics" || path === "/api/calendar-ticket";
     if (!api && !(req.method === "GET" || req.method === "HEAD")) return false;
+    // Unknown API and webhook paths are not app routes: the webhook server answers 404 for them.
+    if (!api && (path === "/api" || path.startsWith("/api/") || path === "/webhook")) return false;
 
     const cors = options.devOrigin !== "" && req.headers.origin === options.devOrigin;
     const head = (extra: Record<string, string> = {}) => ({
@@ -179,8 +181,7 @@ export function webappRouter(service: Service, options: WebappOptions) {
       ...extra,
     });
     const send = (status: number, value: object) => {
-      res.writeHead(status, head({ "content-type": "application/json; charset=utf-8", "cache-control": "no-store",
-        "x-content-type-options": "nosniff" }));
+      res.writeHead(status, head({ "content-type": "application/json; charset=utf-8", "cache-control": "no-store" }));
       res.end(JSON.stringify(value));
     };
     if (api && req.method === "OPTIONS") { res.writeHead(cors ? 204 : 405, head()); res.end(); return true; }
@@ -236,7 +237,6 @@ export function webappRouter(service: Service, options: WebappOptions) {
           "content-type": "text/calendar; charset=utf-8",
           "content-disposition": `attachment; filename="${CALENDAR_FILE}"`,
           "cache-control": "no-store",
-          "x-content-type-options": "nosniff",
         }));
         res.end(ics);
         return true;
@@ -276,7 +276,6 @@ export function webappRouter(service: Service, options: WebappOptions) {
       "content-length": String(size),
       "cache-control": immutable ? "public, max-age=31536000, immutable" : "no-cache",
       "content-security-policy": CSP,
-      "x-content-type-options": "nosniff",
       "referrer-policy": "no-referrer",
     }));
     if (req.method === "HEAD") { res.end(); return true; }
