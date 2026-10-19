@@ -56,7 +56,7 @@ expect pass  "ничего не менялось с зелёного прого�
 # --- session-context.sh (SessionStart: stdout уходит в контекст)
 expect_out() { # expect_out <has|lacks> <описание> <шаблон>
   local out
-  out="$(bash "$HOOKS/session-context.sh" 2>&1)"
+  out="$(SKIP_ISSUES=1 bash "$HOOKS/session-context.sh" 2>&1)"
   if [ "$1" = has ] && ! printf '%s' "$out" | grep -q -- "$3"; then
     echo "FAIL: $2 — нет «$3», вывод: $out"; FAIL=1
   elif [ "$1" = lacks ] && printf '%s' "$out" | grep -q -- "$3"; then
@@ -86,12 +86,31 @@ cat > HANDOFF.md <<'EOF'
 EOF
 git add HANDOFF.md && git -c user.name=t -c user.email=t@t commit -q -m init
 expect_out has   "основная копия на main — предупреждение" "основной копии"
-expect_out has   "активная задача из HANDOFF"              "Сценарий /start"
+expect_out lacks "задачи из HANDOFF не выводятся (они в Issues)" "Сценарий /start"
 expect_out lacks "блокеры не попадают в список задач"      "не показывать"
 expect_out has   "кто держит токен бота"                   "| Alice | polling"
 git worktree add -q .claude/worktrees/wt-test -b worktree-wt-test 2>/dev/null
 (cd .claude/worktrees/wt-test && expect_out lacks "worktree — без предупреждения" "основной копии")
 (cd .claude/worktrees/wt-test && expect_out has   "worktree — видна ветка"        "worktree-wt-test")
+
+# --- check-issue.sh (PreToolUse: без взятой задачи файлы не меняем)
+expect_issue() { # expect_issue <0|2> <описание> <cwd> <json tool_name+tool_input>
+  local out code
+  out="$(printf '{"cwd":"%s",%s}' "$3" "$4" | bash "$HOOKS/check-issue.sh" 2>&1)"; code=$?
+  if [ "$code" != "$1" ]; then echo "FAIL: $2 — код $code, ожидался $1, вывод: $out"; FAIL=1
+  else echo "ok:   $2"; fi
+}
+git worktree add -q .claude/worktrees/7-x -b worktree-7-x 2>/dev/null
+for d in . .claude/worktrees/wt-test .claude/worktrees/7-x; do  # скрипт проверки из репозитория
+  mkdir -p "$d/scripts" && cp "$HOOKS/../../scripts/issues.sh" "$d/scripts/"
+done
+expect_issue 2 "issue: правка в основной копии — отказ" "$TMP" '"tool_name":"Edit","tool_input":{"file_path":"a.txt"}'
+expect_issue 0 "issue: scratchpad — можно" "$TMP" '"tool_name":"Write","tool_input":{"file_path":"/tmp/x/scratchpad/a.txt"}'
+expect_issue 0 "issue: Bash без commit/push — можно" "$TMP" '"tool_name":"Bash","tool_input":{"command":"ls"}'
+wt="$TMP/.claude/worktrees/wt-test"
+expect_issue 2 "issue: ветка без номера задачи — отказ" "$wt" '"tool_name":"Edit","tool_input":{"file_path":"a.txt"}'
+printf 7 > "$(git -C .claude/worktrees/7-x rev-parse --git-dir)/issue-check"
+expect_issue 0 "issue: worktree взятой задачи — можно" "$TMP/.claude/worktrees/7-x" '"tool_name":"Bash","tool_input":{"command":"git commit -m x"}'
 
 # --- check-upstream.sh: чужие коммиты в origin/main против моей работы
 cd "$TMP" && git init -q --bare -b main remote.git

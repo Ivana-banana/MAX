@@ -54,7 +54,7 @@
           {
             "type": "command",
             "command": "bash .claude/hooks/session-context.sh",
-            "timeout": 10
+            "timeout": 20
           }
         ]
       }
@@ -91,6 +91,18 @@
             "type": "command",
             "command": "bash .claude/hooks/check-upstream.sh post",
             "timeout": 30
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit|NotebookEdit|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/check-issue.sh",
+            "timeout": 20
           }
         ]
       }
