@@ -57,7 +57,7 @@ export class Service {
   private sending = false;
   private maintained = -Infinity;
   constructor(readonly store: PostgresStore, readonly context: Omit<DialogueContext, "today">, readonly transport: Transport, readonly clock: () => number = Date.now,
-    readonly limit = new RateLimit(Infinity)) {}
+    readonly limit = new RateLimit(Infinity), readonly sendTimeoutMs = 30_000) {}
   ctx(): DialogueContext { return { ...this.context, today: moscowDate(this.clock()) }; }
   // Resolves after COMMIT: the webhook answers 200 only for a stored update.
   async receive(update: Incoming): Promise<void> {
@@ -130,6 +130,14 @@ export class Service {
       await this.store.transaction(user, async tx => this.scheduleUser(tx, user, await tx.get()));
     }
   }
+  // #65: a hung request must not hold the tick. On timeout the caller takes its usual failure path (retry).
+  private async deliver(user: number, message: Reply): Promise<void> {
+    let timer: NodeJS.Timeout | undefined;
+    const timeout = new Promise<never>((_, reject) => {
+      timer = setTimeout(() => { console.error("Send timed out; the message stays in the outbox for a retry."); reject(new Error("send timeout")); }, this.sendTimeoutMs);
+    });
+    try { await Promise.race([this.transport.send(user, message), timeout]); } finally { clearTimeout(timer); }
+  }
   /** One pass of the background loop: maintenance once a minute, then the queue. */
   async tick(): Promise<void> {
     const now = this.clock();
@@ -159,7 +167,7 @@ export class Service {
             // Only for the end date still entered, and not after the counted date.
             if (!state || !note || !counted || counted.end !== ref.end || counted.due < ctx.today) { await this.store.cancel(job.id, job.lease_token); continue; }
             message = procedureReminderReply(state, ctx, note, counted.due);
-            try { await this.transport.send(job.user_id, message); await this.store.finish(job.id, job.lease_token); }
+            try { await this.deliver(job.user_id, message); await this.store.finish(job.id, job.lease_token); }
             catch { await this.store.retry(job, this.clock()); }
             continue;
           }
@@ -169,7 +177,7 @@ export class Service {
             // Only the visit still planned for that day, and not once it has passed.
             if (!state || !item || state.visits?.[item.ruleId] !== ref.visit || ref.visit < this.ctx().today) { await this.store.cancel(job.id, job.lease_token); continue; }
             message = visitReply(state, this.ctx(), item);
-            try { await this.transport.send(job.user_id, message); await this.store.finish(job.id, job.lease_token); }
+            try { await this.deliver(job.user_id, message); await this.store.finish(job.id, job.lease_token); }
             catch { await this.store.retry(job, this.clock()); }
             continue;
           }
@@ -181,7 +189,7 @@ export class Service {
           message = JSON.parse(job.payload) as Reply;
           if (message.ruleVersion !== this.context.version) { await this.store.cancel(job.id, job.lease_token); continue; }
         }
-        try { await this.transport.send(job.user_id, message); await this.store.finish(job.id, job.lease_token); }
+        try { await this.deliver(job.user_id, message); await this.store.finish(job.id, job.lease_token); }
         catch { await this.store.retry(job, this.clock()); continue; }
         // Outside the send block: a failed counter must not resend the reminder.
         if (job.kind === "reminder") {
