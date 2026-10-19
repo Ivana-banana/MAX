@@ -95,6 +95,7 @@ paths:
         '400': {description: Invalid JSON, unsupported action or revision}
         '401': {description: Missing, forged or expired MAX launch data}
         '409': {description: "The session moved on (chat or another window); body carries the current revision"}
+        '429': {description: "Over RATE_LIMIT_PER_MINUTE actions this minute (shared with the chat); `retry-after` in seconds, nothing changed"}
         '503': {description: Storage failure; nothing changed}
   /api/calendar-ticket:
     post:
@@ -106,6 +107,7 @@ paths:
           content: {application/json: {schema: {type: object, required: [url, fileName, expiresIn]}}}
         '401': {description: Missing, forged or expired MAX launch data}
         '404': {description: Nothing to export — no plan, a plan on older rules, or no unfinished procedures}
+        '429': {description: "Over RATE_LIMIT_PER_MINUTE actions this minute (shared with the chat); `retry-after` in seconds"}
   /api/calendar.ics:
     get:
       summary: The plan as an RFC 5545 calendar file

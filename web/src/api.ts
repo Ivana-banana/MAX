@@ -13,7 +13,7 @@ export type {
 } from "../../src/webapp/contract.js";
 
 /** Why a request could not be made or was refused. The UI shows a sentence per case. */
-export type ApiFailure = "no_launch" | "unauthorized" | "conflict" | "offline" | "server";
+export type ApiFailure = "no_launch" | "unauthorized" | "conflict" | "busy" | "offline" | "server";
 
 export class ApiError extends Error {
   constructor(readonly failure: ApiFailure, readonly revision?: number) {
@@ -49,6 +49,8 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     const body = await response.json().catch(() => ({})) as { revision?: number };
     throw new ApiError("conflict", body.revision);
   }
+  // Too many actions this minute (#59): nothing changed, the same action works again later.
+  if (response.status === 429) throw new ApiError("busy");
   if (!response.ok) throw new ApiError("server");
   return await response.json() as T;
 }

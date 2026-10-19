@@ -126,6 +126,12 @@ function reply(s: Session, ctx: DialogueContext, text: string, rows: Button[][] 
     text: b.text, action: `${s.nonce}.${s.revision}|${b.action}`,
   } : b)) };
 }
+/** #59: an update over the per-minute limit was dropped. In the session's language, or the MAX one before a session. */
+export function limitedReply(s: Session | null, input: Input, ctx: DialogueContext): Reply {
+  const hinted = input.locale?.slice(0, 2).toLowerCase();
+  const lang = s?.lang ?? (hinted !== undefined && ctx.texts.has(hinted) ? hinted : initialSession(ctx.version).lang);
+  return { text: (ctx.demo ? format(ctx.texts, lang, "banner.demo") : "") + format(ctx.texts, lang, "limited"), buttons: [], ruleVersion: ctx.version };
+}
 const button = (text: string, action: string): Button => ({ text, action });
 /** Suffix of the reminder's "Details" button: tells a return from a reminder apart from a card opened in the plan (funnel.ts). */
 export const FROM_REMINDER = ":reminder";

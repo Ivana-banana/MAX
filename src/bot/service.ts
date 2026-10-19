@@ -2,8 +2,9 @@ import { createHash, randomUUID } from "node:crypto";
 import { REMINDER_OFFSETS, reminderDates } from "../core/deadlines.js";
 import { addDays } from "../core/dates.js";
 import type { PostgresStore, PostgresStoreTx } from "../db/postgres-store.js";
-import { plan, procedureDue, procedureReminderReply, reminderReply, transition, undated, visitReply, type DialogueContext, type Input, type Reply, type Session } from "./dialog.js";
+import { limitedReply, plan, procedureDue, procedureReminderReply, reminderReply, transition, undated, visitReply, type DialogueContext, type Input, type Reply, type Session } from "./dialog.js";
 import { funnelEvents, funnelUniversity } from "./funnel.js";
+import { RateLimit } from "./rate.js";
 
 export interface Incoming { id: string; user: number; input: Input; callbackId?: string }
 export interface Transport { send(user: number, reply: Reply): Promise<void>; answer?(id: string): Promise<void> }
@@ -44,11 +45,20 @@ export function moscowDate(now: number): string {
 export class Service {
   private sending = false;
   private maintained = -Infinity;
-  constructor(readonly store: PostgresStore, readonly context: Omit<DialogueContext, "today">, readonly transport: Transport, readonly clock: () => number = Date.now) {}
+  constructor(readonly store: PostgresStore, readonly context: Omit<DialogueContext, "today">, readonly transport: Transport, readonly clock: () => number = Date.now,
+    readonly limit = new RateLimit(Infinity)) {}
   ctx(): DialogueContext { return { ...this.context, today: moscowDate(this.clock()) }; }
   // Resolves after COMMIT: the webhook answers 200 only for a stored update.
   async receive(update: Incoming): Promise<void> {
     const now = this.clock();
+    // Over the limit the update is dropped, not refused: MAX would retry a non-200 answer. One notice a minute.
+    const over = this.limit.take(update.user, now);
+    if (over > 0) {
+      if (over === 1) await this.store.transaction(update.user, async tx => {
+        if (!await tx.seen(update.id, now)) await tx.enqueue(update.id, limitedReply(await tx.get(), update.input, this.ctx()), "reply", now, now);
+      });
+      return;
+    }
     await this.store.transaction(update.user, async tx => {
       if (await tx.seen(update.id, now)) return;
       const before = await tx.get(), ctx = this.ctx();
@@ -104,6 +114,7 @@ export class Service {
   }
   // One user at a time under the same lock as receive(): a concurrent update cannot interleave.
   async maintain(): Promise<void> {
+    this.limit.prune(this.clock());
     await this.store.prune(this.clock());
     for (const { user } of await this.store.sessions()) {
       await this.store.transaction(user, async tx => this.scheduleUser(tx, user, await tx.get()));
