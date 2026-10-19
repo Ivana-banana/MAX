@@ -184,6 +184,7 @@ export function App() {
     if (kind === "unauthorized") return t("app.error.expired");
     if (kind === "offline") return t("app.error.offline");
     if (kind === "conflict") return t("app.error.conflict");
+    if (kind === "busy") return t("app.error.busy");
     if (kind === "download") return t("app.error.download");
     return t("app.error.server");
   };

@@ -195,6 +195,11 @@ export function webappRouter(service: Service, options: WebappOptions) {
         const caller = ticketUser === null
           ? authenticate(req, options, service.clock())
           : { user: ticketUser, mocked: false };
+        // #59: the two routes that write or compute share the chat's per-user counter; reads stay free.
+        if ((path === "/api/action" || path === "/api/calendar-ticket") && service.limit.take(caller.user, service.clock()) > 0) {
+          res.setHeader("retry-after", String(service.limit.retryAfter(caller.user, service.clock())));
+          throw new HttpError(429, "rate_limited");
+        }
         if (path === "/api/state") {
           if (req.method !== "GET") throw new HttpError(405, "method_not_allowed");
           send(200, {

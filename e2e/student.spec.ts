@@ -59,6 +59,11 @@ test("API failure → clear message, retry works without a restart", async ({ pa
   await expect(dateField(page)).toHaveValue(moscowDate(7)); // the screen and the input survive
 
   await page.unroute("**/api/action");
+  await page.route("**/api/action", route => route.fulfill({ status: 429, headers: { "retry-after": "60" }, body: "{}" }));
+  await save(page).click();
+  await expect(page.getByRole("alert")).toContainText("Слишком много действий подряд");
+
+  await page.unroute("**/api/action");
   await page.route("**/api/action", route => route.abort("connectionrefused"));
   await save(page).click();
   await expect(page.getByRole("alert")).toContainText("Нет связи с сервером");

@@ -34,6 +34,7 @@ services:
       DEFAULT_UNIVERSITY: ${DEFAULT_UNIVERSITY:-kfu}
       WEBAPP_BOT: ${WEBAPP_BOT:-}
       DEPLOYED_COMMIT: ${DEPLOYED_COMMIT:-}
+      RATE_LIMIT_PER_MINUTE: ${RATE_LIMIT_PER_MINUTE:-30}
       DATABASE_URL: postgresql://bot:${POSTGRES_PASSWORD:-local-demo-only-not-for-deployment}@postgres:5432/bot
     volumes:
       # Former SQLite database: read once by the import (docs/deploy.md), not used at runtime.
