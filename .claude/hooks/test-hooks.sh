@@ -270,4 +270,16 @@ grep -q "^gh issue close 9" "$FAKE_LOG" && echo "ok:   finish: задача за
   && echo "ok:   finish: worktree и ветка убраны" || { echo "FAIL: finish: уборка не прошла"; FAIL=1; }
 [ -f "$TMP/fin/m.txt" ] && [ -f "$TMP/fin/b.txt" ] && echo "ok:   finish: основная копия подтянута" || { echo "FAIL: finish: основная копия не обновлена"; FAIL=1; }
 
+# --- scripts/mode.sh: режим из строки «Режим:» в CLAUDE.md, main главнее рабочей копии
+expect_mode() { # expect_mode <ожидаемый вывод> <описание>
+  local out; out="$(cd "$TMP/mode" && bash "$HOOKS/../../scripts/mode.sh" --source 2>&1)"
+  [ "$out" = "$1" ] && echo "ok:   mode: $2" || { echo "FAIL: mode: $2 — ожидалось «$1», вывод: $out"; FAIL=1; }
+}
+cd "$TMP" && git init -q --bare -b main mode-remote.git && git clone -q mode-remote.git mode 2>/dev/null
+(cd mode && echo "# t" > CLAUDE.md && git add . && git commit -q -m init)
+expect_mode "сборка CLAUDE.md" "нет строки — сборка"
+(cd mode && printf '# t\n\nРежим: финал\n' > CLAUDE.md && git commit -qam final && git push -q origin HEAD:main && git fetch -q)
+(cd mode && printf '# t\n\nРежим: сборка\n' > CLAUDE.md)
+expect_mode "финал origin/main" "в main финал — финал и при старой рабочей копии"
+
 exit $FAIL
