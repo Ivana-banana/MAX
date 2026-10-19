@@ -415,9 +415,11 @@ docker compose up -d
 Локальный Node останавливается Ctrl+C с ожиданием текущей отправки.
 Бэкап — `pg_dump` с проверкой восстановления в отдельной БД (docs/deploy.md); там же
 разовый перенос прежней SQLite.
-Мониторинг: GitHub Actions `monitor.yml` по расписанию каждые 15 минут (фактически GitHub
-запускает его раз в 3–6 часов) проверяет HTTPS, /health, failed-задания и — при секрете
-`MAX_BOT_TOKEN` — наличие подписки MAX (D-032).
+Мониторинг: основной — внешний keyword-монитор UptimeRobot на /health раз в 5 минут с
+письмом команде (D-049; включает человек, docs/deploy.md, «Мониторинг»). Второй слой —
+GitHub Actions `monitor.yml` → `scripts/monitor.sh` по расписанию каждые 15 минут
+(фактически раз в 3–6 часов): /health, failed-задания и — при секрете `MAX_BOT_TOKEN` —
+наличие подписки MAX (D-032). Руками: `bash scripts/monitor.sh`.
 
 ## Ограничения
 
