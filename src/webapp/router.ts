@@ -16,6 +16,7 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import { countedProcedures, plan } from "../bot/dialog.js";
 import { CALENDAR_FILE, planToIcs } from "../bot/calendar.js";
 import type { Service } from "../bot/service.js";
+import { errorInfo } from "../log.js";
 import { LaunchError, verifyLaunch } from "./initData.js";
 import { applyAction, isAppAction, readState, RevisionConflict } from "./state.js";
 
@@ -241,7 +242,7 @@ export function webappRouter(service: Service, options: WebappOptions) {
       } catch (e) {
         if (e instanceof HttpError) { send(e.status, { error: e.code }); return true; }
         if (e instanceof RevisionConflict) { send(409, { error: "revision_conflict", revision: e.revision }); return true; }
-        console.error("Mini app request failed; inspect storage.");
+        console.error(`Mini app request failed (${errorInfo(e)}); inspect storage.`);
         send(503, { error: "unavailable" });
         return true;
       }

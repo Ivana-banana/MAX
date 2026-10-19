@@ -1,6 +1,7 @@
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { timingSafeEqual } from "node:crypto";
 import { parseUpdate, Service } from "./service.js";
+import { errorInfo } from "../log.js";
 /** Mini app routes, if one is enabled: returns true once it has answered the request. */
 export type ExtraRoutes = (req: IncomingMessage, res: ServerResponse) => Promise<boolean>;
 export function webhookServer(service: Service, secret: string, extra?: ExtraRoutes, commit = "") {
@@ -12,13 +13,17 @@ export function webhookServer(service: Service, secret: string, extra?: ExtraRou
     if (req.method === "GET" && req.url === "/health") {
       try { send(200, { status: "ok", mode: service.context.demo ? "demo" : "live", queue: await service.store.counts(),
         ...(commit ? { commit } : {}) }); }
-      catch { send(503, { error: "storage_unavailable" }); }
+      catch (e) { console.error(`Health check failed (${errorInfo(e)}).`); send(503, { error: "storage_unavailable" }); }
       return;
     }
     if (extra) {
       // The mini app answers its own routes; anything it does not own falls through to the webhook.
       try { if (await extra(req, res)) return; }
-      catch { if (res.headersSent) res.destroy(); else send(503, { error: "webapp_unavailable" }); return; }
+      catch (e) {
+        console.error(`Mini app route failed (${errorInfo(e)}).`);
+        if (res.headersSent) res.destroy(); else send(503, { error: "webapp_unavailable" });
+        return;
+      }
     }
     if (req.method !== "POST" || req.url !== "/webhook") { send(404, { error: "not_found" }); return; }
     const header = req.headers["x-max-bot-api-secret"];
@@ -27,14 +32,14 @@ export function webhookServer(service: Service, secret: string, extra?: ExtraRou
     if (!req.headers["content-type"]?.startsWith("application/json")) { send(415, { error: "json_required" }); return; }
     let raw: unknown;
     try { raw = JSON.parse(await readBody(req)); }
-    catch (e) { send(e instanceof RangeError ? 413 : 400, { error: "invalid_body" }); return; }
+    catch (e) { console.error(`Webhook body rejected (${errorInfo(e)}).`); send(e instanceof RangeError ? 413 : 400, { error: "invalid_body" }); return; }
     let update;
     try { update = parseUpdate(raw); }
-    catch { send(400, { error: "invalid_update" }); return; }
+    catch (e) { console.error(`Webhook update rejected (${errorInfo(e)}).`); send(400, { error: "invalid_update" }); return; }
     try { if (update) await service.receive(update); }
-    catch { send(503, { error: "storage_or_processing_failure" }); return; }
+    catch (e) { console.error(`Webhook update failed (${errorInfo(e)}).`); send(503, { error: "storage_or_processing_failure" }); return; }
     send(200, { success: true });
-    if (update?.callbackId) void service.transport.answer?.(update.callbackId).catch(() => {});
+    if (update?.callbackId) void service.transport.answer?.(update.callbackId).catch((e: unknown) => { console.error(`Callback answer failed (${errorInfo(e)}).`); });
   };
   return createServer((req, res) => void handle(req, res));
 }

@@ -28,9 +28,9 @@ async function fixture(schema?: ScratchSchema) {
   cleanups.push(() => store.close());
   let now = Date.parse("2026-09-24T10:00:00+03:00");
   const sent: { user:number; reply:Reply }[] = [];
-  let failure = false;
+  let failure: boolean | Error = false;
   const service = new Service(store, ctx, { send(user, reply) {
-    if (failure) return Promise.reject(new Error("network unavailable"));
+    if (failure) return Promise.reject(failure instanceof Error ? failure : new Error("network unavailable"));
     sent.push({user,reply});
     return Promise.resolve();
   } }, () => now);
@@ -47,7 +47,7 @@ async function fixture(schema?: ScratchSchema) {
   const pendingReminders = async () =>
     (await pool.query<{n:number}>("SELECT COUNT(*)::int AS n FROM outbox WHERE kind='reminder' AND status='pending'")).rows[0]?.n;
   return { store, pool, service, sent, input, click, onboard, pendingReminders,
-    time: (date:string) => {now = Date.parse(date);}, fail: (value:boolean) => {failure = value;} };
+    time: (date:string) => {now = Date.parse(date);}, fail: (value:boolean | Error) => {failure = value;} };
 }
 describe("student dialogue and durable processing", () => {
   it("completes onboarding, shows sources and saves document checkmarks", async () => {
@@ -148,6 +148,15 @@ describe("student dialogue and durable processing", () => {
     expect((await f.store.counts()).pending).toBe(1); expect(await f.store.get(1)).not.toBeNull();
     f.fail(false); await f.service.flush(); expect(f.sent).toHaveLength(0);
     f.time("2026-09-24T10:01:00+03:00"); await f.service.flush(); expect(f.sent).toHaveLength(1);
+  });
+  it("logs the error code of a failed send without its message", async () => {
+    const f=await fixture(); await f.input("/start");
+    const log=vi.spyOn(console,"error").mockImplementation(() => {});
+    try {
+      f.fail(Object.assign(new Error("secret user text"),{code:"attachment.not.ready",status:400})); await f.service.flush();
+      const line=String(log.mock.calls[0]?.[0]);
+      expect(line).toContain("code=attachment.not.ready"); expect(line).toContain("status=400"); expect(line).not.toContain("secret user text");
+    } finally { log.mockRestore(); }
   });
   it("supersedes an old failed screen after the dialogue advances", async () => {
     const f=await fixture(); await f.input("/start"); f.fail(true); await f.service.flush();

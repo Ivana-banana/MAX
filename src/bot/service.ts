@@ -1,7 +1,8 @@
 import { createHash, randomUUID } from "node:crypto";
 import { REMINDER_OFFSETS, reminderDates } from "../core/deadlines.js";
 import { addDays } from "../core/dates.js";
-import type { PostgresStore, PostgresStoreTx } from "../db/postgres-store.js";
+import type { PostgresJob, PostgresStore, PostgresStoreTx } from "../db/postgres-store.js";
+import { errorInfo } from "../log.js";
 import { plan, procedureDue, procedureReminderReply, reminderReply, transition, undated, visitReply, type DialogueContext, type Input, type Reply, type Session } from "./dialog.js";
 import { funnelEvents, funnelUniversity } from "./funnel.js";
 
@@ -115,9 +116,14 @@ export class Service {
     if (now - this.maintained >= 60_000) {
       this.maintained = now;
       // Maintenance only prunes and schedules reminders: its failure must not hold back replies already queued.
-      try { await this.maintain(); } catch { console.error("Maintenance failed; inspect storage."); }
+      try { await this.maintain(); } catch (e) { console.error(`Maintenance failed (${errorInfo(e)}); inspect storage.`); }
     }
     await this.flush();
+  }
+  /** A failed send goes back to the queue; the log says why, and which attempt it was. */
+  private async failed(job: PostgresJob, error: unknown): Promise<void> {
+    console.error(`Send failed (job ${job.id}, ${job.kind}, attempt ${job.attempts + 1}): ${errorInfo(error)}`);
+    await this.store.retry(job, this.clock());
   }
   async flush(limit = 20): Promise<void> {
     if (this.sending) return;
@@ -139,7 +145,7 @@ export class Service {
             if (!state || !note || !counted || counted.end !== ref.end || counted.due < ctx.today) { await this.store.cancel(job.id, job.lease_token); continue; }
             message = procedureReminderReply(state, ctx, note, counted.due);
             try { await this.transport.send(job.user_id, message); await this.store.finish(job.id, job.lease_token); }
-            catch { await this.store.retry(job, this.clock()); }
+            catch (e) { await this.failed(job, e); }
             continue;
           }
           const item = state && state.ruleVersion === this.context.version && state.reminders
@@ -149,7 +155,7 @@ export class Service {
             if (!state || !item || state.visits?.[item.ruleId] !== ref.visit || ref.visit < this.ctx().today) { await this.store.cancel(job.id, job.lease_token); continue; }
             message = visitReply(state, this.ctx(), item);
             try { await this.transport.send(job.user_id, message); await this.store.finish(job.id, job.lease_token); }
-            catch { await this.store.retry(job, this.clock()); }
+            catch (e) { await this.failed(job, e); }
             continue;
           }
           // Before the date a late reminder is still useful; the follow-up after it goes only on its own day.
@@ -161,11 +167,11 @@ export class Service {
           if (message.ruleVersion !== this.context.version) { await this.store.cancel(job.id, job.lease_token); continue; }
         }
         try { await this.transport.send(job.user_id, message); await this.store.finish(job.id, job.lease_token); }
-        catch { await this.store.retry(job, this.clock()); continue; }
+        catch (e) { await this.failed(job, e); continue; }
         // Outside the send block: a failed counter must not resend the reminder.
         if (job.kind === "reminder") {
           try { await this.store.count(this.ctx().today, funnelUniversity(await this.store.get(job.user_id), this.context), "reminder_sent"); }
-          catch { console.error("Funnel counter failed; the reminder was delivered."); }
+          catch (e) { console.error(`Funnel counter failed (${errorInfo(e)}); the reminder was delivered.`); }
         }
       }
     } finally { this.sending = false; }
