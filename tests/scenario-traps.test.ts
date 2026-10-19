@@ -27,9 +27,9 @@ describe("scenario traps: what the bot answers", () => {
     expect(f.s.entryDate).toBeUndefined();
   });
 
-  it("entry date in the future: no plan, the answer says the date must be up to today", () => {
+  it("entry date in the future: no plan, the answer says the date cannot be in the future", () => {
     const f = atEntry();
-    expect(f.type("25.09.2026").text).toContain("по сегодня");
+    expect(f.type("25.09.2026").text).toContain("Дата въезда не может быть в будущем");
     expect(f.s.entryDate).toBeUndefined();
   });
 

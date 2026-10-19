@@ -121,6 +121,10 @@ function beforeEntryReply(s: Session, ctx: DialogueContext): Reply {
   return reply(s, ctx, t(s, ctx, "beforeEntry.title", { uni: uni(s, ctx).name[s.lang]! }) + cards.join("\n\n") +
     t(s, ctx, "beforeEntry.scope") + t(s, ctx, "beforeEntry.next"), [[link(pageLabel(s, ctx), uni(s, ctx).contactUrl)], ...exampleRow(s, ctx)]);
 }
+/** The entry step's buttons: on its question and on a wrong date, so they never go stale there (#67). */
+function entryRows(s: Session, ctx: DialogueContext): Button[][] {
+  return [...(beforeEntry(s, ctx).length ? [[button(t(s, ctx, "btn.beforeEntry"), "before-entry")]] : []), ...exampleRow(s, ctx)];
+}
 function exampleRow(s: Session, ctx: DialogueContext): Button[][] {
   return ctx.demo ? [[button(t(s, ctx, "btn.example", { date: date(s, exampleEntry(ctx)) }), "example")]] : [];
 }
@@ -321,9 +325,7 @@ export function prompt(s: Session, ctx: DialogueContext): Reply {
       // Citizenships the rules exclude stay as buttons: they lead to the help branch, not to a dead end.
       [...rows(uni(s, ctx).citizenships, 2), ...rows([...coverage(ctx.rules).excluded, "OTHER"], 2)]
         .map(row => row.map(code => button(country(s, ctx, code), code))));
-    case "entry": return reply(s, ctx, t(s, ctx, "entry", { from: date(s, coverage(ctx.rules).from) }),
-      [...(beforeEntry(s, ctx).length ? [[button(t(s, ctx, "btn.beforeEntry"), "before-entry")]] : []),
-        ...exampleRow(s, ctx)]);
+    case "entry": return reply(s, ctx, t(s, ctx, "entry", { from: date(s, coverage(ctx.rules).from) }), entryRows(s, ctx));
     case "completion": return reply(s, ctx, t(s, ctx, "completion"), [[button(t(s, ctx, "btn.cancel"), "plan")]]);
     case "docEnd": {
       const note = undated(s, ctx).find(n => n.id === s.selected);
@@ -408,7 +410,11 @@ export function transition(previous: Session | null, input: Input, ctx: Dialogue
   else if (s.step === "entry") {
     const entry = ctx.demo && action === "example" ? exampleEntry(ctx) : typedDate(action), from = coverage(ctx.rules).from;
     if (!isValidDate(entry) || entry < from || entry > ctx.today) {
-      return { session: s, reply: reply(s, ctx, t(s, ctx, "entry.invalid", { from: date(s, from) })) };
+      // "entry.invalid" stays the key of a date before the period: the mini app matches it (Onboarding.tsx).
+      const text = !isValidDate(entry) ? t(s, ctx, "entry.format")
+        : entry > ctx.today ? t(s, ctx, "entry.future") + (beforeEntry(s, ctx).length ? t(s, ctx, "entry.future.beforeEntry") : "")
+        : t(s, ctx, "entry.invalid", { from: date(s, from) });
+      return { session: s, reply: reply(s, ctx, text, entryRows(s, ctx)) };
     }
     s.entryDate = entry; s.step = "plan";
   } else if (profile(s) && (action === "plan" || action === "/plan")) { s.step = "plan"; delete s.selected; }
