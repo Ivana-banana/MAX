@@ -7,6 +7,7 @@ import { readUniversities } from "../src/data/loadUniversities.js";
 import type { Reply } from "../src/bot/dialog.js";
 import { RateLimit } from "../src/bot/rate.js";
 import { Service } from "../src/bot/service.js";
+import { applyAction } from "../src/webapp/state.js";
 import { webhookServer } from "../src/bot/server.js";
 import { webappRouter } from "../src/webapp/router.js";
 import { testSchema } from "./pg.js";
@@ -18,15 +19,15 @@ const context = { rules: rules.rules, universities, texts, version: rules.versio
 const cleanups: (() => Promise<void>)[] = [];
 afterEach(async () => { for (const fn of cleanups.splice(0).reverse()) await fn(); });
 
-// Two requests a minute per user, so the third one is over the limit.
-async function fixture() {
+// Two requests a minute per user by default, so the third one is over the limit.
+async function fixture(limit = 2) {
   const schema = await testSchema(); cleanups.push(schema.drop);
   const { store } = await schema.open();
   cleanups.push(() => store.close());
   let now = Date.parse("2026-09-24T10:00:00+03:00");
   const sent: Reply[] = [];
   const service = new Service(store, context, { send(_u, reply) { sent.push(reply); return Promise.resolve(); } },
-    () => now, new RateLimit(2));
+    () => now, new RateLimit(limit));
   return { store, service, sent, later: (ms: number) => { now += ms; } };
 }
 
@@ -42,13 +43,39 @@ describe("per-user limit on actions (#59)", () => {
     await click("confirm-delete");
     await input("/start");
     await f.service.flush();
-    // The /start → /delete loop that inflates the funnel stops at the limit: nothing deleted, nothing counted.
+    // Updates over the limit are dropped: the session stays and nothing is counted.
     expect(await f.store.get(1)).not.toBeNull();
     expect((await f.store.funnel()).map(r => r.event)).not.toContain("deleted");
     expect(f.sent.filter(r => r.text === format(texts, "en", "limited"))).toHaveLength(1);
     f.later(60_000);
     await click("confirm-delete");
     expect(await f.store.get(1)).toBeNull();
+  });
+
+  it("chat: a redelivered update does not spend the limit", async () => {
+    const f = await fixture();
+    const update = { id: "same", user: 1, input: { text: "/start", callback: false, locale: "en" } };
+    for (let i = 0; i < 3; i++) await f.service.receive(update);
+    await f.service.flush();
+    await f.service.receive({ id: "next", user: 1, input: { text: "/help", callback: false } });
+    await f.service.flush();
+    expect(f.sent.filter(r => r.text === format(texts, "en", "limited"))).toHaveLength(0);
+    expect(f.sent).toHaveLength(2);
+  });
+
+  it("funnel: the /start → /delete loop counts started and deleted once per user a day, by either path", async () => {
+    const f = await fixture(Infinity);
+    let n = 0;
+    const input = (text: string, callback = false) => f.service.receive({ id: String(++n), user: 1, input: { text, callback } });
+    const click = async (action: string) => { const s = (await f.store.get(1))!; await input(`${s.nonce}.${s.revision}|${action}`, true); };
+    await input("/start"); await input("/delete"); await click("confirm-delete");
+    await applyAction(f.service, 1, "/start", false); await applyAction(f.service, 1, "/delete", false);
+    await applyAction(f.service, 1, "confirm-delete", false);
+    const total = async (event: string) => (await f.store.funnel()).filter(r => r.event === event).reduce((a, r) => a + r.n, 0);
+    expect([await total("started"), await total("deleted")]).toEqual([1, 1]);
+    f.later(24 * 3600_000);
+    await input("/start");
+    expect(await total("started")).toBe(2);
   });
 
   it("mini app: answers 429 with retry-after over the limit, another user still passes", async () => {
@@ -68,5 +95,22 @@ describe("per-user limit on actions (#59)", () => {
     expect(refused.headers.get("retry-after")).toBe("60");
     expect(await refused.json()).toEqual({ error: "rate_limited" });
     expect((await act(8)).status).toBe(200);
+  });
+
+  it("mini app: reads by launch data share the limit, a wrong method does not spend it", async () => {
+    const f = await fixture();
+    const router = webappRouter(f.service, { token: "", dir: "./web/dist", devLaunch: true, devOrigin: "" });
+    const server = webhookServer(f.service, "test-secret-that-is-long-enough-32", router);
+    server.listen(0, "127.0.0.1");
+    await once(server, "listening");
+    cleanups.push(async () => { server.closeAllConnections(); await new Promise<void>(done => server.close(() => done())); });
+    const url = `http://127.0.0.1:${(server.address() as { port: number }).port}`;
+    const call = (path: string, method = "GET") => fetch(`${url}${path}`, { method, headers: { authorization: "MaxWebApp demo:7" } });
+    expect((await call("/api/state", "POST")).status).toBe(405);
+    expect((await call("/api/state")).status).toBe(200);
+    expect((await call("/api/calendar.ics")).status).toBe(404);
+    const refused = await call("/api/state");
+    expect(refused.status).toBe(429);
+    expect(refused.headers.get("retry-after")).toBe("60");
   });
 });

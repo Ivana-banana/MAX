@@ -16,7 +16,7 @@ import {
 } from "../bot/dialog.js";
 import { funnelEvents, funnelUniversity } from "../bot/funnel.js";
 import { BASE_LANG, format } from "../data/loadTexts.js";
-import type { Service } from "../bot/service.js";
+import { countEvents, type Service } from "../bot/service.js";
 import type { AppResult, AppState, AppUniversity } from "./contract.js";
 
 export type {
@@ -207,7 +207,7 @@ export async function applyAction(
     const input: Input = { text: action, callback: false, ...(locale === undefined ? {} : { locale }) };
     const outcome = transition(before, input, ctx);
     const target = funnelUniversity(outcome.session ?? before, ctx);
-    for (const event of funnelEvents(before, outcome.session, input, ctx)) await tx.count(ctx.today, target, event);
+    await countEvents(tx, user, ctx.today, target, funnelEvents(before, outcome.session, input, ctx), service.clock());
     // A chat reply queued earlier carries buttons stamped with the previous revision. The dialogue
     // already refuses them, so drop them rather than leave the user a dead button in the chat.
     await tx.supersedeReplies();
