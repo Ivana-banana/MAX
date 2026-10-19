@@ -65,7 +65,7 @@ export interface AppUndatedItem {
 }
 
 /** #25: what the university asks to prepare before entry; `note` is the chat's "university fact / assumption" line. */
-export interface AppBeforeEntryItem { id: string; title: string; text: string; note: string }
+export interface AppBeforeEntryItem { id: string; title: string; text: string; note: string; url: string }
 
 export interface AppUniversity { id: string; name: string; contactUrl: string }
 

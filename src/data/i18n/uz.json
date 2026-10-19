@@ -183,9 +183,10 @@
   "app.question": "Universitetga savol",
   "app.copied": "Nusxa olindi",
   "app.copyManual": "Nusxa olib boʻlmadi — yuqoridagi matnni belgilab, qoʻlda nusxa oling.",
-  "btn.beforeEntry": "Hali kirmadim — nimani tayyorlash kerak",
+  "btn.beforeEntry": "Hali Rossiyaga kelmadim — nimani tayyorlash kerak",
   "beforeEntry.title": "Kirishdan oldin uyda nimani tayyorlash kerak — {uni} talabasi uchun. Bu yerda muddat hisoblanmaydi: kirish sanasi hali nomaʼlum.\n\n",
   "beforeEntry.fact": "Universitet fakti — {uni} sahifasi: {url} (tekshirilgan: {date}).",
   "beforeEntry.assumption": "\nBot farazi: {text}",
+  "beforeEntry.scope": "\n\nBu toʻliq roʻyxat emas: bu yerda faqat universitet oʻz sahifalarida yozgan narsalar bor. Mamlakatingiz uchun Rossiyaga kirishning umumiy qoidalarini (viza yoki «Gosuslugi RuID» ilovasi) Rossiya konsulligida yoki universitetning xalqaro boʻlimida aniqlang.",
   "beforeEntry.next": "\n\nKirganingizdan keyin kirish sanasini yuboring — bot muddatlar rejasini tuzadi."
 }

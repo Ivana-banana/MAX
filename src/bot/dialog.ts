@@ -117,8 +117,12 @@ export function beforeEntryNote(s: Session, ctx: DialogueContext, card: BeforeEn
 }
 function beforeEntryReply(s: Session, ctx: DialogueContext): Reply {
   const cards = beforeEntry(s, ctx).map(c => `${c.title[s.lang]}\n${c.text[s.lang]}\n${beforeEntryNote(s, ctx, c)}`);
+  // The button press made the entry prompt's buttons stale, so the demo example comes again here.
   return reply(s, ctx, t(s, ctx, "beforeEntry.title", { uni: uni(s, ctx).name[s.lang]! }) + cards.join("\n\n") +
-    t(s, ctx, "beforeEntry.next"), [[link(pageLabel(s, ctx), uni(s, ctx).contactUrl)]]);
+    t(s, ctx, "beforeEntry.scope") + t(s, ctx, "beforeEntry.next"), [[link(pageLabel(s, ctx), uni(s, ctx).contactUrl)], ...exampleRow(s, ctx)]);
+}
+function exampleRow(s: Session, ctx: DialogueContext): Button[][] {
+  return ctx.demo ? [[button(t(s, ctx, "btn.example", { date: date(s, exampleEntry(ctx)) }), "example")]] : [];
 }
 function reply(s: Session, ctx: DialogueContext, text: string, rows: Button[][] = []): Reply {
   const banner = ctx.demo ? t(s, ctx, "banner.demo") : "";
@@ -313,7 +317,7 @@ export function prompt(s: Session, ctx: DialogueContext): Reply {
         .map(row => row.map(code => button(country(s, ctx, code), code))));
     case "entry": return reply(s, ctx, t(s, ctx, "entry", { from: date(s, coverage(ctx.rules).from) }),
       [...(beforeEntry(s, ctx).length ? [[button(t(s, ctx, "btn.beforeEntry"), "before-entry")]] : []),
-        ...(ctx.demo ? [[button(t(s, ctx, "btn.example", { date: date(s, exampleEntry(ctx)) }), "example")]] : [])]);
+        ...exampleRow(s, ctx)]);
     case "completion": return reply(s, ctx, t(s, ctx, "completion"), [[button(t(s, ctx, "btn.cancel"), "plan")]]);
     case "docEnd": {
       const note = undated(s, ctx).find(n => n.id === s.selected);

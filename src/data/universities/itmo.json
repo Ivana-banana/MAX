@@ -363,10 +363,10 @@
         "checkedAt": "2026-10-19"
       },
       "assumption": {
-        "ru": "ваше гражданство отнесено к визовым странам по списку профиля вуза, а не по документу ведомства. Требования консульства России в вашей стране бот не проверял.",
-        "en": "your citizenship is treated as a visa country by the university profile's list, not by an official document. The bot has not checked the requirements of the Russian consulate in your country.",
-        "zh": "您的国籍是按学校资料中的名单被归为需签证国家，而非依据官方文件。机器人未核对俄罗斯驻贵国领事馆的要求。",
-        "uz": "fuqaroligingiz idora hujjati boʻyicha emas, universitet profilidagi roʻyxat boʻyicha vizali davlatlarga kiritilgan. Bot mamlakatingizdagi Rossiya konsulligi talablarini tekshirmagan."
+        "ru": "требования консульства России в вашей стране бот не проверял.",
+        "en": "the bot has not checked the requirements of the Russian consulate in your country.",
+        "zh": "机器人未核对俄罗斯驻贵国领事馆的要求。",
+        "uz": "bot mamlakatingizdagi Rossiya konsulligi talablarini tekshirmagan."
       }
     },
     {
@@ -398,12 +398,6 @@
       "source": {
         "url": "https://int.itmo.ru/ru/important_documents",
         "checkedAt": "2026-10-19"
-      },
-      "assumption": {
-        "ru": "ваше гражданство отнесено к безвизовым странам по списку профиля вуза, а не по документу ведомства.",
-        "en": "your citizenship is treated as a visa-free country by the university profile's list, not by an official document.",
-        "zh": "您的国籍是按学校资料中的名单被归为免签国家，而非依据官方文件。",
-        "uz": "fuqaroligingiz idora hujjati boʻyicha emas, universitet profilidagi roʻyxat boʻyicha vizasiz davlatlarga kiritilgan."
       }
     }
   ]

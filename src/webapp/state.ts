@@ -168,7 +168,7 @@ function view(session: Session | null, ctx: DialogueContext, mocked: boolean, hi
       })) : [],
       share: profile(session) && !stale ? shareText(session, ctx) : "",
       beforeEntry: session.step === "entry" && !stale ? beforeEntry(session, ctx).map(card => ({
-        id: card.id, title: localized(card.title), text: localized(card.text), note: beforeEntryNote(session, ctx, card).trim(),
+        id: card.id, title: localized(card.title), text: localized(card.text), note: beforeEntryNote(session, ctx, card).trim(), url: card.source.url,
       })) : [],
     },
     universities: ctx.universities.map(u => ({ id: u.id, name: localized(u.name), contactUrl: u.contactUrl })),
