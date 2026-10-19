@@ -47,6 +47,9 @@ export interface PostgresStoreTx {
 
 const dayMs = 86_400_000;
 const sessionRetentionMs = 400 * dayMs;
+// A session still on the language or consent step has no consent yet: kept only like the technical event marks.
+const unconsentedRetentionMs = 7 * dayMs;
+const unconsentedSteps = "data->>'step' IN ('language', 'consent')";
 const eventRetentionMs = 7 * dayMs;
 const jobRetentionMs = 7 * dayMs;
 const leaseDurationMs = 60_000;
@@ -228,16 +231,17 @@ export class PostgresStore {
   async prune(now: number): Promise<void> {
     validateTimestamp(now, "prune.now");
     const sessionCutoff = now - sessionRetentionMs;
+    const unconsentedCutoff = now - unconsentedRetentionMs;
     const eventCutoff = now - eventRetentionMs;
     const jobCutoff = now - jobRetentionMs;
     const expired = await this.pool.query<UserIdRow>(
-      "SELECT user_id FROM sessions WHERE updated_at < $1 ORDER BY user_id",
-      [sessionCutoff],
+      `SELECT user_id FROM sessions WHERE updated_at < $1 OR (updated_at < $2 AND ${unconsentedSteps}) ORDER BY user_id`,
+      [sessionCutoff, unconsentedCutoff],
     );
 
     for (const row of expired.rows) {
       const userId = safeInteger(row.user_id, "sessions.user_id", 1);
-      await this.pruneUser(userId, sessionCutoff);
+      await this.pruneUser(userId, sessionCutoff, unconsentedCutoff);
     }
 
     await this.pool.query("DELETE FROM events WHERE created_at < $1", [eventCutoff]);
@@ -255,7 +259,7 @@ export class PostgresStore {
     await this.closePromise;
   }
 
-  private async pruneUser(userId: number, cutoff: number): Promise<void> {
+  private async pruneUser(userId: number, cutoff: number, unconsentedCutoff: number): Promise<void> {
     const client = await this.pool.connect();
 
     try {
@@ -263,8 +267,8 @@ export class PostgresStore {
         // Use the same lock as user work, then recheck the age after waiting for it.
         await lockUser(client, userId);
         const deleted = await client.query(
-          "DELETE FROM sessions WHERE user_id = $1 AND updated_at < $2 RETURNING user_id",
-          [userId, cutoff],
+          `DELETE FROM sessions WHERE user_id = $1 AND (updated_at < $2 OR (updated_at < $3 AND ${unconsentedSteps})) RETURNING user_id`,
+          [userId, cutoff, unconsentedCutoff],
         );
         if (deleted.rowCount === 1) {
           await client.query("DELETE FROM outbox WHERE user_id = $1", [userId]);

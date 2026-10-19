@@ -399,6 +399,17 @@ postgresDescribe("PostgreSQL storage", () => {
     }
   });
 
+  it("prunes a session without consent after 7 days but keeps one with a plan", async () => {
+    const db = getStore(store);
+    const now = 500 * DAY;
+    const age = now - 8 * DAY;
+    await db.transaction(54, (tx) => tx.save({ ...session(), step: "consent" }, age));
+    await db.transaction(55, (tx) => tx.save({ ...session(), step: "plan" }, age));
+    await db.prune(now);
+    expect(await db.get(54)).toBeNull();
+    expect(await db.get(55)).not.toBeNull();
+  });
+
   it("prunes expired sessions and terminal rows but keeps old pending and reclaimable sending jobs", async () => {
     const db = getStore(store);
     if (!pool) throw new Error("PostgreSQL test pool was not initialized");
@@ -409,7 +420,7 @@ postgresDescribe("PostgreSQL storage", () => {
       await tx.save(session(), sessionCutoff - 1);
       await tx.enqueue("expired-session-job", { ruleId: "a", dueDate: "2026-10-01" }, "reminder", 0, 0);
     });
-    await db.transaction(53, (tx) => tx.save(session(1), sessionCutoff + 1));
+    await db.transaction(53, (tx) => tx.save({ ...session(1), step: "plan" }, sessionCutoff + 1));
     await pool.query(
       `INSERT INTO outbox (id, user_id, payload, kind, attempts, next_attempt, status, created_at, lease_token, lease_until)
        VALUES
