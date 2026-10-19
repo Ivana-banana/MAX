@@ -54,6 +54,9 @@ docker compose run --rm bot node dist/demo.js --script
 поднимают временный PostgreSQL сами (dev-зависимость `embedded-postgres`), Docker
 для них не нужен; учебный профиль терминала удаляется при /exit.
 
+Для тех, кто коммитит (люди, Codex): `git config core.hooksPath .githooks` включает
+хуки pre-commit (секреты в индексе, задача) и pre-push (задача); см. GIT.md, «Git-хуки».
+
 ## Основной сценарий и проверка
 
 1. /start → русский или English → условия хранения данных.
