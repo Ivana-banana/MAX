@@ -20,7 +20,7 @@ async function fixture() {
   let now = Date.parse("2026-09-23T10:00:00+03:00");
   const sent: Reply[] = [];
   const service = new Service(store, { rules: rules.rules, universities, texts, version: rules.version, demo: true },
-    { async send(_user, reply) { sent.push(reply); } }, () => now);
+    { send(_user, reply) { sent.push(reply); return Promise.resolve(); } }, () => now);
   let n = 0;
   const input = (text: string, user = 1, callback = false) => service.receive({ id: String(++n), user, input: { text, callback } });
   const click = async (action: string, user = 1) => {

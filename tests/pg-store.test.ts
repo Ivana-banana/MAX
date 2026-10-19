@@ -227,7 +227,7 @@ postgresDescribe("PostgreSQL storage", () => {
   it("rejects invalid or unsafe user IDs before touching PostgreSQL", async () => {
     const db = getStore(store);
     await expect(db.get(0)).rejects.toThrow();
-    await expect(db.transaction(Number.MAX_SAFE_INTEGER + 1, async () => undefined)).rejects.toThrow();
+    await expect(db.transaction(Number.MAX_SAFE_INTEGER + 1, () => Promise.resolve(undefined))).rejects.toThrow();
   });
 
   it("rejects an unsafe BIGINT user ID read from PostgreSQL", async () => {

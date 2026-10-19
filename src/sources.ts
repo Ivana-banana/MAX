@@ -48,7 +48,7 @@ export function pageText(body: Uint8Array, contentType: string): string {
 
 /** Case, ё/е, dash and quote kinds and whitespace do not matter when looking for a quote. */
 export const normalize = (text: string): string => text.toLowerCase()
-  .replace(/ё/g, "е").replace(/[­​]/g, "")
+  .replace(/ё/g, "е").replace(/[\u00AD\u200B]/g, "")
   .replace(/[–—‑−]/g, "-").replace(/[«»“”„"]/g, "\"")
   .replace(/\s+/g, " ").trim();
 

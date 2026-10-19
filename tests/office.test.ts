@@ -18,7 +18,7 @@ function student(start: string, citizenship: string, entry: string, clicks: stri
   s = transition(s, { text: entry, callback: false }, ctx).session!;
   clicks.forEach((a, i) => {
     s = transition(s, { text: `${s.nonce}.${s.revision}|${a}`, callback: true }, ctx).session!;
-    if (typed[i]) s = transition(s, { text: typed[i]!, callback: false }, ctx).session!;
+    if (typed[i]) s = transition(s, { text: typed[i], callback: false }, ctx).session!;
   });
   return s;
 }

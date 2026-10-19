@@ -9,7 +9,7 @@ import { Pool } from "pg";
 import { PostgresStore } from "./postgres-store.js";
 
 export interface DevPostgres { url: string; stop(): Promise<void> }
-export interface ScratchSchema { open(): Promise<{ store: PostgresStore; pool: Pool }>; drop(): Promise<void> }
+export interface ScratchSchema { open: () => Promise<{ store: PostgresStore; pool: Pool }>; drop: () => Promise<void> }
 
 /**
  * A temporary schema of its own in the database at url, for tests and the demo:

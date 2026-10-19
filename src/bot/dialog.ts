@@ -185,7 +185,7 @@ function card(s: Session, ctx: DialogueContext, id: string, prefix = ""): Reply 
       ...(item.status === "done" ? [] : [[button(t(s, ctx, "btn.done"), `done:${id}`)],
         [button(t(s, ctx, visit ? "btn.visitChange" : "btn.visit"), `visit:${id}`)]]),
       [link(t(s, ctx, "btn.law"), item.legal.url)],
-      ...(u.rulePlaces[id] ? [[link(t(s, ctx, "btn.map"), mapUrl(u.rulePlaces[id]!.map))]] : []),
+      ...(u.rulePlaces[id] ? [[link(t(s, ctx, "btn.map"), mapUrl(u.rulePlaces[id].map))]] : []),
       [button(t(s, ctx, overdue ? "btn.overdueHelp" : "btn.cantComplete"), `help:${id}`), button(t(s, ctx, "btn.plan"), "plan")]]);
 }
 /** A university deadline counted from a document end date the student gave (D-040); undefined until then. */
@@ -364,7 +364,7 @@ export function transition(previous: Session | null, input: Input, ctx: Dialogue
     }
     s.completions[s.selected] = done;
     // A marked procedure needs no visit any more; a repeat a year later gets a new one.
-    if (s.visits?.[s.selected]) { const { [s.selected]: _, ...rest } = s.visits; s.visits = rest; }
+    if (s.visits?.[s.selected]) { const rest = { ...s.visits }; delete rest[s.selected]; s.visits = rest; }
     s.step = "plan"; delete s.selected;
   } else if (s.step === "docEnd") {
     const end = typedDate(action);

@@ -29,9 +29,10 @@ async function fixture(schema?: ScratchSchema) {
   let now = Date.parse("2026-09-24T10:00:00+03:00");
   const sent: { user:number; reply:Reply }[] = [];
   let failure = false;
-  const service = new Service(store, ctx, { async send(user, reply) {
-    if (failure) throw new Error("network unavailable");
+  const service = new Service(store, ctx, { send(user, reply) {
+    if (failure) return Promise.reject(new Error("network unavailable"));
     sent.push({user,reply});
+    return Promise.resolve();
   } }, () => now);
   let n = 0;
   const input = (text: string, user = 1, id = String(++n), callback = false) => service.receive({ id, user, input: { text, callback } });
@@ -176,7 +177,7 @@ describe("student dialogue and durable processing", () => {
 });
 describe("webhook boundary and release guards", () => {
   it("uses official SDK headers, direct recipients and callback payloads", async () => {
-    const mocked = vi.fn(async () => new Response(JSON.stringify({message:{body:{mid:"fake"}}}), {status:200}));
+    const mocked = vi.fn(() => Promise.resolve(new Response(JSON.stringify({message:{body:{mid:"fake"}}}), {status:200})));
     vi.stubGlobal("fetch",mocked);
     try {
       const transport=createTransport(readConfig({TRANSPORT:"max",MAX_BOT_TOKEN:"test-token",
@@ -185,7 +186,7 @@ describe("webhook boundary and release guards", () => {
       const call=mocked.mock.calls[0] as unknown as [string,RequestInit];
       expect(call[0]).toBe("https://platform-api2.max.ru/messages?user_id=123");
       expect(call[1].headers).toMatchObject({Authorization:"test-token"});
-      expect(JSON.parse(call[1].body as string).attachments[0].payload.buttons[0][0].payload).toBe("nonce.1|plan");
+      expect((JSON.parse(call[1].body as string) as {attachments:[{payload:{buttons:[[{payload:string}]]}}]}).attachments[0].payload.buttons[0][0].payload).toBe("nonce.1|plan");
     } finally { vi.unstubAllGlobals(); }
   });
   it("normalizes MAX private messages and ignores group traffic", () => {
@@ -270,7 +271,7 @@ describe("calendar export, MAX link/clipboard buttons and reminder navigation", 
   });
   it("links the card to the law and turns 'help' into a ready question to copy", async () => {
     const f=await fixture(); await f.onboard(); await f.click("card:medical-examination"); await f.service.flush();
-    expect(flat(f.sent.at(-1)?.reply)).toContainEqual({ text:"Открыть норму", url:expect.stringContaining("consultant.ru") });
+    expect(flat(f.sent.at(-1)?.reply)).toContainEqual({ text:"Открыть норму", url:expect.stringContaining("consultant.ru") as string });
     await f.click("help:medical-examination"); await f.service.flush();
     const copy=flat(f.sent.at(-1)?.reply).find(b=>"copy" in b) as {copy:string}|undefined;
     expect(copy?.copy).toContain("«Медицинское освидетельствование» (расчётный срок — до 30 сентября 2026 г.), но не получается");
@@ -303,16 +304,16 @@ describe("calendar export, MAX link/clipboard buttons and reminder navigation", 
   });
   it("maps link and clipboard buttons for MAX and retries attachment.not.ready", async () => {
     let calls=0;
-    const mocked = vi.fn(async () => ++calls===1
+    const mocked = vi.fn(() => Promise.resolve(++calls===1
       ? new Response(JSON.stringify({code:"attachment.not.ready",message:"not ready"}),{status:400})
-      : new Response(JSON.stringify({message:{body:{mid:"fake"}}}),{status:200}));
+      : new Response(JSON.stringify({message:{body:{mid:"fake"}}}),{status:200})));
     vi.stubGlobal("fetch",mocked);
     try {
       const transport=createTransport(readConfig({TRANSPORT:"max",MAX_BOT_TOKEN:"test-token",
         WEBHOOK_SECRET:"your-demo-secret-change-before-deploy",DATABASE_URL:"postgresql://unused"}));
       await transport.send(123,{text:"DEMO",ruleVersion:"test",buttons:[[{text:"Law",url:"https://example.org/law"}],[{text:"Copy",copy:"question"}]]});
       expect(mocked).toHaveBeenCalledTimes(2);
-      const body=JSON.parse((mocked.mock.calls[1] as unknown as [string,RequestInit])[1].body as string);
+      const body=JSON.parse((mocked.mock.calls[1] as unknown as [string,RequestInit])[1].body as string) as {attachments:[{payload:{buttons:unknown}}]};
       expect(body.attachments[0].payload.buttons).toEqual([[{type:"link",text:"Law",url:"https://example.org/law"}],[{type:"clipboard",text:"Copy",payload:"question"}]]);
     } finally { vi.unstubAllGlobals(); }
   });

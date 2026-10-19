@@ -32,9 +32,11 @@ jobs:
         env:
           TEST_DATABASE_URL: postgresql://postgres@localhost:5432/postgres
       - run: npm run typecheck
+      # Lint reads web/src with the mini app's types, so its dependencies go in first.
+      - run: npm run web:install
+      - run: npm run lint
       - run: npm run build
       - run: npm run demo:check
-      - run: npm run web:install
       - run: npx playwright install --with-deps chromium
       - run: npm run e2e
         env:

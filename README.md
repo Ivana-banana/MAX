@@ -391,6 +391,7 @@ npm run build
 npm run demo:check
 npm run web:install
 npm run web:typecheck
+npm run lint                     # ESLint: бот, тесты и мини-приложение; после web:install
 npm run web:build
 npx playwright install chromium   # один раз
 npm run e2e                      # мини-приложение: Playwright, мост MAX подменён, APP_MODE=demo

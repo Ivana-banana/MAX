@@ -4,7 +4,7 @@ import { parseUpdate, Service } from "./service.js";
 /** Mini app routes, if one is enabled: returns true once it has answered the request. */
 export type ExtraRoutes = (req: IncomingMessage, res: ServerResponse) => Promise<boolean>;
 export function webhookServer(service: Service, secret: string, extra?: ExtraRoutes, commit = "") {
-  return createServer(async (req, res) => {
+  const handle = async (req: IncomingMessage, res: ServerResponse) => {
     const send = (status: number, value: object) => {
       res.writeHead(status, { "content-type": "application/json", "cache-control": "no-store" });
       res.end(JSON.stringify(value));
@@ -35,7 +35,8 @@ export function webhookServer(service: Service, secret: string, extra?: ExtraRou
     catch { send(503, { error: "storage_or_processing_failure" }); return; }
     send(200, { success: true });
     if (update?.callbackId) void service.transport.answer?.(update.callbackId).catch(() => {});
-  });
+  };
+  return createServer((req, res) => void handle(req, res));
 }
 async function readBody(req: IncomingMessage): Promise<string> {
   return new Promise((resolve, reject) => {

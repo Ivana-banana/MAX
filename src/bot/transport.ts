@@ -11,9 +11,10 @@ const toButton = (b: Button) => "url" in b ? Keyboard.button.link(b.text, b.url)
   : "app" in b ? Keyboard.button.openApp(b.text, b.app, undefined, b.payload) : Keyboard.button.callback(b.text, b.action);
 export function createTransport(config: Config): Transport {
   if (config.transport === "console") return {
-    async send(_user, reply) {
+    send(_user, reply) {
       const { file, ...rest } = reply;
       console.log("[MOCKED: MAX delivery; synthetic demo only]", JSON.stringify(file ? { ...rest, file: file.name } : rest));
+      return Promise.resolve();
     },
   };
   const bot = new Bot(config.token, { clientOptions: {

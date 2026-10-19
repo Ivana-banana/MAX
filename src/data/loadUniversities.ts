@@ -115,13 +115,13 @@ function parseProcedure(raw: unknown, path: string): UniversityProcedure {
   const twice = documents.map(d => d.id).find((id, i, all) => all.indexOf(id) !== i);
   if (twice !== undefined) throw new UniversityValidationError(`${path}.documents`, `повторяющийся id документа «${twice}»`);
   if (!Array.isArray(p.appliesIf)) throw new UniversityValidationError(`${path}.appliesIf`, "ожидается массив (пустой — для всех)");
-  const appliesIf = p.appliesIf.map((c, i) => {
+  const appliesIf = p.appliesIf.map((c, i): UniversityProcedure["appliesIf"][number] => {
     const cond = record(c, `${path}.appliesIf[${i}]`);
     if (cond.field !== "citizenship" || (cond.op !== "in" && cond.op !== "notIn") || !Array.isArray(cond.values) ||
         cond.values.length === 0 || !cond.values.every(v => typeof v === "string" && /^[A-Z]{2}$/.test(v))) {
       throw new UniversityValidationError(`${path}.appliesIf[${i}]`, "поддерживается только citizenship in/notIn со списком кодов ISO");
     }
-    return { field: "citizenship" as const, op: cond.op as "in" | "notIn", values: cond.values as string[] };
+    return { field: "citizenship", op: cond.op, values: cond.values as string[] };
   });
   const source = record(p.source, `${path}.source`);
   const url = text(source.url, `${path}.source.url`);

@@ -27,13 +27,14 @@ let last: Reply;
 let reminderCount = 0;
 const clock = scripted ? () => Date.parse("2026-09-24T10:00:00+03:00") : Date.now;
 const service = new Service(store, { rules: rules.rules, universities, texts, version: rules.version, demo: true }, {
-  async send(_user, reply) {
+  send(_user, reply) {
     last = reply;
     if (reply.text.includes("Напоминание:")) reminderCount++;
     console.log("\n[MOCKED: MAX transport] " + reply.text);
     if (reply.file) console.log(`[MOCKED: MAX file upload] ${reply.file.name}, ${reply.file.content.length} bytes`);
     reply.buttons.flat().forEach((b, i) => console.log(`${i + 1}. ${b.text}` +
       ("url" in b ? ` → ${b.url}` : "copy" in b ? " → [MOCKED: copied to clipboard]" : "")));
+    return Promise.resolve();
   },
 }, clock);
 async function act(text: string, callback = false) {

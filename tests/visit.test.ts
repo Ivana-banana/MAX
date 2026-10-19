@@ -101,7 +101,7 @@ describe("the evening before the visit", () => {
     const { store } = await schema.open(); cleanups.push(() => store.close());
     let now = Date.parse("2026-09-24T10:00:00+03:00");
     const sent: Reply[] = [];
-    const service = new Service(store, ctx, { async send(_user, reply) { sent.push(reply); } }, () => now);
+    const service = new Service(store, ctx, { send(_user, reply) { sent.push(reply); return Promise.resolve(); } }, () => now);
     let n = 0;
     const input = (text: string, callback = false) => service.receive({ id: String(++n), user: 1, input: { text, callback } });
     const click = async (action: string) => { const s = (await store.get(1))!; await input(`${s.nonce}.${s.revision}|${action}`, true); };

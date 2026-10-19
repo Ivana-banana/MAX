@@ -31,14 +31,14 @@ interface MaxWebApp {
   HapticFeedback?: HapticFeedback;
   openLink?: (url: string) => void;
   openMaxLink?: (url: string) => void;
-  downloadFile?: (url: string, fileName: string) => Promise<unknown> | unknown;
-  shareMaxContent?: (params: { text?: string; link?: string }) => Promise<unknown> | unknown;
+  // Both return a promise or a plain value depending on the client; callers await either.
+  downloadFile?: (url: string, fileName: string) => unknown;
+  shareMaxContent?: (params: { text?: string; link?: string }) => unknown;
   enableClosingConfirmation?: () => void;
   disableClosingConfirmation?: () => void;
 }
 
 declare global {
-  // eslint-disable-next-line no-var
   var WebApp: MaxWebApp | undefined;
 }
 

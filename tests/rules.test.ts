@@ -122,8 +122,8 @@ describe("parseRuleSet", () => {
 
   it("принимает approved с reviewedBy", () => {
     const ok = structuredClone(valid) as typeof valid & { rules: [{ legal: Record<string, string> }] };
-    ok.rules[0]!.legal.status = "approved";
-    ok.rules[0]!.legal.reviewedBy = "Юрист";
+    ok.rules[0].legal.status = "approved";
+    ok.rules[0].legal.reviewedBy = "Юрист";
     expect(parseRuleSet(ok).rules[0]?.legal.reviewedBy).toBe("Юрист");
   });
 
@@ -155,12 +155,12 @@ describe("parseRuleSet", () => {
 
   it("отвергает слишком длинный период повторения до расчёта даты", () => {
     const validBoundary = structuredClone(valid) as typeof valid & { rules: [{ repeat: { months: number } }] };
-    validBoundary.rules[0]!.repeat = { months: 120 };
+    validBoundary.rules[0].repeat = { months: 120 };
     expect(parseRuleSet(validBoundary).rules[0]?.repeat?.months).toBe(120);
 
     for (const months of [121, 1_000_000_000]) {
       const broken = structuredClone(validBoundary);
-      broken.rules[0]!.repeat.months = months;
+      broken.rules[0].repeat.months = months;
       expect(() => parseRuleSet(broken), String(months)).toThrow(/repeat\.months\): ожидается целое число от 1 до 120/);
     }
   });

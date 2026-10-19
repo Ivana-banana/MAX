@@ -112,6 +112,24 @@ expect_issue 2 "issue: ветка без номера задачи — отка�
 printf 7 > "$(git -C .claude/worktrees/7-x rev-parse --git-dir)/issue-check"
 expect_issue 0 "issue: worktree взятой задачи — можно" "$TMP/.claude/worktrees/7-x" '"tool_name":"Bash","tool_input":{"command":"git commit -m x"}'
 
+# --- protect-config.js (PreToolUse: правка конфига lint — только с разрешения человека)
+expect_config() { # expect_config <ask|pass> <описание> <file_path>
+  local out
+  out="$(printf '{"tool_name":"Edit","tool_input":{"file_path":"%s"}}' "$3" | node "$HOOKS/protect-config.js" 2>&1)"
+  if [ "$1" = ask ] && ! printf '%s' "$out" | grep -q '"permissionDecision":"ask"'; then
+    echo "FAIL: $2 — ожидался запрос разрешения, вывод: $out"; FAIL=1
+  elif [ "$1" = pass ] && [ -n "$out" ]; then
+    echo "FAIL: $2 — ожидался пустой вывод, вывод: $out"; FAIL=1
+  else
+    echo "ok:   $2"
+  fi
+}
+echo 'export default [];' > eslint.config.mjs
+expect_config ask  "config: правка eslint.config.mjs — спросить человека" "$TMP/eslint.config.mjs"
+expect_config pass "config: новый конфиг, которого ещё нет — можно"        "$TMP/.prettierrc"
+expect_config pass "config: обычный файл — можно"                          "$TMP/a.txt"
+rm eslint.config.mjs
+
 # --- check-upstream.sh: чужие коммиты в origin/main против моей работы
 cd "$TMP" && git init -q --bare -b main remote.git
 git clone -q remote.git mate 2>/dev/null

@@ -276,10 +276,10 @@ class RecordingPool {
   queries: string[] = [];
   reportWrongCounts = false;
 
-  async connect(): Promise<RecordingClient> {
+  connect(): Promise<RecordingClient> {
     const client = new RecordingClient(this);
     this.clients.push(client);
-    return client;
+    return Promise.resolve(client);
   }
 
   asPool(): Pool {
@@ -294,10 +294,12 @@ class RecordingClient {
 
   constructor(private readonly pool: RecordingPool) {}
 
-  async query<Row extends QueryResultRow = QueryResultRow>(
-    queryText: string,
-    values: unknown[] = [],
-  ): Promise<QueryResult<Row>> {
+  // A promise executor turns a throw into a rejection, as the async pg client does.
+  query<Row extends QueryResultRow = QueryResultRow>(queryText: string, values: unknown[] = []): Promise<QueryResult<Row>> {
+    return new Promise(resolve => resolve(this.answer<Row>(queryText, values)));
+  }
+
+  private answer<Row extends QueryResultRow>(queryText: string, values: unknown[]): QueryResult<Row> {
     const text = queryText.trim().replace(/\s+/g, " ");
     this.queries.push({ text, values: [...values] });
     this.pool.queries.push(text);

@@ -18,7 +18,7 @@ async function fixture(start: string) {
   cleanups.push(() => store.close());
   let now = Date.parse(start);
   const sent: Reply[] = [];
-  const service = new Service(store, context, { async send(_u, reply) { sent.push(reply); } }, () => now);
+  const service = new Service(store, context, { send(_u, reply) { sent.push(reply); return Promise.resolve(); } }, () => now);
   let n = 0;
   const input = (text: string, callback = false) => service.receive({ id: String(++n), user: 1, input: { text, callback } });
   const click = async (action: string) => { const s = (await store.get(1))!; await input(`${s.nonce}.${s.revision}|${action}`, true); };
@@ -78,7 +78,7 @@ describe("the background loop", () => {
     const { store, pool } = await schema.open();
     cleanups.push(() => store.close());
     const sent: Reply[] = [];
-    const service = new Service(store, context, { async send(_u, reply) { sent.push(reply); } },
+    const service = new Service(store, context, { send(_u, reply) { sent.push(reply); return Promise.resolve(); } },
       () => Date.parse("2026-09-24T10:00:00+03:00"));
     await pool.query("INSERT INTO sessions (user_id, data, updated_at) VALUES (99, $1::jsonb, $2)",
       [JSON.stringify({ step: "written-by-a-newer-build" }), Date.parse("2026-09-24T10:00:00+03:00")]);

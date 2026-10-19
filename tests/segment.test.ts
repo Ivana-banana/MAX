@@ -51,9 +51,9 @@ describe("dates people can read and type", () => {
     expect(entry.reply.text).toContain("Медицинское освидетельствование: 30 сентября 2026 г. — скоро, осталось 6 дней");
     const s = entry.s;
     const r1 = transition(s, { text: `${s.nonce}.${s.revision}|done:medical-examination`, callback: true }, base);
-    const r2 = transition(r1.session!, { text: "20.09.2026", callback: false }, base);
+    const r2 = transition(r1.session, { text: "20.09.2026", callback: false }, base);
     expect(r2.session!.completions["medical-examination"]).toBe("2026-09-20");
-    expect(transition(r1.session!, { text: "31.02.2026", callback: false }, base).reply.text).toContain("Нужна дата между въездом и сегодня");
+    expect(transition(r1.session, { text: "31.02.2026", callback: false }, base).reply.text).toContain("Нужна дата между въездом и сегодня");
   });
 });
 

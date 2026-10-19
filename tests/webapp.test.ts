@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { createHmac } from "node:crypto";
-import { chmodSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { chmodSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { rm } from "node:fs/promises";
 import { connect } from "node:net";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -48,7 +49,7 @@ async function fixture(dir = "./web/dist", devLaunch = true) {
   const { store, pool } = await schema.open();
   cleanups.push(() => store.close());
   const sent: { user: number; reply: Reply }[] = [];
-  const service = new Service(store, ctx, { async send(u, reply) { sent.push({ user: u, reply }); } }, () => NOW);
+  const service = new Service(store, ctx, { send(u, reply) { sent.push({ user: u, reply }); return Promise.resolve(); } }, () => NOW);
   const router = webappRouter(service, { token: TOKEN, dir, devLaunch, devOrigin: "" });
   return { store, pool, service, sent, router };
 }
@@ -111,7 +112,7 @@ describe("mini app actions on the shared session", () => {
     for (const action of ["/start kfu", ...ONBOARDING.slice(1)]) await applyAction(f.service, 7, action, false);
     const state = await readState(f.service, 7, false);
     expect(state.session?.step).toBe("plan");
-    expect(state.session?.university).toEqual({ id: "kfu", name: "КФУ", contactUrl: expect.stringContaining("kpfu.ru") });
+    expect(state.session?.university).toEqual({ id: "kfu", name: "КФУ", contactUrl: expect.stringContaining("kpfu.ru") as string });
     expect(state.session?.plan.map(i => [i.ruleId, i.dueDate]))
       .toEqual([["medical-examination", "2026-09-30"], ["fingerprinting", "2026-11-29"]]);
     // The legal basis travels with every item: a screen must never show a date without its source.
@@ -404,7 +405,7 @@ describe("mini app HTTP surface", () => {
   });
   it("serves the built bundle and refuses to leave its directory", async () => {
     const dir = mkdtempSync(join(tmpdir(), "webapp-"));
-    cleanups.push(async () => rmSync(dir, { recursive: true, force: true }));
+    cleanups.push(() => rm(dir, { recursive: true, force: true }));
     writeFileSync(join(dir, "index.html"), "<!doctype html><title>app</title>");
     writeFileSync(join(dir, "app-C5bBlBUA.js"), "export const ok = 1;");
     writeFileSync(join(dir, "notes.md"), "not part of the bundle");
@@ -434,7 +435,7 @@ describe("mini app HTTP surface", () => {
   // Root reads any file, so an unreadable one cannot be staged there.
   it.skipIf(process.getuid?.() === 0)("survives a bundle file that fails to open after the headers went out", async () => {
     const dir = mkdtempSync(join(tmpdir(), "webapp-"));
-    cleanups.push(async () => rmSync(dir, { recursive: true, force: true }));
+    cleanups.push(() => rm(dir, { recursive: true, force: true }));
     writeFileSync(join(dir, "index.html"), "<!doctype html><title>app</title>");
     writeFileSync(join(dir, "locked-ABCDEFGH.js"), "export const ok = 1;");
     chmodSync(join(dir, "locked-ABCDEFGH.js"), 0o000);
@@ -443,7 +444,7 @@ describe("mini app HTTP surface", () => {
     const crashes: unknown[] = [];
     const record = (e: unknown) => { crashes.push(e); };
     process.on("unhandledRejection", record);
-    cleanups.push(async () => { process.off("unhandledRejection", record); });
+    cleanups.push(() => { process.off("unhandledRejection", record); return Promise.resolve(); });
     await fetch(`${url}/locked-ABCDEFGH.js`).then(r => r.text()).catch(() => "");
     await new Promise(done => setTimeout(done, 50));
     expect(crashes).toEqual([]);
@@ -451,7 +452,7 @@ describe("mini app HTTP surface", () => {
   });
   it("closes the file when a client drops a download halfway", async () => {
     const dir = mkdtempSync(join(tmpdir(), "webapp-"));
-    cleanups.push(async () => rmSync(dir, { recursive: true, force: true }));
+    cleanups.push(() => rm(dir, { recursive: true, force: true }));
     writeFileSync(join(dir, "big-ABCDEFGH.js"), "x".repeat(4_000_000));
     const f = await fixture(dir);
     const pending = new Set<Promise<boolean>>();

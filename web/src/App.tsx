@@ -43,7 +43,12 @@ export function App() {
   const closeCard = useCallback(() => setOpenCard(null), []);
   useEffect(() => (openCard === null ? undefined : onBack(closeCard)), [openCard, closeCard]);
   // A step change on the server (a completed procedure, a deletion) invalidates an open card.
-  useEffect(() => { if (session?.step !== "plan") setOpenCard(null); }, [session?.step]);
+  // Adjusted during render, not in an effect: https://react.dev/learn/you-might-not-need-an-effect
+  const [shownStep, setShownStep] = useState(session?.step);
+  if (shownStep !== session?.step) {
+    setShownStep(session?.step);
+    if (session?.step !== "plan") setOpenCard(null);
+  }
 
   const act = useCallback((action: string) => { tap(); void dispatch(action); }, [dispatch]);
 
