@@ -491,6 +491,35 @@ describe("mini app HTTP surface", () => {
     expect((await fetch(url)).status).toBe(404);
     expect((await fetch(`${url}/api/state`, { headers: auth(genuine()) })).status).toBe(200);
   });
+  it("keeps one person's session out of another's reach, whatever the body says", async () => {
+    const f = await fixture();
+    const url = await serve(f.router, f.service);
+    const owner = genuine(), stranger = genuine({ user: person(8) });
+    for (const action of ONBOARDING) await act(url, owner, { action });
+    // A user id in the body is not an identity: only the signed launch is.
+    expect((await act(url, stranger, { action: "/start", user: 7, user_id: 7 })).status).toBe(200);
+    expect((await f.store.get(7))?.step).toBe("plan");
+    const seen = await (await fetch(`${url}/api/state`, { headers: auth(stranger) })).json() as
+      { state: { session: { step: string; plan: unknown[] } } };
+    expect(seen.state.session.step).not.toBe("plan");
+    expect(seen.state.session.plan).toEqual([]);
+    expect((await fetch(`${url}/api/calendar.ics`, { headers: auth(stranger) })).status).toBe(404);
+  });
+  it("forbids MIME sniffing on every API and webhook answer, not only on the bundle", async () => {
+    const f = await fixture();
+    const url = await serve(f.router, f.service);
+    const value = genuine();
+    for (const action of ONBOARDING) await act(url, value, { action });
+    const answers = [
+      await fetch(`${url}/api/state`, { headers: auth(value) }),
+      await fetch(`${url}/api/state`),
+      await act(url, value, { action: "plan" }),
+      await fetch(`${url}/api/calendar.ics`, { headers: auth(value) }),
+      await fetch(`${url}/webhook`, { method: "POST" }),
+      await fetch(`${url}/health`),
+    ];
+    for (const answer of answers) expect(answer.headers.get("x-content-type-options"), answer.url).toBe("nosniff");
+  });
   it("lets the chat and the app act on one session in turn", async () => {
     const f = await fixture();
     const url = await serve(f.router, f.service);

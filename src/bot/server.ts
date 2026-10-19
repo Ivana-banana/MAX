@@ -6,7 +6,7 @@ export type ExtraRoutes = (req: IncomingMessage, res: ServerResponse) => Promise
 export function webhookServer(service: Service, secret: string, extra?: ExtraRoutes, commit = "") {
   const handle = async (req: IncomingMessage, res: ServerResponse) => {
     const send = (status: number, value: object) => {
-      res.writeHead(status, { "content-type": "application/json", "cache-control": "no-store" });
+      res.writeHead(status, { "content-type": "application/json", "cache-control": "no-store", "x-content-type-options": "nosniff" });
       res.end(JSON.stringify(value));
     };
     if (req.method === "GET" && req.url === "/health") {
