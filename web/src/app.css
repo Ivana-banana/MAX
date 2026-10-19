@@ -55,7 +55,8 @@ body {
 /* Paper grain, like a printed poster. */
 .app::after {
   content: "";
-  position: fixed;
+  /* Not fixed: a fixed layer covers one screen, so a full-page capture shows the grain ending mid-page (#64). */
+  position: absolute;
   inset: 0;
   pointer-events: none;
   z-index: 50;
