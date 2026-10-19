@@ -112,6 +112,12 @@ expect_issue 2 "issue: ветка без номера задачи — отка�
 printf 7 > "$(git -C .claude/worktrees/7-x rev-parse --git-dir)/issue-check"
 expect_issue 0 "issue: worktree взятой задачи — можно" "$TMP/.claude/worktrees/7-x" '"tool_name":"Bash","tool_input":{"command":"git commit -m x"}'
 
+# --- check-worktrees.sh (SubagentStop: check-secrets.sh в каждом worktree)
+expect pass  "worktrees: все чистые — тишина"        check-worktrees.sh
+echo 'const token = "f9a8Xc72kLmQ01zYvB3n4dHs"' > .claude/worktrees/7-x/bot.js
+expect block "worktrees: секрет в соседнем worktree" check-worktrees.sh
+rm .claude/worktrees/7-x/bot.js
+
 # --- protect-config.js (PreToolUse: правка конфига lint — только с разрешения человека)
 expect_config() { # expect_config <ask|pass> <описание> <file_path>
   local out

@@ -116,6 +116,18 @@
           }
         ]
       }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/check-worktrees.sh",
+            "timeout": 60,
+            "statusMessage": "Секреты во всех worktree…"
+          }
+        ]
+      }
     ]
   }
 }
