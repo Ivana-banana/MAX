@@ -5,6 +5,7 @@
     "ru": "ИТМО",
     "en": "ITMO",
     "uz": "ITMO",
+    "tt": "ИТМО",
     "zh": "ITMO大学"
   },
   "contactUrl": "https://int.itmo.ru/ru/important_documents",
@@ -18,6 +19,12 @@
     "EG",
     "TR"
   ],
+  "posterLanguages": [
+    "ru",
+    "en",
+    "uz",
+    "zh"
+  ],
   "checkedAt": "2026-09-29",
   "procedures": [
     {
@@ -26,18 +33,21 @@
         "ru": "Миграционный учёт (регистрация)",
         "en": "Migration registration",
         "uz": "Migratsiya hisobi (roʻyxatga olish)",
+        "tt": "Миграция исәбе (теркәү)",
         "zh": "移民登记（居留登记）"
       },
       "action": {
         "ru": "Если вы живёте в общежитии ИТМО, регистрацию оформляет Отдел миграционного учёта ИТМО: ул. Ломоносова, 9, оф. 2139d, omu@itmo.ru, +7 (812) 480-09-17. Если живёте на частном адресе — регистрацию оформляет собственник жилья.",
         "en": "If you live in an ITMO dormitory, your registration is handled by the ITMO Migration Registration Office: 9 Lomonosova St., office 2139d, omu@itmo.ru, +7 (812) 480-09-17. If you live at a private address, the owner of the flat registers you.",
         "uz": "Agar ITMO yotoqxonasida yashasangiz, roʻyxatga olishni ITMO migratsiya hisobi boʻlimi: Lomonosov koʻch., 9, 2139d-xona, omu@itmo.ru, +7 (812) 480-09-17 rasmiylashtiradi. Xususiy manzilda yashasangiz — uy egasi rasmiylashtiradi.",
+        "tt": "Әгәр сез ИТМО тулай торагында яшисез икән, теркәүне ИТМОның Миграция исәбе бүлеге рәсмиләштерә: Ломоносов ур., 9, 2139d бүлмә, omu@itmo.ru, +7 (812) 480-09-17. Шәхси адреста яшәсәгез — теркәүне торак милекчесе рәсмиләштерә.",
         "zh": "如果您住在ITMO大学宿舍，居留登记由ITMO大学移民登记处：Lomonosova街9号，2139d室，omu@itmo.ru，+7 (812) 480-09-17办理。如果您住在私人住址，由房东为您办理登记。"
       },
       "when": {
         "ru": "В течение 3 рабочих дней со дня прибытия. Бот не знает дату прибытия в общежитие — она может отличаться от даты въезда в Россию, — поэтому этот срок не считает и о нём не напоминает.",
         "en": "Within 3 working days of arrival. The bot does not know the date you arrived at the dormitory — it may differ from your entry into Russia — so it neither calculates this deadline nor reminds you of it.",
         "uz": "Kelgan kundan boshlab 3 ish kuni ichida. Bot yotoqxonaga kelgan sanangizni bilmaydi — u Rossiyaga kirgan sanadan farq qilishi mumkin, — shuning uchun bu muddatni hisoblamaydi va eslatmaydi.",
+        "tt": "Килгән көннән 3 эш көне эчендә. Бот тулай торакка килү датасын белми — ул Россиягә керү датасыннан аерылырга мөмкин, — шуңа күрә бу срокны исәпләми һәм аның турында искә төшерми.",
         "zh": "抵达之日起3个工作日内。机器人不知道您抵达宿舍的日期（可能与入境俄罗斯的日期不同），因此不计算此期限，也不会提醒。"
       },
       "documents": [
@@ -47,6 +57,7 @@
             "ru": "Паспорт (оригинал)",
             "en": "Passport (original)",
             "uz": "Pasport (asl nusxa)",
+            "tt": "Паспорт (оригиналы)",
             "zh": "护照（原件）"
           }
         },
@@ -56,6 +67,7 @@
             "ru": "Миграционная карта",
             "en": "Migration card",
             "uz": "Migratsiya kartasi",
+            "tt": "Миграция картасы",
             "zh": "移民卡"
           }
         },
@@ -65,6 +77,7 @@
             "ru": "Договор на платное обучение (если учитесь по договору)",
             "en": "Paid tuition contract (if you study on a contract basis)",
             "uz": "Pullik taʼlim shartnomasi (shartnoma asosida oʻqisangiz)",
+            "tt": "Түләүле уку килешүе (килешү буенча укысагыз)",
             "zh": "付费教育合同（如为合同制学生）"
           }
         }
@@ -84,18 +97,21 @@
         "ru": "Переоформить регистрацию при изменениях",
         "en": "Re-register after a change",
         "uz": "Oʻzgarishdan keyin qayta roʻyxatdan oʻtish",
+        "tt": "Үзгәрешләр булганда теркәүне яңадан рәсмиләштерү",
         "zh": "情况变化后重新办理登记"
       },
       "action": {
         "ru": "Если вы пересекли границу России, находились в гостинице или больнице, переехали в другое общежитие или на частный адрес, получили новый паспорт или гражданство, РВП, РВПО или ВНЖ — обратитесь: Отдел миграционного учёта ИТМО: ул. Ломоносова, 9, оф. 2139d, omu@itmo.ru, +7 (812) 480-09-17.",
         "en": "If you crossed the Russian border, stayed at a hotel or hospital, moved to another dormitory or a private address, got a new passport or citizenship, a temporary residence permit or a residence permit, contact the ITMO Migration Registration Office: 9 Lomonosova St., office 2139d, omu@itmo.ru, +7 (812) 480-09-17.",
         "uz": "Agar Rossiya chegarasini kesib oʻtgan boʻlsangiz, mehmonxona yoki kasalxonada boʻlgan boʻlsangiz, boshqa yotoqxonaga yoki xususiy manzilga koʻchgan boʻlsangiz, yangi pasport yoki fuqarolik, vaqtincha yashash ruxsati yoki yashash guvohnomasini olgan boʻlsangiz — murojaat qiling: ITMO migratsiya hisobi boʻlimi: Lomonosov koʻch., 9, 2139d-xona, omu@itmo.ru, +7 (812) 480-09-17.",
+        "tt": "Әгәр сез Россия чиген кичсәгез, кунакханәдә яки хастаханәдә булсагыз, башка тулай торакка яки шәхси адреска күчсәгез, яңа паспорт яки гражданлык, РВП, РВПО яки ВНЖ алсагыз — мөрәҗәгать итегез: ИТМОның Миграция исәбе бүлеге: Ломоносов ур., 9, 2139d бүлмә, omu@itmo.ru, +7 (812) 480-09-17.",
         "zh": "如果您出入过俄罗斯国境、住过酒店或医院、搬到其他宿舍或私人住址、获得新护照或新国籍、临时居留许可或居留证，请联系ITMO大学移民登记处：Lomonosova街9号，2139d室，omu@itmo.ru，+7 (812) 480-09-17。"
       },
       "when": {
         "ru": "В течение 1 рабочего дня после изменения. Бот не знает о таких изменениях, поэтому о сроке не напоминает.",
         "en": "Within 1 working day after the change. The bot does not know about such changes, so it does not remind you.",
         "uz": "Oʻzgarishdan keyin 1 ish kuni ichida. Bot bunday oʻzgarishlarni bilmaydi, shuning uchun eslatmaydi.",
+        "tt": "Үзгәрештән соң 1 эш көне эчендә. Бот мондый үзгәрешләр турында белми, шуңа күрә срок турында искә төшерми.",
         "zh": "变化发生后1个工作日内。机器人不知道此类变化，因此不会提醒。"
       },
       "documents": [],
@@ -114,18 +130,21 @@
         "ru": "Продление регистрации и срока пребывания",
         "en": "Extending registration and the period of stay",
         "uz": "Roʻyxatga olish va yashash muddatini uzaytirish",
+        "tt": "Теркәүне һәм булу срогын озайту",
         "zh": "延长居留登记和停留期限"
       },
       "action": {
         "ru": "Подайте документы: Отдел миграционного учёта ИТМО: ул. Ломоносова, 9, оф. 2139d, omu@itmo.ru, +7 (812) 480-09-17. Без визы можно находиться в России 90 дней суммарно в календарном году без продления; при каждом новом въезде срок пребывания нужно продлить.",
         "en": "Submit the documents to the ITMO Migration Registration Office: 9 Lomonosova St., office 2139d, omu@itmo.ru, +7 (812) 480-09-17. Without a visa you may stay in Russia 90 days in total per calendar year without an extension; after every new entry the period of stay must be extended.",
         "uz": "Hujjatlarni topshiring: ITMO migratsiya hisobi boʻlimi: Lomonosov koʻch., 9, 2139d-xona, omu@itmo.ru, +7 (812) 480-09-17. Vizasiz Rossiyada kalendar yili davomida jami 90 kun uzaytirmasdan boʻlish mumkin; har bir yangi kirishda yashash muddatini uzaytirish kerak.",
+        "tt": "Документларны тапшырыгыз: ИТМОның Миграция исәбе бүлеге: Ломоносов ур., 9, 2139d бүлмә, omu@itmo.ru, +7 (812) 480-09-17. Визасыз Россиядә календарь елында барлыгы 90 көн озайтусыз булырга мөмкин; һәр яңа керүдә булу срогын озайтырга кирәк.",
         "zh": "请向ITMO大学移民登记处：Lomonosova街9号，2139d室，omu@itmo.ru，+7 (812) 480-09-17提交文件。免签人员每个日历年在俄累计可停留90天而无需延期；每次重新入境后都需延长停留期限。"
       },
       "when": {
         "ru": "Не позднее чем за 45 дней до окончания регистрации. Укажите дату окончания регистрации — бот посчитает дату по этому правилу и напомнит.",
         "en": "No later than 45 days before your registration ends. Enter your registration end date — the bot will count the date by this rule and remind you.",
         "uz": "Roʻyxatga olish tugashidan kamida 45 kun oldin. Roʻyxatga olish tugash sanasini kiriting — bot shu qoida boʻyicha sanani hisoblaydi va eslatadi.",
+        "tt": "Теркәү тәмамланганчы 45 көннән дә соңга калмыйча. Теркәү тәмамлану датасын күрсәтегез — бот датаны шушы кагыйдә буенча исәпләр һәм искә төшерер.",
         "zh": "最迟在居留登记到期前45天。请输入居留登记到期日——机器人会按此规定计算日期并提醒您。"
       },
       "documents": [
@@ -135,6 +154,7 @@
             "ru": "Паспорт (оригинал)",
             "en": "Passport (original)",
             "uz": "Pasport (asl nusxa)",
+            "tt": "Паспорт (оригиналы)",
             "zh": "护照（原件）"
           }
         },
@@ -144,6 +164,7 @@
             "ru": "Миграционная карта",
             "en": "Migration card",
             "uz": "Migratsiya kartasi",
+            "tt": "Миграция картасы",
             "zh": "移民卡"
           }
         },
@@ -153,6 +174,7 @@
             "ru": "Действующая регистрация (отрывная часть уведомления о прибытии)",
             "en": "Current registration (tear-off part of the arrival notice)",
             "uz": "Amaldagi roʻyxatga olish (kelish haqidagi bildirishnomaning ajratma qismi)",
+            "tt": "Гамәлдәге теркәү (килү турындагы белдерүнең ертып алына торган өлеше)",
             "zh": "有效的居留登记（抵达通知的回执联）"
           }
         },
@@ -162,6 +184,7 @@
             "ru": "Договор на платное обучение (если учитесь по договору)",
             "en": "Paid tuition contract (if you study on a contract basis)",
             "uz": "Pullik taʼlim shartnomasi (shartnoma asosida oʻqisangiz)",
+            "tt": "Түләүле уку килешүе (килешү буенча укысагыз)",
             "zh": "付费教育合同（如为合同制学生）"
           }
         },
@@ -171,6 +194,7 @@
             "ru": "Медицинское заключение, справка о внесении данных в базу МВД и карта дактилоскопии",
             "en": "Medical certificate, certificate of entry into the Interior Ministry database and fingerprint card",
             "uz": "Tibbiy xulosa, IIV bazasiga kiritilganlik haqida maʼlumotnoma va daktiloskopiya kartasi",
+            "tt": "Медицина бәяләмәсе, мәгълүматларның ЭЭМ базасына кертелүе турында белешмә һәм дактилоскопия картасы",
             "zh": "体检结论、录入内务部数据库的证明及指纹卡"
           }
         }
@@ -194,18 +218,21 @@
         "ru": "Продление визы",
         "en": "Visa extension",
         "uz": "Vizani uzaytirish",
+        "tt": "Визаны озайту",
         "zh": "签证延期"
       },
       "action": {
         "ru": "Однократная учебная виза выдаётся не более чем на 90 дней; для учёбы её меняют на многократную до 1 года. Обратитесь: Отдел миграционного учёта ИТМО: ул. Ломоносова, 9, оф. 2139d, omu@itmo.ru, +7 (812) 480-09-17. Паспорт должен действовать ещё не менее 6 месяцев после окончания визы.",
         "en": "A single-entry study visa is issued for no more than 90 days; for your studies it is replaced with a multiple-entry visa for up to 1 year. Contact the ITMO Migration Registration Office: 9 Lomonosova St., office 2139d, omu@itmo.ru, +7 (812) 480-09-17. Your passport must remain valid for at least 6 months after the visa ends.",
         "uz": "Bir martalik oʻquv vizasi koʻpi bilan 90 kunga beriladi; oʻqish uchun u 1 yilgacha koʻp martalik vizaga almashtiriladi. Murojaat qiling: ITMO migratsiya hisobi boʻlimi: Lomonosov koʻch., 9, 2139d-xona, omu@itmo.ru, +7 (812) 480-09-17. Pasport viza tugaganidan keyin kamida 6 oy amal qilishi kerak.",
+        "tt": "Бер тапкыр керү өчен уку визасы 90 көннән дә артыкка бирелми; уку өчен аны 1 елга кадәр күп тапкыр керү визасына алмаштыралар. Мөрәҗәгать итегез: ИТМОның Миграция исәбе бүлеге: Ломоносов ур., 9, 2139d бүлмә, omu@itmo.ru, +7 (812) 480-09-17. Паспорт виза тәмамланганнан соң тагын 6 айдан да ким булмаган вакыт гамәлдә булырга тиеш.",
         "zh": "一次性学习签证最长90天；为继续学习需换发最长1年的多次入境签证。请联系ITMO大学移民登记处：Lomonosova街9号，2139d室，omu@itmo.ru，+7 (812) 480-09-17。签证到期后护照有效期须至少还有6个月。"
       },
       "when": {
         "ru": "За 1,5 месяца до окончания действующей визы. Бот не знает дату окончания вашей визы, поэтому этот срок не считает и о нём не напоминает.",
         "en": "1.5 months before your current visa expires. The bot does not know when your visa expires, so it neither calculates this deadline nor reminds you of it.",
         "uz": "Amaldagi viza tugashidan 1,5 oy oldin. Bot vizangiz qachon tugashini bilmaydi, shuning uchun bu muddatni hisoblamaydi va eslatmaydi.",
+        "tt": "Гамәлдәге виза тәмамланганчы 1,5 ай алда. Бот визагыз тәмамлану датасын белми, шуңа күрә бу срокны исәпләми һәм аның турында искә төшерми.",
         "zh": "在现有签证到期前1.5个月。机器人不知道您的签证何时到期，因此不计算此期限，也不会提醒。"
       },
       "documents": [
@@ -215,6 +242,7 @@
             "ru": "Паспорт (оригинал)",
             "en": "Passport (original)",
             "uz": "Pasport (asl nusxa)",
+            "tt": "Паспорт (оригиналы)",
             "zh": "护照（原件）"
           }
         },
@@ -224,6 +252,7 @@
             "ru": "Миграционная карта",
             "en": "Migration card",
             "uz": "Migratsiya kartasi",
+            "tt": "Миграция картасы",
             "zh": "移民卡"
           }
         },
@@ -233,6 +262,7 @@
             "ru": "Действующая регистрация (отрывная часть уведомления о прибытии)",
             "en": "Current registration (tear-off part of the arrival notice)",
             "uz": "Amaldagi roʻyxatga olish (kelish haqidagi bildirishnomaning ajratma qismi)",
+            "tt": "Гамәлдәге теркәү (килү турындагы белдерүнең ертып алына торган өлеше)",
             "zh": "有效的居留登记（抵达通知的回执联）"
           }
         },
@@ -242,6 +272,7 @@
             "ru": "Одна фотография 3×4 см",
             "en": "One 3×4 cm photo",
             "uz": "Bitta 3×4 sm fotosurat",
+            "tt": "Бер фотосурәт 3×4 см",
             "zh": "一张3×4厘米照片"
           }
         },
@@ -251,6 +282,7 @@
             "ru": "Квитанция об уплате госпошлины за многократную визу (реквизиты — в отделе)",
             "en": "Receipt for the multiple-entry visa fee (payment details at the office)",
             "uz": "Koʻp martalik viza uchun davlat boji toʻlangani haqida kvitansiya (rekvizitlar — boʻlimda)",
+            "tt": "Күп тапкыр керү визасы өчен дәүләт пошлинасы түләү квитанциясе (реквизитлар — бүлектә)",
             "zh": "多次入境签证国家规费缴费收据（缴费信息向该处索取）"
           }
         },
@@ -260,6 +292,7 @@
             "ru": "Договор на платное обучение (если учитесь по договору)",
             "en": "Paid tuition contract (if you study on a contract basis)",
             "uz": "Pullik taʼlim shartnomasi (shartnoma asosida oʻqisangiz)",
+            "tt": "Түләүле уку килешүе (килешү буенча укысагыз)",
             "zh": "付费教育合同（如为合同制学生）"
           }
         },
@@ -269,6 +302,7 @@
             "ru": "Медицинское заключение, справка о внесении данных в базу МВД и карта дактилоскопии",
             "en": "Medical certificate, certificate of entry into the Interior Ministry database and fingerprint card",
             "uz": "Tibbiy xulosa, IIV bazasiga kiritilganlik haqida maʼlumotnoma va daktiloskopiya kartasi",
+            "tt": "Медицина бәяләмәсе, мәгълүматларның ЭЭМ базасына кертелүе турында белешмә һәм дактилоскопия картасы",
             "zh": "体检结论、录入内务部数据库的证明及指纹卡"
           }
         }
@@ -309,6 +343,7 @@
         "ru": "ФГУП «ПВС» МВД России, филиал по Санкт-Петербургу и Ленинградской области: ул. Красного Текстильщика, 10–12, лит. В, вход № 2 со двора",
         "en": "FSUE «PVS» of the Russian Interior Ministry, Saint Petersburg and Leningrad Region branch: 10–12 Krasnogo Tekstilshchika St., building V, entrance 2 from the courtyard",
         "uz": "Rossiya IIV «PVS» FDUK, Sankt-Peterburg va Leningrad viloyati filiali: Krasnogo Tekstilshchika koʻch., 10–12, V bino, hovlidan 2-kirish",
+        "tt": "Россия ЭЭМның «ПВС» ФДУП, Санкт-Петербург һәм Ленинград өлкәсе буенча филиалы: Красного Текстильщика ур., 10–12, В литерасы, ишегалдыннан 2 нче керү",
         "zh": "俄罗斯内务部“PVS”联邦国有单一制企业圣彼得堡及列宁格勒州分部：Krasnogo Tekstilshchika街10–12号V栋，从院内2号入口进入"
       },
       "map": "Санкт-Петербург, ул. Красного Текстильщика, 10-12",
@@ -322,6 +357,7 @@
         "ru": "ФГУП «ПВС» МВД России, филиал по Санкт-Петербургу и Ленинградской области: ул. Красного Текстильщика, 10–12, лит. В, вход № 2 со двора",
         "en": "FSUE «PVS» of the Russian Interior Ministry, Saint Petersburg and Leningrad Region branch: 10–12 Krasnogo Tekstilshchika St., building V, entrance 2 from the courtyard",
         "uz": "Rossiya IIV «PVS» FDUK, Sankt-Peterburg va Leningrad viloyati filiali: Krasnogo Tekstilshchika koʻch., 10–12, V bino, hovlidan 2-kirish",
+        "tt": "Россия ЭЭМның «ПВС» ФДУП, Санкт-Петербург һәм Ленинград өлкәсе буенча филиалы: Красного Текстильщика ур., 10–12, В литерасы, ишегалдыннан 2 нче керү",
         "zh": "俄罗斯内务部“PVS”联邦国有单一制企业圣彼得堡及列宁格勒州分部：Krasnogo Tekstilshchika街10–12号V栋，从院内2号入口进入"
       },
       "map": "Санкт-Петербург, ул. Красного Текстильщика, 10-12",
@@ -338,13 +374,15 @@
         "ru": "Учебная виза",
         "en": "Study visa",
         "zh": "学习签证",
-        "uz": "Oʻquv vizasi"
+        "uz": "Oʻquv vizasi",
+        "tt": "Уку визасы"
       },
       "text": {
         "ru": "Студенты из визовых стран въезжают по учебной визе (обыкновенная учебная — ОУ) по приглашению ИТМО или Минобрнауки.",
         "en": "Students from visa countries enter on a study visa (ordinary study visa, OU) issued on an invitation from ITMO or the Ministry of Science and Higher Education.",
         "zh": "来自需签证国家的学生须持学习签证（普通学习签证，OU）入境，签证依据ITMO大学或俄罗斯科学与高等教育部的邀请函办理。",
-        "uz": "Vizali davlatlardan kelgan talabalar ITMO yoki Fan va oliy taʼlim vazirligi taklifnomasi boʻyicha oʻquv vizasi (oddiy oʻquv — OU) bilan kiradi."
+        "uz": "Vizali davlatlardan kelgan talabalar ITMO yoki Fan va oliy taʼlim vazirligi taklifnomasi boʻyicha oʻquv vizasi (oddiy oʻquv — OU) bilan kiradi.",
+        "tt": "Виза режимы булган илләрдән студентлар ИТМО яки Мәгариф һәм фән министрлыгы чакыруы буенча уку визасы (гади уку визасы — ОУ) белән керәләр."
       },
       "appliesIf": [
         {
@@ -366,7 +404,8 @@
         "ru": "требования консульства России в вашей стране бот не проверял.",
         "en": "the bot has not checked the requirements of the Russian consulate in your country.",
         "zh": "机器人未核对俄罗斯驻贵国领事馆的要求。",
-        "uz": "bot mamlakatingizdagi Rossiya konsulligi talablarini tekshirmagan."
+        "uz": "bot mamlakatingizdagi Rossiya konsulligi talablarini tekshirmagan.",
+        "tt": "илегездәге Россия консулльлеге таләпләрен бот тикшермәде."
       }
     },
     {
@@ -375,13 +414,15 @@
         "ru": "«Госуслуги RuID» до въезда",
         "en": "Gosuslugi RuID before entry",
         "zh": "入境前使用“Gosuslugi RuID”",
-        "uz": "Kirishdan oldin «Gosuslugi RuID»"
+        "uz": "Kirishdan oldin «Gosuslugi RuID»",
+        "tt": "Кергәнче «Госуслуги RuID»"
       },
       "text": {
         "ru": "Граждане безвизовых стран (кроме Беларуси) до въезда регистрируются в приложении «Госуслуги RuID» и подают заявление не позднее чем за 72 часа до въезда. На границе нужен уникальный код из приложения.",
         "en": "Citizens of visa-free countries (except Belarus) register in the Gosuslugi RuID app before entry and submit the application no later than 72 hours before entry. At the border you need the unique code from the app.",
         "zh": "免签国家公民（白俄罗斯除外）须在入境前注册“Gosuslugi RuID”应用，并在计划入境前至少72小时提交申请。过境时需出示应用中的唯一代码。",
-        "uz": "Vizasiz davlatlar fuqarolari (Belarusdan tashqari) kirishdan oldin «Gosuslugi RuID» ilovasida roʻyxatdan oʻtadi va arizani kirishdan kamida 72 soat oldin topshiradi. Chegarada ilovadagi noyob kod kerak boʻladi."
+        "uz": "Vizasiz davlatlar fuqarolari (Belarusdan tashqari) kirishdan oldin «Gosuslugi RuID» ilovasida roʻyxatdan oʻtadi va arizani kirishdan kamida 72 soat oldin topshiradi. Chegarada ilovadagi noyob kod kerak boʻladi.",
+        "tt": "Визасыз илләр гражданнары (Беларусьтан тыш) кергәнче «Госуслуги RuID» кушымтасында теркәләләр һәм керүгә кадәр 72 сәгатьтән дә соңга калмыйча гариза бирәләр. Чиктә кушымтадан уникаль код кирәк."
       },
       "appliesIf": [
         {

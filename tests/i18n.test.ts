@@ -29,7 +29,7 @@ function withKazakh(): DialogueContext {
 
 describe("interface texts live in data", () => {
   it("has the same keys, placeholders and needed plural forms in every language", () => {
-    expect([...texts.keys()]).toEqual(["ru", "en", "uz", "zh"]);
+    expect([...texts.keys()]).toEqual(["ru", "en", "tt", "uz", "zh"]);
     expect(() => checkTexts(texts)).not.toThrow();
     expect(() => checkTranslated(texts, rules.rules, universities)).not.toThrow();
   });
@@ -62,7 +62,7 @@ describe("interface texts live in data", () => {
   it("adds a language with data files only: button, MAX locale, plan and card", () => {
     const ctx = withKazakh();
     const first = transition(null, { text: "/start", callback: false }, ctx);
-    expect(first.reply.buttons.flat().map(b => b.text)).toEqual(["Русский", "English", "Oʻzbekcha", "中文", "Qazaqşa"]);
+    expect(first.reply.buttons.flat().map(b => b.text)).toEqual(["Русский", "English", "Татарча", "Oʻzbekcha", "中文", "Qazaqşa"]);
     let s: Session = transition(null, { text: "/start", callback: false, locale: "kk-KZ" }, ctx).session!;
     expect(s.lang).toBe("kk");
     const click = (action: string) => { const r = transition(s, { text: `${s.nonce}.${s.revision}|${action}`, callback: true }, ctx); s = r.session!; return r.reply; };

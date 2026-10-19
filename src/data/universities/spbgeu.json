@@ -5,6 +5,7 @@
     "ru": "СПбГЭУ",
     "en": "UNECON",
     "uz": "SPbGEU",
+    "tt": "СПбГЭУ",
     "zh": "圣彼得堡国立经济大学"
   },
   "contactUrl": "https://unecon.ru/mezhdunarodnye-svyazi/upravlenie-mezhdunarodnogo-sotrudnichestva/otdel-po-rabote-s-inostrannymi-uchashhimisya/",
@@ -18,6 +19,12 @@
     "EG",
     "TR"
   ],
+  "posterLanguages": [
+    "ru",
+    "en",
+    "uz",
+    "zh"
+  ],
   "checkedAt": "2026-09-29",
   "procedures": [
     {
@@ -26,18 +33,21 @@
         "ru": "Миграционный учёт (регистрация)",
         "en": "Migration registration",
         "uz": "Migratsiya hisobi (roʻyxatga olish)",
+        "tt": "Миграция исәбе (теркәү)",
         "zh": "移民登记（居留登记）"
       },
       "action": {
         "ru": "Если вы живёте в общежитии СПбГЭУ, регистрацию оформляет Отдел виз и регистраций СПбГЭУ: наб. канала Грибоедова, 30–32, 2-я лестница, 1 этаж, каб. 3-1-7, +7 (812) 315-81-36. Если живёте на частном адресе — регистрацию оформляет собственник жилья.",
         "en": "If you live in a UNECON dormitory, your registration is handled by the UNECON Visa and Registration Office: 30–32 Griboyedov Canal Emb., staircase 2, 1st floor, room 3-1-7, +7 (812) 315-81-36. If you live at a private address, the owner of the flat registers you.",
         "uz": "Agar SPbGEU yotoqxonasida yashasangiz, roʻyxatga olishni SPbGEU vizalar va roʻyxatga olish boʻlimi: Griboyedov kanali sohili, 30–32, 2-zina, 1-qavat, 3-1-7-xona, +7 (812) 315-81-36 rasmiylashtiradi. Xususiy manzilda yashasangiz — uy egasi rasmiylashtiradi.",
+        "tt": "Әгәр сез СПбГЭУ тулай торагында яшисез икән, теркәүне СПбГЭУның Визалар һәм теркәүләр бүлеге рәсмиләштерә: Грибоедов каналы яр буе, 30–32, 2 нче баскыч, 1 кат, 3-1-7 бүлмә, +7 (812) 315-81-36. Шәхси адреста яшәсәгез — теркәүне торак милекчесе рәсмиләштерә.",
         "zh": "如果您住在圣彼得堡国立经济大学宿舍，居留登记由圣彼得堡国立经济大学签证与登记处：格里博耶多夫运河沿岸街30–32号，2号楼梯，1楼，3-1-7室，+7 (812) 315-81-36办理。如果您住在私人住址，由房东为您办理登记。"
       },
       "when": {
         "ru": "В течение трёх рабочих дней со дня прибытия. Бот не знает дату прибытия в общежитие — она может отличаться от даты въезда в Россию, — поэтому этот срок не считает и о нём не напоминает.",
         "en": "Within three working days of arrival. The bot does not know the date you arrived at the dormitory — it may differ from your entry into Russia — so it neither calculates this deadline nor reminds you of it.",
         "uz": "Kelgan kundan boshlab uch ish kuni ichida. Bot yotoqxonaga kelgan sanangizni bilmaydi — u Rossiyaga kirgan sanadan farq qilishi mumkin, — shuning uchun bu muddatni hisoblamaydi va eslatmaydi.",
+        "tt": "Килгән көннән өч эш көне эчендә. Бот тулай торакка килү датасын белми — ул Россиягә керү датасыннан аерылырга мөмкин, — шуңа күрә бу срокны исәпләми һәм аның турында искә төшерми.",
         "zh": "抵达之日起三个工作日内。机器人不知道您抵达宿舍的日期（可能与入境俄罗斯的日期不同），因此不计算此期限，也不会提醒。"
       },
       "documents": [
@@ -47,6 +57,7 @@
             "ru": "Паспорт (оригинал)",
             "en": "Passport (original)",
             "uz": "Pasport (asl nusxa)",
+            "tt": "Паспорт (оригиналы)",
             "zh": "护照（原件）"
           }
         },
@@ -56,6 +67,7 @@
             "ru": "Миграционная карта",
             "en": "Migration card",
             "uz": "Migratsiya kartasi",
+            "tt": "Миграция картасы",
             "zh": "移民卡"
           }
         }
@@ -75,18 +87,21 @@
         "ru": "Переоформить регистрацию при изменениях",
         "en": "Re-register after a change",
         "uz": "Oʻzgarishdan keyin qayta roʻyxatdan oʻtish",
+        "tt": "Үзгәрешләр булганда теркәүне яңадан рәсмиләштерү",
         "zh": "情况变化后重新办理登记"
       },
       "action": {
         "ru": "Если вы пересекли границу России, находились в гостинице или больнице, переехали в другое общежитие или на частный адрес, получили новый паспорт — обратитесь: Отдел виз и регистраций СПбГЭУ: наб. канала Грибоедова, 30–32, 2-я лестница, 1 этаж, каб. 3-1-7, +7 (812) 315-81-36.",
         "en": "If you crossed the Russian border, stayed at a hotel or hospital, moved to another dormitory or a private address, or got a new passport, contact the UNECON Visa and Registration Office: 30–32 Griboyedov Canal Emb., staircase 2, 1st floor, room 3-1-7, +7 (812) 315-81-36.",
         "uz": "Agar Rossiya chegarasini kesib oʻtgan boʻlsangiz, mehmonxona yoki kasalxonada boʻlgan boʻlsangiz, boshqa yotoqxonaga yoki xususiy manzilga koʻchgan boʻlsangiz yoki yangi pasport olgan boʻlsangiz — murojaat qiling: SPbGEU vizalar va roʻyxatga olish boʻlimi: Griboyedov kanali sohili, 30–32, 2-zina, 1-qavat, 3-1-7-xona, +7 (812) 315-81-36.",
+        "tt": "Әгәр сез Россия чиген кичсәгез, кунакханәдә яки хастаханәдә булсагыз, башка тулай торакка яки шәхси адреска күчсәгез, яңа паспорт алсагыз — мөрәҗәгать итегез: СПбГЭУның Визалар һәм теркәүләр бүлеге: Грибоедов каналы яр буе, 30–32, 2 нче баскыч, 1 кат, 3-1-7 бүлмә, +7 (812) 315-81-36.",
         "zh": "如果您出入过俄罗斯国境、住过酒店或医院、搬到其他宿舍或私人住址，或获得了新护照，请联系圣彼得堡国立经济大学签证与登记处：格里博耶多夫运河沿岸街30–32号，2号楼梯，1楼，3-1-7室，+7 (812) 315-81-36。"
       },
       "when": {
         "ru": "В течение 1 рабочего дня после изменения. Бот не знает о таких изменениях, поэтому о сроке не напоминает.",
         "en": "Within 1 working day after the change. The bot does not know about such changes, so it does not remind you.",
         "uz": "Oʻzgarishdan keyin 1 ish kuni ichida. Bot bunday oʻzgarishlarni bilmaydi, shuning uchun eslatmaydi.",
+        "tt": "Үзгәрештән соң 1 эш көне эчендә. Бот мондый үзгәрешләр турында белми, шуңа күрә срок турында искә төшерми.",
         "zh": "变化发生后1个工作日内。机器人不知道此类变化，因此不会提醒。"
       },
       "documents": [],
@@ -105,18 +120,21 @@
         "ru": "Продление регистрации",
         "en": "Extending registration",
         "uz": "Roʻyxatga olishni uzaytirish",
+        "tt": "Теркәүне озайту",
         "zh": "延长居留登记"
       },
       "action": {
         "ru": "Подайте документы: Отдел виз и регистраций СПбГЭУ: наб. канала Грибоедова, 30–32, 2-я лестница, 1 этаж, каб. 3-1-7, +7 (812) 315-81-36. К этому моменту медосвидетельствование и дактилоскопия должны быть пройдены.",
         "en": "Submit the documents to the UNECON Visa and Registration Office: 30–32 Griboyedov Canal Emb., staircase 2, 1st floor, room 3-1-7, +7 (812) 315-81-36. By then your medical examination and fingerprinting must be completed.",
         "uz": "Hujjatlarni topshiring: SPbGEU vizalar va roʻyxatga olish boʻlimi: Griboyedov kanali sohili, 30–32, 2-zina, 1-qavat, 3-1-7-xona, +7 (812) 315-81-36. Bu vaqtga kelib tibbiy koʻrik va daktiloskopiyadan oʻtgan boʻlishingiz kerak.",
+        "tt": "Документларны тапшырыгыз: СПбГЭУның Визалар һәм теркәүләр бүлеге: Грибоедов каналы яр буе, 30–32, 2 нче баскыч, 1 кат, 3-1-7 бүлмә, +7 (812) 315-81-36. Бу вакытка медицина тикшерүе һәм дактилоскопия узылган булырга тиеш.",
         "zh": "请向圣彼得堡国立经济大学签证与登记处：格里博耶多夫运河沿岸街30–32号，2号楼梯，1楼，3-1-7室，+7 (812) 315-81-36提交文件。届时须已完成体检和指纹登记。"
       },
       "when": {
         "ru": "Не менее чем за 45 дней до окончания регистрации. Укажите дату окончания регистрации — бот посчитает дату по этому правилу и напомнит.",
         "en": "At least 45 days before your registration ends. Enter your registration end date — the bot will count the date by this rule and remind you.",
         "uz": "Roʻyxatga olish tugashidan kamida 45 kun oldin. Roʻyxatga olish tugash sanasini kiriting — bot shu qoida boʻyicha sanani hisoblaydi va eslatadi.",
+        "tt": "Теркәү тәмамланганчы 45 көннән дә ким булмаган вакыт алда. Теркәү тәмамлану датасын күрсәтегез — бот датаны шушы кагыйдә буенча исәпләр һәм искә төшерер.",
         "zh": "至少在居留登记到期前45天。请输入居留登记到期日——机器人会按此规定计算日期并提醒您。"
       },
       "documents": [
@@ -126,6 +144,7 @@
             "ru": "Пройденные медосвидетельствование и дактилоскопия («зелёная карта»)",
             "en": "Completed medical examination and fingerprinting (the “green card”)",
             "uz": "Oʻtilgan tibbiy koʻrik va daktiloskopiya («yashil karta»)",
+            "tt": "Узылган медицина тикшерүе һәм дактилоскопия («яшел карта»)",
             "zh": "已完成的体检和指纹登记（“绿卡”）"
           }
         }
@@ -149,18 +168,21 @@
         "ru": "Продление визы",
         "en": "Visa extension",
         "uz": "Vizani uzaytirish",
+        "tt": "Визаны озайту",
         "zh": "签证延期"
       },
       "action": {
         "ru": "Однократная учебная виза выдаётся на 90 дней. Документы на продление принимает Отдел виз и регистраций СПбГЭУ: наб. канала Грибоедова, 30–32, 2-я лестница, 1 этаж, каб. 3-1-7, +7 (812) 315-81-36. Показано гражданам визовых стран: перечень безвизовых стран взят со страницы ИТМО (int.itmo.ru/ru/important_documents), своего перечня страница СПбГЭУ не даёт.",
         "en": "A single-entry study visa is issued for 90 days. Extension documents are accepted by the UNECON Visa and Registration Office: 30–32 Griboyedov Canal Emb., staircase 2, 1st floor, room 3-1-7, +7 (812) 315-81-36. Shown to citizens of visa countries: the list of visa-free countries is taken from the ITMO page (int.itmo.ru/ru/important_documents), as the UNECON page gives none.",
         "uz": "Bir martalik oʻquv vizasi 90 kunga beriladi. Uzaytirish uchun hujjatlarni SPbGEU vizalar va roʻyxatga olish boʻlimi: Griboyedov kanali sohili, 30–32, 2-zina, 1-qavat, 3-1-7-xona, +7 (812) 315-81-36 qabul qiladi. Vizali mamlakatlar fuqarolariga koʻrsatiladi: vizasiz mamlakatlar roʻyxati ITMO sahifasidan olingan (int.itmo.ru/ru/important_documents), SPbGEU sahifasida bunday roʻyxat yoʻq.",
+        "tt": "Бер тапкыр керү өчен уку визасы 90 көнгә бирелә. Озайту өчен документларны СПбГЭУның Визалар һәм теркәүләр бүлеге кабул итә: Грибоедов каналы яр буе, 30–32, 2 нче баскыч, 1 кат, 3-1-7 бүлмә, +7 (812) 315-81-36. Виза режимы булган илләр гражданнарына күрсәтелә: визасыз илләр исемлеге ИТМО битеннән алынган (int.itmo.ru/ru/important_documents), СПбГЭУ бите үз исемлеген бирми.",
         "zh": "一次性学习签证有效期为90天。延期文件由圣彼得堡国立经济大学签证与登记处：格里博耶多夫运河沿岸街30–32号，2号楼梯，1楼，3-1-7室，+7 (812) 315-81-36受理。此项向签证国家公民显示：免签国家名单取自ITMO大学页面（int.itmo.ru/ru/important_documents），圣彼得堡国立经济大学页面未提供该名单。"
       },
       "when": {
         "ru": "Не менее чем за 45 дней до окончания визы. Укажите дату окончания визы — бот посчитает дату по этому правилу и напомнит.",
         "en": "At least 45 days before your visa expires. Enter your visa end date — the bot will count the date by this rule and remind you.",
         "uz": "Viza tugashidan kamida 45 kun oldin. Viza tugash sanasini kiriting — bot shu qoida boʻyicha sanani hisoblaydi va eslatadi.",
+        "tt": "Виза тәмамланганчы 45 көннән дә ким булмаган вакыт алда. Виза тәмамлану датасын күрсәтегез — бот датаны шушы кагыйдә буенча исәпләр һәм искә төшерер.",
         "zh": "至少在签证到期前45天。请输入签证到期日——机器人会按此规定计算日期并提醒您。"
       },
       "documents": [
@@ -170,6 +192,7 @@
             "ru": "Паспорт (оригинал)",
             "en": "Passport (original)",
             "uz": "Pasport (asl nusxa)",
+            "tt": "Паспорт (оригиналы)",
             "zh": "护照（原件）"
           }
         },
@@ -179,6 +202,7 @@
             "ru": "Миграционная карта",
             "en": "Migration card",
             "uz": "Migratsiya kartasi",
+            "tt": "Миграция картасы",
             "zh": "移民卡"
           }
         },
@@ -188,6 +212,7 @@
             "ru": "Постановка на миграционный учёт (регистрация)",
             "en": "Migration registration",
             "uz": "Migratsiya hisobiga qoʻyilganlik (roʻyxatga olish)",
+            "tt": "Миграция исәбенә кую (теркәү)",
             "zh": "移民登记（居留登记）"
           }
         },
@@ -197,6 +222,7 @@
             "ru": "Пройденные медосвидетельствование и дактилоскопия («зелёная карта»)",
             "en": "Completed medical examination and fingerprinting (the “green card”)",
             "uz": "Oʻtilgan tibbiy koʻrik va daktiloskopiya («yashil karta»)",
+            "tt": "Узылган медицина тикшерүе һәм дактилоскопия («яшел карта»)",
             "zh": "已完成的体检和指纹登记（“绿卡”）"
           }
         }
@@ -231,18 +257,21 @@
         "ru": "Полис ДМС",
         "en": "Voluntary health insurance policy",
         "uz": "Ixtiyoriy tibbiy sugʻurta polisi",
+        "tt": "ИМС полисы",
         "zh": "自愿医疗保险单"
       },
       "action": {
         "ru": "Полис ДМС обязателен для всех иностранных студентов. Оформите его в Санкт-Петербурге на 1 год: амбулаторное и стационарное лечение, помощь при несчастных случаях и репатриация.",
         "en": "A voluntary health insurance policy is mandatory for all international students. Buy it in Saint Petersburg for 1 year, covering outpatient and inpatient care, accidents and repatriation.",
         "uz": "Ixtiyoriy tibbiy sugʻurta polisi barcha xorijiy talabalar uchun majburiy. Uni Sankt-Peterburgda 1 yilga rasmiylashtiring: ambulator va statsionar davolanish, baxtsiz hodisalarda yordam va repatriatsiya.",
+        "tt": "ИМС (ирекле медицина иминияте) полисы барлык чит ил студентлары өчен дә мәҗбүри. Аны Санкт-Петербургта 1 елга рәсмиләштерегез: амбулатор һәм стационар дәвалау, бәхетсезлек очракларында ярдәм һәм репатриация.",
         "zh": "所有外国留学生都必须持有自愿医疗保险单。请在圣彼得堡办理为期1年的保险，涵盖门诊、住院、意外事故救助和遣返。"
       },
       "when": {
         "ru": "Срок оформления на странице вуза не указан — уточните в отделе.",
         "en": "The page does not give a deadline — ask the office.",
         "uz": "Sahifada muddat koʻrsatilmagan — boʻlimdan aniqlang.",
+        "tt": "Рәсмиләштерү срогы вуз битендә күрсәтелмәгән — бүлектә ачыклагыз.",
         "zh": "页面未注明办理期限，请向该处咨询。"
       },
       "documents": [],
@@ -259,6 +288,7 @@
         "ru": "ФГУП «ПВС» МВД России, филиал по Санкт-Петербургу и Ленинградской области: ул. Красного Текстильщика, 10–12, лит. В, вход № 2 со двора",
         "en": "FSUE «PVS» of the Russian Interior Ministry, Saint Petersburg and Leningrad Region branch: 10–12 Krasnogo Tekstilshchika St., building V, entrance 2 from the courtyard",
         "uz": "Rossiya IIV «PVS» FDUK, Sankt-Peterburg va Leningrad viloyati filiali: Krasnogo Tekstilshchika koʻch., 10–12, V bino, hovlidan 2-kirish",
+        "tt": "Россия ЭЭМның «ПВС» ФДУП, Санкт-Петербург һәм Ленинград өлкәсе буенча филиалы: Красного Текстильщика ур., 10–12, В литерасы, ишегалдыннан 2 нче керү",
         "zh": "俄罗斯内务部“PVS”联邦国有单一制企业圣彼得堡及列宁格勒州分部：Krasnogo Tekstilshchika街10–12号V栋，从院内2号入口进入"
       },
       "map": "Санкт-Петербург, ул. Красного Текстильщика, 10-12",
@@ -272,6 +302,7 @@
         "ru": "ФГУП «ПВС» МВД России, филиал по Санкт-Петербургу и Ленинградской области: ул. Красного Текстильщика, 10–12, лит. В, вход № 2 со двора",
         "en": "FSUE «PVS» of the Russian Interior Ministry, Saint Petersburg and Leningrad Region branch: 10–12 Krasnogo Tekstilshchika St., building V, entrance 2 from the courtyard",
         "uz": "Rossiya IIV «PVS» FDUK, Sankt-Peterburg va Leningrad viloyati filiali: Krasnogo Tekstilshchika koʻch., 10–12, V bino, hovlidan 2-kirish",
+        "tt": "Россия ЭЭМның «ПВС» ФДУП, Санкт-Петербург һәм Ленинград өлкәсе буенча филиалы: Красного Текстильщика ур., 10–12, В литерасы, ишегалдыннан 2 нче керү",
         "zh": "俄罗斯内务部“PVS”联邦国有单一制企业圣彼得堡及列宁格勒州分部：Krasnogo Tekstilshchika街10–12号V栋，从院内2号入口进入"
       },
       "map": "Санкт-Петербург, ул. Красного Текстильщика, 10-12",
@@ -288,13 +319,15 @@
         "ru": "Приглашение и виза",
         "en": "Invitation and visa",
         "zh": "邀请函和签证",
-        "uz": "Taklifnoma va viza"
+        "uz": "Taklifnoma va viza",
+        "tt": "Чакыру һәм виза"
       },
       "text": {
         "ru": "Приглашение оформляется после вступительных испытаний и заключения договора на обучение. Оно приходит в электронном виде на вашу почту. По нему в консульстве России оформляют однократную визу на 90 дней.",
         "en": "The invitation is issued after the entrance tests and the study contract. It comes electronically to your e-mail. With it, the Russian consulate issues a single-entry visa for 90 days.",
         "zh": "邀请函在通过入学考试并签订学习合同后办理，以电子形式发送到您的电子邮箱。凭邀请函可在俄罗斯领事馆办理90天一次性签证。",
-        "uz": "Taklifnoma kirish sinovlaridan va oʻqish shartnomasi tuzilgandan keyin rasmiylashtiriladi. U elektron shaklda pochtangizga keladi. U bilan Rossiya konsulligida 90 kunlik bir martalik viza olinadi."
+        "uz": "Taklifnoma kirish sinovlaridan va oʻqish shartnomasi tuzilgandan keyin rasmiylashtiriladi. U elektron shaklda pochtangizga keladi. U bilan Rossiya konsulligida 90 kunlik bir martalik viza olinadi.",
+        "tt": "Чакыру керү имтиханнарыннан һәм уку килешүе төзелгәннән соң рәсмиләштерелә. Ул сезнең почтагызга электрон рәвештә килә. Аның буенча Россия консулльлегендә 90 көнгә бер тапкыр керү визасы рәсмиләштерәләр."
       },
       "appliesIf": [
         {
@@ -316,7 +349,8 @@
         "ru": "ваше гражданство отнесено к визовым странам по списку профиля вуза, а не по документу ведомства. Требования консульства России в вашей стране бот не проверял.",
         "en": "your citizenship is treated as a visa country by the university profile's list, not by an official document. The bot has not checked the requirements of the Russian consulate in your country.",
         "zh": "您的国籍是按学校资料中的名单被归为需签证国家，而非依据官方文件。机器人未核对俄罗斯驻贵国领事馆的要求。",
-        "uz": "fuqaroligingiz idora hujjati boʻyicha emas, universitet profilidagi roʻyxat boʻyicha vizali davlatlarga kiritilgan. Bot mamlakatingizdagi Rossiya konsulligi talablarini tekshirmagan."
+        "uz": "fuqaroligingiz idora hujjati boʻyicha emas, universitet profilidagi roʻyxat boʻyicha vizali davlatlarga kiritilgan. Bot mamlakatingizdagi Rossiya konsulligi talablarini tekshirmagan.",
+        "tt": "гражданлыгыгыз виза режимы булган илләргә ведомство документы буенча түгел, ә вуз профилендәге исемлек буенча кертелгән. Илегездәге Россия консулльлеге таләпләрен бот тикшермәде."
       }
     },
     {
@@ -325,13 +359,15 @@
         "ru": "Документы для заселения в общежитие",
         "en": "Documents to move into the dormitory",
         "zh": "入住宿舍所需文件",
-        "uz": "Yotoqxonaga joylashish uchun hujjatlar"
+        "uz": "Yotoqxonaga joylashish uchun hujjatlar",
+        "tt": "Тулай торакка урнашу өчен документлар"
       },
       "text": {
         "ru": "Для заселения СПбГЭУ просит: паспорт с нотариально заверенным переводом на русский язык (или с переводом, который заверил подписью руководитель Управления международного сотрудничества (УМС) СПбГЭУ и печатью), медицинскую справку с результатами флюорографии и её копию, документ о зачислении (справку из студенческого отдела кадров или выписку из приказа о зачислении). До 18 лет — нотариально заверенное согласие родителей (опекунов).",
         "en": "To move in, UNECON asks for: your passport with a notarised translation into Russian (or a translation certified by the signature of the head of UNECON's International Cooperation Department and its seal), a medical certificate with chest X-ray (fluorography) results and its copy, and a document confirming enrolment (a certificate from the student HR office or an extract from the enrolment order). Under 18: notarised consent of your parents (guardians).",
         "zh": "入住时圣彼得堡国立经济大学要求提供：护照及其经公证的俄文译本（或经该校国际合作处负责人签字并加盖公章认证的译本）、附胸部X光检查结果的医疗证明及其复印件、录取证明文件（学生人事处出具的证明或录取令摘录）。未满18岁者——父母（监护人）经公证的同意书。",
-        "uz": "Joylashish uchun SPbGEU soʻraydi: rus tiliga notarial tasdiqlangan tarjimasi bilan pasport (yoki SPbGEU Xalqaro hamkorlik boshqarmasi rahbari imzosi va muhri bilan tasdiqlangan tarjima), flyuorografiya natijalari bilan tibbiy maʼlumotnoma va uning nusxasi, oʻqishga qabul qilinganlik haqidagi hujjat (talabalar kadrlar boʻlimidan maʼlumotnoma yoki qabul qilish buyrugʻidan koʻchirma). 18 yoshgacha — ota-onaning (vasiylarning) notarial tasdiqlangan roziligi."
+        "uz": "Joylashish uchun SPbGEU soʻraydi: rus tiliga notarial tasdiqlangan tarjimasi bilan pasport (yoki SPbGEU Xalqaro hamkorlik boshqarmasi rahbari imzosi va muhri bilan tasdiqlangan tarjima), flyuorografiya natijalari bilan tibbiy maʼlumotnoma va uning nusxasi, oʻqishga qabul qilinganlik haqidagi hujjat (talabalar kadrlar boʻlimidan maʼlumotnoma yoki qabul qilish buyrugʻidan koʻchirma). 18 yoshgacha — ota-onaning (vasiylarning) notarial tasdiqlangan roziligi.",
+        "tt": "Урнашу өчен СПбГЭУ сорый: рус теленә нотариаль расланган тәрҗемәле паспорт (яки СПбГЭУның Халыкара хезмәттәшлек идарәсе (УМС) җитәкчесе имзасы һәм мөһер белән раслаган тәрҗемәле), флюорография нәтиҗәләре белән медицина белешмәсе һәм аның күчермәсе, кабул итү турында документ (студентлар кадрлар бүлегеннән белешмә яки кабул итү турында боерыктан өземтә). 18 яшькә кадәр — ата-ананың (опекуннарның) нотариаль расланган ризалыгы."
       },
       "appliesIf": [],
       "source": {

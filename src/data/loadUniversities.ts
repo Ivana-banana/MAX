@@ -41,6 +41,12 @@ export interface University {
    * says what the bot assumes on top of it. Empty when the profile has none.
    */
   beforeEntry: BeforeEntryCard[];
+  /**
+   * Languages of the QR poster, in print order; the first is printed larger. An A4 sheet holds
+   * about four languages with a scannable code, so a university picks those of its dormitory.
+   * Absent — every interface language.
+   */
+  posterLanguages?: string[];
 }
 
 export interface BeforeEntryCard {
@@ -238,10 +244,15 @@ export function parseUniversity(raw: unknown, path = "university"): University {
   const procedures = ((u.procedures ?? []) as unknown[]).map((p, i) => parseProcedure(p, `${path}.procedures[${i}]`));
   const repeated = procedures.map(p => p.id).find((id, i, all) => all.indexOf(id) !== i);
   if (repeated !== undefined) throw new UniversityValidationError(`${path}.procedures`, `повторяющийся id «${repeated}»`);
+  if (u.posterLanguages !== undefined && (!Array.isArray(u.posterLanguages) || u.posterLanguages.length === 0 ||
+      !u.posterLanguages.every(l => typeof l === "string" && /^[a-z]{2}$/.test(l)))) {
+    throw new UniversityValidationError(`${path}.posterLanguages`, "ожидается непустой список кодов языков ISO 639-1");
+  }
   return { id, name: names,
     contactUrl, citizenships: [...new Set(u.citizenships as string[])], checkedAt, procedures,
     rulePlaces: parseRulePlaces(u.rulePlaces, `${path}.rulePlaces`), ruleTargets: parseRuleTargets(u.ruleTargets, `${path}.ruleTargets`),
-    beforeEntry: parseBeforeEntry(u.beforeEntry, `${path}.beforeEntry`) };
+    beforeEntry: parseBeforeEntry(u.beforeEntry, `${path}.beforeEntry`),
+    ...(u.posterLanguages ? { posterLanguages: [...new Set(u.posterLanguages as string[])] } : {}) };
 }
 
 /** All profiles from a directory; the default university comes first. */

@@ -5,7 +5,8 @@
     "ru": "КФУ",
     "en": "KFU",
     "zh": "喀山联邦大学",
-    "uz": "KFU"
+    "uz": "KFU",
+    "tt": "КФУ"
   },
   "contactUrl": "https://kpfu.ru/international/migracionnoe-soprovozhdenie-inostrannyh-grazhdan",
   "citizenships": [
@@ -18,6 +19,12 @@
     "EG",
     "TR"
   ],
+  "posterLanguages": [
+    "ru",
+    "tt",
+    "en",
+    "zh"
+  ],
   "checkedAt": "2026-09-23",
   "procedures": [
     {
@@ -26,18 +33,21 @@
         "ru": "Миграционный учёт (регистрация)",
         "en": "Migration registration",
         "uz": "Migratsiya hisobi (roʻyxatga olish)",
+        "tt": "Миграция исәбе (теркәү)",
         "zh": "移民登记（居留登记）"
       },
       "action": {
         "ru": "Если вы живёте в общежитии КФУ, миграционный учёт оформляет университет. Лично придите в Департамент внешних связей КФУ: ул. Гвардейская, 9, зал А (пн–пт 9:00–17:00, электронная очередь) — с оригиналами документов ниже.",
         "en": "If you live in a KFU dormitory, the university handles your migration registration. Come in person to the KFU Department of External Relations: 9 Gvardeyskaya St., hall A (Mon–Fri 9:00–17:00, electronic queue), with the original documents below.",
         "uz": "Agar KFU yotoqxonasida yashasangiz, migratsiya hisobini universitet rasmiylashtiradi. KFU Tashqi aloqalar departamentiga shaxsan keling: Gvardeyskaya koʻch., 9, A zal (du–ju 9:00–17:00, elektron navbat) — quyidagi hujjatlarning asl nusxalari bilan.",
+        "tt": "Әгәр сез КФУ тулай торагында яшисез икән, миграция исәбен университет рәсмиләштерә. КФУның Тышкы элемтәләр департаментына үзегез килегез: Гвардейская ур., 9, А залы (дш–җм 9:00–17:00, электрон чират) — түбәндәге документларның оригиналлары белән.",
         "zh": "如果您住在喀山联邦大学宿舍，移民登记由大学办理。请本人携带以下文件原件前往喀山联邦大学对外联络部：Gvardeyskaya 街 9 号 A 厅（周一至周五 9:00–17:00，电子排队）。"
       },
       "when": {
         "ru": "В течение следующего рабочего дня после заселения в общежитие (кроме выходных и праздников). Бот не знает дату заселения, поэтому этот срок не считает и о нём не напоминает.",
         "en": "Within the next working day after moving into the dormitory (weekends and holidays excluded). The bot does not know your move-in date, so it neither calculates this deadline nor reminds you of it.",
         "uz": "Yotoqxonaga joylashgandan keyingi ish kuni ichida (dam olish va bayram kunlari bundan mustasno). Bot joylashish sanasini bilmaydi, shuning uchun bu muddatni hisoblamaydi va eslatmaydi.",
+        "tt": "Тулай торакка урнашканнан соң киләсе эш көне эчендә (ял һәм бәйрәм көннәреннән тыш). Бот урнашу датасын белми, шуңа күрә бу срокны исәпләми һәм аның турында искә төшерми.",
         "zh": "入住宿舍后的下一个工作日内（周末和节假日除外）。机器人不知道您的入住日期，因此不计算此期限，也不会提醒。"
       },
       "documents": [
@@ -47,6 +57,7 @@
             "ru": "Паспорт (оригинал)",
             "en": "Passport (original)",
             "uz": "Pasport (asl nusxa)",
+            "tt": "Паспорт (оригиналы)",
             "zh": "护照（原件）"
           }
         },
@@ -56,6 +67,7 @@
             "ru": "Миграционная карта (оригинал)",
             "en": "Migration card (original)",
             "uz": "Migratsiya kartasi (asl nusxa)",
+            "tt": "Миграция картасы (оригиналы)",
             "zh": "移民卡（原件）"
           }
         },
@@ -65,6 +77,7 @@
             "ru": "Договор найма в общежитии (оригинал)",
             "en": "Dormitory tenancy agreement (original)",
             "uz": "Yotoqxona ijara shartnomasi (asl nusxa)",
+            "tt": "Тулай торакта яллау килешүе (оригиналы)",
             "zh": "宿舍租住合同（原件）"
           }
         },
@@ -74,6 +87,7 @@
             "ru": "Справка об обучении (не старше 14 дней)",
             "en": "Certificate of enrolment (not older than 14 days)",
             "uz": "Oʻqish haqida maʼlumotnoma (14 kundan eski emas)",
+            "tt": "Уку турында белешмә (14 көннән дә искерәк түгел)",
             "zh": "在读证明（开具不超过 14 天）"
           }
         }
@@ -104,18 +118,21 @@
         "ru": "Миграционный учёт (регистрация)",
         "en": "Migration registration",
         "uz": "Migratsiya hisobi (roʻyxatga olish)",
+        "tt": "Миграция исәбе (теркәү)",
         "zh": "移民登记（居留登记）"
       },
       "action": {
         "ru": "Если вы живёте в общежитии КФУ, миграционный учёт оформляет университет. Лично придите в Департамент внешних связей КФУ: ул. Гвардейская, 9, зал А (пн–пт 9:00–17:00, электронная очередь) — с оригиналами документов ниже.",
         "en": "If you live in a KFU dormitory, the university handles your migration registration. Come in person to the KFU Department of External Relations: 9 Gvardeyskaya St., hall A (Mon–Fri 9:00–17:00, electronic queue), with the original documents below.",
         "uz": "Agar KFU yotoqxonasida yashasangiz, migratsiya hisobini universitet rasmiylashtiradi. KFU Tashqi aloqalar departamentiga shaxsan keling: Gvardeyskaya koʻch., 9, A zal (du–ju 9:00–17:00, elektron navbat) — quyidagi hujjatlarning asl nusxalari bilan.",
+        "tt": "Әгәр сез КФУ тулай торагында яшисез икән, миграция исәбен университет рәсмиләштерә. КФУның Тышкы элемтәләр департаментына үзегез килегез: Гвардейская ур., 9, А залы (дш–җм 9:00–17:00, электрон чират) — түбәндәге документларның оригиналлары белән.",
         "zh": "如果您住在喀山联邦大学宿舍，移民登记由大学办理。请本人携带以下文件原件前往喀山联邦大学对外联络部：Gvardeyskaya 街 9 号 A 厅（周一至周五 9:00–17:00，电子排队）。"
       },
       "when": {
         "ru": "В течение следующего рабочего дня после заселения в общежитие (кроме выходных и праздников). Бот не знает дату заселения, поэтому этот срок не считает и о нём не напоминает.",
         "en": "Within the next working day after moving into the dormitory (weekends and holidays excluded). The bot does not know your move-in date, so it neither calculates this deadline nor reminds you of it.",
         "uz": "Yotoqxonaga joylashgandan keyingi ish kuni ichida (dam olish va bayram kunlari bundan mustasno). Bot joylashish sanasini bilmaydi, shuning uchun bu muddatni hisoblamaydi va eslatmaydi.",
+        "tt": "Тулай торакка урнашканнан соң киләсе эш көне эчендә (ял һәм бәйрәм көннәреннән тыш). Бот урнашу датасын белми, шуңа күрә бу срокны исәпләми һәм аның турында искә төшерми.",
         "zh": "入住宿舍后的下一个工作日内（周末和节假日除外）。机器人不知道您的入住日期，因此不计算此期限，也不会提醒。"
       },
       "documents": [
@@ -125,6 +142,7 @@
             "ru": "Паспорт (оригинал)",
             "en": "Passport (original)",
             "uz": "Pasport (asl nusxa)",
+            "tt": "Паспорт (оригиналы)",
             "zh": "护照（原件）"
           }
         },
@@ -134,6 +152,7 @@
             "ru": "Виза (оригинал) — если въезжали по визе",
             "en": "Visa (original), if you entered on a visa",
             "uz": "Viza (asl nusxa) — agar viza bilan kirgan boʻlsangiz",
+            "tt": "Виза (оригиналы) — виза белән кергән булсагыз",
             "zh": "签证（原件）——如持签证入境"
           }
         },
@@ -143,6 +162,7 @@
             "ru": "Миграционная карта (оригинал)",
             "en": "Migration card (original)",
             "uz": "Migratsiya kartasi (asl nusxa)",
+            "tt": "Миграция картасы (оригиналы)",
             "zh": "移民卡（原件）"
           }
         },
@@ -152,6 +172,7 @@
             "ru": "Договор найма в общежитии (оригинал)",
             "en": "Dormitory tenancy agreement (original)",
             "uz": "Yotoqxona ijara shartnomasi (asl nusxa)",
+            "tt": "Тулай торакта яллау килешүе (оригиналы)",
             "zh": "宿舍租住合同（原件）"
           }
         },
@@ -161,6 +182,7 @@
             "ru": "Справка об обучении (не старше 14 дней)",
             "en": "Certificate of enrolment (not older than 14 days)",
             "uz": "Oʻqish haqida maʼlumotnoma (14 kundan eski emas)",
+            "tt": "Уку турында белешмә (14 көннән дә искерәк түгел)",
             "zh": "在读证明（开具不超过 14 天）"
           }
         },
@@ -170,6 +192,7 @@
             "ru": "Прежняя регистрация — если была до заселения",
             "en": "Previous registration, if you had one before moving in",
             "uz": "Oldingi roʻyxatga olish — agar joylashishdan oldin boʻlgan boʻlsa",
+            "tt": "Элекке теркәү — урнашканчы булган булса",
             "zh": "此前的登记——如入住前曾登记"
           }
         }
@@ -200,18 +223,21 @@
         "ru": "Переоформить учёт после поездки, больницы или переезда",
         "en": "Re-register after a trip, a hospital stay or a move",
         "uz": "Sayohat, kasalxona yoki koʻchishdan keyin qayta roʻyxatdan oʻtish",
+        "tt": "Сәфәрдән, хастаханәдән яки күчүдән соң исәпне яңадан рәсмиләштерү",
         "zh": "旅行、住院或搬家后重新办理登记"
       },
       "action": {
         "ru": "Если вы ездили по России или за границу, лежали в больнице или переехали (в том числе внутри студгородка КФУ и Деревни Универсиады), лично придите: Департамент внешних связей КФУ: ул. Гвардейская, 9 (пн–пт 9:00–17:00, +7 (843) 206-52-89, доб. 8135). Перед выездом из России предупредите заведующего общежитием.",
         "en": "If you travelled in Russia or abroad, stayed in hospital or moved (including within the KFU campus and the Universiade Village), come in person to the KFU Department of External Relations: 9 Gvardeyskaya St. (Mon–Fri 9:00–17:00, +7 (843) 206-52-89, ext. 8135). Before leaving Russia, tell the dormitory manager.",
         "uz": "Agar Rossiya boʻylab yoki chet elga sayohat qilgan boʻlsangiz, kasalxonada yotgan boʻlsangiz yoki koʻchgan boʻlsangiz (KFU talabalar shaharchasi va Universiada qishlogʻi ichida ham), shaxsan keling: KFU Tashqi aloqalar departamenti: Gvardeyskaya koʻch., 9 (du–ju 9:00–17:00, +7 (843) 206-52-89, 8135-qoʻshimcha). Rossiyadan chiqishdan oldin yotoqxona mudirini ogohlantiring.",
+        "tt": "Әгәр сез Россия буенча яки чит илгә барсагыз, хастаханәдә ятсагыз яки күчсәгез (шул исәптән КФУ студентлар шәһәрчеге һәм Универсиада авылы эчендә), үзегез килегез: КФУның Тышкы элемтәләр департаменты: Гвардейская ур., 9 (дш–җм 9:00–17:00, +7 (843) 206-52-89, өст. 8135). Россиядән киткәнче тулай торак мөдиренә әйтегез.",
         "zh": "如果您在俄罗斯境内或出境旅行、住院或搬家（包括在喀山联邦大学校园和大运村内搬动），请本人前往喀山联邦大学对外联络部：Gvardeyskaya街9号（周一至周五9:00–17:00，+7 (843) 206-52-89 转8135）。离开俄罗斯前请告知宿舍管理员。"
       },
       "when": {
         "ru": "В течение следующего рабочего дня после возвращения или переезда (кроме выходных и праздников). Бот не знает о поездках и переездах, поэтому о сроке не напоминает.",
         "en": "Within the next working day after your return or move (weekends and holidays excluded). The bot does not know about trips and moves, so it does not remind you.",
         "uz": "Qaytgandan yoki koʻchgandan keyingi ish kuni ichida (dam olish va bayram kunlari bundan mustasno). Bot sayohat va koʻchishlarni bilmaydi, shuning uchun eslatmaydi.",
+        "tt": "Кайтканнан яки күчкәннән соң киләсе эш көне эчендә (ял һәм бәйрәм көннәреннән тыш). Бот сәфәрләр һәм күчүләр турында белми, шуңа күрә срок турында искә төшерми.",
         "zh": "返回或搬家后的下一个工作日内（周末和节假日除外）。机器人不知道您的旅行和搬家情况，因此不会提醒。"
       },
       "documents": [
@@ -221,6 +247,7 @@
             "ru": "Паспорт (оригинал)",
             "en": "Passport (original)",
             "uz": "Pasport (asl nusxa)",
+            "tt": "Паспорт (оригиналы)",
             "zh": "护照（原件）"
           }
         },
@@ -230,6 +257,7 @@
             "ru": "Миграционная карта (оригинал)",
             "en": "Migration card (original)",
             "uz": "Migratsiya kartasi (asl nusxa)",
+            "tt": "Миграция картасы (оригиналы)",
             "zh": "移民卡（原件）"
           }
         },
@@ -239,6 +267,7 @@
             "ru": "Документ о миграционном учёте (оригинал)",
             "en": "Migration registration document (original)",
             "uz": "Migratsiya hisobi hujjati (asl nusxa)",
+            "tt": "Миграция исәбе турында документ (оригиналы)",
             "zh": "居留登记文件（原件）"
           }
         },
@@ -248,6 +277,7 @@
             "ru": "Договор найма в общежитии (оригинал)",
             "en": "Dormitory tenancy agreement (original)",
             "uz": "Yotoqxona ijara shartnomasi (asl nusxa)",
+            "tt": "Тулай торакта яллау килешүе (оригиналы)",
             "zh": "宿舍租赁合同（原件）"
           }
         }
@@ -267,18 +297,21 @@
         "ru": "Продление срока пребывания",
         "en": "Extending the period of stay",
         "uz": "Yashash muddatini uzaytirish",
+        "tt": "Булу срогын озайту",
         "zh": "延长停留期限"
       },
       "action": {
         "ru": "Чтобы продлить регистрацию, безвизовому студенту нужно решение о продлении срока пребывания. Обратитесь: Департамент внешних связей КФУ: ул. Гвардейская, 9 (пн–пт 9:00–17:00, +7 (843) 206-52-89, доб. 8135). Госпошлина за продление — 1000 ₽, реквизиты — на странице КФУ.",
         "en": "To extend your registration as a visa-free student you need a decision extending your period of stay. Contact the KFU Department of External Relations: 9 Gvardeyskaya St. (Mon–Fri 9:00–17:00, +7 (843) 206-52-89, ext. 8135). The state fee for the extension is 1,000 roubles; payment details are on the KFU page.",
         "uz": "Roʻyxatga olishni uzaytirish uchun vizasiz talabaga yashash muddatini uzaytirish toʻgʻrisidagi qaror kerak. Murojaat qiling: KFU Tashqi aloqalar departamenti: Gvardeyskaya koʻch., 9 (du–ju 9:00–17:00, +7 (843) 206-52-89, 8135-qoʻshimcha). Uzaytirish uchun davlat boji — 1000 rubl, rekvizitlar — KFU sahifasida.",
+        "tt": "Теркәүне озайту өчен визасыз студентка булу срогын озайту турында карар кирәк. Мөрәҗәгать итегез: КФУның Тышкы элемтәләр департаменты: Гвардейская ур., 9 (дш–җм 9:00–17:00, +7 (843) 206-52-89, өст. 8135). Озайту өчен дәүләт пошлинасы — 1000 ₽, реквизитлар — КФУ битендә.",
         "zh": "免签学生如需延长居留登记，须先获得延长停留期限的决定。请联系喀山联邦大学对外联络部：Gvardeyskaya街9号（周一至周五9:00–17:00，+7 (843) 206-52-89 转8135）。延期国家规费为1000卢布，缴费信息见喀山联邦大学页面。"
       },
       "when": {
         "ru": "Не позднее чем за 45 дней до истечения регистрации. Укажите дату окончания регистрации — бот посчитает дату по этому правилу и напомнит.",
         "en": "No later than 45 days before your registration expires. Enter your registration end date — the bot will count the date by this rule and remind you.",
         "uz": "Roʻyxatga olish tugashidan kamida 45 kun oldin. Roʻyxatga olish tugash sanasini kiriting — bot shu qoida boʻyicha sanani hisoblaydi va eslatadi.",
+        "tt": "Теркәү срогы чыкканчы 45 көннән дә соңга калмыйча. Теркәү тәмамлану датасын күрсәтегез — бот датаны шушы кагыйдә буенча исәпләр һәм искә төшерер.",
         "zh": "最迟在居留登记到期前45天。请输入居留登记到期日——机器人会按此规定计算日期并提醒您。"
       },
       "documents": [],
@@ -312,18 +345,21 @@
         "ru": "Продление визы",
         "en": "Visa extension",
         "uz": "Vizani uzaytirish",
+        "tt": "Визаны озайту",
         "zh": "签证延期"
       },
       "action": {
         "ru": "Однократная учебная виза выдаётся на 90 дней; продление даёт право находиться в России до 1 года. Лично подайте полный пакет документов в паспортно-визовый отдел ДВС КФУ: ул. Гвардейская, 9. Точный перечень копий — на странице КФУ.",
         "en": "A single-entry study visa is issued for 90 days; the extension lets you stay in Russia for up to 1 year. Submit the full set of documents in person to the passport and visa office of the KFU Department of External Relations: 9 Gvardeyskaya St. The exact list of copies is on the KFU page.",
         "uz": "Bir martalik oʻquv vizasi 90 kunga beriladi; uzaytirish Rossiyada 1 yilgacha boʻlish huquqini beradi. Hujjatlar toʻplamini KFU Tashqi aloqalar departamentining pasport-viza boʻlimiga shaxsan topshiring: Gvardeyskaya koʻch., 9. Nusxalarning aniq roʻyxati — KFU sahifasida.",
+        "tt": "Бер тапкыр керү өчен уку визасы 90 көнгә бирелә; озайту Россиядә 1 елга кадәр булырга хокук бирә. Документларның тулы җыелмасын КФУ ТЭДның паспорт-виза бүлегенә үзегез тапшырыгыз: Гвардейская ур., 9. Күчермәләрнең төгәл исемлеге — КФУ битендә.",
         "zh": "一次性学习签证有效期为90天；延期后可在俄罗斯停留最长1年。请本人向喀山联邦大学对外联络部护照签证处（Gvardeyskaya街9号）递交全套文件。所需复印件的详细清单见喀山联邦大学页面。"
       },
       "when": {
         "ru": "Не ранее чем за 90 и не позднее чем за 45 дней до окончания визы. Укажите дату окончания визы — бот посчитает дату по этому правилу и напомнит.",
         "en": "No earlier than 90 and no later than 45 days before your visa expires. Enter your visa end date — the bot will count the date by this rule and remind you.",
         "uz": "Viza tugashidan 90 kundan oldin emas va 45 kundan kechiktirmay. Viza tugash sanasini kiriting — bot shu qoida boʻyicha sanani hisoblaydi va eslatadi.",
+        "tt": "Виза тәмамланганчы 90 көннән дә иртәрәк түгел һәм 45 көннән дә соңрак түгел. Виза тәмамлану датасын күрсәтегез — бот датаны шушы кагыйдә буенча исәпләр һәм искә төшерер.",
         "zh": "不早于签证到期前90天，且不晚于到期前45天。请输入签证到期日——机器人会按此规定计算日期并提醒您。"
       },
       "documents": [
@@ -333,6 +369,7 @@
             "ru": "Паспорт (оригинал)",
             "en": "Passport (original)",
             "uz": "Pasport (asl nusxa)",
+            "tt": "Паспорт (оригиналы)",
             "zh": "护照（原件）"
           }
         },
@@ -342,6 +379,7 @@
             "ru": "Документ о миграционном учёте (оригинал)",
             "en": "Migration registration document (original)",
             "uz": "Migratsiya hisobi hujjati (asl nusxa)",
+            "tt": "Миграция исәбе турында документ (оригиналы)",
             "zh": "居留登记文件（原件）"
           }
         },
@@ -351,6 +389,7 @@
             "ru": "Миграционная карта (оригинал)",
             "en": "Migration card (original)",
             "uz": "Migratsiya kartasi (asl nusxa)",
+            "tt": "Миграция картасы (оригиналы)",
             "zh": "移民卡（原件）"
           }
         },
@@ -360,6 +399,7 @@
             "ru": "Справка об обучении из деканата (не старше 14 дней)",
             "en": "Certificate of study from the dean's office (not older than 14 days)",
             "uz": "Dekanatdan oʻqish haqida maʼlumotnoma (14 kundan eski boʻlmagan)",
+            "tt": "Деканаттан уку турында белешмә (14 көннән дә искерәк түгел)",
             "zh": "院系出具的在读证明（14天内有效）"
           }
         },
@@ -369,6 +409,7 @@
             "ru": "Квитанция об уплате госпошлины",
             "en": "State fee receipt",
             "uz": "Davlat boji toʻlangani haqida kvitansiya",
+            "tt": "Дәүләт пошлинасы түләү квитанциясе",
             "zh": "国家规费缴费收据"
           }
         },
@@ -378,6 +419,7 @@
             "ru": "Две цветные фотографии 3×4",
             "en": "Two colour 3×4 photos",
             "uz": "Ikkita rangli 3×4 fotosurat",
+            "tt": "Ике төсле фотосурәт 3×4",
             "zh": "两张3×4彩色照片"
           }
         },
@@ -387,6 +429,7 @@
             "ru": "Документ о дактилоскопии и медосвидетельствовании (оригинал и копия)",
             "en": "Fingerprinting and medical examination document (original and copy)",
             "uz": "Daktiloskopiya va tibbiy koʻrik hujjati (asl nusxa va nusxa)",
+            "tt": "Дактилоскопия һәм медицина тикшерүе турында документ (оригиналы һәм күчермәсе)",
             "zh": "指纹登记和体检证明（原件及复印件）"
           }
         }
@@ -423,6 +466,7 @@
         "ru": "Медико-санитарная часть КФУ, ул. Вишневского, 2а, 4 этаж (первый день — ср или пт 12:00–17:00, второй — вт 15:00–18:00)",
         "en": "KFU medical unit, 2a Vishnevskogo St., 4th floor (first day — Wed or Fri 12:00–17:00, second — Tue 15:00–18:00)",
         "uz": "KFU tibbiy-sanitariya qismi, Vishnevskiy koʻch., 2a, 4-qavat (birinchi kun — chor yoki jum 12:00–17:00, ikkinchi — sesh 15:00–18:00)",
+        "tt": "КФУның медицина-санитар бүлеге, Вишневский ур., 2а, 4 кат (беренче көн — чр яки җм 12:00–17:00, икенчесе — сш 15:00–18:00)",
         "zh": "喀山联邦大学医疗卫生部：Vishnevskogo街2a号4楼（第一天——周三或周五12:00–17:00，第二天——周二15:00–18:00）"
       },
       "map": "Казань, ул. Вишневского, 2а",
@@ -439,13 +483,15 @@
         "ru": "Приглашение на учебную визу",
         "en": "Invitation for a study visa",
         "zh": "学习签证邀请函",
-        "uz": "Oʻquv vizasi uchun taklifnoma"
+        "uz": "Oʻquv vizasi uchun taklifnoma",
+        "tt": "Уку визасына чакыру"
       },
       "text": {
         "ru": "Приглашение оформляет МВД по ходатайству КФУ — не менее 45 календарных дней. Заявление на приглашение доступно в личном кабинете только после приказа о зачислении. Паспорт должен действовать не менее 18 месяцев с даты въезда. Не покупайте билет, пока не получите приглашение. Если вы поступили по квоте (гослиния), вместо приглашения оформляют визовое указание через Минобрнауки России — не менее 30 календарных дней.",
         "en": "The Ministry of Internal Affairs issues the invitation at KFU's request; it takes at least 45 calendar days. The invitation application opens in your personal account only after the enrolment order. Your passport must be valid for at least 18 months from the entry date. Do not buy a ticket until you have the invitation. If you were admitted under the government quota, a visa authorisation is issued through the Ministry of Science and Higher Education instead of an invitation; it takes at least 30 calendar days.",
         "zh": "邀请函由内务部根据喀山联邦大学的申请办理，至少需要45个日历日。只有在录取令发布后，个人账户中才会开放邀请函申请。护照自入境之日起须至少有效18个月。收到邀请函之前请不要购买机票。如果您是按政府配额（公费名额）录取的，则不办理邀请函，而是通过俄罗斯科学与高等教育部办理签证指示，至少需要30个日历日。",
-        "uz": "Taklifnomani KFU iltimosnomasi boʻyicha IIV rasmiylashtiradi — kamida 45 kalendar kun. Taklifnoma uchun ariza shaxsiy kabinetda faqat oʻqishga qabul qilish buyrugʻidan keyin ochiladi. Pasport kirgan kundan boshlab kamida 18 oy amal qilishi kerak. Taklifnoma olmaguningizcha chipta sotib olmang. Agar kvota (davlat liniyasi) boʻyicha qabul qilingan boʻlsangiz, taklifnoma oʻrniga Rossiya Fan va oliy taʼlim vazirligi orqali viza koʻrsatmasi rasmiylashtiriladi — kamida 30 kalendar kun."
+        "uz": "Taklifnomani KFU iltimosnomasi boʻyicha IIV rasmiylashtiradi — kamida 45 kalendar kun. Taklifnoma uchun ariza shaxsiy kabinetda faqat oʻqishga qabul qilish buyrugʻidan keyin ochiladi. Pasport kirgan kundan boshlab kamida 18 oy amal qilishi kerak. Taklifnoma olmaguningizcha chipta sotib olmang. Agar kvota (davlat liniyasi) boʻyicha qabul qilingan boʻlsangiz, taklifnoma oʻrniga Rossiya Fan va oliy taʼlim vazirligi orqali viza koʻrsatmasi rasmiylashtiriladi — kamida 30 kalendar kun.",
+        "tt": "Чакыруны КФУ үтенече буенча ЭЭМ рәсмиләштерә — 45 календарь көненнән дә ким түгел. Чакыруга гариза шәхси кабинетта кабул итү турында боерыктан соң гына ачыла. Паспорт керү датасыннан 18 айдан да ким булмаган вакыт гамәлдә булырга тиеш. Чакыру алганчы билет сатып алмагыз. Әгәр сез квота буенча кергән булсагыз (дәүләт линиясе), чакыру урынына Россия Мәгариф һәм фән министрлыгы аша виза күрсәтмәсе рәсмиләштерәләр — 30 календарь көненнән дә ким түгел."
       },
       "appliesIf": [
         {
@@ -466,7 +512,8 @@
         "ru": "ваше гражданство отнесено к визовым странам по списку профиля вуза, а не по документу ведомства. Требования консульства России в вашей стране бот не проверял.",
         "en": "your citizenship is treated as a visa country by the university profile's list, not by an official document. The bot has not checked the requirements of the Russian consulate in your country.",
         "zh": "您的国籍是按学校资料中的名单被归为需签证国家，而非依据官方文件。机器人未核对俄罗斯驻贵国领事馆的要求。",
-        "uz": "fuqaroligingiz idora hujjati boʻyicha emas, universitet profilidagi roʻyxat boʻyicha vizali davlatlarga kiritilgan. Bot mamlakatingizdagi Rossiya konsulligi talablarini tekshirmagan."
+        "uz": "fuqaroligingiz idora hujjati boʻyicha emas, universitet profilidagi roʻyxat boʻyicha vizali davlatlarga kiritilgan. Bot mamlakatingizdagi Rossiya konsulligi talablarini tekshirmagan.",
+        "tt": "гражданлыгыгыз виза режимы булган илләргә ведомство документы буенча түгел, ә вуз профилендәге исемлек буенча кертелгән. Илегездәге Россия консулльлеге таләпләрен бот тикшермәде."
       }
     },
     {
@@ -475,13 +522,15 @@
         "ru": "Приглашение: оформление приостановлено",
         "en": "Invitation: issuing is suspended",
         "zh": "邀请函：暂停办理",
-        "uz": "Taklifnoma: rasmiylashtirish toʻxtatilgan"
+        "uz": "Taklifnoma: rasmiylashtirish toʻxtatilgan",
+        "tt": "Чакыру: рәсмиләштерү туктатылган"
       },
       "text": {
         "ru": "На странице КФУ сказано: оформление приглашений для граждан Египта временно приостановлено. Бот не знает, когда это изменится и касается ли это визового указания по квоте (гослиния). До поездки и покупки билета уточните в Департаменте внешних связей КФУ: +7 (843) 206-52-89, доб. 8609.",
         "en": "The KFU page says that issuing invitations for citizens of Egypt is temporarily suspended. The bot does not know when this will change, or whether it also applies to a visa authorisation under the government quota. Before the trip and before you buy a ticket, ask the KFU Department of External Relations: +7 (843) 206-52-89, ext. 8609.",
         "zh": "喀山联邦大学页面写明：暂停为埃及公民办理邀请函。机器人不知道何时会恢复，也不知道这是否同样适用于按政府配额（公费名额）办理的签证指示。出行和购买机票之前，请向喀山联邦大学对外联络部咨询：+7 (843) 206-52-89，分机8609。",
-        "uz": "KFU sahifasida yozilgan: Misr fuqarolari uchun taklifnoma rasmiylashtirish vaqtincha toʻxtatilgan. Bot bu qachon oʻzgarishini va kvota (davlat liniyasi) boʻyicha viza koʻrsatmasiga ham taalluqli yoki yoʻqligini bilmaydi. Safar va chipta sotib olishdan oldin KFU Tashqi aloqalar departamentidan soʻrang: +7 (843) 206-52-89, qoʻshimcha 8609."
+        "uz": "KFU sahifasida yozilgan: Misr fuqarolari uchun taklifnoma rasmiylashtirish vaqtincha toʻxtatilgan. Bot bu qachon oʻzgarishini va kvota (davlat liniyasi) boʻyicha viza koʻrsatmasiga ham taalluqli yoki yoʻqligini bilmaydi. Safar va chipta sotib olishdan oldin KFU Tashqi aloqalar departamentidan soʻrang: +7 (843) 206-52-89, qoʻshimcha 8609.",
+        "tt": "КФУ битендә әйтелгән: Мисыр гражданнары өчен чакырулар рәсмиләштерү вакытлыча туктатылган. Бот бу кайчан үзгәрәчәген һәм квота буенча виза күрсәтмәсенә (дәүләт линиясе) кагыламы-юкмы икәнен белми. Сәфәргә һәм билет сатып алуга кадәр КФУның Тышкы элемтәләр департаментында ачыклагыз: +7 (843) 206-52-89, өст. 8609."
       },
       "appliesIf": [
         {
@@ -503,13 +552,15 @@
         "ru": "Новые правила въезда: «Госуслуги RuID»",
         "en": "New entry rules: Gosuslugi RuID",
         "zh": "新入境规定：“Gosuslugi RuID”应用",
-        "uz": "Yangi kirish qoidalari: «Gosuslugi RuID»"
+        "uz": "Yangi kirish qoidalari: «Gosuslugi RuID»",
+        "tt": "Керүнең яңа кагыйдәләре: «Госуслуги RuID»"
       },
       "text": {
         "ru": "С 30 июня 2025 года для граждан безвизовых стран действуют новые правила въезда — через приложение «Госуслуги RuID». До поездки прочитайте порядок и памятки на странице КФУ.",
         "en": "Since 30 June 2025, citizens of visa-free countries enter Russia under new rules, through the Gosuslugi RuID app. Before the trip, read the procedure and leaflets on the KFU page.",
         "zh": "自2025年6月30日起，免签国家公民须按新规定入境——通过“Gosuslugi RuID”应用。出行前请阅读喀山联邦大学页面上的办理流程和说明手册。",
-        "uz": "2025-yil 30-iyundan vizasiz davlatlar fuqarolari uchun yangi kirish qoidalari amal qiladi — «Gosuslugi RuID» ilovasi orqali. Safardan oldin KFU sahifasidagi tartib va eslatmalarni oʻqing."
+        "uz": "2025-yil 30-iyundan vizasiz davlatlar fuqarolari uchun yangi kirish qoidalari amal qiladi — «Gosuslugi RuID» ilovasi orqali. Safardan oldin KFU sahifasidagi tartib va eslatmalarni oʻqing.",
+        "tt": "2025 елның 30 июненнән визасыз илләр гражданнары өчен керүнең яңа кагыйдәләре гамәлдә — «Госуслуги RuID» кушымтасы аша. Сәфәр алдыннан КФУ битендәге тәртипне һәм истәлекләрне укыгыз."
       },
       "appliesIf": [
         {
@@ -531,7 +582,8 @@
         "ru": "ваше гражданство отнесено к безвизовым странам по списку профиля вуза, а не по документу ведомства.",
         "en": "your citizenship is treated as a visa-free country by the university profile's list, not by an official document.",
         "zh": "您的国籍是按学校资料中的名单被归为免签国家，而非依据官方文件。",
-        "uz": "fuqaroligingiz idora hujjati boʻyicha emas, universitet profilidagi roʻyxat boʻyicha vizasiz davlatlarga kiritilgan."
+        "uz": "fuqaroligingiz idora hujjati boʻyicha emas, universitet profilidagi roʻyxat boʻyicha vizasiz davlatlarga kiritilgan.",
+        "tt": "гражданлыгыгыз визасыз илләргә ведомство документы буенча түгел, ә вуз профилендәге исемлек буенча кертелгән."
       }
     },
     {
@@ -540,13 +592,15 @@
         "ru": "Нотариальный перевод паспорта",
         "en": "Notarised translation of your passport",
         "zh": "护照公证翻译",
-        "uz": "Pasportning notarial tarjimasi"
+        "uz": "Pasportning notarial tarjimasi",
+        "tt": "Паспортның нотариаль тәрҗемәсе"
       },
       "text": {
         "ru": "Для медосвидетельствования в КФУ нужны паспорт и его нотариально заверенный перевод на русский язык. Возьмите также результаты прежних обследований, если они есть.",
         "en": "For the medical examination at KFU you need your passport and its notarised translation into Russian. Also bring the results of earlier examinations, if you have any.",
         "zh": "在喀山联邦大学进行体检需要护照及其经公证的俄文译本。如有以往的检查结果，也请一并带上。",
-        "uz": "KFUda tibbiy koʻrikdan oʻtish uchun pasport va uning rus tiliga notarial tasdiqlangan tarjimasi kerak. Oldingi tekshiruv natijalari boʻlsa, ularni ham olib keling."
+        "uz": "KFUda tibbiy koʻrikdan oʻtish uchun pasport va uning rus tiliga notarial tasdiqlangan tarjimasi kerak. Oldingi tekshiruv natijalari boʻlsa, ularni ham olib keling.",
+        "tt": "КФУда медицина тикшерүе өчен паспорт һәм аның рус теленә нотариаль расланган тәрҗемәсе кирәк. Элекке тикшерүләр нәтиҗәләрен дә алыгыз, булса."
       },
       "appliesIf": [],
       "source": {
@@ -560,13 +614,15 @@
         "ru": "Где заверить перевод",
         "en": "Where to certify a translation",
         "zh": "在哪里办理翻译公证",
-        "uz": "Tarjimani qayerda tasdiqlash kerak"
+        "uz": "Tarjimani qayerda tasdiqlash kerak",
+        "tt": "Тәрҗемәне кайда расларга"
       },
       "text": {
         "ru": "Департамент внешних связей КФУ не заверяет переводы у нотариуса. Если нужен нотариально заверенный перевод, сразу обращайтесь в бюро переводов.",
         "en": "The KFU Department of External Relations does not notarise translations. If you need a notarised translation, go straight to a translation agency.",
         "zh": "喀山联邦大学对外联络部不办理翻译公证。如需经公证的译本，请直接到翻译机构办理。",
-        "uz": "KFU Tashqi aloqalar departamenti tarjimalarni notarial tasdiqlamaydi. Notarial tasdiqlangan tarjima kerak boʻlsa, darhol tarjima byurosiga murojaat qiling."
+        "uz": "KFU Tashqi aloqalar departamenti tarjimalarni notarial tasdiqlamaydi. Notarial tasdiqlangan tarjima kerak boʻlsa, darhol tarjima byurosiga murojaat qiling.",
+        "tt": "КФУның Тышкы элемтәләр департаменты тәрҗемәләрне нотариуста расламый. Нотариаль расланган тәрҗемә кирәк булса, шунда ук тәрҗемә бюросына мөрәҗәгать итегез."
       },
       "appliesIf": [],
       "source": {

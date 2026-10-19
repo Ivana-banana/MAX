@@ -2,7 +2,7 @@
  * Printable A4 poster with a QR code that opens the bot for one university:
  * https://max.ru/<bot>?start=<university id> (D-018). A university hangs it in the dormitory,
  * the student scans it and lands in their own university's scenario without choosing anything.
- * Texts come from src/data/i18n, so the poster carries every interface language at once.
+ * Texts come from src/data/i18n; the poster carries the profile's posterLanguages or every interface language.
  */
 
 import qrcode from "qrcode-generator";
@@ -50,7 +50,9 @@ function qrPath(data: string): { path: string; size: number } {
 
 export function posterSvg(university: University, texts: Texts, o: PosterOptions): string {
   const link = deepLink(o.botLink, university);
-  const langs = [...texts.keys()];
+  const langs = university.posterLanguages ?? [...texts.keys()];
+  const unknown = langs.filter(lang => !texts.has(lang));
+  if (unknown.length) throw new Error(`posterLanguages of ${university.id}: no interface texts for ${unknown.join(", ")}`);
   const tr = (lang: string, key: string) => format(texts, lang, key, { uni: university.name[lang] ?? university.name.ru! });
   const out: string[] = [];
   const text = (y: number, size: number, value: string, weight = 400, fill = "#1b1f24") =>
@@ -73,7 +75,7 @@ export function posterSvg(university: University, texts: Texts, o: PosterOptions
   // QR code with its quiet zone, up to 110 mm wide in the middle of the sheet.
   const { path, size } = qrPath(link);
   const top = y + 22, side = Math.min(110, 297 - top - belowHeight);
-  if (side < 60) throw new Error("Too many languages for one poster: the QR code would be smaller than 6 cm");
+  if (side < 60) throw new Error(`Too many languages for one poster of ${university.id}: the QR code would be smaller than 6 cm; set posterLanguages in the profile`);
   const scale = side / (size + 8), left = 105 - side / 2;
   out.push(`<rect x="${left}" y="${top}" width="${side}" height="${side}" fill="#ffffff" stroke="#0b5cad" stroke-width="0.6"/>`,
     `<path transform="translate(${left + 4 * scale} ${top + 4 * scale}) scale(${scale})" d="${path}" fill="#000000" shape-rendering="crispEdges"/>`);

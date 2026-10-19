@@ -32,10 +32,11 @@ describe("university QR poster", () => {
     expect(() => deepLink("http://max.ru/bot", kfu)).toThrow(/https/);
     expect(() => deepLink(`${botLink}?start=kfu`, kfu)).toThrow(/without parameters/);
   });
-  it("prints the link, the university and every interface language, marked as demo", () => {
+  it("prints the link, the university and the profile's poster languages, marked as demo", () => {
     const svg = posterSvg(kfu, texts, { botLink, demo: true });
     expect(svg).toContain(">https://max.ru/t149_hakaton_max_bot?start=kfu<");
-    for (const line of ["Первые 90 дней в России", "Your first 90 days in Russia", "Rossiyadagi dastlabki 90 kun", "在俄罗斯的最初90天", ">КФУ<", "готовит вопрос в КФУ.", "drafts a question to"]) expect(svg).toContain(line);
+    for (const line of ["Первые 90 дней в России", "Россиядә беренче 90 көн", "Your first 90 days in Russia", "在俄罗斯的最初90天", ">КФУ<", "готовит вопрос в КФУ.", "drafts a question to"]) expect(svg).toContain(line);
+    expect(svg).not.toContain("Rossiyadagi dastlabki 90 kun"); // uz is not in the KFU poster languages
     expect(svg).toContain("ДЕМО · учебные данные.");
     expect(posterSvg(kfu, texts, { botLink, demo: false })).not.toContain("ДЕМО");
   });
@@ -48,8 +49,11 @@ describe("university QR poster", () => {
   it("keeps room for more languages and refuses a QR code too small to scan", () => {
     const withLangs = (n: number): Texts => new Map([...texts, ...Array.from({ length: n }, (_, i) =>
       [`x${String.fromCharCode(97 + i)}`, texts.get("en")!] as const)]);
-    expect(() => posterSvg(kfu, texts, { botLink, demo: true })).not.toThrow(); // ru, en, uz, zh
-    expect(() => posterSvg(kfu, withLangs(4), { botLink, demo: true })).toThrow(/smaller than 6 cm/);
+    const every: University = { ...kfu };
+    delete every.posterLanguages;
+    expect(() => posterSvg(every, withLangs(0), { botLink, demo: true })).toThrow(/smaller than 6 cm; set posterLanguages/); // all five
+    expect(() => posterSvg({ ...kfu, posterLanguages: ["ru", "en", "uz", "zh"] }, withLangs(4), { botLink, demo: true })).not.toThrow();
+    expect(() => posterSvg({ ...kfu, posterLanguages: ["ru", "xx"] }, texts, { botLink, demo: true })).toThrow(/no interface texts for xx/);
   });
   it.skipIf(!has("rsvg-convert") || !has("zbarimg"))("scans back to the same link with a real QR reader", () => {
     const dir = mkdtempSync(join(tmpdir(), "poster-"));
