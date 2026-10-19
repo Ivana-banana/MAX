@@ -15,5 +15,5 @@
     "skipLibCheck": true,
     "outDir": "dist"
   },
-  "include": ["src", "tests"]
+  "include": ["src", "tests", "e2e", "playwright.config.ts"]
 }
