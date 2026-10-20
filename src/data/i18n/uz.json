@@ -155,6 +155,7 @@
   "app.entry.body": "Kirgan sana KK.OO.YYYY formatida, {from} dan bugungacha.",
   "app.entry.invalid": "Sana ssenariydan tashqarida. {from} dan bugungacha boʻlgan sanani kiriting.",
   "app.entry.future": "Kirgan sana kelajakda boʻla olmaydi: muddatlar haqiqiy kirgan kundan hisoblanadi.",
+  "app.entry.nodate": "Bunday sana taqvimda yoʻq. Kun va oyni tekshiring.",
   "app.completion.body": "Oʻtgan sana KK.OO.YYYY formatida. Bu oʻz belgingiz, IIV tasdigʻi emas.",
   "app.save": "Saqlash",
   "app.today": "Bugun",

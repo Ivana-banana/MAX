@@ -85,6 +85,10 @@ test("empty and invalid date: Save stays off or the reason is shown", async ({ p
   await dateField(page).fill("");
   await dateField(page).pressSequentially("31022026");
   await expect(save(page)).toBeDisabled(); // 31 February is not a day
+  await expect(page.getByRole("alert")).toContainText("Такой даты нет"); // the reason is shown
+  // Disabled looks disabled: the entrance animation must not keep opacity at 1.
+  await expect(save(page)).toHaveCSS("opacity", "0.45");
+  await page.screenshot({ path: testInfo.outputPath("3-nonexistent-date.png"), fullPage: true, animations: "disabled" });
 
   await dateField(page).fill("");
   await dateField(page).pressSequentially("01012020");

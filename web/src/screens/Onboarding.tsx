@@ -202,9 +202,11 @@ function EntryDate({ texts, today, message, pending, onAction, example, cards }:
   const t = (key: string) => text(texts, key);
   const valid = value !== "" && value <= today;
   // Say why Save is off right away, and drop the server's error once the user changes the date.
+  const nonexistent = value === "" && typed.length === 10;
   const prompt = value > today ? t("app.entry.future")
+    : nonexistent ? t("app.entry.nodate")
     : !edited && isText(message, t("entry.invalid")) ? t("app.entry.invalid") : t("app.entry.body");
-  const warning = value > today || (!edited && isText(message, t("entry.invalid")));
+  const warning = value > today || nonexistent || (!edited && isText(message, t("entry.invalid")));
   // A half-filled date is worth a confirmation before MAX closes the app over it.
   useEffect(() => {
     closingConfirmation(typed !== "");

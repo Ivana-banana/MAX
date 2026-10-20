@@ -153,6 +153,7 @@
   "app.entry.body": "入境日期，格式为 DD.MM.YYYY，从 {from} 到今天。",
   "app.entry.invalid": "日期超出范围。请输入 {from} 到今天之间的日期。",
   "app.entry.future": "入境日期不能是将来的日期：期限从实际入境日起计算。",
+  "app.entry.nodate": "日历上没有这个日期。请检查日和月。",
   "app.completion.body": "办理日期，格式为 DD.MM.YYYY。这是您的自我标记，不是内务部的确认。",
   "app.save": "保存",
   "app.today": "今天",
