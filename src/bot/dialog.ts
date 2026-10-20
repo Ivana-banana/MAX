@@ -294,15 +294,17 @@ export function countedProcedures(s: Session, ctx: DialogueContext): { id: strin
     return counted && counted.due >= ctx.today ? [{ id: n.id, title: n.title[s.lang]!, due: counted.due }] : [];
   });
 }
-function help(s: Session, ctx: DialogueContext, ruleId?: string, unsupported = false): Reply {
+/** `unsupported`: the answer that ended the scenario — the scope question ("no") or the citizenship one. */
+function help(s: Session, ctx: DialogueContext, ruleId?: string, unsupported?: "scope" | "citizenship"): Reply {
   const item = ruleId ? plan(s, ctx).find(i => i.ruleId === ruleId) : undefined;
-  const back = profile(s) ? [[button(t(s, ctx, "btn.plan"), "plan")]] : [];
+  // Before the plan exists the way out is the question that was being answered (#68), not a retyped /start.
+  const back = profile(s) ? [[button(t(s, ctx, "btn.plan"), "plan")]] : unsupported ? [[button(t(s, ctx, "btn.back"), "back")]] : [];
   const u = uni(s, ctx), name = u.name[s.lang]!;
   const actions = (draft: string): Button[][] => [[{ text: t(s, ctx, "btn.copy"), copy: draft }],
     [link(t(s, ctx, "btn.page", { uni: name }), u.contactUrl)], ...back];
   if (!item) {
     const draft = t(s, ctx, "help.generic.draft", { uni: name });
-    return reply(s, ctx, (unsupported ? t(s, ctx, "help.unsupported") : "") +
+    return reply(s, ctx, (unsupported ? t(s, ctx, "help.unsupported") + t(s, ctx, `help.unsupported.${unsupported}`) : "") +
       t(s, ctx, "help.generic", { draft, uni: name, url: u.contactUrl }), actions(draft));
   }
   const who = t(s, ctx, "help.who", { citizenship: country(s, ctx, s.citizenship!), entry: date(s, s.entryDate!) });
@@ -400,7 +402,9 @@ export function transition(previous: Session | null, input: Input, ctx: Dialogue
     if (chosen !== undefined && ctx.universities.some(u => u.id === chosen)) s.university = chosen;
   }
   if (action === "/help" || action === "help") return { session: s, reply: help(s, ctx) };
-  if (action === "no" || action === "OTHER" || coverage(ctx.rules).excluded.includes(action)) return { session: s, reply: help(s, ctx, undefined, true) };
+  if (action === "back" && !profile(s)) return { session: s, reply: prompt(s, ctx) };
+  if (action === "no") return { session: s, reply: help(s, ctx, undefined, "scope") };
+  if (action === "OTHER" || coverage(ctx.rules).excluded.includes(action)) return { session: s, reply: help(s, ctx, undefined, "citizenship") };
   if (action.startsWith("help:")) return { session: s, reply: help(s, ctx, action.slice(5)) };
   if (s.step === "language" && ctx.texts.has(action)) { s.lang = action; s.step = "consent"; }
   else if (s.step === "consent" && ctx.texts.has(action)) s.lang = action;

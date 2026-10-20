@@ -397,6 +397,28 @@ describe("review fixes in the dialogue", () => {
     expect(help).toContain("Подготовьте вопрос");
     expect(help).not.toContain("Для неподдержанного случая");
   });
+  it("unsupported case: names the condition that did not match and has a button back to the question", () => {
+    let s: Session = transition(null, { text: "/start", callback: false }, ctx).session!;
+    const click = (action: string) => transition(s, { text: `${s.nonce}.${s.revision}|${action}`, callback: true }, ctx);
+    const texts = (r: Reply) => r.buttons.flat().map(b => b.text);
+    const back = (r: Reply) => r.buttons.flat().find(b => b.text === "← Назад");
+    for (const a of ["ru", "accept"]) s = click(a).session!;
+    const no = click("no");
+    expect(no.reply.text).toContain("Причина: условия сценария не совпали");
+    expect(texts(no.reply)).toContain("← Назад");
+    s = no.session!;
+    const scope = click((back(no.reply) as { action: string }).action.split("|")[1]!);
+    expect(scope.reply.text).toContain("Сценарий: вам 18+");
+    expect(texts(scope.reply)).toContain("Да, совпадает");
+    s = scope.session!;
+    s = click("yes").session!;
+    const other = click("OTHER");
+    expect(other.reply.text).toContain("Причина: для этого гражданства");
+    s = other.session!;
+    const citizenship = click((back(other.reply) as { action: string }).action.split("|")[1]!);
+    expect(citizenship.reply.text).toContain("Выберите гражданство");
+    expect(citizenship.session!.step).toBe("citizenship");
+  });
 });
 describe("example profile for reviewers (demo only)", () => {
   const actions = (r?: Reply) => (r?.buttons.flat() ?? []).flatMap(b => "action" in b ? [b.action.split("|")[1]] : []);
