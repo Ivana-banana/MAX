@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { parseRuleSet } from "../src/data/loadRules.js";
 import raw from "../src/data/rules/ru-student.json" with { type: "json" };
@@ -52,6 +53,16 @@ describe("interface texts live in data", () => {
     expect([1, 2, 5, 11, 21, 22, 25].map(n => days("ru", n))).toEqual(["1 день", "2 дня", "5 дней", "11 дней", "21 день", "22 дня", "25 дней"]);
     expect([1, 2].map(n => days("en", n))).toEqual(["1 day", "2 days"]);
     expect(format(texts, "ru", "left", { n: 1 })).toBe("остался 1 день");
+  });
+  it("does not take plural rules from the host locale for a language ICU lacks (tt, #87)", () => {
+    // ICU has no Tatar rules: Intl falls back to the process locale, so a ru_RU host turned tt into Russian forms.
+    const script = `import { readTexts, pluralForms, format } from "./src/data/loadTexts.ts";
+      const texts = readTexts("src/data/i18n");
+      console.log(JSON.stringify([pluralForms("tt"), pluralForms("ru"), format(texts, "tt", "days", { n: 5 }) === texts.get("tt")["days#other"].replace("{n}", "5")]));`;
+    for (const locale of ["ru_RU.UTF-8", "en_US.UTF-8"]) {
+      const out = execFileSync(process.execPath, ["--input-type=module", "-e", script], { env: { ...process.env, LANG: locale, LC_ALL: locale }, encoding: "utf8" });
+      expect(JSON.parse(out), locale).toEqual([["one", "other"], ["one", "few", "many", "other"], true]);
+    }
   });
   it("keeps the dialogue and calendar code free of user-facing Russian text", () => {
     for (const file of ["src/bot/dialog.ts", "src/bot/calendar.ts"]) {

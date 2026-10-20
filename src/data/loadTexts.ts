@@ -24,7 +24,10 @@ export class TextsValidationError extends Error {
 
 const base = (key: string) => key.split("#")[0]!;
 const placeholders = (text: string) => [...text.matchAll(/\{(\w+)\}/g)].map(m => m[1]!).sort().join(",");
-export const pluralForms = (lang: Lang) => new Intl.PluralRules(lang).resolvedOptions().pluralCategories;
+// ICU has no plural rules for some languages (tt): Intl then silently uses the host locale, so a ru_RU server
+// would demand Russian forms. Such a language takes the English one/other rule explicitly, whatever the host (#87).
+const pluralRules = (lang: Lang) => new Intl.PluralRules(Intl.PluralRules.supportedLocalesOf([lang]).length ? lang : "en");
+export const pluralForms = (lang: Lang) => pluralRules(lang).resolvedOptions().pluralCategories;
 
 export function parseTexts(lang: Lang, raw: unknown, path = lang): Record<string, string> {
   // "no" is also the scope screen's answer button, so it cannot name a language action.
@@ -97,7 +100,7 @@ export function format(texts: Texts, lang: Lang, key: string, vars: Record<strin
   const table = texts.get(lang) ?? texts.get(BASE_LANG)!;
   const n = vars.n;
   const text = typeof n === "number" && table[`${key}#other`] !== undefined
-    ? table[`${key}#${new Intl.PluralRules(lang).select(n)}`] ?? table[`${key}#other`]
+    ? table[`${key}#${pluralRules(lang).select(n)}`] ?? table[`${key}#other`]
     : table[key];
   if (text === undefined) throw new Error(`Missing text: ${lang}.${key}`);
   return text.replace(/\{(\w+)\}/g, (_, name: string) => String(vars[name] ?? `{${name}}`));
