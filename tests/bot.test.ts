@@ -397,27 +397,51 @@ describe("review fixes in the dialogue", () => {
     expect(help).toContain("Подготовьте вопрос");
     expect(help).not.toContain("Для неподдержанного случая");
   });
-  it("unsupported case: names the condition that did not match and has a button back to the question", () => {
-    let s: Session = transition(null, { text: "/start", callback: false }, ctx).session!;
-    const click = (action: string) => transition(s, { text: `${s.nonce}.${s.revision}|${action}`, callback: true }, ctx);
-    const texts = (r: Reply) => r.buttons.flat().map(b => b.text);
-    const back = (r: Reply) => r.buttons.flat().find(b => b.text === "← Назад");
-    for (const a of ["ru", "accept"]) s = click(a).session!;
-    const no = click("no");
-    expect(no.reply.text).toContain("Причина: условия сценария не совпали");
-    expect(texts(no.reply)).toContain("← Назад");
-    s = no.session!;
-    const scope = click((back(no.reply) as { action: string }).action.split("|")[1]!);
-    expect(scope.reply.text).toContain("Сценарий: вам 18+");
-    expect(texts(scope.reply)).toContain("Да, совпадает");
-    s = scope.session!;
-    s = click("yes").session!;
-    const other = click("OTHER");
-    expect(other.reply.text).toContain("Причина: для этого гражданства");
-    s = other.session!;
-    const citizenship = click((back(other.reply) as { action: string }).action.split("|")[1]!);
-    expect(citizenship.reply.text).toContain("Выберите гражданство");
-    expect(citizenship.session!.step).toBe("citizenship");
+  describe("unsupported case (#68)", () => {
+    const start = (...path: string[]) => {
+      let s: Session = transition(null, { text: "/start", callback: false }, ctx).session!;
+      const click = (action: string) => transition(s, { text: `${s.nonce}.${s.revision}|${action}`, callback: true }, ctx);
+      for (const a of path) s = click(a).session!;
+      return { click, set: (n: Session) => { s = n; }, session: () => s };
+    };
+    const backAction = (r: Reply) => (r.buttons.flat().find(b => b.text === "← Назад") as { action: string } | undefined)?.action.split("|")[1];
+    it("'no' on the scope question: names the scope conditions, including the entry date", () => {
+      const reply = start("ru", "accept").click("no").reply;
+      expect(reply.text).toContain("Причина: условия сценария не совпали");
+      expect(reply.text).toContain("въезд с 1 сентября 2026 г.");
+    });
+    it("'no': the back button returns to the scope question", () => {
+      const f = start("ru", "accept"), no = f.click("no");
+      expect(backAction(no.reply)).toBe("back");
+      f.set(no.session!);
+      const back = f.click("back");
+      expect(back.reply.text).toContain("Сценарий: вам 18+");
+      expect(back.reply.buttons.flat().map(b => b.text)).toContain("Да, совпадает");
+    });
+    it("a citizenship the rules exclude (BY): says the rules have no deadlines for it", () => {
+      expect(start("ru", "accept", "yes").click("BY").reply.text).toContain("для этого гражданства в правилах бота нет сроков");
+    });
+    it("'Other' citizenship: does not say there are no deadlines, says to ask the university", () => {
+      const text = start("ru", "accept", "yes").click("OTHER").reply.text;
+      expect(text).not.toContain("нет сроков");
+      expect(text).toContain("Сроки для вас могут действовать — уточните в вузе");
+    });
+    it("'Other': the back button returns to the citizenship question", () => {
+      const f = start("ru", "accept", "yes"), other = f.click("OTHER");
+      f.set(other.session!);
+      const back = f.click(backAction(other.reply)!);
+      expect(back.reply.text).toContain("Выберите гражданство");
+      expect(back.session!.step).toBe("citizenship");
+    });
+    it("with a plan there is no question to go back to: no reason, no back button", () => {
+      const f = start("ru", "accept", "yes");
+      f.set(f.click("KZ").session!);
+      const session = transition(f.session(), { text: "2026-09-01", callback: false }, ctx).session!;
+      f.set(session);
+      const reply = f.click("no").reply;
+      expect(reply.text).not.toContain("Причина");
+      expect(backAction(reply)).toBeUndefined();
+    });
   });
 });
 describe("example profile for reviewers (demo only)", () => {

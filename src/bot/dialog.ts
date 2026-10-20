@@ -294,8 +294,11 @@ export function countedProcedures(s: Session, ctx: DialogueContext): { id: strin
     return counted && counted.due >= ctx.today ? [{ id: n.id, title: n.title[s.lang]!, due: counted.due }] : [];
   });
 }
-/** `unsupported`: the answer that ended the scenario — the scope question ("no") or the citizenship one. */
-function help(s: Session, ctx: DialogueContext, ruleId?: string, unsupported?: "scope" | "citizenship"): Reply {
+/** `unsupported`: the answer that ended the scenario — the scope question ("no"), a citizenship the rules exclude, or "other" (not in the university's list). */
+// The reason is for a student still at the questions: with a plan there is no question to go back to.
+const unsupportedReason = (s: Session, ctx: DialogueContext, why: "scope" | "citizenship" | "other") =>
+  t(s, ctx, `help.unsupported.${why}`, { uni: uni(s, ctx).name[s.lang]!, from: date(s, coverage(ctx.rules).from) });
+function help(s: Session, ctx: DialogueContext, ruleId?: string, unsupported?: "scope" | "citizenship" | "other"): Reply {
   const item = ruleId ? plan(s, ctx).find(i => i.ruleId === ruleId) : undefined;
   // Before the plan exists the way out is the question that was being answered (#68), not a retyped /start.
   const back = profile(s) ? [[button(t(s, ctx, "btn.plan"), "plan")]] : unsupported ? [[button(t(s, ctx, "btn.back"), "back")]] : [];
@@ -304,7 +307,7 @@ function help(s: Session, ctx: DialogueContext, ruleId?: string, unsupported?: "
     [link(t(s, ctx, "btn.page", { uni: name }), u.contactUrl)], ...back];
   if (!item) {
     const draft = t(s, ctx, "help.generic.draft", { uni: name });
-    return reply(s, ctx, (unsupported ? t(s, ctx, "help.unsupported") + t(s, ctx, `help.unsupported.${unsupported}`) : "") +
+    return reply(s, ctx, (unsupported ? t(s, ctx, "help.unsupported") + (profile(s) ? "" : unsupportedReason(s, ctx, unsupported)) : "") +
       t(s, ctx, "help.generic", { draft, uni: name, url: u.contactUrl }), actions(draft));
   }
   const who = t(s, ctx, "help.who", { citizenship: country(s, ctx, s.citizenship!), entry: date(s, s.entryDate!) });
@@ -404,7 +407,8 @@ export function transition(previous: Session | null, input: Input, ctx: Dialogue
   if (action === "/help" || action === "help") return { session: s, reply: help(s, ctx) };
   if (action === "back" && !profile(s)) return { session: s, reply: prompt(s, ctx) };
   if (action === "no") return { session: s, reply: help(s, ctx, undefined, "scope") };
-  if (action === "OTHER" || coverage(ctx.rules).excluded.includes(action)) return { session: s, reply: help(s, ctx, undefined, "citizenship") };
+  if (action === "OTHER") return { session: s, reply: help(s, ctx, undefined, "other") };
+  if (coverage(ctx.rules).excluded.includes(action)) return { session: s, reply: help(s, ctx, undefined, "citizenship") };
   if (action.startsWith("help:")) return { session: s, reply: help(s, ctx, action.slice(5)) };
   if (s.step === "language" && ctx.texts.has(action)) { s.lang = action; s.step = "consent"; }
   else if (s.step === "consent" && ctx.texts.has(action)) s.lang = action;
