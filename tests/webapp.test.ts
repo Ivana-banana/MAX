@@ -267,7 +267,7 @@ describe("mini app shows what the chat shows", () => {
     for (const action of ONBOARDING.slice(0, 4)) await applyAction(f.service, 7, action, false);
     expect((await readState(f.service, 7, false)).session?.citizenships).toContain("BY");
     const other = await applyAction(f.service, 7, "BY", false);
-    expect(other.copy).toContain("Я учусь в");
+    expect(other.copy).toContain("какие процедуры и сроки после въезда"); // #82: the unsupported-case draft, not the generic one
   });
   it("starts in the MAX interface language, as the chat does", async () => {
     const f = await fixture();

@@ -441,6 +441,19 @@ describe("review fixes in the dialogue", () => {
       expect(back.reply.text).toContain("Выберите гражданство");
       expect(back.session!.step).toBe("citizenship");
     });
+    it("the draft question asks which deadlines apply, not for help with a procedure (#82)", () => {
+      const copy = (r: Reply) => (r.buttons.flat().find(b => "copy" in b) as { copy: string } | undefined)?.copy ?? "";
+      for (const lang of ["ru", "en", "tt", "uz", "zh"] as const) {
+        const table = texts.get(lang)!, [before, after] = table["help.unsupported.draft"]!.split("{uni}");
+        for (const reply of [start(lang, "accept").click("no").reply, start(lang, "accept", "yes").click("OTHER").reply, start(lang, "accept", "yes").click("BY").reply]) {
+          expect(copy(reply), lang).toContain(before);
+          expect(copy(reply), lang).toContain(after);
+          expect(reply.text, lang).toContain(copy(reply));
+          expect(reply.text, lang).not.toContain(table["help.generic"]!.split("{draft}")[0]);
+        }
+      }
+      expect(copy(start("ru", "accept", "yes").click("OTHER").reply)).toContain("какие процедуры и сроки после въезда");
+    });
     it("with a plan there is no question to go back to: no reason, no back button", () => {
       const f = start("ru", "accept", "yes");
       f.set(f.click("KZ").session!);

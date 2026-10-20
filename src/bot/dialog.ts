@@ -310,9 +310,10 @@ function help(s: Session, ctx: DialogueContext, ruleId?: string, unsupported?: "
   const actions = (draft: string): Button[][] => [[{ text: t(s, ctx, "btn.copy"), copy: draft }],
     [link(t(s, ctx, "btn.page", { uni: name }), u.contactUrl)], ...back];
   if (!item) {
-    const draft = t(s, ctx, "help.generic.draft", { uni: name });
+    // An unsupported case has no procedure to ask about: the question is which deadlines apply at all (#82).
+    const draft = t(s, ctx, unsupported ? "help.unsupported.draft" : "help.generic.draft", { uni: name });
     return reply(s, ctx, (unsupported ? t(s, ctx, "help.unsupported") + (profile(s) ? "" : unsupportedReason(s, ctx, unsupported)) : "") +
-      t(s, ctx, "help.generic", { draft, uni: name, url: u.contactUrl }), actions(draft));
+      t(s, ctx, unsupported ? "help.unsupported.ask" : "help.generic", { draft, uni: name, url: u.contactUrl }), actions(draft));
   }
   const who = t(s, ctx, "help.who", { citizenship: country(s, ctx, s.citizenship!), entry: date(s, s.entryDate!) });
   const overdue = item.status === "overdue";
