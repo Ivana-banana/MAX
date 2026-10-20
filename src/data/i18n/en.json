@@ -56,7 +56,7 @@
   "help.unsupported": "We do not calculate unsupported cases. ",
   "help.unsupported.scope": "Reason: the scenario conditions did not match (age 18+, first entry for study longer than 90 days, entry from {from}, university dormitory, no residence permit and no previously completed procedures), and the bot has no rules for another case. If you made a mistake, go back to the question. ",
   "help.unsupported.citizenship": "Reason: the bot's rules have no deadlines for this citizenship. If you made a mistake, go back to the question. ",
-  "help.unsupported.other": "Reason: \"Other\" is a citizenship outside the list the scenario is checked for at {uni}. Deadlines may apply to you — ask the university. If you made a mistake, go back to the question. ",
+  "help.unsupported.other": "Reason: “Other” is a citizenship outside the list the scenario is checked for at {uni}. Deadlines may apply to you — ask the university. If you made a mistake, go back to the question. ",
   "help.generic": "Is a document missing, is booking unavailable, or is the next step unclear? Draft: “{draft}” Send it yourself to the {uni} office:\n{url}\n/start to continue; /delete to remove data.",
   "help.who": "citizenship {citizenship}, entry {entry}",
   "help.draft": "Hello! I am an international {uni} student ({who}). I need to complete “{title}”, calculated deadline {due}. The problem: ___. Could you tell me the next step and the documents I need?",

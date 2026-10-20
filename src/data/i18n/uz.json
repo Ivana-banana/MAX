@@ -56,7 +56,7 @@
   "help.unsupported": "Qoʻllab-quvvatlanmaydigan holat uchun hisob-kitob qilmaymiz. ",
   "help.unsupported.scope": "Sabab: holat shartlari mos kelmadi (18+, oʻqish uchun 90 kundan ortiq muddatga birinchi marta kirish, kirish sanasi {from} yoki undan keyin, universitet yotoqxonasi, vaqtincha yashashga ruxsat yoki yashash guvohnomasi yoʻq va bu tartib-taomillardan ilgari oʻtmagan), boshqa holat uchun botda qoidalar yoʻq. Adashgan boʻlsangiz, savolga qayting. ",
   "help.unsupported.citizenship": "Sabab: bu fuqarolik uchun botning qoidalarida muddatlar yoʻq. Adashgan boʻlsangiz, savolga qayting. ",
-  "help.unsupported.other": "Sabab: «Boshqa» — {uni} uchun senariy tekshirilgan roʻyxatda yoʻq fuqarolik. Muddatlar sizga tegishli boʻlishi mumkin — universitetdan soʻrang. Adashgan boʻlsangiz, savolga qayting. ",
+  "help.unsupported.other": "Sabab: «Boshqa» — {uni} uchun holat tekshirilgan roʻyxatda yoʻq fuqarolik. Muddatlar sizga tegishli boʻlishi mumkin — universitetdan soʻrang. Adashgan boʻlsangiz, savolga qayting. ",
   "help.generic": "Nima xalaqit bermoqda: hujjat yoʻqmi, navbatga yozilib boʻlmayaptimi yoki keyingi qadam tushunarsizmi? Savol loyihasi: «{draft}» Uni oʻzingiz yuboring ({uni}):\n{url}\n/start — davom etish; /delete — maʼlumotlarni oʻchirish.",
   "help.who": "fuqaroligi {citizenship}, kirgan sana {entry}",
   "help.draft": "Assalomu alaykum! Men chet ellik talabaman, {uni} ({who}). «{title}» tartib-taomilidan oʻtishim kerak, hisoblangan muddat — {due} gacha. Muammo: ___. Iltimos, keyingi qadam va kerakli hujjatlarni aytib bering.",
