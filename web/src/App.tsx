@@ -236,14 +236,18 @@ function DateStep({ texts, today, prompt, message, title, invalid: invalidKey, p
   pending: string | null; onAction: (action: string) => void;
 }) {
   const [value, setValue] = useState("");
+  const [nonexistent, setNonexistent] = useState(false);
   const t = (key: string) => text(texts, key);
   const invalid = isText(message, t(invalidKey));
   return (
     <div className="stack">
       <h1 className="heading in">{t(title)}</h1>
-      <p className={`prose in d1 ${invalid ? "banner banner-error" : ""}`}>{invalid ? t(invalidKey) : prompt}</p>
+      <p className={`prose in d1 ${nonexistent || invalid ? "banner banner-error" : ""}`} role={nonexistent ? "alert" : undefined}>
+        {nonexistent ? t("app.entry.nodate") : invalid ? t(invalidKey) : prompt}
+      </p>
       <div className="in d2">
-        <DateField label={t(title)} hint={t("app.entry.hint")} onChange={setValue} />
+        <DateField label={t(title)} hint={t("app.entry.hint")}
+          onChange={(iso, display) => { setValue(iso); setNonexistent(iso === "" && display.length === 10); }} />
       </div>
       <Button className="in d3" disabled={value === "" || value < today || pending !== null} loading={pending === value}
         onClick={() => onAction(value)}>
@@ -260,15 +264,18 @@ function Completion({ texts, today, message, pending, onAction }: {
   texts: Texts; today: string; message: string; pending: string | null; onAction: (action: string) => void;
 }) {
   const [value, setValue] = useState("");
+  const [nonexistent, setNonexistent] = useState(false);
   const t = (key: string) => text(texts, key);
+  const invalid = isText(message, t("completion.invalid"));
   return (
     <div className="stack">
       <h1 className="heading in">{t("app.completionTitle")}</h1>
-      <p className={`prose in d1 ${isText(message, t("completion.invalid")) ? "banner banner-error" : ""}`}>
-        {isText(message, t("completion.invalid")) ? t("completion.invalid") : t("app.completion.body")}
+      <p className={`prose in d1 ${nonexistent || invalid ? "banner banner-error" : ""}`} role={nonexistent ? "alert" : undefined}>
+        {nonexistent ? t("app.entry.nodate") : invalid ? t("completion.invalid") : t("app.completion.body")}
       </p>
       <div className="in d2">
-        <DateField label={t("app.completionTitle")} hint={t("app.entry.hint")} onChange={setValue} />
+        <DateField label={t("app.completionTitle")} hint={t("app.entry.hint")}
+          onChange={(iso, display) => { setValue(iso); setNonexistent(iso === "" && display.length === 10); }} />
       </div>
       <Button className="in d3" disabled={value === "" || value > today || pending !== null} loading={pending === value}
         onClick={() => onAction(value)}>

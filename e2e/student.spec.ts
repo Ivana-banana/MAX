@@ -132,3 +132,24 @@ test("an overdue tile says how long ago; app texts name buttons, not chat comman
   await expect(page.getByText("Нажмите «Начать»")).toBeVisible();
   await expect(page.locator("body")).not.toContainText("/start");
 });
+
+test("visit and completion screens: a nonexistent date shows the reason", async ({ page }) => {
+  await toEntryDate(page);
+  await dateField(page).fill(moscowDate(7));
+  await save(page).click();
+  await page.getByRole("button", { name: /Медицинское освидетельствование/ }).click();
+
+  await page.getByRole("button", { name: "Запланировать визит" }).click();
+  const visit = page.getByRole("textbox", { name: "Когда пойдёте?" });
+  await visit.pressSequentially("31022027");
+  await expect(save(page)).toBeDisabled();
+  await expect(page.getByRole("alert")).toContainText("Такой даты нет");
+  await page.getByRole("button", { name: "Отмена" }).click();
+
+  await page.getByRole("button", { name: /Медицинское освидетельствование/ }).click();
+  await page.getByRole("button", { name: "Процедура пройдена" }).click();
+  const done = page.getByRole("textbox", { name: "Когда вы прошли процедуру?" });
+  await done.pressSequentially("31022026");
+  await expect(save(page)).toBeDisabled();
+  await expect(page.getByRole("alert")).toContainText("Такой даты нет");
+});
