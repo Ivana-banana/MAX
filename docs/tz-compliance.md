@@ -159,7 +159,7 @@
 | Профили вузов | `npm run university:check` | «Каталог принят»: КФУ, ИТМО, СПбГЭУ |
 | Источники | `npm run sources:check` | источников 9, изменились 0, не открылись 0 |
 | Хуки | `bash .claude/hooks/test-hooks.sh` | 43 проверки `ok:`, сбоев нет |
-| Презентация: сборка | `python scripts/build-presentation.py --check` | 20.10: «PDF matches its sources: 22 pages, 716872 bytes» |
+| Презентация: сборка | `python scripts/build-presentation.py --check` | 20.10: «PDF matches its sources: 22 pages, 716955 bytes» |
 | Презентация: сцены | `npm run demo:export:check` | **красный**: `sourceTree` в манифесте `dbc3e54…`, у `src` сейчас `1032d03…`; манифест отстал, пересборка — #38 (D-017) |
 | Docker | `docker compose config -q`; `time docker compose build --no-cache` | конфиг валиден; сборка 39 с |
 | Секреты | `bash .claude/hooks/check-secrets.sh`; `git log -p --all` по `token\|secret\|api_key` со значением от 32 символов | пустой вывод; в истории только текст решения D-022 |
