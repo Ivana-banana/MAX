@@ -462,6 +462,7 @@ describe("changing the citizenship before the plan (#69)", () => {
     const back = f.click("back");
     expect(back.session!.step).toBe("citizenship");
     expect(back.reply.text).toContain("Выберите гражданство");
+    expect(back.session!.citizenship).toBeUndefined();
   });
   it("the new citizenship is saved and the entry date is asked again", () => {
     const f = atEntry();
