@@ -444,7 +444,7 @@ OFL-1.1 (`web/FONTS-OFL.txt`); закрытых библиотек нет.
 
 ## Материалы защиты
 
-[PDF: 17 слайдов](docs/presentation/first-90-days.pdf),
+[PDF: 22 слайда, основная часть на 7 минут](docs/presentation/first-90-days.pdf),
 [сборка и ограничения](docs/presentation/README.md),
 [заметки докладчика](docs/presentation/speaker-notes.md).
 Слайды демонстрации — скриншоты из MAX (docs/presentation/screens, из images/max-check).
