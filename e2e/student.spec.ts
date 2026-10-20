@@ -49,6 +49,15 @@ test("entry date → plan with deadlines", async ({ page }, testInfo) => {
   await page.screenshot({ path: testInfo.outputPath("1-plan.png"), fullPage: true, animations: "disabled" });
 });
 
+test("entry date → change the citizenship and choose again", async ({ page }, testInfo) => {
+  await toEntryDate(page);
+  await page.screenshot({ path: testInfo.outputPath("0-entry-date.png"), fullPage: true, animations: "disabled" });
+  await page.getByRole("button", { name: "← Изменить гражданство" }).click();
+  await expect(page.getByRole("heading", { name: "Гражданство" })).toBeVisible();
+  await page.getByRole("button", { name: /KG/ }).click();
+  await expect(page.getByRole("heading", { name: "Дата въезда" })).toBeVisible();
+});
+
 test("API failure → clear message, retry works without a restart", async ({ page }, testInfo) => {
   await toEntryDate(page);
   await dateField(page).fill(moscowDate(7));

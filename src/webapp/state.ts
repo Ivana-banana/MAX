@@ -44,6 +44,8 @@ export function isAppAction(action: string): boolean {
     || action === "universities" || action === "uni-missing" || /^uni:[a-z0-9_-]{1,32}$/.test(action)
     // demo-only example entry date: outside the demo the dialogue treats it as an invalid date
     || action === "example"
+    // "Change citizenship" on the entry step; elsewhere it changes nothing: before the plan it repeats the question
+    || action === "back"
     || action === "plan" || action === "reminders" || action === "/today"
     || action === "/delete" || action === "confirm-delete" || action === "cancel-delete"
     || /^[A-Z]{2}$/.test(action) || action === "OTHER"

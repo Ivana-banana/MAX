@@ -119,11 +119,15 @@ function beforeEntryReply(s: Session, ctx: DialogueContext): Reply {
   const cards = beforeEntry(s, ctx).map(c => `${c.title[s.lang]}\n${c.text[s.lang]}\n${beforeEntryNote(s, ctx, c)}`);
   // The button press made the entry prompt's buttons stale, so the demo example comes again here.
   return reply(s, ctx, t(s, ctx, "beforeEntry.title", { uni: uni(s, ctx).name[s.lang]! }) + cards.join("\n\n") +
-    t(s, ctx, "beforeEntry.scope") + t(s, ctx, "beforeEntry.next"), [[link(pageLabel(s, ctx), uni(s, ctx).contactUrl)], ...exampleRow(s, ctx)]);
+    t(s, ctx, "beforeEntry.scope") + t(s, ctx, "beforeEntry.next"), [[link(pageLabel(s, ctx), uni(s, ctx).contactUrl)], ...exampleRow(s, ctx), ...changeRow(s, ctx)]);
 }
 /** The entry step's buttons: on its question and on a wrong date, so they never go stale there (#67). */
 function entryRows(s: Session, ctx: DialogueContext): Button[][] {
-  return [...(beforeEntry(s, ctx).length ? [[button(t(s, ctx, "btn.beforeEntry"), "before-entry")]] : []), ...exampleRow(s, ctx)];
+  return [...(beforeEntry(s, ctx).length ? [[button(t(s, ctx, "btn.beforeEntry"), "before-entry")]] : []), ...exampleRow(s, ctx), ...changeRow(s, ctx)];
+}
+/** A mis-tapped citizenship is corrected here, before the plan exists, like the university (#69). */
+function changeRow(s: Session, ctx: DialogueContext): Button[][] {
+  return [[button(t(s, ctx, "btn.changeCitizenship"), "back")]];
 }
 function exampleRow(s: Session, ctx: DialogueContext): Button[][] {
   return ctx.demo ? [[button(t(s, ctx, "btn.example", { date: date(s, exampleEntry(ctx)) }), "example")]] : [];
@@ -405,7 +409,10 @@ export function transition(previous: Session | null, input: Input, ctx: Dialogue
     if (chosen !== undefined && ctx.universities.some(u => u.id === chosen)) s.university = chosen;
   }
   if (action === "/help" || action === "help") return { session: s, reply: help(s, ctx) };
-  if (action === "back" && !profile(s)) return { session: s, reply: prompt(s, ctx) };
+  if (action === "back" && !profile(s)) {
+    if (s.step === "entry") { s.step = "citizenship"; delete s.citizenship; }
+    return { session: s, reply: prompt(s, ctx) };
+  }
   if (action === "no") return { session: s, reply: help(s, ctx, undefined, "scope") };
   if (action === "OTHER") return { session: s, reply: help(s, ctx, undefined, "other") };
   if (coverage(ctx.rules).excluded.includes(action)) return { session: s, reply: help(s, ctx, undefined, "citizenship") };

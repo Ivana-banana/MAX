@@ -46,6 +46,7 @@
   "btn.no": "Нет / не уверен",
   "btn.cancel": "Отмена",
   "btn.back": "← Назад",
+  "btn.changeCitizenship": "← Изменить гражданство",
   "btn.confirmDelete": "Да, удалить",
   "btn.otherCountry": "Другое",
   "card.deadline": "Расчётный предельный срок: ",

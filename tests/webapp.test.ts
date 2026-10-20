@@ -172,7 +172,7 @@ describe("mini app actions on the shared session", () => {
   it("keeps chat-only branches out of the app's vocabulary", () => {
     for (const action of ["/start", "/start kfu", "ru", "en", "accept", "yes", "KZ", "OTHER", "2026-09-01", "/today",
       "plan", "reminders", "doc:medical-examination:passport", "done:fingerprinting", "/delete", "confirm-delete",
-      "cancel-delete", "help:fingerprinting"]) expect(isAppAction(action), action).toBe(true);
+      "cancel-delete", "help:fingerprinting", "back"]) expect(isAppAction(action), action).toBe(true);
     for (const action of ["/stop", "calendar", "help", "/help", "help:", "help:../x", "card:fingerprinting",
       "/start ../etc", "doc:x", "done:", "reminders ", "2026-02-30", ""]) expect(isAppAction(action), action).toBe(false);
   });

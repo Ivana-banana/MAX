@@ -167,7 +167,7 @@ describe("a student who has not entered yet (#25)", () => {
   });
   it("keeps the step's buttons working after a wrong entry date (#67)", () => {
     const wrong = step(toEntry("/start kfu", "KZ"), { text: "15.11.2026", callback: false });
-    expect(buttons(wrong).map(b => b.action?.split("|")[1])).toEqual(["before-entry", "example"]);
+    expect(buttons(wrong).map(b => b.action?.split("|")[1])).toEqual(["before-entry", "example", "back"]);
     const before = buttons(wrong).find(b => b.action?.endsWith("|before-entry"))!;
     const r = step(wrong.session, { text: before.action!, callback: true });
     expect(r.expired).toBeUndefined();
