@@ -26,9 +26,8 @@ interface Props {
 }
 
 /**
- * One procedure: the number of days, its name and one line under it. The date is enough when a
- * deadline is ahead; a missed or marked one needs the chat's words, since a bare number would not
- * say which way it counts. The whole countdown is read out to screen readers either way.
+ * One procedure: the number of days, its name and one line under it. The line always carries the
+ * chat's words ("68 days left", "17 days ago"), since a bare number would not say which way it counts. The whole countdown is read out to screen readers either way.
  */
 function Task({ item, index, deadline, disabled, onOpen }: {
   item: AppPlanItem; index: number; deadline: string; disabled: boolean; onOpen: (ruleId: string) => void;
@@ -44,7 +43,7 @@ function Task({ item, index, deadline, disabled, onOpen }: {
       <span aria-hidden="true">
         <span className="t">{item.title}</span>
         {/* The countdown comes from the server: plural forms live in the shared text data. */}
-        <span className="d">{item.status === "ok" || item.status === "dueSoon" ? `${deadline}: ${dotted(item.dueDate)}` : item.countdown}</span>
+        <span className="d">{item.status === "ok" || item.status === "dueSoon" ? `${deadline}: ${dotted(item.dueDate)} · ${item.countdown}` : item.countdown}</span>
       </span>
     </button>
   );

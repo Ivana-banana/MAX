@@ -115,7 +115,7 @@ export function Onboarding({ session, texts, languages, universities, message, c
     return (
       <div className="stack">
         <h1 className="display title in">{t("app.consentTitle")}</h1>
-        <p className="prose in d1">{session.prompt}</p>
+        <p className="prose in d1">{t("app.consent")}</p>
         <Button className="in d2" loading={pending === "accept"} disabled={busy} onClick={() => onAction("accept")}>
           {t("btn.continue")}
         </Button>

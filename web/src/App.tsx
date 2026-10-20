@@ -102,7 +102,7 @@ export function App() {
             <h1 className="display word in"><Accented text={t("app.title")} /></h1>
             <p className="caps uni in d1">{t("app.start.title")}</p>
             <div className="spacer" />
-            <p className="lead prose in d2">{status.message === "" ? t("app.start.body") : status.message}</p>
+            <p className="lead prose in d2">{status.message === "" ? t("app.start.body") : isText(status.message, t("deleted")) ? t("app.deleted") : status.message}</p>
             <Button className="in d3" loading={status.pending !== null} onClick={() => act(start)}>{t("app.start.action")}</Button>
           </div>
         </section>
@@ -127,7 +127,7 @@ export function App() {
       // The chat has stopped this plan (rulesChanged): the app must not keep showing its dates.
       return (
         <div className="stack">
-          <p className="prose in">{t("rulesChanged")}</p>
+          <p className="prose in">{t("app.rulesChanged")}</p>
           <Button className="in d1" arrow="×" loading={status.pending === "/delete"} disabled={status.pending !== null}
             onClick={() => act("/delete")}>
             {t("btn.delete")}

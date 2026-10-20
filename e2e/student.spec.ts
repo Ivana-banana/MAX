@@ -45,7 +45,7 @@ test("entry date → plan with deadlines", async ({ page }, testInfo) => {
   expect(await page.evaluate(() => (globalThis as unknown as { closingConfirmation: boolean[] }).closingConfirmation.at(-1))).toBe(true);
   await save(page).click();
   await expect(page.getByRole("heading", { name: "Ваш план" })).toBeVisible();
-  await expect(page.getByRole("button", { name: /Медицинское освидетельствование/ })).toContainText("Срок:");
+  await expect(page.getByRole("button", { name: /Медицинское освидетельствование/ })).toContainText(/Срок: .*осталось \d+/);
   await page.screenshot({ path: testInfo.outputPath("1-plan.png"), fullPage: true, animations: "disabled" });
 });
 
@@ -102,4 +102,24 @@ test("empty and invalid date: Save stays off or the reason is shown", async ({ p
   await dateField(page).pressSequentially(moscowDate(-3).replaceAll(".", ""));
   await expect(page.getByRole("alert")).toContainText("не может быть в будущем");
   await expect(save(page)).toBeDisabled(); // the future
+});
+
+test("an overdue tile says how long ago; app texts name buttons, not chat commands", async ({ page }, testInfo) => {
+  await page.getByRole("button", { name: "Начать" }).click();
+  await page.getByRole("button", { name: /Русский/ }).click();
+  await expect(page.getByText("Кнопка «Удалить мои данные»")).toBeVisible();
+  await expect(page.locator("body")).not.toContainText("/delete");
+  await page.getByRole("button", { name: "Продолжить" }).click();
+  await page.getByRole("button", { name: "Да, совпадает" }).click();
+  await page.getByRole("button", { name: /KZ/ }).click();
+  await dateField(page).fill(moscowDate(45));
+  await save(page).click();
+  await expect(page.getByRole("heading", { name: "Ваш план" })).toBeVisible();
+  await expect(page.getByRole("button", { name: /прошёл \d+ \S+ назад/ }).first()).toContainText(/прошёл \d+ \S+ назад/);
+  await page.screenshot({ path: testInfo.outputPath("4-plan-overdue.png"), fullPage: true, animations: "disabled" });
+
+  await page.getByRole("button", { name: "Удалить мои данные" }).click();
+  await page.getByRole("button", { name: "Да, удалить" }).click();
+  await expect(page.getByText("Нажмите «Начать»")).toBeVisible();
+  await expect(page.locator("body")).not.toContainText("/start");
 });
