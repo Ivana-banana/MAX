@@ -1,8 +1,9 @@
 /**
  * Steps before a plan exists: language, consent, scope, citizenship, entry date.
  *
- * The wording of consent and scope comes from the server (`session.prompt`): it is the text a
- * lawyer reads and the chat already shows, so the app must not paraphrase it. The language list
+ * The wording of scope comes from the server (`session.prompt`), as the chat shows it. Consent is
+ * the same legal text under `app.consent`: only the sentence naming the chat command /delete
+ * differs (a test keeps the two copies in step). The language list
  * is data too — whatever files exist in `src/data/i18n`.
  */
 

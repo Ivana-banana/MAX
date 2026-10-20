@@ -216,7 +216,8 @@ export async function applyAction(
     else await tx.remove();
     await service.scheduleUser(tx, user, outcome.session);
     const copy = outcome.reply.buttons.flat().find(b => "copy" in b);
-    return { state: view(outcome.session, ctx, mocked), message: withoutBanner(outcome.reply.text, ctx),
+    // A deleted session has no language of its own: the one it had (else the MAX interface's) keeps the app's texts matching the reply.
+    return { state: view(outcome.session, ctx, mocked, before?.lang ?? locale), message: withoutBanner(outcome.reply.text, ctx),
       ...(copy !== undefined && "copy" in copy ? { copy: copy.copy } : {}) };
   });
 }

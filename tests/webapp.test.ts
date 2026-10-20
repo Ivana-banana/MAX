@@ -139,6 +139,27 @@ describe("mini app actions on the shared session", () => {
     expect(en.texts["app.title"]).toBe("First 90 days");
     expect(en.session?.plan[0]?.title).not.toBe(ru.session?.plan[0]?.title);
   });
+  it("after deleting, the app's texts and the chat's reply are in the user's language", async () => {
+    const f = await fixture();
+    for (const action of ["/start", "zh", "accept", "yes", "KZ", "2026-09-01"]) await applyAction(f.service, 7, action, false);
+    await applyAction(f.service, 7, "/delete", false);
+    const result = await applyAction(f.service, 7, "confirm-delete", false);
+    expect(result.state.session).toBeNull();
+    expect(result.state.texts["app.deleted"]).toBe(texts.get("zh")!["app.deleted"]);
+    expect(result.message).toBe(texts.get("zh")!.deleted);
+  });
+  it("the app's consent differs from the chat's only in the sentence about deleting", () => {
+    const sentences = (value: string) => value.split(/(?<=[.。])/);
+    for (const [lang, table] of texts) {
+      const chat = sentences(table.consent!);
+      const app = sentences(table["app.consent"]!);
+      expect(app.length, lang).toBe(chat.length);
+      const differing = chat.flatMap((sentence, i) => sentence === app[i] ? [] : [[sentence, app[i]!]]);
+      expect(differing.length, lang).toBe(1);
+      expect(differing[0]![0], lang).toContain("/delete");
+      expect(differing[0]![1], lang).not.toContain("/delete");
+    }
+  });
   it("refuses an action built on a revision someone else has already moved past", async () => {
     const f = await fixture();
     await applyAction(f.service, 7, "/start", false);
