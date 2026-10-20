@@ -428,4 +428,22 @@ describe("example profile for reviewers (demo only)", () => {
     expect(exampleEntry({ rules: rules.rules, today: "2026-10-14" })).toBe("2026-09-22");
     expect(exampleEntry({ rules: rules.rules, today: "2026-09-10" })).toBe("2026-09-01");
   });
+  it("offers the next step as a button after /stop and on the completion date", () => {
+    let s: Session = transition(null, { text: "/start", callback: false }, ctx).session!;
+    const click = (action: string) => transition(s, { text: `${s.nonce}.${s.revision}|${action}`, callback: true }, ctx);
+    for (const a of ["ru", "accept", "yes", "KZ"]) s = click(a).session!;
+    s = transition(s, { text: "2026-09-01", callback: false }, ctx).session!;
+    const actions = (r: Reply) => r.buttons.flat().flatMap(b => "action" in b ? [b.action.slice(b.action.indexOf("|") + 1)] : []);
+    const stopped = transition(s, { text: "/stop", callback: false }, ctx);
+    expect(actions(stopped.reply)).toContain("plan");
+    s = stopped.session!;
+    expect(click("plan").session!.step).toBe("plan");
+    s = click("card:medical-examination").session!;
+    const asked = click("done:medical-examination");
+    s = asked.session!;
+    expect(actions(asked.reply)).toContain("2026-09-24");
+    const date = click("2026-09-24");
+    expect(date.session!.step).toBe("plan");
+    expect(date.session!.completions["medical-examination"]).toBe("2026-09-24");
+  });
 });
