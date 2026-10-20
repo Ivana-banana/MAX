@@ -326,7 +326,8 @@ export function prompt(s: Session, ctx: DialogueContext): Reply {
       [...rows(uni(s, ctx).citizenships, 2), ...rows([...coverage(ctx.rules).excluded, "OTHER"], 2)]
         .map(row => row.map(code => button(country(s, ctx, code), code))));
     case "entry": return reply(s, ctx, t(s, ctx, "entry", { from: date(s, coverage(ctx.rules).from) }), entryRows(s, ctx));
-    case "completion": return reply(s, ctx, t(s, ctx, "completion"), [[button(t(s, ctx, "btn.cancel"), "plan")]]);
+    case "completion": return reply(s, ctx, t(s, ctx, "completion"),
+      [[button(t(s, ctx, "btn.today"), ctx.today)], [button(t(s, ctx, "btn.cancel"), "plan")]]);
     case "docEnd": {
       const note = undated(s, ctx).find(n => n.id === s.selected);
       return reply(s, ctx, t(s, ctx, `docEnd.${note?.countdown?.from ?? "visa-end"}`), [[button(t(s, ctx, "btn.cancel"), "plan")]]);
@@ -363,7 +364,8 @@ export function transition(previous: Session | null, input: Input, ctx: Dialogue
     return { session: null, reply: reply(s, ctx, t(s, ctx, "deleted")) };
   }
   if (s.step === "delete" && action === "cancel-delete") { s.step = s.back ?? (profile(s) ? "plan" : "language"); delete s.back; }
-  if (action === "/stop") { s.reminders = false; return { session: s, reply: reply(s, ctx, t(s, ctx, "stopped")) }; }
+  if (action === "/stop") { s.reminders = false; return { session: s, reply: reply(s, ctx, t(s, ctx, "stopped"),
+    profile(s) ? [[button(t(s, ctx, "btn.plan"), "plan")]] : []) }; }
   if (s.ruleVersion !== ctx.version) {
     s.reminders = false;
     return { session: s, reply: reply(s, ctx, t(s, ctx, "rulesChanged")) };
