@@ -5,7 +5,7 @@ import type { DeadlineRule, UserProfile } from "../src/core/types.js";
 
 const legal = {
   act: "Тестовый акт",
-  article: "ст. 1",
+  article: { ru: "ст. 1", en: "Art. 1" },
   url: "https://example.org",
   edition: "ред. от 01.01.2026",
   checkedAt: "2026-09-16",

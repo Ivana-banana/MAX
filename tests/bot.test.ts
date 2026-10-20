@@ -58,6 +58,14 @@ describe("student dialogue and durable processing", () => {
     expect(f.sent.at(-1)?.reply.text).toContain("consultant.ru");
     expect(f.sent.at(-1)?.reply.text).toContain("ДЕМО");
   });
+  it("card on en: the norm line has no Russian explanatory words and the check date is written in words", async () => {
+    const f=await fixture(); await f.onboard(1,"en"); await f.click("card:medical-examination"); await f.service.flush();
+    const text = f.sent.at(-1)!.reply.text;
+    const norm = text.split("\n").find(line => line.includes("115-ФЗ"))!;
+    expect(norm.replace("Федеральный закон от 25.07.2002 № 115-ФЗ", "")).not.toMatch(/[А-Яа-яЁё]/);
+    expect(text).toContain("Source checked: October 19, 2026");
+    expect(text).not.toContain("2026-10-19");
+  });
   it("rejects invalid/future/out-of-scope dates without losing the step", async () => {
     const f=await fixture(); await f.input("/start"); await f.click("ru"); await f.click("accept"); await f.click("yes"); await f.click("KZ");
     for(const date of ["2026-02-30","2026-08-31","2026-09-25"]) {

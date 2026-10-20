@@ -117,7 +117,7 @@ function asLegalBasis(value: unknown, path: string): LegalBasis {
 
   return {
     act: asString(record.act, `${path}.act`),
-    article: asString(record.article, `${path}.article`),
+    article: asLocalized(record.article, `${path}.article`),
     url: asString(record.url, `${path}.url`),
     edition: asString(record.edition, `${path}.edition`),
     checkedAt: asDate(record.checkedAt, `${path}.checkedAt`),

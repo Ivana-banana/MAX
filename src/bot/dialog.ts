@@ -222,8 +222,8 @@ function card(s: Session, ctx: DialogueContext, id: string, prefix = ""): Reply 
   return reply(s, ctx, prefix + `${item.title[s.lang]}\n${item.action[s.lang]}\n` + t(s, ctx, "card.deadline") + date(s, item.dueDate) +
     (item.status === "done" ? "" : ` (${countdown(s, ctx, item)})`) + target + late +
     (visit ? t(s, ctx, "card.visit", { date: date(s, visit) }) : "") + placeText(s, ctx, id) +
-    "\n\n" + docs.join("\n") + "\n" + documentsNote(s, ctx, item) + "\n\n" + item.legal.act + ", " + item.legal.article +
-    "\n" + item.legal.url + t(s, ctx, "card.checked") + item.legal.checkedAt +
+    "\n\n" + docs.join("\n") + "\n" + documentsNote(s, ctx, item) + "\n\n" + item.legal.act + ", " + item.legal.article[s.lang] +
+    "\n" + item.legal.url + t(s, ctx, "card.checked") + date(s, item.legal.checkedAt) +
     t(s, ctx, "card.confirm", { uni: u.name[s.lang]! }) + u.contactUrl,
     [...item.documents.map(d => [button((s.documents[`${key}:${d.id}`] ? "✓ " : "□ ") + d.title[s.lang], `doc:${id}:${d.id}`)]),
       ...(item.status === "done" ? [] : [[button(t(s, ctx, "btn.done"), `done:${id}`)],

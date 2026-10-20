@@ -47,8 +47,8 @@ export type LegalStatus = "draft" | "approved";
 export interface LegalBasis {
   /** Human-readable act, e.g. "Федеральный закон от 25.07.2002 № 115-ФЗ". */
   act: string;
-  /** Specific article or clause the term comes from. */
-  article: string;
+  /** Specific article or clause the term comes from; the act name stays in the original, explanatory words are translated. */
+  article: Localized;
   url: string;
   /** Wording of the act as of this date. */
   edition: string;

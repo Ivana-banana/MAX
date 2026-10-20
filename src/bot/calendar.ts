@@ -44,7 +44,7 @@ export function planToIcs(items: PlanItem[], o: CalendarOptions): string {
       ...(item.recommendedDate ? [t("ics.recommended") + item.recommendedDate] : []),
       t("ics.calculated"),
       ...(item.provisional ? [t("ics.provisional")] : []),
-      `${item.legal.act}, ${item.legal.article}`, item.legal.url].join("\n");
+      `${item.legal.act}, ${item.legal.article[o.lang]}`, item.legal.url].join("\n");
     lines.push("BEGIN:VEVENT", `UID:${item.ruleId}-${o.uid}@max-first-90-days`, `DTSTAMP:${stamp}`, `SEQUENCE:${o.sequence}`,
       ...(done ? ["STATUS:CANCELLED"] : []),
       `DTSTART;VALUE=DATE:${compact(item.dueDate)}`, `DTEND;VALUE=DATE:${compact(addDays(item.dueDate, 1))}`,

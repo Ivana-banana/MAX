@@ -76,7 +76,7 @@ export function readTexts(dir: string): Texts {
 /** Rules and university names must exist in every interface language, or a card would show a hole. */
 export function checkTranslated(texts: Texts, rules: DeadlineRule[], universities: University[]): void {
   const localized = [
-    ...rules.flatMap(r => [[`${r.id}.title`, r.title], [`${r.id}.action`, r.action],
+    ...rules.flatMap(r => [[`${r.id}.title`, r.title], [`${r.id}.action`, r.action], [`${r.id}.legal.article`, r.legal.article],
       ...r.documents.map(d => [`${r.id}.documents.${d.id}`, d.title])]),
     ...universities.map(u => [`${u.id}.name`, u.name]),
     ...universities.flatMap(u => u.procedures.flatMap(p => [[`${u.id}.${p.id}.title`, p.title],

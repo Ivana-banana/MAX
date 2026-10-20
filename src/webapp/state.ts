@@ -147,7 +147,7 @@ function view(session: Session | null, ctx: DialogueContext, mocked: boolean, hi
           checked: session.documents[`${item.ruleId}:${item.dueDate}:${d.id}`] === true,
         })),
         documentsNote: documentsNote(session, ctx, item),
-        legal: item.legal,
+        legal: { ...item.legal, article: localized(item.legal.article) },
         ...(item.status === "done" || session.visits?.[item.ruleId] === undefined ? {} : { visit: session.visits[item.ruleId] }),
         ...placeView(session, ctx, item.ruleId),
         ...(targetText(session, ctx, item) ? { target: targetText(session, ctx, item).trim() } : {}),

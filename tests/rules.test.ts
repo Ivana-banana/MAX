@@ -17,7 +17,7 @@ describe("файл норм ru-student.json", () => {
   it("у каждого правила есть ссылка на норму, редакция и дата сверки", () => {
     for (const rule of ruleSet.rules) {
       expect(rule.legal.url, rule.id).toMatch(/^https:\/\//);
-      expect(rule.legal.article, rule.id).not.toHaveLength(0);
+      expect(rule.legal.article.ru, rule.id).not.toHaveLength(0);
       expect(rule.legal.edition, rule.id).not.toHaveLength(0);
       expect(rule.legal.checkedAt, rule.id).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     }
@@ -100,7 +100,7 @@ describe("parseRuleSet", () => {
         documents: [],
         legal: {
           act: "А",
-          article: "ст. 1",
+          article: { ru: "ст. 1", en: "Art. 1" },
           url: "https://example.org",
           edition: "ред.",
           checkedAt: "2026-09-16",
