@@ -149,7 +149,7 @@ describe("mini app actions on the shared session", () => {
     expect(result.message).toBe(texts.get("zh")!.deleted);
   });
   it("the app's consent differs from the chat's only in the sentence about deleting", () => {
-    const sentences = (value: string) => value.split(/(?<=[.。])/);
+    const sentences = (value: string) => value.split(/(?<=[.;。；])/);
     for (const [lang, table] of texts) {
       const chat = sentences(table.consent!);
       const app = sentences(table["app.consent"]!);
