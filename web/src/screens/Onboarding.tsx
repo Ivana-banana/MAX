@@ -233,6 +233,9 @@ function EntryDate({ texts, today, message, pending, onAction, example, cards }:
           {example}
         </Button>
       )}
+      <button type="button" className="link in d3" disabled={pending !== null} onClick={() => onAction("back")}>
+        {t("btn.changeCitizenship")}
+      </button>
       <BeforeEntry cards={cards} texts={texts} />
     </div>
   );

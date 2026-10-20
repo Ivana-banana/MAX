@@ -444,6 +444,39 @@ describe("review fixes in the dialogue", () => {
     });
   });
 });
+describe("changing the citizenship before the plan (#69)", () => {
+  const atEntry = () => {
+    let s: Session = transition(null, { text: "/start", callback: false }, ctx).session!;
+    const click = (action: string) => transition(s, { text: `${s.nonce}.${s.revision}|${action}`, callback: true }, ctx);
+    for (const a of ["ru", "accept", "yes", "KZ"]) s = click(a).session!;
+    return { click, set: (n: Session) => { s = n; }, session: () => s };
+  };
+  const change = (r: Reply) => (r.buttons.flat().find(b => b.text === "← Изменить гражданство") as { action: string } | undefined)?.action.split("|")[1];
+  it("the entry step offers the button, on its question and after a wrong date", () => {
+    const f = atEntry();
+    expect(change(transition(f.session(), { text: "/start", callback: false }, ctx).reply)).toBe("back");
+    expect(change(transition(f.session(), { text: "2026-02-30", callback: false }, ctx).reply)).toBe("back");
+  });
+  it("the button returns to the citizenship question", () => {
+    const f = atEntry();
+    const back = f.click("back");
+    expect(back.session!.step).toBe("citizenship");
+    expect(back.reply.text).toContain("Выберите гражданство");
+  });
+  it("the new citizenship is saved and the entry date is asked again", () => {
+    const f = atEntry();
+    f.set(f.click("back").session!);
+    const entry = f.click("KG");
+    expect(entry.session!.citizenship).toBe("KG");
+    expect(entry.session!.step).toBe("entry");
+  });
+  it("with a plan there is no such button", () => {
+    const f = atEntry();
+    f.set(transition(f.session(), { text: "2026-09-01", callback: false }, ctx).session!);
+    expect(change(f.click("plan").reply)).toBeUndefined();
+    expect(f.click("back").session!.step).toBe("plan");
+  });
+});
 describe("example profile for reviewers (demo only)", () => {
   const actions = (r?: Reply) => (r?.buttons.flat() ?? []).flatMap(b => "action" in b ? [b.action.split("|")[1]] : []);
   it("offers an example entry date whose first reminder is due the same day", async () => {

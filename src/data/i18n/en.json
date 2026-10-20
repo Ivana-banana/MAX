@@ -42,6 +42,7 @@
   "btn.no": "No / unsure",
   "btn.cancel": "Cancel",
   "btn.back": "← Back",
+  "btn.changeCitizenship": "← Change citizenship",
   "btn.confirmDelete": "Yes, delete",
   "btn.otherCountry": "Other",
   "card.deadline": "Calculated deadline: ",

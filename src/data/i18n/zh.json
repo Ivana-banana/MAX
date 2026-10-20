@@ -40,6 +40,7 @@
   "btn.no": "否 / 不确定",
   "btn.cancel": "取消",
   "btn.back": "← 返回",
+  "btn.changeCitizenship": "← 更改国籍",
   "btn.confirmDelete": "是，删除",
   "btn.otherCountry": "其他",
   "card.deadline": "计算的最终期限：",
