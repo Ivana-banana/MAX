@@ -119,7 +119,7 @@
   "expired": "Tugma eskirgan. /plan yoki /start ni oching.",
   "limited": "Ketma-ket juda koʻp amal: oxirgisi bajarilmadi. Bir daqiqa kuting va qaytadan urinib koʻring.",
   "stopped": "Eslatmalar oʻchirildi. /plan — qaytish.",
-  "stoppedNoPlan": "Eslatmalar oʻchirildi. Joriy bosqichga qaytish uchun «Davom etish» tugmasini bosing.",
+  "stoppedNoPlan": "Hozircha eslatmalar yoʻq: reja tayyor boʻlgach yoqiladi. Joriy bosqichga qaytish uchun «Davom etish» tugmasini bosing.",
   "rulesChanged": "Qoidalar oʻzgardi. Hisob-kitob toʻxtatildi. Eski profilni /delete orqali oʻchiring va qaytadan boshlang.",
   "reminder": "Eslatma: {title} — {due} ({countdown})",
   "reminder.overdue": "Eslatma: {title} — hisoblangan muddat {due} gacha edi. Tartib-taomildan baribir oʻtish kerak: kartochkada nima qilish kerakligi va universitetga tayyor savol bor.",

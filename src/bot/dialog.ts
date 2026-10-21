@@ -400,6 +400,8 @@ export function transition(previous: Session | null, input: Input, ctx: Dialogue
     delete s.university; delete s.citizenship; delete s.entryDate; delete s.selected; delete s.back; delete s.visits; delete s.ends;
     s.completions = {}; s.documents = {}; s.reminders = false; s.step = "scope";
   }
+  // After /stop before the plan: the current step's question again, not an answer to it.
+  if (action === "continue") return { session: s, reply: prompt(s, ctx) };
   const start = /^\/start(?:\s+(\S+))?$/.exec(action);
   if (start) {
     // A university's QR code opens max.ru/<bot>?start=<id>; the choice is fixed once the plan exists.

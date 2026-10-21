@@ -482,13 +482,16 @@ describe("review fixes in the dialogue", () => {
   it("answers /stop before the plan with a button back to the current step, without /plan (#96)", () => {
     let s: Session = transition(null, { text: "/start", callback: false }, ctx).session!;
     const click = (action: string) => transition(s, { text: `${s.nonce}.${s.revision}|${action}`, callback: true }, ctx);
-    for (const a of ["ru", "accept", "yes"]) s = click(a).session!;
+    for (const a of ["ru", "accept", "yes", "UZ"]) s = click(a).session!;
     const step = s.step;
+    expect(step).toBe("entry");
     const stopped = transition(s, { text: "/stop", callback: false }, ctx);
     expect(stopped.reply.text).not.toContain("/plan");
     s = stopped.session!;
     const back = stopped.reply.buttons.flat()[0]!;
-    expect("action" in back && click(back.action.slice(back.action.indexOf("|") + 1)).reply.text).toBe(transition(s, { text: "", callback: false }, ctx).reply.text);
+    const resumed = "action" in back ? click(back.action.slice(back.action.indexOf("|") + 1)).reply.text : "";
+    expect(resumed).not.toContain("Не удалось прочитать дату");
+    expect(resumed).toBe(transition(s, { text: "/start", callback: false }, ctx).reply.text);
     expect(s.step).toBe(step);
   });
   it("offers the next step as a button after /stop and on the completion date", () => {
