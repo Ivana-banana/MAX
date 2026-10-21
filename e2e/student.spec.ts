@@ -248,6 +248,36 @@ test("a tap shows it is waiting for the server: the document box and the text bu
   await expect(page.getByRole("button", { name: "Да, удалить" })).toBeVisible();
 });
 
+test("a saved visit comes back to the card with a confirmation, and a warning when it is after the deadline", async ({ page }, testInfo) => {
+  await toEntryDate(page);
+  await dateField(page).fill(moscowDate(7)); // the medical examination is due in about three weeks
+  await save(page).click();
+  await page.getByRole("button", { name: /^Медицинское освидетельствование/ }).click();
+  const late = "позже расчётного срока";
+
+  await page.getByRole("button", { name: "Запланировать визит" }).click();
+  await page.getByRole("textbox", { name: "Когда пойдёте?" }).fill(moscowDate(-40));
+  await save(page).click();
+  await expect(page.getByRole("heading", { name: "Медицинское освидетельствование" })).toBeVisible();
+  await expect(page.getByRole("status")).toHaveText(`Визит записан: ${moscowDate(-40)}`);
+  await expect(page.getByText(late)).toBeVisible();
+  await page.screenshot({ path: testInfo.outputPath("5-visit-late.png"), fullPage: true, animations: "disabled" });
+
+  await page.getByRole("button", { name: "Изменить день визита" }).click();
+  await page.getByRole("textbox", { name: "Когда пойдёте?" }).fill(moscowDate(-1));
+  await save(page).click();
+  await expect(page.getByRole("status")).toHaveText(`Визит записан: ${moscowDate(-1)}`);
+  await expect(page.getByText(late)).toHaveCount(0);
+  await page.getByRole("checkbox", { name: /Паспорт$/ }).click(); // the next action: the confirmation was about the save only
+  await expect(page.getByRole("checkbox", { name: /Паспорт$/ })).toHaveAttribute("aria-checked", "true");
+  await expect(page.getByRole("status")).toHaveCount(0);
+
+  // Cancel leaves the question for the plan, as before; the confirmation is about a save only.
+  await page.getByRole("button", { name: "Изменить день визита" }).click();
+  await page.getByRole("button", { name: "Отмена" }).click();
+  await expect(page.getByRole("heading", { name: "Ваш план" })).toBeVisible();
+});
+
 test("a marked yearly procedure comes back labelled as a repeat, with the date it was done", async ({ page }) => {
   await toEntryDate(page);
   await dateField(page).fill(moscowDate(7));

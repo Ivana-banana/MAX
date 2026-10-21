@@ -8,13 +8,15 @@
 import { useState } from "react";
 import type { AppPlanItem, AppSession } from "../api.js";
 import { openLink, tap } from "../bridge.js";
-import { text, type Texts } from "../texts.js";
+import { fill, text, type Texts } from "../texts.js";
 import { Button, dayMonth, dotted, ordinal } from "../ui.js";
 
 interface Props {
   session: AppSession;
   texts: Texts;
   item: AppPlanItem;
+  /** The last action saved this card's visit: the card confirms it, as the chat does. */
+  visitSaved: boolean;
   pending: string | null;
   /** The ready question to the university from the last reply (the chat's "Copy" button). */
   copy: string;
@@ -47,16 +49,19 @@ export function Question({ texts, copy }: { texts: Texts; copy: string }) {
   );
 }
 
-export function Card({ session, texts, item, pending, copy, onAction }: Props) {
+export function Card({ session, texts, item, visitSaved, pending, copy, onAction }: Props) {
   const t = (key: string) => text(texts, key);
   // The help branch is the chat's: the question comes from the dialogue, not from the app.
   const [helpAsked, setHelpAsked] = useState(false);
   const overdue = item.status === "overdue";
   const checked = item.documents.filter(document => document.checked).length;
   const calm = item.status === "ok" || item.status === "done";
+  // The chat warns once, on saving; the card keeps the warning while the visit stays after the deadline.
+  const visitLate = item.visit !== undefined && item.status !== "done" && item.visit > item.dueDate;
 
   return (
     <div className="stack">
+      {visitSaved && item.visit !== undefined && <p className="caps in" role="status">{fill(t("visit.saved"), { date: dotted(item.visit) })}</p>}
       <h1 className="heading in">{item.title}</h1>
 
       <div className={`deadline ${calm ? "deadline-calm" : ""} in d1`}>
@@ -71,6 +76,7 @@ export function Card({ session, texts, item, pending, copy, onAction }: Props) {
         {item.provisional && <span>{t("app.provisional")}</span>}
         {item.visit !== undefined && <span>{`${t("app.visit")}: ${dotted(item.visit)}`}</span>}
       </div>
+      {visitLate && <p className="prose in d1">{fill(t("visit.late"), { due: dotted(item.dueDate) })}</p>}
 
       <p className="prose in d2">{item.action}</p>
 
