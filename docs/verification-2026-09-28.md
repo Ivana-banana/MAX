@@ -35,3 +35,21 @@ web.max.ru, скриншоты веб-версии — в `images/max-check/web-
 |---|---|---|---|---|---|
 | Мобильная | | | | `8bcb1cd` | |
 | Веб | | | | `8bcb1cd` | |
+
+## Чек-лист сдачи 30.09 на ветке `online-submission`
+
+Скилл `submission-checklist`, чистый клон `online-submission` на `5517eda`, 30.09.2026.
+
+| Пункт | Итог | Доказательство |
+|---|---|---|
+| Код = выкаченный | ✅ | `git diff --stat 8bcb1cd origin/online-submission -- src web Dockerfile compose.yaml package.json package-lock.json` пуст |
+| Сервер | ✅ | `/health` → `status: ok`, `commit` = `8bcb1cd…`, `failed: 0` |
+| CI | ✅ | `checks` на `5517eda` — success ([run 36677540839](https://github.com/M1hairu/MAX_GOATed_messenger/actions/runs/36677540839)) |
+| Docker | ✅ | `docker compose config -q`; `build --no-cache` — **45 с** (базовые образы загружены заранее); `up -d --wait` → `bot` и `postgres` healthy, локальный `/health` 200; `.dockerignore` исключает `.git`, `.env`, `node_modules` |
+| Зависимости | ✅ | `package-lock.json`, `web/package-lock.json`; лицензии по lock-файлам — MIT, ISC, Apache-2.0, BSD-3-Clause, MPL-2.0 (`lightningcss`, сборка), OFL-1.1 (шрифты); закрытых нет |
+| Секреты | ✅ | `check-secrets.sh` — пусто; в `.env.example` токен пуст, пароли — `local-demo-only-not-for-deployment` |
+| README | ✅ | разделы: запуск одной командой, сценарий и проверка, окружение, реальная интеграция MAX, архитектура, данные и интеграции (`[MOCKED]`), проверки, остановка, ограничения, лицензия |
+| Слайд 1 | ✅ | бот, репозиторий, commit `8bcb1cd`, HTTPS `/health`, «учётки и токены не нужны», путь проверки |
+| Слайд 2, команда | ❌ | `manifest.json` → `"team": null` — нужен состав команды (человек) и пересборка PDF |
+| Прогон в MAX | ❌ | таблица выше пуста — шаги 1–32 в мобильном MAX и web.max.ru (человек) |
+| Тег `submit-online` | ⏳ | ставится последним, после двух пунктов выше |
