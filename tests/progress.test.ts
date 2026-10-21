@@ -20,6 +20,12 @@ describe("planProgress", () => {
     expect(planProgress([repeat, open])).toEqual({ done: 1, total: 2, next: open });
   });
 
+  it("opens a repeat round again once its date is near or missed (#103)", () => {
+    const passed = item("done"), soon = item("dueSoon", true), late = item("overdue", true);
+    expect(planProgress([passed, soon])).toEqual({ done: 1, total: 2, next: soon });
+    expect(planProgress([passed, late])).toEqual({ done: 1, total: 2, next: late });
+  });
+
   it("has no next step once everything is passed", () => {
     expect(planProgress([item("done"), item("ok", true)])).toEqual({ done: 2, total: 2 });
   });
@@ -53,7 +59,8 @@ describe("the plan in the chat opens with the progress", () => {
   });
 
   it("leads the nearest-step button to the card of that procedure", () => {
-    expect(chat("ru", ["medical-examination"]).buttons[1]![0]).toMatchObject({ action: expect.stringMatching(/\|card:fingerprinting$/) });
+    const next = chat("ru", ["medical-examination"]).buttons[1]![0]!;
+    expect("action" in next ? next.action : "").toMatch(/\|card:fingerprinting$/);
   });
 
   it("says that all are marked once they are, and offers no step", () => {
