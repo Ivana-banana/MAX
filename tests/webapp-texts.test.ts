@@ -17,7 +17,7 @@ describe("mini app text match", () => {
 });
 
 describe("mini app texts", () => {
-  const command = /(?<![\p{L}\p{N}\/:.])\/[a-z]+/u;
+  const command = /(?<![\p{L}\p{N}/:.])\/[a-z]+/u;
 
   it("the pattern finds a command in a chat text", () => {
     expect(readTexts("src/data/i18n").get("zh")!["visit.invalid"]).toMatch(command);
