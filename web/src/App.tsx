@@ -229,7 +229,8 @@ function Notice({ title, body, action }: { title: string; body: string; action?:
 
 /**
  * The chat's steps that ask for a day from today on — a visit (D-039) or a document end date (D-040).
- * The server checks the range and answers with the card; the wording of the question is the chat's.
+ * The client shows why a day before today is refused; the server checks the full range and answers
+ * with the card. The wording of the question is the chat's.
  */
 function DateStep({ texts, today, prompt, message, title, invalid: invalidKey, pending, onAction }: {
   texts: Texts; today: string; prompt: string; message: string; title: string; invalid: string;
