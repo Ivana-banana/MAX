@@ -370,6 +370,12 @@ export function changeOff(s: Session, ctx: DialogueContext): Reply {
 /** The question for the event date and, on a wrong date, the same buttons again, so they never go stale. */
 const changeDateRows = (s: Session, ctx: DialogueContext): Button[][] =>
   [[button(t(s, ctx, "btn.today"), "/today"), button(t(s, ctx, "btn.yesterday"), "/yesterday")], [button(t(s, ctx, "btn.cancel"), "plan")]];
+/** The same for the completion, visit and document end dates (#109): a refusal repeats the question's buttons. */
+const completionRows = (s: Session, ctx: DialogueContext): Button[][] =>
+  [[button(t(s, ctx, "btn.today"), "/today")], [button(t(s, ctx, "btn.cancel"), "plan")]];
+const visitRows = (s: Session, ctx: DialogueContext): Button[][] =>
+  [[button(t(s, ctx, "btn.today"), "/today"), button(t(s, ctx, "btn.tomorrow"), "/tomorrow")], [button(t(s, ctx, "btn.cancel"), "plan")]];
+const docEndRows = (s: Session, ctx: DialogueContext): Button[][] => [[button(t(s, ctx, "btn.cancel"), "plan")]];
 /** The university's own procedure for a case (re-registration), when it names one for this student. */
 export function changeProcedure(s: Session, ctx: DialogueContext, c: ChangeSituation): UniversityProcedure | undefined {
   const id = uni(s, ctx).changeTerms[c.id]?.procedure;
@@ -492,17 +498,14 @@ export function prompt(s: Session, ctx: DialogueContext): Reply {
       [...rows(uni(s, ctx).citizenships, 2), ...rows([...coverage(ctx.rules).excluded, "OTHER"], 2)]
         .map(row => row.map(code => button(country(s, ctx, code), code))));
     case "entry": return reply(s, ctx, t(s, ctx, "entry", { from: date(s, coverage(ctx.rules).from) }), entryRows(s, ctx));
-    case "completion": return reply(s, ctx, t(s, ctx, "completion"),
-      [[button(t(s, ctx, "btn.today"), "/today")], [button(t(s, ctx, "btn.cancel"), "plan")]]);
+    case "completion": return reply(s, ctx, t(s, ctx, "completion"), completionRows(s, ctx));
     case "docEnd": {
       const note = undated(s, ctx).find(n => n.id === s.selected);
-      return reply(s, ctx, t(s, ctx, `docEnd.${note?.countdown?.from ?? "visa-end"}`), [[button(t(s, ctx, "btn.cancel"), "plan")]]);
+      return reply(s, ctx, t(s, ctx, `docEnd.${note?.countdown?.from ?? "visa-end"}`), docEndRows(s, ctx));
     }
     case "visit": {
       const item = plan(s, ctx).find(i => i.ruleId === s.selected);
-      return reply(s, ctx, t(s, ctx, "visit", { title: item?.title[s.lang] ?? "" }),
-        [[button(t(s, ctx, "btn.today"), "/today"), button(t(s, ctx, "btn.tomorrow"), "/tomorrow")],
-          [button(t(s, ctx, "btn.cancel"), "plan")]]);
+      return reply(s, ctx, t(s, ctx, "visit", { title: item?.title[s.lang] ?? "" }), visitRows(s, ctx));
     }
     case "changeDate": {
       const c = situation(ctx, s.selected);
@@ -613,7 +616,7 @@ export function transition(previous: Session | null, input: Input, ctx: Dialogue
     const done = action === "/today" ? ctx.today : typedDate(action);
     const last = s.selected ? s.completions[s.selected] : undefined;
     if (!s.selected || !isValidDate(done) || done > ctx.today || done < s.entryDate! || (last && compareDates(done, last) <= 0)) {
-      return { session: s, reply: reply(s, ctx, t(s, ctx, "completion.invalid")) };
+      return { session: s, reply: reply(s, ctx, t(s, ctx, "completion.invalid"), completionRows(s, ctx)) };
     }
     s.completions[s.selected] = done;
     // A marked procedure needs no visit any more; a repeat a year later gets a new one.
@@ -623,7 +626,7 @@ export function transition(previous: Session | null, input: Input, ctx: Dialogue
     const end = typedDate(action);
     const note = undated(s, ctx).find(n => n.id === s.selected && n.countdown);
     if (!note?.countdown || !isValidDate(end) || end < ctx.today || end > addDays(ctx.today, 2 * VISIT_HORIZON_DAYS)) {
-      return { session: s, reply: reply(s, ctx, t(s, ctx, "docEnd.invalid")) };
+      return { session: s, reply: reply(s, ctx, t(s, ctx, "docEnd.invalid"), docEndRows(s, ctx)) };
     }
     s.ends = { ...s.ends, [note.countdown.from]: end }; s.step = "plan"; delete s.selected;
     return { session: s, reply: procedureCard(s, ctx, note) };
@@ -632,7 +635,7 @@ export function transition(previous: Session | null, input: Input, ctx: Dialogue
     const day = action === "/today" ? ctx.today : action === "/tomorrow" ? addDays(ctx.today, 1) : typedDate(action);
     const item = plan(s, ctx).find(i => i.ruleId === s.selected && i.status !== "done");
     if (!item || !isValidDate(day) || day < ctx.today || day > addDays(ctx.today, VISIT_HORIZON_DAYS)) {
-      return { session: s, reply: reply(s, ctx, t(s, ctx, "visit.invalid")) };
+      return { session: s, reply: reply(s, ctx, t(s, ctx, "visit.invalid"), visitRows(s, ctx)) };
     }
     s.visits = { ...s.visits, [item.ruleId]: day }; s.step = "plan"; delete s.selected;
     const note = t(s, ctx, "visit.saved", { date: date(s, day) }) +

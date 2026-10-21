@@ -76,6 +76,12 @@ describe("a university deadline counted from the visa or registration end date",
     }
   });
 
+  it("keeps Cancel under a refused end date, like the question (#109)", () => {
+    const f = planned("CN");
+    f.click("card:visa-extension"); f.click("end:visa-extension");
+    expect(actions(f.type("2026-09-23"))).toEqual(["plan"]);
+  });
+
   it("says the submission period has passed instead of showing a date in the past", () => {
     const f = planned("CN");
     f.click("card:visa-extension"); f.click("end:visa-extension");
