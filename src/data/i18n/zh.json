@@ -110,7 +110,7 @@
   "visit.remindOff": "请在计划下方开启提醒，这样机器人会在前一天提醒您还缺哪些文件。\n\n",
   "card.visit": "\n前往日期：{date}",
   "repeat.yearly": "每年",
-  "repeat.everyMonths": "每{n}个月",
+  "repeat.everyMonths#other": "每{n}个月",
   "repeat.label": "再次办理（{period}）",
   "repeat.doneOn": "您已于{date}办理",
   "card.repeat": "再次办理（{period}）。您已于{date}办理。",

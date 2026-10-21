@@ -3,7 +3,8 @@ import { parseRuleSet } from "../src/data/loadRules.js";
 import raw from "../src/data/rules/ru-student.json" with { type: "json" };
 import { readTexts } from "../src/data/loadTexts.js";
 import { readUniversities } from "../src/data/loadUniversities.js";
-import { transition, type DialogueContext, type Session } from "../src/bot/dialog.js";
+import { format } from "../src/data/loadTexts.js";
+import { plan, reminderReply, shareText, transition, type DialogueContext, type Session } from "../src/bot/dialog.js";
 
 const rules = parseRuleSet(raw);
 const texts = readTexts("src/data/i18n");
@@ -18,7 +19,7 @@ function afterDone(lang = "ru") {
   for (const a of [lang, "accept", "yes", "KZ"]) click(a);
   type("03.09.2026");
   click("card:medical-examination"); click("done:medical-examination"); type("24.09.2026");
-  return { click, type };
+  return { click, type, session: () => s };
 }
 
 describe("a marked yearly procedure is shown as a repeat", () => {
@@ -46,5 +47,34 @@ describe("a marked yearly procedure is shown as a repeat", () => {
       const t = texts.get(lang)!;
       expect(reply, lang).toContain(t["repeat.label"]!.replace("{period}", t["repeat.yearly"]!));
     }
+  });
+
+  it("shared plan: the same label and the date it was done, a first round has neither", () => {
+    const text = shareText(afterDone().session(), ctx);
+    expect(text).toContain("• Медицинское освидетельствование, повторно (ежегодно) — до 24 октября 2027 г.\n  пройдено вами 24 сентября 2026 г.");
+    expect(text.split("\n").find(l => l.startsWith("• Дактилоскопия"))).not.toContain("овторно");
+  });
+
+  it("reminder a year later: says it is a repeat and when the previous round was done", () => {
+    const f = afterDone(), c = { ...ctx, today: "2027-10-17" };
+    const item = plan(f.session(), c).find(i => i.ruleId === "medical-examination")!;
+    expect(reminderReply(f.session(), c, item).text)
+      .toContain("Напоминание: Медицинское освидетельствование, повторно (ежегодно) — 24 октября 2027 г. (скоро, осталось 7 дней)\n  пройдено вами 24 сентября 2026 г.");
+    const first = plan(f.session(), c).find(i => i.ruleId === "fingerprinting")!;
+    expect(reminderReply(f.session(), c, first).text).not.toContain("овторно");
+  });
+
+  it("every language: the shared plan and the reminder carry the repeat label", () => {
+    for (const lang of texts.keys()) {
+      const f = afterDone(lang), t = texts.get(lang)!, label = t["repeat.label"]!.replace("{period}", t["repeat.yearly"]!);
+      const item = plan(f.session(), ctx).find(i => i.ruleId === "medical-examination")!;
+      expect(shareText(f.session(), ctx), lang).toContain(label);
+      expect(reminderReply(f.session(), ctx, item).text, lang).toContain(label);
+    }
+  });
+
+  it("English says 'every month' for one month, not 'every 1 months'", () => {
+    expect(format(texts, "en", "repeat.everyMonths", { n: 1 })).toBe("every month");
+    expect(format(texts, "en", "repeat.everyMonths", { n: 6 })).toBe("every 6 months");
   });
 });
