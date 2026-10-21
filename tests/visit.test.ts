@@ -90,6 +90,24 @@ describe("planning a visit in the chat", () => {
     expect(r.session!.completions).toEqual({ "medical-examination": "2026-09-25" });
   });
 
+  it("keeps the day buttons working after a refused day or date (#109)", () => {
+    for (const [ask, answer, wrong, field] of [
+      ["visit:medical-examination", "/tomorrow", "2026-09-23", "visits"],
+      ["done:medical-examination", "/today", "01.01.2020", "completions"],
+    ] as const) {
+      const f = planned();
+      f.click("card:medical-examination"); f.click(ask);
+      const refused = f.type(wrong);
+      expect(actions(refused)).toContain(answer);
+      expect(actions(refused)).toContain("plan");
+      // The button of the refusal itself: its stamp is the one the session expects now.
+      const pressed = refused.buttons.flat().find(b => "action" in b && b.action.endsWith(`|${answer}`))!;
+      const r = transition(f.session, { text: "action" in pressed ? pressed.action : "", callback: true }, ctx);
+      expect(r.expired).toBeUndefined();
+      expect(r.session![field]).toEqual({ "medical-examination": answer === "/today" ? "2026-09-24" : "2026-09-25" });
+    }
+  });
+
   it("does not offer a visit for a procedure already marked as done", () => {
     const f = planned();
     f.click("card:fingerprinting"); f.click("done:fingerprinting"); f.type("/today");
