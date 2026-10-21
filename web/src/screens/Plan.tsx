@@ -57,6 +57,7 @@ export function Plan({ session, texts, pending, onAction, onOpen, onCalendar, ca
   // means every first-round procedure is marked; repeats stay listed below the finale.
   const firstRound = session.plan.filter(item => !item.isRepeat);
   const finished = session.plan.length > 0 && firstRound.every(item => item.status === "done");
+  const next = session.plan.find(item => item.ruleId === session.progress.nextRuleId);
   const photo = universityPhoto(session.university.id);
   // Outside MAX the plan text goes to the clipboard; null until the first press.
   const [copied, setCopied] = useState<boolean | null>(null);
@@ -82,6 +83,23 @@ export function Plan({ session, texts, pending, onAction, onOpen, onCalendar, ca
         <div className="plan-head in">
           <h1 className="display">{t("app.planTitle")}</h1>
           <span className="vertical">{session.university.name}{session.entryDate !== undefined && ` · ${dotted(session.entryDate).slice(0, 5)}`}</span>
+        </div>
+      )}
+
+      {/* #93: how far the plan is and the one nearest step; the wording comes from the server (the chat's). */}
+      {!finished && session.progress.total > 0 && (
+        <div className="progress in d1">
+          <p className="progress-line" role="progressbar" aria-valuemin={0} aria-valuemax={session.progress.total}
+            aria-valuenow={session.progress.done} aria-valuetext={session.progress.line}>{session.progress.line}</p>
+          <div className="progress-bar" aria-hidden="true">
+            {Array.from({ length: session.progress.total }, (_, i) => <i key={i} className={i < session.progress.done ? "on" : ""} />)}
+          </div>
+          {next !== undefined && (
+            <Button arrow="→" disabled={pending !== null} onClick={() => onOpen(next.ruleId)}>
+              {`${t("app.next")}: ${next.title}`}
+            </Button>
+          )}
+          {next !== undefined && <p className="small muted">{`${t("app.deadline")}: ${dotted(next.dueDate)} · ${next.countdown}`}</p>}
         </div>
       )}
 

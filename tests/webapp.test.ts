@@ -390,8 +390,9 @@ describe("mini app HTTP surface", () => {
       revision = body.state.session.revision;
     }
     const state = await (await fetch(`${url}/api/state`, { headers: auth(value) })).json() as
-      { state: { session: { step: string; university: { id: string }; plan: unknown[] } } };
+      { state: { session: { step: string; university: { id: string }; plan: { ruleId: string }[]; progress: { done: number; total: number; nextRuleId: string } } } };
     expect(state.state.session.step).toBe("plan");
+    expect(state.state.session.progress).toMatchObject({ done: 0, total: 2, nextRuleId: state.state.session.plan[0]!.ruleId }); // #93
     expect(state.state.session.university.id).toBe("itmo");
     expect(state.state.session.plan).toHaveLength(2);
   });
