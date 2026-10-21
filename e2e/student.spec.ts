@@ -37,6 +37,8 @@ async function toEntryDate(page: Page) {
 
 const dateField = (page: Page) => page.getByRole("textbox", { name: "Дата въезда" });
 const save = (page: Page) => page.getByRole("button", { name: "Сохранить" });
+/** Alerts with text: the date screens keep an empty alert region on the page, so a new reason is announced. */
+const alert = (page: Page) => page.getByRole("alert").filter({ hasText: /\S/ });
 
 test("entry date → plan with deadlines", async ({ page }, testInfo) => {
   await toEntryDate(page);
@@ -66,24 +68,24 @@ test("API failure → clear message, retry works without a restart", async ({ pa
 
   await page.route("**/api/action", route => route.fulfill({ status: 500, body: "{}" }));
   await save(page).click();
-  await expect(page.getByRole("alert")).toContainText("Сервер не смог обработать действие");
+  await expect(alert(page)).toContainText("Сервер не смог обработать действие");
   await expect(dateField(page)).toHaveValue(moscowDate(7)); // the screen and the input survive
 
   await page.unroute("**/api/action");
   await page.route("**/api/action", route => route.fulfill({ status: 429, headers: { "retry-after": "60" }, body: "{}" }));
   await save(page).click();
-  await expect(page.getByRole("alert")).toContainText("Слишком много действий подряд");
+  await expect(alert(page)).toContainText("Слишком много действий подряд");
 
   await page.unroute("**/api/action");
   await page.route("**/api/action", route => route.abort("connectionrefused"));
   await save(page).click();
-  await expect(page.getByRole("alert")).toContainText("Нет связи с сервером");
+  await expect(alert(page)).toContainText("Нет связи с сервером");
   await page.screenshot({ path: testInfo.outputPath("2-api-error.png"), fullPage: true, animations: "disabled" });
 
   await page.unroute("**/api/action");
   await save(page).click();
   await expect(page.getByRole("heading", { name: "Ваш план" })).toBeVisible();
-  await expect(page.getByRole("alert")).toHaveCount(0);
+  await expect(alert(page)).toHaveCount(0);
 });
 
 test("empty and invalid date: Save stays off or the reason is shown", async ({ page }, testInfo) => {
@@ -96,7 +98,7 @@ test("empty and invalid date: Save stays off or the reason is shown", async ({ p
   await dateField(page).fill("");
   await dateField(page).pressSequentially("31022026");
   await expect(save(page)).toBeDisabled(); // 31 February is not a day
-  await expect(page.getByRole("alert")).toContainText("Такой даты нет"); // the reason is shown
+  await expect(alert(page)).toContainText("Такой даты нет"); // the reason is shown
   // Disabled looks disabled: the entrance animation must not keep opacity at 1.
   await expect(save(page)).toHaveCSS("opacity", "0.45");
   await page.screenshot({ path: testInfo.outputPath("3-nonexistent-date.png"), fullPage: true, animations: "disabled" });
@@ -105,14 +107,35 @@ test("empty and invalid date: Save stays off or the reason is shown", async ({ p
   await dateField(page).pressSequentially("01012020");
   await expect(save(page)).toBeEnabled(); // a real day; only the server knows the supported period
   await save(page).click();
-  await expect(page.getByRole("alert")).toContainText("Дата вне сценария");
+  await expect(alert(page)).toContainText("Дата вне сценария");
   await expect(page.getByRole("heading", { name: "Ваш план" })).toHaveCount(0);
   await page.screenshot({ path: testInfo.outputPath("3-invalid-date.png"), fullPage: true, animations: "disabled" });
 
   await dateField(page).fill("");
   await dateField(page).pressSequentially(moscowDate(-3).replaceAll(".", ""));
-  await expect(page.getByRole("alert")).toContainText("не может быть в будущем");
+  await expect(alert(page)).toContainText("не может быть в будущем");
   await expect(save(page)).toBeDisabled(); // the future
+});
+
+test("a server refusal shows again on a repeated Save; a network failure does not show it", async ({ page }) => {
+  await toEntryDate(page);
+  await expect(page.getByRole("alert")).toHaveText(""); // the live region is on the page before any reason
+  await dateField(page).fill("01.01.2020");
+  await save(page).click();
+  await expect(alert(page)).toContainText("Дата вне сценария");
+
+  // The same date again: the old refusal hides on Save, and the server's new answer shows it again.
+  const answer = page.waitForResponse("**/api/action");
+  await save(page).click();
+  await answer;
+  await expect(alert(page)).toContainText("Дата вне сценария");
+
+  // Another date, and the request does not reach the server: the reason is the network, not the date.
+  await dateField(page).fill(moscowDate(7));
+  await page.route("**/api/action", route => route.abort("connectionrefused"));
+  await save(page).click();
+  await expect(alert(page)).toContainText("Нет связи с сервером");
+  await expect(page.getByText("Дата вне сценария")).toHaveCount(0);
 });
 
 test("an overdue tile says how long ago; app texts name buttons, not chat commands", async ({ page }, testInfo) => {
@@ -145,21 +168,21 @@ test("visit and completion screens: a nonexistent date shows the reason", async 
   const visit = page.getByRole("textbox", { name: "Когда пойдёте?" });
   await visit.pressSequentially("31022027");
   await expect(save(page)).toBeDisabled();
-  await expect(page.getByRole("alert")).toContainText("Такой даты нет");
+  await expect(alert(page)).toContainText("Такой даты нет");
 
   await visit.fill("");
   await visit.pressSequentially(moscowDate(1).replaceAll(".", "")); // yesterday: «Save» is off and the reason is shown
   await expect(save(page)).toBeDisabled();
-  await expect(page.getByRole("alert")).toContainText("Нужна дата не раньше сегодняшней");
+  await expect(alert(page)).toContainText("Нужна дата не раньше сегодняшней");
 
   await visit.fill("");
   await visit.pressSequentially("01012099"); // a real day, but over a year ahead: the server refuses
   await save(page).click();
-  await expect(page.getByRole("alert")).toContainText("Нужна дата не раньше сегодняшней");
+  await expect(alert(page)).toContainText("Нужна дата не раньше сегодняшней");
   await expect(page.locator("body")).not.toContainText("/plan");
   await visit.fill("");
   await visit.pressSequentially(moscowDate(0).replaceAll(".", "")); // the field is changed: the server's refusal goes away
-  await expect(page.getByRole("alert")).toHaveCount(0);
+  await expect(alert(page)).toHaveCount(0);
   await page.getByRole("button", { name: "Отмена" }).click();
 
   await page.getByRole("button", { name: /^Медицинское освидетельствование/ }).click();
@@ -167,21 +190,21 @@ test("visit and completion screens: a nonexistent date shows the reason", async 
   const done = page.getByRole("textbox", { name: "Когда вы прошли процедуру?" });
   await done.pressSequentially("31022026");
   await expect(save(page)).toBeDisabled();
-  await expect(page.getByRole("alert")).toContainText("Такой даты нет");
+  await expect(alert(page)).toContainText("Такой даты нет");
 
   await done.fill("");
   await done.pressSequentially(moscowDate(-1).replaceAll(".", "")); // tomorrow: «Save» is off and the reason is shown
   await expect(save(page)).toBeDisabled();
-  await expect(page.getByRole("alert")).toContainText("Нужна дата между въездом и сегодня");
+  await expect(alert(page)).toContainText("Нужна дата между въездом и сегодня");
 
   await done.fill("");
   await done.pressSequentially("01012020"); // a real day, but before entry: the server refuses
   await save(page).click();
-  await expect(page.getByRole("alert")).toContainText("Нужна дата между въездом и сегодня");
+  await expect(alert(page)).toContainText("Нужна дата между въездом и сегодня");
   await expect(page.locator("body")).not.toContainText("/plan");
   await done.fill("");
   await done.pressSequentially(moscowDate(0).replaceAll(".", ""));
-  await expect(page.getByRole("alert")).toHaveCount(0);
+  await expect(alert(page)).toHaveCount(0);
 });
 
 test("a marked yearly procedure comes back labelled as a repeat, with the date it was done", async ({ page }) => {

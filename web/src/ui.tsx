@@ -55,3 +55,16 @@ export const dayMonth = (iso: string): string => dotted(iso).slice(0, 5);
 export function Accented({ text }: { text: string }) {
   return <>{text.split(/(\d+)/).map((part, i) => (/^\d+$/.test(part) ? <span key={i} className="r">{part}</span> : part))}</>;
 }
+
+/**
+ * The line above a date field: the prompt, or the reason the date is refused, in the error style.
+ * The alert region stays on the page and only its text changes, so a screen reader announces every new reason.
+ */
+export function DateNote({ prompt, error, className }: { prompt: string; error: string; className: string }) {
+  return (
+    <p className={`prose ${className} ${error === "" ? "" : "banner banner-error"}`}>
+      <span role="alert">{error}</span>
+      {error === "" && prompt}
+    </p>
+  );
+}
