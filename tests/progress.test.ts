@@ -53,7 +53,8 @@ describe("the plan in the chat opens with the progress", () => {
   });
 
   it("leads the nearest-step button to the card of that procedure", () => {
-    expect(chat("ru", ["medical-examination"]).buttons[1]![0]).toMatchObject({ action: expect.stringMatching(/\|card:fingerprinting$/) });
+    const next = chat("ru", ["medical-examination"]).buttons[1]![0]!;
+    expect("action" in next ? next.action : "").toMatch(/\|card:fingerprinting$/);
   });
 
   it("says that all are marked once they are, and offers no step", () => {
