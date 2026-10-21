@@ -365,8 +365,11 @@ body {
 }
 .doc[aria-checked="true"] .txt { text-decoration: line-through; text-decoration-color: var(--red); text-decoration-thickness: 2px; color: var(--muted); }
 .doc:disabled { cursor: default; }
-/* The tapped document's box blinks until the server answers, so a slow tap does not look ignored. */
-.doc[aria-busy="true"] .box { animation: blink .6s steps(2) infinite; }
+/* The tapped document's box shows "…" until the server answers, like a .btn, and blinks where motion is allowed:
+   a slow tap does not look ignored, also with the system's "reduce motion" on. */
+.doc[aria-busy="true"] .box { background: none; animation: blink .6s steps(2) infinite; }
+.doc[aria-busy="true"] .box::after { display: none; }
+.doc[aria-busy="true"] .box::before { content: "…"; position: absolute; inset: 0; display: grid; place-items: center; font: 800 14px/1 var(--text); }
 .law { font: 700 15px/1.35 var(--text); margin: 8px 0 0; }
 .law small { display: block; font-weight: 500; color: var(--muted); margin-top: 3px; }
 
