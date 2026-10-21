@@ -82,7 +82,7 @@ test("API failure → clear message, retry works without a restart", async ({ pa
   await page.unroute("**/api/action");
   await page.route("**/api/action", route => route.abort("connectionrefused"));
   await save(page).click();
-  await expect(alert(page)).toContainText("Нет связи с сервером");
+  await expect(bannerAlerts(page)).toHaveText([/Нет связи с сервером/, ""]); // the action's banner, the calendar's stays empty
   await page.screenshot({ path: testInfo.outputPath("2-api-error.png"), fullPage: true, animations: "disabled" });
 
   await page.unroute("**/api/action");
