@@ -3,21 +3,23 @@ import { readFileSync } from "node:fs";
 import { parseRuleSet } from "../src/data/loadRules.js";
 import raw from "../src/data/rules/ru-student.json" with { type: "json" };
 import { readUniversities } from "../src/data/loadUniversities.js";
+import { readCalendar } from "../src/data/loadCalendar.js";
 import { checkPage, dataUrls, pageText, parseSources, type Source } from "../src/sources.js";
 
 const rules = parseRuleSet(raw).rules;
 const universities = readUniversities("src/data/universities", "kfu");
+const calendarUrls = readCalendar("src/data/calendar/ru.json").urls;
 const sources = parseSources(JSON.parse(readFileSync("src/data/sources.json", "utf8")));
 
 describe("official sources are watched", () => {
   it("registers every link the rules and university profiles rely on", () => {
     const watched = new Set(sources.map(s => s.url));
-    const missing = dataUrls(rules, universities).filter(url => !watched.has(url));
+    const missing = dataUrls(rules, universities, calendarUrls).filter(url => !watched.has(url));
     expect(missing).toEqual([]);
   });
 
   it("keeps no source nobody uses any more", () => {
-    const used = new Set(dataUrls(rules, universities));
+    const used = new Set(dataUrls(rules, universities, calendarUrls));
     expect(sources.map(s => s.url).filter(url => !used.has(url))).toEqual([]);
   });
 
