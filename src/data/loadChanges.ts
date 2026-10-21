@@ -31,6 +31,7 @@ function asSituation(value: unknown, path: string): ChangeSituation {
     norm: asLocalized(record.norm, `${path}.norm`),
     ...(workdays === undefined ? {} : { workdays }),
     receiver: record.receiver,
+    ...(record.assumption === undefined ? {} : { assumption: asLocalized(record.assumption, `${path}.assumption`) }),
     legal,
   };
 }

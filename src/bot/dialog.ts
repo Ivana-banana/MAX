@@ -202,7 +202,7 @@ function home(s: Session, ctx: DialogueContext, prefix = ""): Reply {
   }).join("\n") : "";
   const changes = reportedChanges(s, ctx);
   const changeLines = changes.length ? t(s, ctx, "home.changes") + changes.map(({ situation: c, deadline: d }) => d.due
-    ? t(s, ctx, "home.change", { title: c.title[s.lang]!, due: date(s, d.due), countdown: changeCountdown(s, ctx, d.due) })
+    ? t(s, ctx, "home.change", { title: c.title[s.lang]!, what: dueWhat(s, ctx, c, d), due: date(s, d.due), countdown: changeCountdown(s, ctx, d.due) })
     : t(s, ctx, "home.changeWords", { title: c.title[s.lang]! })).join("\n") : "";
   // Reminders are the core mechanic, so while they are off the switch comes first, right under the text.
   const toggle = [button(t(s, ctx, s.reminders ? "btn.remindersOff" : "btn.remindersOn"), "reminders")];
@@ -344,6 +344,12 @@ export function reportedChanges(s: Session, ctx: DialogueContext): { situation: 
 export function countedChanges(s: Session, ctx: DialogueContext): { id: string; title: string; due: string }[] {
   return reportedChanges(s, ctx).flatMap(({ situation: c, deadline: d }) => d.due && d.due >= ctx.today ? [{ id: c.id, title: c.title[s.lang]!, due: d.due }] : []);
 }
+/** Who files the notification of arrival (109-FZ Art. 22 part 2): the university as the receiving side, or the hotel or hospital. */
+const filer = (s: Session, ctx: DialogueContext, c: ChangeSituation) =>
+  c.receiver === "university" ? uni(s, ctx).name[s.lang]! : t(s, ctx, "change.who.place");
+/** Whose date the deadline is: the university's own term for the student, or the receiving side's filing deadline. */
+const dueWhat = (s: Session, ctx: DialogueContext, c: ChangeSituation, d: ChangeDeadline) => d.stricter === "university"
+  ? t(s, ctx, "change.what.university", { uni: uni(s, ctx).name[s.lang]! }) : t(s, ctx, "change.what.filing", { who: filer(s, ctx, c) });
 /** Days left to a change deadline, in the plan's words. */
 function changeCountdown(s: Session, ctx: DialogueContext, due: string): string {
   const n = daysBetween(ctx.today, due);
@@ -366,16 +372,18 @@ function changeCard(s: Session, ctx: DialogueContext, c: ChangeSituation, prefix
   const d = changeDue(s, ctx, c), term = u.changeTerms[c.id];
   const law = t(s, ctx, "change.law", { act: c.legal.act, article: c.legal.article[s.lang]!, url: c.legal.url, date: date(s, c.legal.checkedAt) });
   const federal = !d ? t(s, ctx, "change.norm", { norm }) : t(s, ctx, "change.event", { date: date(s, d.event) }) +
-    (d.federal ? t(s, ctx, "change.federal", { date: date(s, d.federal), norm }) : t(s, ctx, "change.federalWords", { norm }));
+    (d.federal ? t(s, ctx, "change.federal", { date: date(s, d.federal), norm, who: filer(s, ctx, c) }) : t(s, ctx, "change.federalWords", { norm, who: filer(s, ctx, c) }));
+  const assumption = c.assumption ? t(s, ctx, "change.situationAssumption", { text: c.assumption[s.lang]! }) : "";
   const source = term ? { uni: name, words: term.words[s.lang]!, url: term.source.url, checked: date(s, term.source.checkedAt) } : undefined;
   const own = !d ? "" : source ? (d.university ? t(s, ctx, "change.university", { ...source, date: date(s, d.university) }) : t(s, ctx, "change.universityWords", source))
     : c.receiver === "university" ? t(s, ctx, "change.universityTbd", { uni: name }) : "";
-  const due = !d ? "" : d.due ? t(s, ctx, term ? "change.due.both" : "change.due.one", { date: date(s, d.due), countdown: changeCountdown(s, ctx, d.due) }) +
-    t(s, ctx, "change.assumption") + (d.due >= ctx.today ? t(s, ctx, s.reminders ? "change.remindOn" : "change.remindOff") : "") : t(s, ctx, "change.dueWords");
+  const due = !d ? "" : (d.due ? t(s, ctx, d.stricter === "university" ? "change.due.both" : "change.due.one",
+    { date: date(s, d.due), countdown: changeCountdown(s, ctx, d.due), uni: name, who: filer(s, ctx, c) }) + t(s, ctx, "change.now") +
+    t(s, ctx, "change.assumption") + (d.due >= ctx.today ? t(s, ctx, s.reminders ? "change.remindOn" : "change.remindOff") : "") : t(s, ctx, "change.dueWords") + t(s, ctx, "change.now"));
   const handover = !c.workdays ? t(s, ctx, "change.handover.passport", { uni: name, url: u.contactUrl })
     : t(s, ctx, `change.handover.${c.receiver}`, { uni: name, url: u.contactUrl, act: filing.act, article: filing.article[s.lang]!, law: filing.url }) + t(s, ctx, "change.tornOff");
   const procedure = term?.procedure ? undated(s, ctx).find(n => n.id === term.procedure) : undefined;
-  return reply(s, ctx, prefix + c.title[s.lang]! + federal + law + own + due + handover +
+  return reply(s, ctx, prefix + c.title[s.lang]! + federal + assumption + law + own + due + handover +
     t(s, ctx, "change.notDecision") + (c.legal.status === "approved" ? "" : t(s, ctx, "change.provisional")),
     [...(d ? [[button(t(s, ctx, "btn.tornOff"), `change-done:${c.id}`)], [button(t(s, ctx, "btn.changeDate"), `change:${c.id}`)]] : []),
       ...(procedure ? [[button(procedure.title[s.lang]!, `card:${procedure.id}`)]] : []),
@@ -564,7 +572,10 @@ export function transition(previous: Session | null, input: Input, ctx: Dialogue
   if (coverage(ctx.rules).excluded.includes(action)) return { session: s, reply: help(s, ctx, undefined, "citizenship") };
   if (action.startsWith("help:")) return { session: s, reply: help(s, ctx, action.slice(5)) };
   // #41: from any step once the plan exists; before it the student answers the current question first.
-  if (ctx.changes && (action === "/change" || action === "change")) {
+  if (action === "/change" || action === "change") {
+    // Live mode with draft norms: say so instead of showing the plan silently.
+    if (!ctx.changes) return { session: s, reply: reply(s, ctx, t(s, ctx, "change.off", { uni: uni(s, ctx).name[s.lang]!, url: uni(s, ctx).contactUrl }),
+      [[link(pageLabel(s, ctx), uni(s, ctx).contactUrl)], [button(t(s, ctx, profile(s) ? "btn.plan" : "btn.continue"), profile(s) ? "plan" : "continue")]]) };
     if (!profile(s)) return { session: s, reply: reply(s, ctx, t(s, ctx, "change.noPlan"), [[button(t(s, ctx, "btn.continue"), "continue")]]) };
     s.step = "plan"; delete s.selected;
     return { session: s, reply: changeList(s, ctx) };
@@ -677,7 +688,9 @@ export function procedureReminderReply(s: Session, ctx: DialogueContext, note: U
 }
 /** A reminder before a change deadline (#41): 3 days and 1 day before, and on the day. */
 export function changeReminderReply(s: Session, ctx: DialogueContext, c: ChangeSituation, due: string): Reply {
-  return reply(s, ctx, t(s, ctx, "change.reminder", { title: c.title[s.lang]!, due: date(s, due), countdown: changeCountdown(s, ctx, due) }),
+  const d = changeDue(s, ctx, c);
+  return reply(s, ctx, t(s, ctx, "change.reminder", { title: c.title[s.lang]!, what: d ? dueWhat(s, ctx, c, d) : t(s, ctx, "change.what.filing", { who: filer(s, ctx, c) }),
+    due: date(s, due), countdown: changeCountdown(s, ctx, due) }),
     [[button(t(s, ctx, "btn.details"), `changed:${c.id}`)], [button(t(s, ctx, "btn.planShort"), "plan")]]);
 }
 /** The evening before a planned visit: which documents of the checklist are still unchecked. */

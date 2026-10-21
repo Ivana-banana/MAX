@@ -154,6 +154,8 @@ export interface ChangeSituation {
   workdays?: number;
   /** Who files the notification of arrival: the university as the receiving side, or the place of stay itself (hotel, hospital). */
   receiver: "university" | "place";
+  /** What the bot assumes about the norm for this student, shown as an assumption, not as a fact (e.g. the dormitory TBD). */
+  assumption?: Localized;
   legal: LegalBasis;
 }
 

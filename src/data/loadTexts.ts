@@ -101,7 +101,7 @@ export function checkTranslated(texts: Texts, rules: DeadlineRule[], universitie
 export function checkTranslatedChanges(texts: Texts, changes: ChangeSet): void {
   const localized = [["filing.article", changes.filing.article],
     ...changes.situations.flatMap(s => [[`${s.id}.title`, s.title], [`${s.id}.norm`, s.norm], [`${s.id}.legal.article`, s.legal.article],
-      ...(s.event ? [[`${s.id}.event`, s.event]] : [])])] as [string, Record<string, string>][];
+      ...(s.event ? [[`${s.id}.event`, s.event]] : []), ...(s.assumption ? [[`${s.id}.assumption`, s.assumption]] : [])])] as [string, Record<string, string>][];
   for (const lang of texts.keys()) {
     const hole = localized.find(([, value]) => !value[lang]?.trim());
     if (hole) throw new TextsValidationError(lang, `нет перевода для ${hole[0]}`);

@@ -45,6 +45,13 @@
       },
       "workdays": 7,
       "receiver": "university",
+      "assumption": {
+        "ru": "если вы живёте в общежитии, закон может требовать 1 рабочий день, как для гостиницы: не решено, считается ли общежитие «иным средством размещения» (ст. 20 ч. 3.1, TBD). Передайте документы в первый же рабочий день",
+        "en": "if you live in a dormitory, the law may require 1 working day, as for a hotel: it is not settled whether a dormitory counts as «another place of accommodation» (Art. 20 part 3.1, TBD). Hand over your documents on the first working day",
+        "uz": "agar yotoqxonada yashasangiz, qonun mehmonxonadagi kabi 1 ish kunini talab qilishi mumkin: yotoqxona «boshqa joylashtirish vositasi» hisoblanadimi — hal qilinmagan (20-modda 3.1-qism, TBD). Hujjatlarni birinchi ish kunidayoq topshiring",
+        "tt": "тулай торакта яшәсәгез, закон кунакханәдәге кебек 1 эш көне таләп итәргә мөмкин: тулай торак «башка урнаштыру чарасы» саналамы — хәл ителмәгән (20 статья 3.1 өлеш, TBD). Документларны беренче эш көнендә үк тапшырыгыз",
+        "zh": "如果您住在宿舍，法律可能像酒店一样要求1个工作日：宿舍是否属于“其他住宿设施”尚无定论（第20条第3.1款，TBD）。请在第一个工作日就提交证件"
+      },
       "legal": {
         "act": "Федеральный закон от 18.07.2006 № 109-ФЗ",
         "article": {
@@ -85,6 +92,13 @@
       },
       "workdays": 7,
       "receiver": "university",
+      "assumption": {
+        "ru": "если вы живёте в общежитии, закон может требовать 1 рабочий день, как для гостиницы: не решено, считается ли общежитие «иным средством размещения» (ст. 20 ч. 3.1, TBD). Передайте документы в первый же рабочий день",
+        "en": "if you live in a dormitory, the law may require 1 working day, as for a hotel: it is not settled whether a dormitory counts as «another place of accommodation» (Art. 20 part 3.1, TBD). Hand over your documents on the first working day",
+        "uz": "agar yotoqxonada yashasangiz, qonun mehmonxonadagi kabi 1 ish kunini talab qilishi mumkin: yotoqxona «boshqa joylashtirish vositasi» hisoblanadimi — hal qilinmagan (20-modda 3.1-qism, TBD). Hujjatlarni birinchi ish kunidayoq topshiring",
+        "tt": "тулай торакта яшәсәгез, закон кунакханәдәге кебек 1 эш көне таләп итәргә мөмкин: тулай торак «башка урнаштыру чарасы» саналамы — хәл ителмәгән (20 статья 3.1 өлеш, TBD). Документларны беренче эш көнендә үк тапшырыгыз",
+        "zh": "如果您住在宿舍，法律可能像酒店一样要求1个工作日：宿舍是否属于“其他住宿设施”尚无定论（第20条第3.1款，TBD）。请在第一个工作日就提交证件"
+      },
       "legal": {
         "act": "Федеральный закон от 18.07.2006 № 109-ФЗ",
         "article": {
