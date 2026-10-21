@@ -48,7 +48,7 @@ export function App() {
   const closeCard = useCallback(() => { setOpenCard(null); setOpenChange(null); }, []);
   const nested = openCard !== null || openChange !== null;
   // The date question is a server step: Back cancels it on the server, as the screen's Cancel does.
-  const dating = session?.step === "changeDate";
+  const dating = session?.step === "changeDate" || session?.step === "visit";
   const goBack = useCallback(() => (dating ? act("plan") : closeCard()), [dating, act, closeCard]);
   useEffect(() => (nested ? onBack(goBack) : undefined), [nested, goBack]);
   // A step change on the server (a completed procedure, a deletion) invalidates an open card.
@@ -56,7 +56,9 @@ export function App() {
   const [shownStep, setShownStep] = useState(session?.step);
   if (shownStep !== session?.step) {
     setShownStep(session?.step);
-    if (session?.step !== "plan") setOpenCard(null);
+    // The visit question keeps its card open, so a saved day comes back to the card with the confirmation (#110).
+    const visitSaved = session?.step === "plan" && isText(status.message, t("visit.saved"));
+    if (session?.step !== "visit" && !visitSaved) setOpenCard(null);
     // The date question keeps its case open, so a saved date comes back to the case's card; Cancel goes to the plan.
     if (session?.step === "changeDate") setOpenChange(session.selected ?? null);
     else if (session?.step !== "plan" || !isText(status.message, t("change.saved"))) setOpenChange(null);
@@ -201,7 +203,8 @@ export function App() {
       return (
         <div className="stack">
           {back}
-          <Card key={item.ruleId} session={session} texts={texts} item={item} pending={status.pending} copy={status.copy} onAction={act} />
+          <Card key={item.ruleId} session={session} texts={texts} item={item} message={status.message} pending={status.pending}
+            copy={status.copy} onAction={act} />
         </div>
       );
     }

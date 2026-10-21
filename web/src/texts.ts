@@ -25,3 +25,7 @@ export const isText = (message: string, template: string): boolean => {
   const fixed = template.split("{")[0]!.trim();
   return fixed !== "" && message.includes(fixed);
 };
+
+/** A chat text with its placeholders filled on the screen, from values the app already has (a visit day). */
+export const fill = (template: string, values: Record<string, string>): string =>
+  template.replace(/\{(\w+)\}/g, (whole, key: string) => values[key] ?? whole).trim();
