@@ -1,8 +1,9 @@
 import { randomUUID } from "node:crypto";
 import { buildPlan, coverage, matchesCondition, REMINDER_OFFSETS } from "../core/deadlines.js";
 import { planProgress } from "../core/progress.js";
-import { addDays, compareDates, daysBetween, isValidDate } from "../core/dates.js";
-import type { Completions, DeadlineRule, Lang, PlanItem, UserProfile } from "../core/types.js";
+import { changeDeadline, type ChangeDeadline } from "../core/changes.js";
+import { addDays, compareDates, daysBetween, isValidDate, type WorkCalendar } from "../core/dates.js";
+import type { ChangeSet, ChangeSituation, Completions, DeadlineRule, Lang, PlanItem, UserProfile } from "../core/types.js";
 import type { BeforeEntryCard, ProcedureCountdown, University, UniversityProcedure } from "../data/loadUniversities.js";
 import { format, type Texts } from "../data/loadTexts.js";
 import { CALENDAR_FILE, planToIcs } from "./calendar.js";
@@ -18,7 +19,7 @@ export interface Session {
   nonce: string;
   revision: number;
   lang: Lang;
-  step: "language" | "consent" | "scope" | "citizenship" | "entry" | "plan" | "completion" | "visit" | "docEnd" | "delete";
+  step: "language" | "consent" | "scope" | "citizenship" | "entry" | "plan" | "completion" | "visit" | "docEnd" | "changeDate" | "delete";
   /** Step the delete confirmation was opened from, so "Cancel" returns there. */
   back?: Session["step"];
   university?: string;
@@ -31,6 +32,8 @@ export interface Session {
   visits?: Record<string, string>;
   /** End dates of the student's documents (D-040), from which university deadlines in days are counted. */
   ends?: Partial<Record<ProcedureCountdown["from"], string>>;
+  /** Changes of circumstances the student reported (situation id → day of the event, #41): the deadline is counted from it. */
+  changes?: Record<string, string>;
   reminders: boolean;
   ruleVersion: string;
 }
@@ -38,7 +41,11 @@ export interface DialogueContext {
   rules: DeadlineRule[]; universities: University[]; texts: Texts; version: string; today: string; demo: boolean;
   /** Bot whose mini app the plan opens (`open_app`); unset until the app URL is registered with MAX. */
   webApp?: string;
+  /** "Circumstances changed" (#41, D-061); without it the bot does not offer /change. */
+  changes?: Changes;
 }
+/** The changes of circumstances with the calendar their working days are counted over (D-060). */
+export type Changes = ChangeSet & { calendar: WorkCalendar };
 // locale comes only with bot_started (MAX client language); a ?start= payload arrives as "/start <payload>"
 export interface Input { text: string; callback: boolean; locale?: string }
 /**
@@ -162,7 +169,7 @@ const languages = (ctx: DialogueContext, except?: Lang) => rows([...ctx.texts.ke
   .map(l => button(format(ctx.texts, l, "language.name"), l)), 3);
 // Read-only screens: a stale button to them (e.g. in a reminder sent days ago) is still safe to follow.
 const navigation = (action: string) => action === "plan" || action === "help" || action === "calendar" || action === "pdf" ||
-  action.startsWith("card:") || action.startsWith("help:");
+  action.startsWith("card:") || action.startsWith("help:") || action.startsWith("changed:");
 /** A repeat round's texts in the session's language (repeat.ts); empty for a first round. */
 export const repeatParts = (s: Session, ctx: DialogueContext, item: PlanItem) => repeatText(ctx.texts, s.lang, item);
 /** The title with "repeat (yearly)" after it for a repeat round, and the "marked done on" line to put under it; the same in the plan, the shared copy and the reminder. */
@@ -193,16 +200,22 @@ function home(s: Session, ctx: DialogueContext, prefix = ""): Reply {
     const counted = procedureDue(s, ctx, n);
     return counted ? t(s, ctx, "home.undatedDue", { title: n.title[s.lang]!, due: date(s, counted.due) }) : `• ${n.title[s.lang]}`;
   }).join("\n") : "";
+  const changes = reportedChanges(s, ctx);
+  const changeLines = changes.length ? t(s, ctx, "home.changes") + changes.map(({ situation: c, deadline: d }) => d.due
+    ? t(s, ctx, "home.change", { title: c.title[s.lang]!, due: date(s, d.due), countdown: changeCountdown(s, ctx, d.due) })
+    : t(s, ctx, "home.changeWords", { title: c.title[s.lang]! })).join("\n") : "";
   // Reminders are the core mechanic, so while they are off the switch comes first, right under the text.
   const toggle = [button(t(s, ctx, s.reminders ? "btn.remindersOff" : "btn.remindersOn"), "reminders")];
-  return reply(s, ctx, prefix + t(s, ctx, "home.title") + progress.text + lines.join("\n") + noteLines + t(s, ctx, "home.scope") +
+  return reply(s, ctx, prefix + t(s, ctx, "home.title") + progress.text + lines.join("\n") + noteLines + changeLines + t(s, ctx, "home.scope") +
     t(s, ctx, s.reminders ? "home.reminders.on" : "home.reminders.off"),
     [...(s.reminders ? [] : [toggle]),
       ...(progress.next ? [[button(t(s, ctx, "btn.next", { title: progress.next.title[s.lang]! }), `card:${progress.next.ruleId}`)]] : []),
       ...items.map(i => [button(i.title[s.lang]!, `card:${i.ruleId}`)]),
       ...notes.map(n => [button(n.title[s.lang]!, `card:${n.id}`)]),
+      ...changes.map(({ situation: c }) => [button(c.title[s.lang]!, `changed:${c.id}`)]),
+      ...(ctx.changes ? [[button(t(s, ctx, "btn.change"), "change")]] : []),
       ...(s.reminders ? [toggle] : []),
-      ...(items.some(i => i.status !== "done") ? [[button(t(s, ctx, "btn.calendar"), "calendar")]] : []),
+      ...(items.some(i => i.status !== "done") || countedChanges(s, ctx).length ? [[button(t(s, ctx, "btn.calendar"), "calendar")]] : []),
       ...(items.length ? [[button(t(s, ctx, "btn.pdf"), "pdf")]] : []),
       // The same plan as a screen; the payload picks the university the way ?start= does.
       ...(ctx.webApp ? [[{ text: t(s, ctx, "btn.app"), app: ctx.webApp, payload: uni(s, ctx).id }]] : []),
@@ -316,6 +329,59 @@ function procedureCard(s: Session, ctx: DialogueContext, note: UniversityProcedu
       [link(pageLabel(s, ctx), note.source.url)],
       [button(t(s, ctx, "btn.plan"), "plan")]]);
 }
+const situation = (ctx: DialogueContext, id: string | undefined) => ctx.changes?.situations.find(c => c.id === id);
+/** The deadline after a reported change (#41, D-061); undefined until the event date is given, and for a norm without a number of days. */
+export function changeDue(s: Session, ctx: DialogueContext, c: ChangeSituation): (ChangeDeadline & { event: string }) | undefined {
+  const event = s.changes?.[c.id];
+  if (!ctx.changes || !event || !c.workdays) return undefined;
+  return { event, ...changeDeadline(event, c.workdays, uni(s, ctx).changeTerms[c.id]?.workdays, ctx.changes.calendar) };
+}
+/** The reported changes with their deadlines, in the order of the data file; the plan, the calendar and the reminders list them. */
+export function reportedChanges(s: Session, ctx: DialogueContext): { situation: ChangeSituation; deadline: ChangeDeadline & { event: string } }[] {
+  return (ctx.changes?.situations ?? []).flatMap(c => { const deadline = changeDue(s, ctx, c); return deadline ? [{ situation: c, deadline }] : []; });
+}
+/** Change deadlines still ahead, for the calendar file. */
+export function countedChanges(s: Session, ctx: DialogueContext): { id: string; title: string; due: string }[] {
+  return reportedChanges(s, ctx).flatMap(({ situation: c, deadline: d }) => d.due && d.due >= ctx.today ? [{ id: c.id, title: c.title[s.lang]!, due: d.due }] : []);
+}
+/** Days left to a change deadline, in the plan's words. */
+function changeCountdown(s: Session, ctx: DialogueContext, due: string): string {
+  const n = daysBetween(ctx.today, due);
+  if (n < 0) return t(s, ctx, "countdown.passed", { days: t(s, ctx, "days", { n: -n }) });
+  return n === 0 ? t(s, ctx, "countdown.today") : t(s, ctx, "countdown.upcoming", { left: t(s, ctx, "left", { n }) });
+}
+function changeList(s: Session, ctx: DialogueContext): Reply {
+  return reply(s, ctx, t(s, ctx, "change.choose", { uni: uni(s, ctx).name[s.lang]! }),
+    [...ctx.changes!.situations.map(c => [button(c.title[s.lang]!, `change:${c.id}`)]), [button(t(s, ctx, "btn.plan"), "plan")]]);
+}
+/** The question for the event date and, on a wrong date, the same buttons again, so they never go stale. */
+const changeDateRows = (s: Session, ctx: DialogueContext): Button[][] =>
+  [[button(t(s, ctx, "btn.today"), "/today"), button(t(s, ctx, "btn.yesterday"), "/yesterday")], [button(t(s, ctx, "btn.cancel"), "plan")]];
+/**
+ * A change of circumstances: the norm (fact), the university's own term with its source or that none is
+ * confirmed, the stricter date (calculation) with how it is counted (assumption), what to hand over and where.
+ */
+function changeCard(s: Session, ctx: DialogueContext, c: ChangeSituation, prefix = ""): Reply {
+  const u = uni(s, ctx), name = u.name[s.lang]!, filing = ctx.changes!.filing, norm = c.norm[s.lang]!;
+  const d = changeDue(s, ctx, c), term = u.changeTerms[c.id];
+  const law = t(s, ctx, "change.law", { act: c.legal.act, article: c.legal.article[s.lang]!, url: c.legal.url, date: date(s, c.legal.checkedAt) });
+  const federal = !d ? t(s, ctx, "change.norm", { norm }) : t(s, ctx, "change.event", { date: date(s, d.event) }) +
+    (d.federal ? t(s, ctx, "change.federal", { date: date(s, d.federal), norm }) : t(s, ctx, "change.federalWords", { norm }));
+  const source = term ? { uni: name, words: term.words[s.lang]!, url: term.source.url, checked: date(s, term.source.checkedAt) } : undefined;
+  const own = !d ? "" : source ? (d.university ? t(s, ctx, "change.university", { ...source, date: date(s, d.university) }) : t(s, ctx, "change.universityWords", source))
+    : c.receiver === "university" ? t(s, ctx, "change.universityTbd", { uni: name }) : "";
+  const due = !d ? "" : d.due ? t(s, ctx, term ? "change.due.both" : "change.due.one", { date: date(s, d.due), countdown: changeCountdown(s, ctx, d.due) }) +
+    t(s, ctx, "change.assumption") + (d.due >= ctx.today ? t(s, ctx, s.reminders ? "change.remindOn" : "change.remindOff") : "") : t(s, ctx, "change.dueWords");
+  const handover = !c.workdays ? t(s, ctx, "change.handover.passport", { uni: name, url: u.contactUrl })
+    : t(s, ctx, `change.handover.${c.receiver}`, { uni: name, url: u.contactUrl, act: filing.act, article: filing.article[s.lang]!, law: filing.url }) + t(s, ctx, "change.tornOff");
+  const procedure = term?.procedure ? undated(s, ctx).find(n => n.id === term.procedure) : undefined;
+  return reply(s, ctx, prefix + c.title[s.lang]! + federal + law + own + due + handover +
+    t(s, ctx, "change.notDecision") + (c.legal.status === "approved" ? "" : t(s, ctx, "change.provisional")),
+    [...(d ? [[button(t(s, ctx, "btn.tornOff"), `change-done:${c.id}`)], [button(t(s, ctx, "btn.changeDate"), `change:${c.id}`)]] : []),
+      ...(procedure ? [[button(procedure.title[s.lang]!, `card:${procedure.id}`)]] : []),
+      [link(t(s, ctx, "btn.law"), c.legal.url)], [link(pageLabel(s, ctx), u.contactUrl)],
+      [button(t(s, ctx, "btn.change"), "change"), button(t(s, ctx, "btn.plan"), "plan")]]);
+}
 /**
  * The catalogue of university profiles, offered on the scope question; the current one is not
  * repeated. `lost`: the student's own is gone, so every profile is offered and the reason is said.
@@ -328,11 +394,11 @@ function universityList(s: Session, ctx: DialogueContext, lost = false): Reply {
 }
 function calendar(s: Session, ctx: DialogueContext): Reply {
   const items = plan(s, ctx);
-  if (!items.some(i => i.status !== "done")) return home(s, ctx);
+  if (!items.some(i => i.status !== "done") && !countedChanges(s, ctx).length) return home(s, ctx);
   return { ...reply(s, ctx, t(s, ctx, "calendar.intro"), [[button(t(s, ctx, "btn.plan"), "plan")]]),
     file: { name: CALENDAR_FILE, content: planToIcs(items,
       { lang: s.lang, texts: ctx.texts, demo: ctx.demo, uid: s.nonce, today: ctx.today, sequence: s.revision, ...(s.visits ? { visits: s.visits } : {}),
-        procedures: countedProcedures(s, ctx) }) } };
+        procedures: countedProcedures(s, ctx), changes: countedChanges(s, ctx) }) } };
 }
 /**
  * The plan as a PDF for a curator or the university (#92, D-056): deadlines, marks, legal basis and
@@ -418,6 +484,10 @@ export function prompt(s: Session, ctx: DialogueContext): Reply {
         [[button(t(s, ctx, "btn.today"), "/today"), button(t(s, ctx, "btn.tomorrow"), "/tomorrow")],
           [button(t(s, ctx, "btn.cancel"), "plan")]]);
     }
+    case "changeDate": {
+      const c = situation(ctx, s.selected);
+      return reply(s, ctx, t(s, ctx, "change.date", { title: c?.title[s.lang] ?? "", event: c?.event?.[s.lang] ?? "" }), changeDateRows(s, ctx));
+    }
     case "delete": return reply(s, ctx, t(s, ctx, "delete"),
       [[button(t(s, ctx, "btn.confirmDelete"), "confirm-delete"), button(t(s, ctx, "btn.cancel"), "cancel-delete")]]);
     case "plan": return home(s, ctx);
@@ -461,7 +531,7 @@ export function transition(previous: Session | null, input: Input, ctx: Dialogue
     if (action !== "uni-missing" && !(chosen !== undefined && ctx.universities.some(u => u.id === chosen))) {
       return { session: s, reply: universityList(s, ctx, true) };
     }
-    delete s.university; delete s.citizenship; delete s.entryDate; delete s.selected; delete s.back; delete s.visits; delete s.ends;
+    delete s.university; delete s.citizenship; delete s.entryDate; delete s.selected; delete s.back; delete s.visits; delete s.ends; delete s.changes;
     s.completions = {}; s.documents = {}; s.reminders = false; s.step = "scope";
   }
   // After /stop before the plan: the current step's question again, not an answer to it.
@@ -493,6 +563,12 @@ export function transition(previous: Session | null, input: Input, ctx: Dialogue
   if (action === "OTHER") return { session: s, reply: help(s, ctx, undefined, "other") };
   if (coverage(ctx.rules).excluded.includes(action)) return { session: s, reply: help(s, ctx, undefined, "citizenship") };
   if (action.startsWith("help:")) return { session: s, reply: help(s, ctx, action.slice(5)) };
+  // #41: from any step once the plan exists; before it the student answers the current question first.
+  if (ctx.changes && (action === "/change" || action === "change")) {
+    if (!profile(s)) return { session: s, reply: reply(s, ctx, t(s, ctx, "change.noPlan"), [[button(t(s, ctx, "btn.continue"), "continue")]]) };
+    s.step = "plan"; delete s.selected;
+    return { session: s, reply: changeList(s, ctx) };
+  }
   if (s.step === "language" && ctx.texts.has(action)) { s.lang = action; s.step = "consent"; }
   else if (s.step === "consent" && ctx.texts.has(action)) s.lang = action;
   else if (s.step === "consent" && action === "accept") s.step = "scope";
@@ -541,6 +617,14 @@ export function transition(previous: Session | null, input: Input, ctx: Dialogue
       (day > item.dueDate ? t(s, ctx, "visit.late", { due: date(s, item.dueDate) }) : "") +
       t(s, ctx, s.reminders ? "visit.remindOn" : "visit.remindOff");
     return { session: s, reply: card(s, ctx, item.ruleId, note) };
+  } else if (s.step === "changeDate") {
+    const day = action === "/today" ? ctx.today : action === "/yesterday" ? addDays(ctx.today, -1) : typedDate(action);
+    const c = situation(ctx, s.selected);
+    if (!c?.workdays || !isValidDate(day) || day < s.entryDate! || day > addDays(ctx.today, VISIT_HORIZON_DAYS)) {
+      return { session: s, reply: reply(s, ctx, t(s, ctx, "change.invalid"), changeDateRows(s, ctx)) };
+    }
+    s.changes = { ...s.changes, [c.id]: day }; s.step = "plan"; delete s.selected;
+    return { session: s, reply: changeCard(s, ctx, c, t(s, ctx, "change.saved")) };
   } else if (s.step === "plan") {
     if (action === "reminders") { s.reminders = !s.reminders; }
     else if (action.startsWith("card:")) return { session: s, reply: card(s, ctx, action.slice(5).replace(FROM_REMINDER, "")) };
@@ -564,6 +648,21 @@ export function transition(previous: Session | null, input: Input, ctx: Dialogue
     } else if (action.startsWith("visit:")) {
       const id = action.slice(6);
       if (plan(s, ctx).some(i => i.ruleId === id && i.status !== "done")) { s.selected = id; s.step = "visit"; }
+    } else if (action.startsWith("change:")) {
+      const c = situation(ctx, action.slice(7));
+      // A norm without a number of days asks for no date: the card says what to do.
+      if (c && !c.workdays) return { session: s, reply: changeCard(s, ctx, c) };
+      if (c) { s.selected = c.id; s.step = "changeDate"; }
+    } else if (action.startsWith("changed:")) {
+      const c = situation(ctx, action.slice(8));
+      if (c) return { session: s, reply: changeCard(s, ctx, c) };
+    } else if (action.startsWith("change-done:")) {
+      // The torn-off part is the proof of registration: the deadline and its reminders are no longer needed.
+      const id = action.slice(12);
+      if (s.changes?.[id]) {
+        const rest = { ...s.changes }; delete rest[id]; s.changes = rest;
+        return { session: s, reply: home(s, ctx, t(s, ctx, "change.closed")) };
+      }
     } else if (action.startsWith("done:")) {
       const id = action.slice(5);
       if (plan(s, ctx).some(i => i.ruleId === id && i.status !== "done")) { s.selected = id; s.step = "completion"; }
@@ -575,6 +674,11 @@ export function transition(previous: Session | null, input: Input, ctx: Dialogue
 export function procedureReminderReply(s: Session, ctx: DialogueContext, note: UniversityProcedure, due: string): Reply {
   return reply(s, ctx, t(s, ctx, "procedure.reminder", { title: note.title[s.lang]!, due: date(s, due), left: t(s, ctx, "left", { n: daysBetween(ctx.today, due) }) }),
     [[button(t(s, ctx, "btn.details"), `card:${note.id}`)], [button(t(s, ctx, "btn.planShort"), "plan")]]);
+}
+/** A reminder before a change deadline (#41): 3 days and 1 day before, and on the day. */
+export function changeReminderReply(s: Session, ctx: DialogueContext, c: ChangeSituation, due: string): Reply {
+  return reply(s, ctx, t(s, ctx, "change.reminder", { title: c.title[s.lang]!, due: date(s, due), countdown: changeCountdown(s, ctx, due) }),
+    [[button(t(s, ctx, "btn.details"), `changed:${c.id}`)], [button(t(s, ctx, "btn.planShort"), "plan")]]);
 }
 /** The evening before a planned visit: which documents of the checklist are still unchecked. */
 export function visitReply(s: Session, ctx: DialogueContext, item: PlanItem): Reply {

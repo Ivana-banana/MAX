@@ -1,4 +1,5 @@
 import { REMINDER_OFFSETS, reminderDates } from "../core/deadlines.js";
+import { CHANGE_REMINDER_OFFSETS } from "../core/changes.js";
 import { addDays } from "../core/dates.js";
 import type { Lang, PlanItem } from "../core/types.js";
 import { format, type Texts } from "../data/loadTexts.js";
@@ -13,6 +14,8 @@ export interface CalendarOptions {
   visits?: Record<string, string>;
   /** University deadlines counted from a document end date (D-040), with the same alarms as the plan. */
   procedures?: { id: string; title: string; due: string }[];
+  /** Deadlines after a change of circumstances (#41), with the bot's alarms 3 and 1 days before and on the day. */
+  changes?: { id: string; title: string; due: string }[];
 }
 export const CALENDAR_FILE = "first-90-days.ics";
 const REMIND_AT = "T060000Z"; // 09:00 Moscow time, the same hour the bot reminds
@@ -69,17 +72,20 @@ export function planToIcs(items: PlanItem[], o: CalendarOptions): string {
         "END:VEVENT");
     }
   }
-  for (const p of o.procedures ?? []) {
-    lines.push("BEGIN:VEVENT", `UID:${p.id}-${o.uid}@max-first-90-days`, `DTSTAMP:${stamp}`, `SEQUENCE:${o.sequence}`,
+  // A counted deadline without a rule: a university one (D-040) or one after a change of circumstances (#41).
+  const counted = (uid: string, p: { title: string; due: string }, prefix: string, note: string, offsets: readonly number[]) => {
+    lines.push("BEGIN:VEVENT", `UID:${uid}-${o.uid}@max-first-90-days`, `DTSTAMP:${stamp}`, `SEQUENCE:${o.sequence}`,
       `DTSTART;VALUE=DATE:${compact(p.due)}`, `DTEND;VALUE=DATE:${compact(addDays(p.due, 1))}`,
-      "SUMMARY:" + escape(demo + t("ics.university") + p.title), "DESCRIPTION:" + escape(t("ics.universityNote")), "TRANSP:TRANSPARENT");
-    for (const offset of REMINDER_OFFSETS) {
+      "SUMMARY:" + escape(demo + prefix + p.title), "DESCRIPTION:" + escape(note), "TRANSP:TRANSPARENT");
+    for (const offset of offsets) {
       const day = addDays(p.due, -offset);
       if (day >= o.today) lines.push("BEGIN:VALARM", "ACTION:DISPLAY", `TRIGGER;VALUE=DATE-TIME:${compact(day)}${REMIND_AT}`,
         "DESCRIPTION:" + escape(demo + p.title + " — " + p.due), "END:VALARM");
     }
     lines.push("END:VEVENT");
-  }
+  };
+  for (const p of o.procedures ?? []) counted(p.id, p, t("ics.university"), t("ics.universityNote"), REMINDER_OFFSETS);
+  for (const c of o.changes ?? []) counted(`change-${c.id}`, c, t("ics.change"), t("ics.changeNote"), CHANGE_REMINDER_OFFSETS);
   lines.push("END:VCALENDAR");
   return lines.map(fold).join("\r\n") + "\r\n";
 }

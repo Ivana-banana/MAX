@@ -24,14 +24,14 @@ export class RuleValidationError extends Error {
   }
 }
 
-function asRecord(value: unknown, path: string): Record<string, unknown> {
+export function asRecord(value: unknown, path: string): Record<string, unknown> {
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
     throw new RuleValidationError(path, "ожидается объект");
   }
   return value as Record<string, unknown>;
 }
 
-function asString(value: unknown, path: string): string {
+export function asString(value: unknown, path: string): string {
   if (typeof value !== "string" || value.length === 0) {
     throw new RuleValidationError(path, "ожидается непустая строка");
   }
@@ -39,13 +39,13 @@ function asString(value: unknown, path: string): string {
 }
 
 /** Ids travel in button payloads split on ":" and in the mini app's action grammar (src/webapp/state.ts). */
-function asId(value: unknown, path: string): string {
+export function asId(value: unknown, path: string): string {
   const id = asString(value, path);
   if (!/^[a-z0-9-]{1,64}$/.test(id)) throw new RuleValidationError(path, `ожидается id из a-z, 0-9 и «-», получено «${id}»`);
   return id;
 }
 
-function asDate(value: unknown, path: string): string {
+export function asDate(value: unknown, path: string): string {
   const raw = asString(value, path);
   if (!isValidDate(raw)) {
     throw new RuleValidationError(path, `ожидается дата ГГГГ-ММ-ДД, получено «${raw}»`);
@@ -53,7 +53,7 @@ function asDate(value: unknown, path: string): string {
   return raw;
 }
 
-function asLocalized(value: unknown, path: string): Localized {
+export function asLocalized(value: unknown, path: string): Localized {
   const record = asRecord(value, path);
   // Russian is the base language; the rest are checked against the interface languages at startup.
   asString(record.ru, `${path}.ru`);
@@ -101,7 +101,7 @@ function asCondition(value: unknown, path: string): Condition {
   throw new RuleValidationError(`${path}.field`, `неизвестное поле условия «${field}»`);
 }
 
-function asLegalBasis(value: unknown, path: string): LegalBasis {
+export function asLegalBasis(value: unknown, path: string): LegalBasis {
   const record = asRecord(value, path);
   const status = asString(record.status, `${path}.status`);
   if (status !== "draft" && status !== "approved") {

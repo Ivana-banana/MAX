@@ -24,7 +24,8 @@ function withKazakh(): DialogueContext {
     procedures: u.procedures.map(p => ({ ...p, title: tr(p.title), action: tr(p.action), when: tr(p.when),
       documents: p.documents.map(d => ({ ...d, title: tr(d.title) })) })),
     rulePlaces: Object.fromEntries(Object.entries(u.rulePlaces).map(([id, place]) => [id, { ...place, where: tr(place.where) }])),
-    beforeEntry: u.beforeEntry.map(c => ({ ...c, title: tr(c.title), text: tr(c.text), ...(c.assumption ? { assumption: tr(c.assumption) } : {}) })) }));
+    beforeEntry: u.beforeEntry.map(c => ({ ...c, title: tr(c.title), text: tr(c.text), ...(c.assumption ? { assumption: tr(c.assumption) } : {}) })),
+    changeTerms: Object.fromEntries(Object.entries(u.changeTerms).map(([id, term]) => [id, { ...term, words: tr(term.words) }])) }));
   checkTexts(all); checkTranslated(all, kkRules, kkUniversities);
   return { rules: kkRules, universities: kkUniversities, texts: all, version: rules.version, demo: true, today: "2026-09-24" };
 }

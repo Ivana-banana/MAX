@@ -1,12 +1,17 @@
 import { readFileSync } from "node:fs";
 import { parseRuleSet, type RuleSet } from "../data/loadRules.js";
-import type { DeadlineRule } from "../core/types.js";
-import { checkCitizenships, checkProcedures, checkRuleTargets, readUniversities, type University } from "../data/loadUniversities.js";
+import type { ChangeSet, DeadlineRule } from "../core/types.js";
+import type { WorkCalendar } from "../core/dates.js";
+import { checkChangeTerms, checkCitizenships, checkProcedures, checkRuleTargets, readUniversities, type University } from "../data/loadUniversities.js";
 import { coverage } from "../core/deadlines.js";
-import { checkTranslated, readTexts, type Texts } from "../data/loadTexts.js";
+import { checkTranslated, checkTranslatedChanges, readTexts, type Texts } from "../data/loadTexts.js";
+import { readChangeSet } from "../data/loadChanges.js";
+import { readCalendar } from "../data/loadCalendar.js";
 export interface Config {
   mode: "demo" | "live"; transport: "console" | "max"; token: string; secret: string;
   databaseUrl: string; port: number; host: string; rulesPath: string; universitiesPath: string; defaultUniversity: string; textsPath: string;
+  /** Changes of circumstances (#41) and the production calendar their working days are counted over (D-060). */
+  changesPath: string; calendarPath: string;
   /** Built mini app bundle; served by the same process, because MAX needs one public HTTPS origin. */
   webappDir: string;
   /** Origin of the Vite dev server, allowed through CORS. Local demo only. */
@@ -62,7 +67,8 @@ export function readConfig(env: NodeJS.ProcessEnv = process.env): Config {
     webappDir: env.WEBAPP_DIR ?? "./web/dist", webappDevOrigin, webappBot, deployedCommit,
     rulesPath: env.RULES_PATH ?? "./src/data/rules/ru-student.json",
     universitiesPath: env.UNIVERSITIES_PATH ?? "./src/data/universities", defaultUniversity: env.DEFAULT_UNIVERSITY ?? "kfu",
-    textsPath: env.TEXTS_PATH ?? "./src/data/i18n" };
+    textsPath: env.TEXTS_PATH ?? "./src/data/i18n",
+    changesPath: env.CHANGES_PATH ?? "./src/data/rules/ru-change.json", calendarPath: env.CALENDAR_PATH ?? "./src/data/calendar/ru.json" };
 }
 export function loadRules(config: Pick<Config, "rulesPath" | "mode">): RuleSet {
   const set = parseRuleSet(JSON.parse(readFileSync(config.rulesPath, "utf8")));
@@ -82,4 +88,18 @@ export function loadTexts(config: Pick<Config, "textsPath">, rules: DeadlineRule
   checkProcedures(universities, rules.map(r => r.id));
   checkRuleTargets(universities, rules);
   return texts;
+}
+/**
+ * The changes of circumstances with the calendar. Live mode does not show norms nobody approved; unlike
+ * loadRules it turns /change off instead of stopping the bot: the main scenario does not depend on it.
+ */
+export function loadChanges(config: Pick<Config, "changesPath" | "calendarPath" | "mode">, texts: Texts, universities: University[]): (ChangeSet & { calendar: WorkCalendar }) | undefined {
+  const set = readChangeSet(config.changesPath);
+  checkTranslatedChanges(texts, set);
+  checkChangeTerms(universities, set.situations);
+  if (config.mode === "live" && set.situations.some(s => s.legal.status !== "approved")) {
+    console.warn("Changes of circumstances are draft: /change is off in live mode. Do not approve them just to turn it on.");
+    return undefined;
+  }
+  return { ...set, calendar: readCalendar(config.calendarPath).calendar };
 }

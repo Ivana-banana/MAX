@@ -13,7 +13,7 @@ const ctx = { rules: rules.rules, universities: readUniversities("src/data/unive
 describe("bot command hints (PATCH /me/commands)", () => {
   it("lists the commands with Russian and English descriptions within MAX limits", () => {
     const commands = botCommands(texts);
-    expect(commands.map(c => c.name)).toEqual(["start", "plan", "help", "stop", "delete"]);
+    expect(commands.map(c => c.name)).toEqual(["start", "plan", "change", "help", "stop", "delete"]);
     expect(commands[1]!.description).toBe("мой план и сроки / my plan and dates");
     expect(commands.length).toBeLessThanOrEqual(32);
     for (const c of commands) expect(c.name).toMatch(/^[a-z]+$/);

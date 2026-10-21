@@ -8,7 +8,7 @@
 
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import type { DeadlineRule, Lang } from "../core/types.js";
+import type { ChangeSet, DeadlineRule, Lang } from "../core/types.js";
 import type { University } from "./loadUniversities.js";
 
 /** Language code → key → text. The base language (ru) comes first, then en, then the rest. */
@@ -89,7 +89,19 @@ export function checkTranslated(texts: Texts, rules: DeadlineRule[], universitie
     ...universities.flatMap(u => Object.entries(u.rulePlaces).map(([id, place]) => [`${u.id}.rulePlaces.${id}.where`, place.where])),
     ...universities.flatMap(u => u.beforeEntry.flatMap(c => [[`${u.id}.beforeEntry.${c.id}.title`, c.title],
       [`${u.id}.beforeEntry.${c.id}.text`, c.text], ...(c.assumption ? [[`${u.id}.beforeEntry.${c.id}.assumption`, c.assumption]] : [])])),
+    ...universities.flatMap(u => Object.entries(u.changeTerms).map(([id, term]) => [`${u.id}.changeTerms.${id}.words`, term.words])),
   ] as [string, Record<string, string>][];
+  for (const lang of texts.keys()) {
+    const hole = localized.find(([, value]) => !value[lang]?.trim());
+    if (hole) throw new TextsValidationError(lang, `нет перевода для ${hole[0]}`);
+  }
+}
+
+/** The changes of circumstances (#41) in every interface language, like the rules. */
+export function checkTranslatedChanges(texts: Texts, changes: ChangeSet): void {
+  const localized = [["filing.article", changes.filing.article],
+    ...changes.situations.flatMap(s => [[`${s.id}.title`, s.title], [`${s.id}.norm`, s.norm], [`${s.id}.legal.article`, s.legal.article],
+      ...(s.event ? [[`${s.id}.event`, s.event]] : [])])] as [string, Record<string, string>][];
   for (const lang of texts.keys()) {
     const hole = localized.find(([, value]) => !value[lang]?.trim());
     if (hole) throw new TextsValidationError(lang, `нет перевода для ${hole[0]}`);

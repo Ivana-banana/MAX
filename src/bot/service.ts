@@ -1,9 +1,11 @@
 import { createHash, randomUUID } from "node:crypto";
 import { REMINDER_OFFSETS, reminderDates } from "../core/deadlines.js";
+import { changeReminderDates } from "../core/changes.js";
 import { addDays } from "../core/dates.js";
 import type { PostgresJob, PostgresStore, PostgresStoreTx } from "../db/postgres-store.js";
 import { errorInfo } from "../log.js";
-import { limitedReply, plan, procedureDue, procedureReminderReply, reminderReply, transition, undated, visitReply, type DialogueContext, type Input, type Reply, type Session } from "./dialog.js";
+import { changeReminderReply, limitedReply, plan, procedureDue, procedureReminderReply, reminderReply, reportedChanges, transition, undated, visitReply,
+  type DialogueContext, type Input, type Reply, type Session } from "./dialog.js";
 import { funnelEvents, funnelUniversity, type FunnelEvent } from "./funnel.js";
 import { PLAN_FILE, renderPlanPdf } from "./pdf.js";
 import { RateLimit } from "./rate.js";
@@ -119,6 +121,15 @@ export class Service {
       }
     }
     await this.scheduleProcedures(tx, user, state, ctx, now);
+    // #41: a deadline after a change of circumstances, 3 days and 1 day before and on the day, at 09:00.
+    for (const { situation, deadline } of reportedChanges(state, ctx)) {
+      if (!deadline.due) continue;
+      for (const day of changeReminderDates(deadline.due, ctx.today)) {
+        const key = createHash("sha256").update(JSON.stringify([state.nonce, user, ctx.version, "change", situation.id, deadline.event, day])).digest("hex");
+        await tx.enqueue(key, { ruleId: situation.id, dueDate: deadline.due, change: situation.id, event: deadline.event, day }, "reminder",
+          Date.parse(day + "T09:00:00+03:00"), now);
+      }
+    }
   }
   // D-040: a university deadline counted from a document end date, reminded 7, 3 and 1 days before at 09:00.
   private async scheduleProcedures(tx: PostgresStoreTx, user: number, state: Session, ctx: DialogueContext, now: number): Promise<void> {
@@ -175,7 +186,18 @@ export class Service {
         let message: Reply;
         if (job.kind === "reminder") {
           const state = await this.store.get(job.user_id);
-          const ref = JSON.parse(job.payload) as {ruleId:string;dueDate:string;day?:string;visit?:string;procedure?:string;end?:string};
+          const ref = JSON.parse(job.payload) as {ruleId:string;dueDate:string;day?:string;visit?:string;procedure?:string;end?:string;change?:string;event?:string};
+          if (ref.change !== undefined) {
+            const ctx = this.ctx();
+            const found = state && state.ruleVersion === this.context.version && state.reminders
+              ? reportedChanges(state, ctx).find(r => r.situation.id === ref.change) : undefined;
+            // Only for the event date still entered, and not after the deadline.
+            if (!state || !found?.deadline.due || found.deadline.event !== ref.event || found.deadline.due < ctx.today) { await this.store.cancel(job.id, job.lease_token); continue; }
+            message = changeReminderReply(state, ctx, found.situation, found.deadline.due);
+            try { await this.deliver(job.user_id, message); await this.store.finish(job.id, job.lease_token); }
+            catch (e) { await this.failed(job, e); }
+            continue;
+          }
           if (ref.procedure !== undefined) {
             const ctx = this.ctx();
             const note = state && state.ruleVersion === this.context.version && state.reminders

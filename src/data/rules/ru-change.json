@@ -1,0 +1,176 @@
+{
+  "$comment": [
+    "«Изменились обстоятельства» (/change, #41, D-061): федеральные сроки после переезда, возвращения, гостиницы или больницы и нового паспорта.",
+    "workdays — n-й рабочий день после дня события (день события не считается), календарь — src/data/calendar/ru.json (D-060). Без workdays норма числа дней для студента не называет: бот срок не считает и не напоминает.",
+    "receiver — кто подаёт уведомление о прибытии: university — вуз как принимающая сторона, place — гостиница или больница (ст. 22 ч. 2).",
+    "Срок вуза — в профиле вуза (changeTerms), только с цитатой со страницы вуза в src/data/sources.json. Бот берёт более строгий из двух и показывает оба основания.",
+    "Сверка — docs/legal-review.md, раздел 7 (21.10.2026, Claude Code). Команда нормы не утверждала: status = draft, APP_MODE=live их не запустит.",
+    "TBD: общежитие — «иное средство размещения» (1 рабочий день) или общий случай (7) — legal-review 7.6 п. 1; региональные нерабочие дни Татарстана — 7.6 п. 3."
+  ],
+  "filing": {
+    "act": "Федеральный закон от 18.07.2006 № 109-ФЗ",
+    "article": {
+      "ru": "ст. 22 ч. 2",
+      "en": "Art. 22 part 2",
+      "uz": "22-modda 2-qism",
+      "tt": "22 статья 2 өлеш",
+      "zh": "第22条第2款"
+    },
+    "url": "https://www.consultant.ru/document/cons_doc_LAW_61569/5870db6b61f003dfeffe784df6b3ee9c026925ba/",
+    "checkedAt": "2026-10-21"
+  },
+  "situations": [
+    {
+      "id": "moving",
+      "title": {
+        "ru": "Переезд",
+        "en": "Moving",
+        "uz": "Koʻchish",
+        "tt": "Күчү",
+        "zh": "搬家"
+      },
+      "event": {
+        "ru": "день, когда вы заселились на новом месте",
+        "en": "the day you moved into the new place",
+        "uz": "yangi joyga joylashgan kuningiz",
+        "tt": "яңа урынга урнашкан көнегез",
+        "zh": "您入住新住处的日期"
+      },
+      "norm": {
+        "ru": "уведомление о прибытии подаётся в течение 7 рабочих дней со дня прибытия в место пребывания",
+        "en": "the notification of arrival is filed within 7 working days of arrival at the place of stay",
+        "uz": "kelganlik haqidagi bildirishnoma turish joyiga kelgan kundan boshlab 7 ish kuni ichida topshiriladi",
+        "tt": "килү турында белдерү булу урынына килгән көннән алып 7 эш көне эчендә тапшырыла",
+        "zh": "抵达通知须在抵达居留地之日起7个工作日内提交"
+      },
+      "workdays": 7,
+      "receiver": "university",
+      "legal": {
+        "act": "Федеральный закон от 18.07.2006 № 109-ФЗ",
+        "article": {
+          "ru": "ст. 20 ч. 3",
+          "en": "Art. 20 part 3",
+          "uz": "20-modda 3-qism",
+          "tt": "20 статья 3 өлеш",
+          "zh": "第20条第3款"
+        },
+        "url": "https://www.consultant.ru/document/cons_doc_LAW_61569/259e33be7736b57036467f128672f0ce6ca81f9d/",
+        "edition": "ред. от 31.07.2025 (с изм. и доп., вступ. в силу с 01.03.2026)",
+        "checkedAt": "2026-10-21",
+        "status": "draft"
+      }
+    },
+    {
+      "id": "trip",
+      "title": {
+        "ru": "Возвращение из поездки или больницы",
+        "en": "Return from a trip or hospital",
+        "uz": "Sayohat yoki kasalxonadan qaytish",
+        "tt": "Сәфәрдән яки хастаханәдән кайту",
+        "zh": "旅行或出院后返回"
+      },
+      "event": {
+        "ru": "день, когда вы вернулись в место пребывания (общежитие)",
+        "en": "the day you returned to your place of stay (the dormitory)",
+        "uz": "turish joyingizga (yotoqxonaga) qaytgan kuningiz",
+        "tt": "булу урынына (тулай торакка) кайткан көнегез",
+        "zh": "您返回居留地（宿舍）的日期"
+      },
+      "norm": {
+        "ru": "уведомление о прибытии подаётся в течение 7 рабочих дней со дня прибытия в место пребывания",
+        "en": "the notification of arrival is filed within 7 working days of arrival at the place of stay",
+        "uz": "kelganlik haqidagi bildirishnoma turish joyiga kelgan kundan boshlab 7 ish kuni ichida topshiriladi",
+        "tt": "килү турында белдерү булу урынына килгән көннән алып 7 эш көне эчендә тапшырыла",
+        "zh": "抵达通知须在抵达居留地之日起7个工作日内提交"
+      },
+      "workdays": 7,
+      "receiver": "university",
+      "legal": {
+        "act": "Федеральный закон от 18.07.2006 № 109-ФЗ",
+        "article": {
+          "ru": "ст. 20 ч. 3",
+          "en": "Art. 20 part 3",
+          "uz": "20-modda 3-qism",
+          "tt": "20 статья 3 өлеш",
+          "zh": "第20条第3款"
+        },
+        "url": "https://www.consultant.ru/document/cons_doc_LAW_61569/259e33be7736b57036467f128672f0ce6ca81f9d/",
+        "edition": "ред. от 31.07.2025 (с изм. и доп., вступ. в силу с 01.03.2026)",
+        "checkedAt": "2026-10-21",
+        "status": "draft"
+      }
+    },
+    {
+      "id": "hotel",
+      "title": {
+        "ru": "Гостиница или больница",
+        "en": "Hotel or hospital",
+        "uz": "Mehmonxona yoki kasalxona",
+        "tt": "Кунакханә яки хастаханә",
+        "zh": "酒店或住院"
+      },
+      "event": {
+        "ru": "день, когда вы заселились в гостиницу или легли в больницу",
+        "en": "the day you checked into the hotel or were admitted to hospital",
+        "uz": "mehmonxonaga joylashgan yoki kasalxonaga yotqizilgan kuningiz",
+        "tt": "кунакханәгә урнашкан яки хастаханәгә яткан көнегез",
+        "zh": "您入住酒店或住院的日期"
+      },
+      "norm": {
+        "ru": "уведомление подаётся в течение одного рабочего дня, следующего за днём прибытия; если вы прибыли в нерабочий день — в первый рабочий день после него",
+        "en": "the notification is filed within one working day following the day of arrival; if you arrived on a non-working day, on the first working day after it",
+        "uz": "bildirishnoma kelgan kundan keyingi bir ish kuni ichida topshiriladi; ishlanmaydigan kuni kelgan boʻlsangiz — undan keyingi birinchi ish kunida",
+        "tt": "белдерү килгән көннән соң килүче бер эш көне эчендә тапшырыла; эшләми торган көнне килсәгез — аннан соңгы беренче эш көнендә",
+        "zh": "通知须在抵达之日后的一个工作日内提交；如在非工作日抵达，则在其后的第一个工作日提交"
+      },
+      "workdays": 1,
+      "receiver": "place",
+      "legal": {
+        "act": "Федеральный закон от 18.07.2006 № 109-ФЗ",
+        "article": {
+          "ru": "ст. 20 ч. 3 п. 1, ч. 3.1",
+          "en": "Art. 20 part 3 cl. 1, part 3.1",
+          "uz": "20-modda 3-qism 1-band, 3.1-qism",
+          "tt": "20 статья 3 өлеш 1 пункт, 3.1 өлеш",
+          "zh": "第20条第3款第1项、第3.1款"
+        },
+        "url": "https://www.consultant.ru/document/cons_doc_LAW_61569/259e33be7736b57036467f128672f0ce6ca81f9d/",
+        "edition": "ред. от 31.07.2025 (с изм. и доп., вступ. в силу с 01.03.2026)",
+        "checkedAt": "2026-10-21",
+        "status": "draft"
+      }
+    },
+    {
+      "id": "passport",
+      "title": {
+        "ru": "Новый паспорт",
+        "en": "New passport",
+        "uz": "Yangi pasport",
+        "tt": "Яңа паспорт",
+        "zh": "新护照"
+      },
+      "norm": {
+        "ru": "незамедлительно сообщите принимающей стороне (вузу) и передайте ей копии подтверждающих документов. Числа дней для вас норма не называет, поэтому бот срок не считает. Принимающая сторона затем сообщает в МВД в течение 3 рабочих дней",
+        "en": "tell the receiving side (the university) without delay and give it copies of the supporting documents. The norm sets you no number of days, so the bot does not count a deadline. The receiving side then informs the Ministry of Internal Affairs within 3 working days",
+        "uz": "qabul qiluvchi tomonga (universitetga) zudlik bilan xabar bering va tasdiqlovchi hujjatlar nusxalarini topshiring. Norma siz uchun kunlar sonini belgilamaydi, shuning uchun bot muddatni hisoblamaydi. Qabul qiluvchi tomon soʻngra 3 ish kuni ichida IIVga xabar beradi",
+        "tt": "кабул итүче якка (университетка) кичекмәстән хәбәр итегез һәм раслаучы документларның күчермәләрен тапшырыгыз. Норма сезнең өчен көннәр санын билгеләми, шуңа күрә бот срокны исәпләми. Кабул итүче як аннары 3 эш көне эчендә ЭЭМгә хәбәр итә",
+        "zh": "请立即告知接待方（大学）并向其提交证明文件的复印件。该规定未对您设定天数，因此机器人不计算期限。接待方随后在3个工作日内通知内务部"
+      },
+      "receiver": "university",
+      "legal": {
+        "act": "Постановление Правительства РФ от 15.01.2007 № 9 (Правила миграционного учёта)",
+        "article": {
+          "ru": "п. 42",
+          "en": "cl. 42",
+          "uz": "42-band",
+          "tt": "42 пункт",
+          "zh": "第42项"
+        },
+        "url": "https://www.consultant.ru/document/cons_doc_LAW_525276/fae587ce7120a45554e98af00cc6d09cae10d27f/",
+        "edition": "ред. от 26.01.2026",
+        "checkedAt": "2026-10-21",
+        "status": "draft"
+      }
+    }
+  ]
+}

@@ -6,7 +6,7 @@
  * rule does. A missing quote means the data must be checked against the page again.
  */
 
-import type { DeadlineRule } from "./core/types.js";
+import type { ChangeSet, DeadlineRule } from "./core/types.js";
 import type { University } from "./data/loadUniversities.js";
 
 export interface Source { url: string; about: string; quotes: string[] }
@@ -24,10 +24,12 @@ export function parseSources(raw: unknown): Source[] {
   });
 }
 
-/** Every link the rules, university profiles and the production calendar stand on. */
-export function dataUrls(rules: DeadlineRule[], universities: University[], calendarUrls: string[]): string[] {
+/** Every link the rules, the changes of circumstances, university profiles and the production calendar stand on. */
+export function dataUrls(rules: DeadlineRule[], universities: University[], calendarUrls: string[], changes: ChangeSet): string[] {
   const urls = [
     ...calendarUrls,
+    changes.filing.url, ...changes.situations.map(s => s.legal.url),
+    ...universities.flatMap(u => Object.values(u.changeTerms).map(t => t.source.url)),
     ...rules.flatMap(r => [r.legal.url, ...(r.documentsSource ? [r.documentsSource.url] : [])]),
     ...universities.flatMap(u => [u.contactUrl, ...u.procedures.map(p => p.source.url), ...u.beforeEntry.map(c => c.source.url)]),
   ];

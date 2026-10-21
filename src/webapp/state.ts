@@ -130,7 +130,8 @@ function view(session: Session | null, ctx: DialogueContext, mocked: boolean, hi
   return {
     session: session === null ? null : {
       revision: session.revision,
-      step: session.step,
+      // The app has no screen for the chat's question about the date of a change (#41): it shows the plan.
+      step: session.step === "changeDate" ? "plan" : session.step,
       lang: session.lang,
       university: university(session.university, ctx, lang),
       citizenships: [...(ctx.universities.find(u => u.id === session.university) ?? ctx.universities[0]!).citizenships,
@@ -221,7 +222,8 @@ export async function applyAction(
     }
     // The MAX interface language picks the first screen's language on /start, as bot_started does in the chat.
     const input: Input = { text: action, callback: false, ...(locale === undefined ? {} : { locale }) };
-    const outcome = transition(before, input, ctx);
+    // #41: the app's action starts from the plan, as the chat's "Cancel" on the date question does.
+    const outcome = transition(before?.step === "changeDate" ? { ...before, step: "plan" } : before, input, ctx);
     const target = funnelUniversity(outcome.session ?? before, ctx);
     await countEvents(tx, user, ctx.today, target, funnelEvents(before, outcome.session, input, ctx), service.clock());
     // A chat reply queued earlier carries buttons stamped with the previous revision. The dialogue

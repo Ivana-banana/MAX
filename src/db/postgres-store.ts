@@ -16,6 +16,9 @@ interface PostgresReminderPayload {
   // Reminder of a university deadline counted from a document end date (D-040).
   procedure?: string;
   end?: string;
+  // Reminder of a deadline after a change of circumstances (#41): the situation and the event day.
+  change?: string;
+  event?: string;
 }
 
 export interface PostgresJob {
@@ -68,6 +71,7 @@ const sessionSteps = new Set([
   "entry",
   "visit",
   "docEnd",
+  "changeDate",
   "plan",
   "completion",
   "delete",
@@ -408,6 +412,9 @@ function readSession(value: unknown): Session {
   }
   if ("ends" in value && (!isRecord(value.ends) || !Object.values(value.ends).every(day => typeof day === "string"))) {
     throw invalidValue("sessions.data.ends");
+  }
+  if ("changes" in value && (!isRecord(value.changes) || !Object.values(value.changes).every(day => typeof day === "string"))) {
+    throw invalidValue("sessions.data.changes");
   }
   return value as unknown as Session;
 }

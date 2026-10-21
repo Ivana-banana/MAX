@@ -7,7 +7,7 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { isValidDate } from "../core/dates.js";
-import type { Condition, DeadlineRule, Localized, RequiredDocument } from "../core/types.js";
+import type { ChangeSituation, Condition, DeadlineRule, Localized, RequiredDocument } from "../core/types.js";
 
 export interface University {
   /** Deep-link payload: https://max.ru/<bot>?start=<id> */
@@ -42,6 +42,12 @@ export interface University {
    */
   beforeEntry: BeforeEntryCard[];
   /**
+   * The university's own term after a change of circumstances (situation id → term, #41, D-061), from its
+   * page. Shown next to the federal term; the stricter of the two is the date in the plan. A situation
+   * without an entry has no confirmed university term.
+   */
+  changeTerms: Record<string, ChangeTerm>;
+  /**
    * Languages of the QR poster, in print order; the first is printed larger. An A4 sheet holds
    * about four languages with a scannable code, so a university picks those of its dormitory.
    * Absent — every interface language.
@@ -63,6 +69,16 @@ export interface BeforeEntryCard {
 export interface RuleTarget {
   days: number;
   source: { url: string; checkedAt: string };
+}
+
+export interface ChangeTerm {
+  /** The n-th working day after the event day, as the federal term counts. */
+  workdays: number;
+  /** The term in the source's words. */
+  words: Localized;
+  source: { url: string; checkedAt: string };
+  /** The university's procedure card with its own checklist for this case. */
+  procedure?: string;
 }
 
 export interface RulePlace {
@@ -194,6 +210,16 @@ function parseRuleTargets(raw: unknown, path: string): Record<string, RuleTarget
   }));
 }
 
+function parseChangeTerms(raw: unknown, path: string): Record<string, ChangeTerm> {
+  if (raw === undefined) return {};
+  return Object.fromEntries(Object.entries(record(raw, path)).map(([id, value]) => {
+    const t = record(value, `${path}.${id}`);
+    if (!Number.isInteger(t.workdays) || (t.workdays as number) < 1) throw new UniversityValidationError(`${path}.${id}.workdays`, "целое число рабочих дней от 1");
+    return [id, { workdays: t.workdays as number, words: localized(t.words, `${path}.${id}.words`), source: parseSource(t.source, `${path}.${id}.source`),
+      ...(t.procedure === undefined ? {} : { procedure: slug(t.procedure, `${path}.${id}.procedure`) }) }];
+  }));
+}
+
 function parseBeforeEntry(raw: unknown, path: string): BeforeEntryCard[] {
   if (raw === undefined) return [];
   if (!Array.isArray(raw)) throw new UniversityValidationError(path, "ожидается массив");
@@ -251,7 +277,7 @@ export function parseUniversity(raw: unknown, path = "university"): University {
   return { id, name: names,
     contactUrl, citizenships: [...new Set(u.citizenships as string[])], checkedAt, procedures,
     rulePlaces: parseRulePlaces(u.rulePlaces, `${path}.rulePlaces`), ruleTargets: parseRuleTargets(u.ruleTargets, `${path}.ruleTargets`),
-    beforeEntry: parseBeforeEntry(u.beforeEntry, `${path}.beforeEntry`),
+    beforeEntry: parseBeforeEntry(u.beforeEntry, `${path}.beforeEntry`), changeTerms: parseChangeTerms(u.changeTerms, `${path}.changeTerms`),
     ...(u.posterLanguages ? { posterLanguages: [...new Set(u.posterLanguages as string[])] } : {}) };
 }
 
@@ -284,6 +310,22 @@ export function checkRuleTargets(universities: University[], rules: readonly Dea
       if (!rule) throw new UniversityValidationError(`${u.id}.ruleTargets`, `нет нормы «${id}»`);
       if (target.days >= rule.term.days) {
         throw new UniversityValidationError(`${u.id}.ruleTargets.${id}`, `${target.days} дн. не раньше срока по норме (${rule.term.days} дн.): профиль вуза не может ослабить федеральный срок`);
+      }
+    }
+  }
+}
+
+/** A university term after a change may only be stricter than the federal one, like ruleTargets (D-043, D-061). */
+export function checkChangeTerms(universities: University[], situations: readonly ChangeSituation[]): void {
+  for (const u of universities) {
+    for (const [id, term] of Object.entries(u.changeTerms)) {
+      const situation = situations.find(s => s.id === id);
+      if (!situation?.workdays) throw new UniversityValidationError(`${u.id}.changeTerms`, `нет ситуации со сроком «${id}»`);
+      if (term.workdays >= situation.workdays) {
+        throw new UniversityValidationError(`${u.id}.changeTerms.${id}`, `${term.workdays} раб. дн. не раньше федерального срока (${situation.workdays}): профиль вуза не может ослабить закон`);
+      }
+      if (term.procedure !== undefined && !u.procedures.some(p => p.id === term.procedure)) {
+        throw new UniversityValidationError(`${u.id}.changeTerms.${id}.procedure`, `нет процедуры «${term.procedure}»`);
       }
     }
   }

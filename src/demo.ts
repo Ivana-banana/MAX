@@ -7,6 +7,7 @@ import { coverage } from "./core/deadlines.js";
 import { checkTranslated, readTexts } from "./data/loadTexts.js";
 import { scratchSchema, startDevPostgres } from "./db/dev-postgres.js";
 import { Service, moscowDate } from "./bot/service.js";
+import { loadChanges } from "./bot/config.js";
 import { addDays } from "./core/dates.js";
 import type { Reply } from "./bot/dialog.js";
 
@@ -18,6 +19,7 @@ checkTranslated(texts, rules.rules, universities);
 checkCitizenships(universities, coverage(rules.rules).excluded);
 checkProcedures(universities, rules.rules.map(r => r.id));
 checkRuleTargets(universities, rules.rules);
+const changes = loadChanges({ changesPath: "./src/data/rules/ru-change.json", calendarPath: "./src/data/calendar/ru.json", mode: "demo" }, texts, universities);
 // Synthetic profile in a temporary schema, dropped on exit: inside Compose it is the bot's DATABASE_URL,
 // locally a throwaway PostgreSQL (embedded-postgres, dev dependency).
 const dev = process.env.DATABASE_URL ? undefined : await startDevPostgres();
@@ -26,7 +28,7 @@ const { store } = await schema.open();
 let last: Reply;
 let reminderCount = 0;
 const clock = scripted ? () => Date.parse("2026-09-24T10:00:00+03:00") : Date.now;
-const service = new Service(store, { rules: rules.rules, universities, texts, version: rules.version, demo: true }, {
+const service = new Service(store, { rules: rules.rules, universities, texts, version: rules.version, demo: true, ...(changes ? { changes } : {}) }, {
   send(_user, reply) {
     last = reply;
     if (reply.text.includes("Напоминание:")) reminderCount++;

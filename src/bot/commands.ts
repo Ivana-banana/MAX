@@ -1,7 +1,7 @@
 import { format, type Texts } from "../data/loadTexts.js";
 
 /** Commands the dialogue understands as typed text; MAX shows them as hints after "/". */
-export const COMMANDS = ["start", "plan", "help", "stop", "delete"] as const;
+export const COMMANDS = ["start", "plan", "change", "help", "stop", "delete"] as const;
 
 // PATCH /me/commands has one description per command, not one per language: Russian and
 // English together cover the interface's base language and the common one.

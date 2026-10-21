@@ -138,3 +138,27 @@ export interface PlanItem {
    */
   provisional: boolean;
 }
+
+/**
+ * A change of circumstances the student reports (#41, D-061): moving, a return, a hotel or hospital,
+ * a new passport. The federal term is counted in working days from the day of the event.
+ */
+export interface ChangeSituation {
+  id: string;
+  title: Localized;
+  /** Which day the student enters: "the day you moved in". Absent when nothing is counted. */
+  event?: Localized;
+  /** The norm in words: shown as is when the date falls outside the calendar or the norm has no number. */
+  norm: Localized;
+  /** The n-th working day after the event day (the event day is not counted); absent when the norm gives the student no number. */
+  workdays?: number;
+  /** Who files the notification of arrival: the university as the receiving side, or the place of stay itself (hotel, hospital). */
+  receiver: "university" | "place";
+  legal: LegalBasis;
+}
+
+export interface ChangeSet {
+  situations: ChangeSituation[];
+  /** Who files the notification and what the student hands over (109-ФЗ ст. 22 ч. 2); the card cites it. */
+  filing: { act: string; article: Localized; url: string; checkedAt: PlainDate };
+}

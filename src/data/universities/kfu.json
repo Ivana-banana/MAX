@@ -1,5 +1,5 @@
 {
-  "$comment": "Профиль вуза: всё, что меняется при переносе сценария в другой вуз. КФУ — кандидат в пилот, не партнёр (D-011). Контакт — публичная страница, не интеграция. procedures — правила самого КФУ (страницы «Миграционный учёт — безвизовый / визовый въезд», 2026/27), а не федеральные нормы: срок отсчитывается от заселения, поэтому бот его не считает (docs/product/plan-vs-studroute.md, пп. 1 и 5). С 29.09 — ещё переоформление после поездок и переезда, продление срока пребывания (безвизовые) и визы (визовые) по страницам КФУ (D-036).",
+  "$comment": "Профиль вуза: всё, что меняется при переносе сценария в другой вуз. КФУ — кандидат в пилот, не партнёр (D-011). Контакт — публичная страница, не интеграция. procedures — правила самого КФУ (страницы «Миграционный учёт — безвизовый / визовый въезд», 2026/27), а не федеральные нормы: срок отсчитывается от заселения, поэтому бот его не считает (docs/product/plan-vs-studroute.md, пп. 1 и 5). С 29.09 — ещё переоформление после поездок и переезда, продление срока пребывания (безвизовые) и визы (визовые) по страницам КФУ (D-036). С 21.10 — changeTerms: срок КФУ после переезда и возвращения (следующий рабочий день) для «Изменились обстоятельства» (/change, D-061); цитаты — в src/data/sources.json. Для гостиницы и больницы своего срока КФУ нет: уведомление подаёт сама гостиница или больница.",
   "id": "kfu",
   "name": {
     "ru": "КФУ",
@@ -234,11 +234,11 @@
         "zh": "如果您在俄罗斯境内或出境旅行、住院或搬家（包括在喀山联邦大学校园和大运村内搬动），请本人前往喀山联邦大学对外联络部：Gvardeyskaya街9号（周一至周五9:00–17:00，+7 (843) 206-52-89 转8135）。离开俄罗斯前请告知宿舍管理员。"
       },
       "when": {
-        "ru": "В течение следующего рабочего дня после возвращения или переезда (кроме выходных и праздников). Бот не знает о поездках и переездах, поэтому о сроке не напоминает.",
-        "en": "Within the next working day after your return or move (weekends and holidays excluded). The bot does not know about trips and moves, so it does not remind you.",
-        "uz": "Qaytgandan yoki koʻchgandan keyingi ish kuni ichida (dam olish va bayram kunlari bundan mustasno). Bot sayohat va koʻchishlarni bilmaydi, shuning uchun eslatmaydi.",
-        "tt": "Кайтканнан яки күчкәннән соң киләсе эш көне эчендә (ял һәм бәйрәм көннәреннән тыш). Бот сәфәрләр һәм күчүләр турында белми, шуңа күрә срок турында искә төшерми.",
-        "zh": "返回或搬家后的下一个工作日内（周末和节假日除外）。机器人不知道您的旅行和搬家情况，因此不会提醒。"
+        "ru": "В течение следующего рабочего дня после возвращения или переезда (кроме выходных и праздников). Сообщите боту дату события — команда /change: он посчитает срок и напомнит о нём.",
+        "en": "Within the next working day after your return or move (weekends and holidays excluded). Tell the bot the date of the event with /change: it will count the deadline and remind you.",
+        "uz": "Qaytgandan yoki koʻchgandan keyingi ish kuni ichida (dam olish va bayram kunlari bundan mustasno). Voqea sanasini botga /change buyrugʻi bilan yuboring: u muddatni hisoblaydi va eslatadi.",
+        "tt": "Кайтканнан яки күчкәннән соң киләсе эш көне эчендә (ял һәм бәйрәм көннәреннән тыш). Вакыйга датасын ботка /change командасы белән хәбәр итегез: ул срокны исәпләр һәм искә төшерер.",
+        "zh": "返回或搬家后的下一个工作日内（周末和节假日除外）。请用 /change 命令告诉机器人事件日期：它会计算期限并提醒您。"
       },
       "documents": [
         {
@@ -630,5 +630,37 @@
         "checkedAt": "2026-10-19"
       }
     }
-  ]
+  ],
+  "changeTerms": {
+    "moving": {
+      "workdays": 1,
+      "words": {
+        "ru": "после смены места проживания (в том числе в пределах студгородка КФУ и Деревни Универсиады) — в течение следующего рабочего дня лично прийти в Департамент внешних связей для постановки на учёт по новому адресу",
+        "en": "after changing your place of residence (including within the KFU campus and the Universiade Village) — come in person to the Department of External Relations within the next working day to register at the new address",
+        "uz": "yashash joyini oʻzgartirgandan keyin (shu jumladan KFU talabalar shaharchasi va Universiada qishlogʻi ichida) — yangi manzil boʻyicha roʻyxatga olish uchun keyingi ish kuni ichida Tashqi aloqalar departamentiga shaxsan keling",
+        "tt": "яшәү урынын алыштырганнан соң (шул исәптән КФУ студентлар шәһәрчеге һәм Универсиада авылы эчендә) — яңа адрес буенча исәпкә кую өчен киләсе эш көне эчендә Тышкы элемтәләр департаментына үзегез килегез",
+        "zh": "更换住所后（包括在喀山联邦大学校园和大运村内部更换）——须在下一个工作日内本人前往对外联络部办理新地址登记"
+      },
+      "source": {
+        "url": "https://kpfu.ru/international/migracionnoe-soprovozhdenie-inostrannyh-grazhdan/bezvizovyi-vjezd",
+        "checkedAt": "2026-10-21"
+      },
+      "procedure": "registration-change"
+    },
+    "trip": {
+      "workdays": 1,
+      "words": {
+        "ru": "после возвращения из поездки или из больницы — в течение следующего рабочего дня передать документы для возобновления миграционного учёта",
+        "en": "after returning from a trip or from hospital — hand in the documents to resume migration registration within the next working day",
+        "uz": "sayohat yoki kasalxonadan qaytgandan keyin — migratsiya hisobini tiklash uchun hujjatlarni keyingi ish kuni ichida topshiring",
+        "tt": "сәфәрдән яки хастаханәдән кайтканнан соң — миграция исәбен яңарту өчен документларны киләсе эш көне эчендә тапшырыгыз",
+        "zh": "旅行或出院返回后——须在下一个工作日内提交恢复移民登记的文件"
+      },
+      "source": {
+        "url": "https://kpfu.ru/international/migracionnoe-soprovozhdenie-inostrannyh-grazhdan/bezvizovyi-vjezd",
+        "checkedAt": "2026-10-21"
+      },
+      "procedure": "registration-change"
+    }
+  }
 }
