@@ -60,6 +60,7 @@ describe("«Изменились обстоятельства» in the mini app 
     const chat = changeCard((await f.store.get(7))!, ctx, changes.situations.find(c => c.id === "moving")!).text;
     expect(chat.endsWith(moving.card)).toBe(true);
     expect(moving.card).toContain("(подаёт КФУ)");
+    expect(moving.procedure!.title).toBe("Переоформить учёт после поездки, больницы или переезда");
     // A new passport asks no date and counts no deadline.
     expect(session.changes.find(c => c.id === "passport")).toMatchObject({ dated: false });
     expect(session.changes.find(c => c.id === "passport")!.due).toBeUndefined();

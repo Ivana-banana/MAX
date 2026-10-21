@@ -12,7 +12,7 @@ import { coverage } from "../core/deadlines.js";
 import { isValidDate } from "../core/dates.js";
 import type { Lang, PlanItem } from "../core/types.js";
 import {
-  beforeEntry, beforeEntryNote, changeCard, changeDue, changeLine, changeList, changeOff, consequenceText, countdown, documentsNote, mapUrl, pageLabel, placeText, plan, progressParts, repeatParts, targetText, procedureDue, procedureDueText, procedureSource, profile, prompt, shareText, transition, undated, universityLost, type DialogueContext, type Input, type Session,
+  beforeEntry, beforeEntryNote, changeCard, changeDue, changeProcedure, changeLine, changeList, changeOff, consequenceText, countdown, documentsNote, mapUrl, pageLabel, placeText, plan, progressParts, repeatParts, targetText, procedureDue, procedureDueText, procedureSource, profile, prompt, shareText, transition, undated, universityLost, type DialogueContext, type Input, type Session,
 } from "../bot/dialog.js";
 import { funnelEvents, funnelUniversity } from "../bot/funnel.js";
 import { BASE_LANG, format } from "../data/loadTexts.js";
@@ -126,7 +126,7 @@ function countdownView(session: Session, ctx: DialogueContext, note: ReturnType<
 /** #91: the cases of /change with the chat's card and plan line; none while /change is off. */
 function changesView(session: Session, ctx: DialogueContext): AppChange[] {
   return (ctx.changes?.situations ?? []).map(c => {
-    const title = c.title[session.lang]!, d = changeDue(session, ctx, c);
+    const title = c.title[session.lang]!, d = changeDue(session, ctx, c), procedure = changeProcedure(session, ctx, c);
     return {
       id: c.id, title, dated: c.workdays !== undefined,
       ...(d ? { event: d.event, line: changeLine(session, ctx, c, d).replace(/^• /, "") } : {}),
@@ -134,6 +134,7 @@ function changesView(session: Session, ctx: DialogueContext): AppChange[] {
       // The card opens with the title; the app shows it as the heading.
       card: withoutBanner(changeCard(session, ctx, c).text, ctx).slice(title.length).trimStart(),
       lawUrl: c.legal.url,
+      ...(procedure ? { procedure: { title: procedure.title[session.lang]!, url: procedure.source.url } } : {}),
     };
   });
 }

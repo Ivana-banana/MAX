@@ -151,8 +151,8 @@ export function Plan({ session, texts, today, pending, onAction, onOpen, onChang
         </div>
       )}
 
-      {/* #91: the chat's /change. The button stays while it is off: the next screen says so and where to ask. */}
-      <div className="in d4 stack">
+      {/* #91: the chat's /change; hidden while it is off (live mode with draft norms), as on the chat's home. */}
+      {session.changes.length > 0 && <div className="in d4 stack">
         <h2 className="section"><span>{t("btn.change")}</span></h2>
         {reported.map(change => (
           <button key={change.id} type="button" className="task task-hot" disabled={pending !== null} onClick={() => onChange(change.id)}>
@@ -161,7 +161,7 @@ export function Plan({ session, texts, today, pending, onAction, onOpen, onChang
           </button>
         ))}
         <Button tone="outline" disabled={pending !== null} onClick={() => onChange(CHANGE_LIST)}>{t("btn.change")}</Button>
-      </div>
+      </div>}
 
       <div className="toggle in d4">
         <span>{t("app.reminders")}</span>

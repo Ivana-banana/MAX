@@ -370,6 +370,11 @@ export function changeOff(s: Session, ctx: DialogueContext): Reply {
 /** The question for the event date and, on a wrong date, the same buttons again, so they never go stale. */
 const changeDateRows = (s: Session, ctx: DialogueContext): Button[][] =>
   [[button(t(s, ctx, "btn.today"), "/today"), button(t(s, ctx, "btn.yesterday"), "/yesterday")], [button(t(s, ctx, "btn.cancel"), "plan")]];
+/** The university's own procedure for a case (re-registration), when it names one for this student. */
+export function changeProcedure(s: Session, ctx: DialogueContext, c: ChangeSituation): UniversityProcedure | undefined {
+  const id = uni(s, ctx).changeTerms[c.id]?.procedure;
+  return id ? undated(s, ctx).find(n => n.id === id) : undefined;
+}
 /**
  * A change of circumstances: the norm (fact), the university's own term with its source or that none is
  * confirmed, the stricter date (calculation) with how it is counted (assumption), what to hand over and where.
@@ -389,7 +394,7 @@ export function changeCard(s: Session, ctx: DialogueContext, c: ChangeSituation,
     t(s, ctx, "change.assumption") + (d.due >= ctx.today ? t(s, ctx, s.reminders ? "change.remindOn" : "change.remindOff") : "") : t(s, ctx, "change.dueWords") + t(s, ctx, "change.now"));
   const handover = !c.workdays ? t(s, ctx, "change.handover.passport", { uni: name, url: u.contactUrl })
     : t(s, ctx, `change.handover.${c.receiver}`, { uni: name, url: u.contactUrl, act: filing.act, article: filing.article[s.lang]!, law: filing.url }) + t(s, ctx, "change.tornOff");
-  const procedure = term?.procedure ? undated(s, ctx).find(n => n.id === term.procedure) : undefined;
+  const procedure = changeProcedure(s, ctx, c);
   return reply(s, ctx, prefix + c.title[s.lang]! + federal + assumption + law + own + due + handover +
     t(s, ctx, "change.notDecision") + (c.legal.status === "approved" ? "" : t(s, ctx, "change.provisional")),
     [...(d ? [[button(t(s, ctx, "btn.tornOff"), `change-done:${c.id}`)], [button(t(s, ctx, "btn.changeDate"), `change:${c.id}`)]] : []),
@@ -676,7 +681,7 @@ export function transition(previous: Session | null, input: Input, ctx: Dialogue
     } else if (action.startsWith("change-done:")) {
       // The torn-off part is the proof of registration: the deadline and its reminders are no longer needed.
       const id = action.slice(12);
-      if (s.changes?.[id]) {
+      if (Object.hasOwn(s.changes ?? {}, id)) {
         const rest = { ...s.changes }; delete rest[id]; s.changes = rest;
         return { session: s, reply: home(s, ctx, t(s, ctx, "change.closed")) };
       }

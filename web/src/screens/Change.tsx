@@ -14,7 +14,7 @@ import { Button } from "../ui.js";
 /** `openChange` value for the list of cases; any other value is the id of a case. */
 export const CHANGE_LIST = "";
 
-/** What changed: the chat's cases, or its "off for now" reply while the norms are draft. */
+/** What changed: the chat's cases under the chat's question. */
 export function ChangeList({ session, texts, pending, onAction, onOpen }: {
   session: AppSession; texts: Texts; pending: string | null; onAction: (action: string) => void; onOpen: (id: string) => void;
 }) {
@@ -32,14 +32,11 @@ export function ChangeList({ session, texts, pending, onAction, onOpen }: {
           </Button>
         ))}
       </div>
-      {session.changes.length === 0 && (
-        <Button className="in d3" tone="outline" arrow="↗" onClick={() => openLink(session.university.contactUrl)}>{t("app.contact")}</Button>
-      )}
     </div>
   );
 }
 
-/** One case: the chat's card, its law and university links, and the chat's two buttons once a date is entered. */
+/** One case: the chat's card, the university's procedure, its law and university links, and the chat's two buttons once a date is entered. */
 export function ChangeCard({ session, texts, change, message, pending, onAction }: {
   session: AppSession; texts: Texts; change: AppChange; message: string; pending: string | null; onAction: (action: string) => void;
 }) {
@@ -62,6 +59,9 @@ export function ChangeCard({ session, texts, change, message, pending, onAction 
           onClick={() => onAction(`change:${change.id}`)}>
           {t("btn.changeDate")}
         </Button>
+      )}
+      {change.procedure !== undefined && (
+        <Button className="in d3" tone="outline" arrow="↗" onClick={() => openLink(change.procedure!.url)}>{change.procedure.title}</Button>
       )}
       <Button className="in d3" tone="outline" arrow="↗" onClick={() => openLink(change.lawUrl)}>{t("btn.law")}</Button>
       <button type="button" className="link in d4" onClick={() => openLink(session.university.contactUrl)}>{t("app.contact")}</button>

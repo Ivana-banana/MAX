@@ -108,6 +108,13 @@ describe("deadline after a change of circumstances", () => {
     expect(actions(wrong)).toEqual(expect.arrayContaining(["/today", "/yesterday", "plan"]));
   });
 
+  it("closes only a reported case, not an inherited object key", () => {
+    const f = planned();
+    f.click("change:moving"); f.type("29.10.2026");
+    expect(f.click("change-done:constructor").text).not.toContain("Отметили");
+    expect(f.session.changes).toEqual({ moving: "2026-10-29" });
+  });
+
   it("turns /change off in live mode while the norms are draft", () => {
     expect(loadChanges({ changesPath: "src/data/rules/ru-change.json", calendarPath: "src/data/calendar/ru.json", mode: "live" }, texts, universities)).toBeUndefined();
     const off: DialogueContext = { ...ctx };

@@ -42,10 +42,15 @@ export function App() {
   const texts: Texts = status.state?.texts ?? {};
   const t = (key: string) => text(texts, key);
 
+  const act = useCallback((action: string) => { tap(); void dispatch(action); }, [dispatch]);
+
   // The card is a nested screen, so the native back button has to leave it.
   const closeCard = useCallback(() => { setOpenCard(null); setOpenChange(null); }, []);
   const nested = openCard !== null || openChange !== null;
-  useEffect(() => (nested ? onBack(closeCard) : undefined), [nested, closeCard]);
+  // The date question is a server step: Back cancels it on the server, as the screen's Cancel does.
+  const dating = session?.step === "changeDate";
+  const goBack = useCallback(() => (dating ? act("plan") : closeCard()), [dating, act, closeCard]);
+  useEffect(() => (nested ? onBack(goBack) : undefined), [nested, goBack]);
   // A step change on the server (a completed procedure, a deletion) invalidates an open card.
   // Adjusted during render, not in an effect: https://react.dev/learn/you-might-not-need-an-effect
   const [shownStep, setShownStep] = useState(session?.step);
@@ -59,8 +64,6 @@ export function App() {
   // Haptics once the server confirms a saved date or a closed deadline; silently absent on desktop and web.
   const changeSaved = session?.step === "plan" && (isText(status.message, t("change.saved")) || isText(status.message, t("change.closed")));
   useEffect(() => { if (changeSaved) tap("success"); }, [changeSaved, session?.revision]);
-
-  const act = useCallback((action: string) => { tap(); void dispatch(action); }, [dispatch]);
 
   const exportCalendar = useCallback(async () => {
     setCalendarBusy(true);

@@ -89,6 +89,8 @@ export interface AppChange {
   /** The chat's card word for word, without the title: norm, assumptions, both grounds, the deadline, what to hand over and where. */
   card: string;
   lawUrl: string;
+  /** The university's own procedure for this case (the chat's «Переоформить учёт» button), opened at its source page. */
+  procedure?: { title: string; url: string };
 }
 
 export interface AppUniversity { id: string; name: string; contactUrl: string }
