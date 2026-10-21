@@ -81,6 +81,17 @@ describe("plan as a PDF (#92)", () => {
     }
   });
 
+  it("shows a marked yearly procedure as a repeat round, as the plan does, in each language", async () => {
+    for (const lang of texts.keys()) {
+      let s = press(planned(lang), "done:medical-examination").session!;
+      s = transition(s, { text: "2026-09-24", callback: false }, ctx).session!;
+      const plan = planPdf(s, ctx);
+      const text = pdfText(await renderPlanPdf(plan));
+      expect(text, lang).toBe(squeeze([plan.title, ...plan.notes, ...plan.sections.flatMap(x => [x.heading, x.body]), plan.footer].join("")));
+      if (lang === "ru") expect(text).toContain(squeeze("Повторно (ежегодно). Пройдено вами 24 сентября 2026 г."));
+    }
+  });
+
   it("answers the button with a loading notice and offers a retry when the file cannot be built", () => {
     const outcome = press(planned(), "pdf");
     expect(outcome.reply.text).toContain("PDF с вашим планом");

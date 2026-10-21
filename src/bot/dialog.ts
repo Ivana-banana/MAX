@@ -324,6 +324,7 @@ function calendar(s: Session, ctx: DialogueContext): Reply {
 export function planPdf(s: Session, ctx: DialogueContext): PlanPdf {
   const u = uni(s, ctx), name = u.name[s.lang]!;
   const items = plan(s, ctx).map(item => ({ heading: item.title[s.lang]!, body: [
+    repeatParts(s, ctx, item)?.card ?? "",
     t(s, ctx, "card.deadline") + date(s, item.dueDate),
     item.status === "done" ? t(s, ctx, "pdf.done", { date: date(s, s.completions[item.ruleId]!) }) : countdown(s, ctx, item),
     ...(item.status === "done" ? [] : [(targetText(s, ctx, item) || (item.recommendedDate ? t(s, ctx, "card.recommended") + date(s, item.recommendedDate) : "")).trim()]),
