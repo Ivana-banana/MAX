@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { Transport } from "./service.js";
 import type { Config } from "./config.js";
-import type { Button } from "./dialog.js";
+import type { Button, Reply } from "./dialog.js";
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 const toButton = (b: Button) => "url" in b ? Keyboard.button.link(b.text, b.url)
   : "copy" in b ? Keyboard.button.clipboard(b.text, b.copy)
@@ -26,11 +26,11 @@ export function createTransport(config: Config): Transport {
     lastRequest = Date.now() + delay;
     if (delay) await sleep(delay);
   }
-  // The SDK names a Buffer upload with a random UUID; a path keeps the .ics extension phones need.
-  async function upload(file: { name: string; content: string }) {
+  // The SDK names a Buffer upload with a random UUID; a path keeps the .ics and .pdf extensions phones need.
+  async function upload(file: NonNullable<Reply["file"]>) {
     const dir = await mkdtemp(join(tmpdir(), "max-file-"));
     try {
-      await writeFile(join(dir, file.name), file.content, "utf8");
+      await writeFile(join(dir, file.name), Buffer.from(file.content, file.encoding ?? "utf8"));
       await pace();
       return (await bot.api.uploadFile({ source: join(dir, file.name) })).toJson();
     } finally { await rm(dir, { recursive: true, force: true }); }
@@ -51,6 +51,12 @@ export function createTransport(config: Config): Transport {
         }
       }
     },
-    async answer(id) { await pace(); await bot.api.answerOnCallback(id); },
+    // `notification` is in the body of POST /answers in the official SDK source (max-bot-api-client-ts) and
+    // the Go client, but not yet in the 0.3.1 types; the SDK passes the body through as is (D-055).
+    async answer(id, notification) {
+      await pace();
+      const extra: Parameters<typeof bot.api.answerOnCallback>[1] & { notification?: string } = notification ? { notification } : {};
+      await bot.api.answerOnCallback(id, extra);
+    },
   };
 }

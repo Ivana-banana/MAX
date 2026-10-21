@@ -207,5 +207,15 @@
   "beforeEntry.fact": "University fact — {uni} page: {url} (checked {date}).",
   "beforeEntry.assumption": "\nBot's assumption: {text}",
   "beforeEntry.scope": "\n\nThis is not a full list: it shows only what the university writes on its own pages. Check the general rules of entry to Russia for your country (a visa or the Gosuslugi RuID app) with the Russian consulate or the university's international office.",
-  "beforeEntry.next": "\n\nOnce you have entered, send your entry date — the bot will build your deadline plan."
+  "beforeEntry.next": "\n\nOnce you have entered, send your entry date — the bot will build your deadline plan.",
+  "btn.pdf": "📄 Plan as PDF",
+  "btn.retry": "Try again",
+  "pdf.intro": "A PDF of your plan: deadlines, legal basis and completed steps. You can forward it to your curator or the university. These are calculated dates, not an official decision.",
+  "pdf.loading": "Preparing the PDF…",
+  "pdf.failed": "Could not build the PDF. Your plan has not changed. Tap \"Try again\" or go back to the plan.",
+  "pdf.title": "Preparation plan — {uni}",
+  "pdf.demo": "DEMONSTRATION DATA. A training profile, not for submission to authorities.",
+  "pdf.date": "Calculated on {date}. The bot calculated the deadlines from its reference data; this is not an official decision. Completed steps are as marked by the student.",
+  "pdf.done": "Completed on {date} (marked by the student)",
+  "pdf.contact": "Check the place and the documents with {uni}: {url}"
 }

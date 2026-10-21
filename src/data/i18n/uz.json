@@ -207,5 +207,15 @@
   "beforeEntry.fact": "Universitet fakti — {uni} sahifasi: {url} (tekshirilgan: {date}).",
   "beforeEntry.assumption": "\nBot farazi: {text}",
   "beforeEntry.scope": "\n\nBu toʻliq roʻyxat emas: bu yerda faqat universitet oʻz sahifalarida yozgan narsalar bor. Mamlakatingiz uchun Rossiyaga kirishning umumiy qoidalarini (viza yoki «Gosuslugi RuID» ilovasi) Rossiya konsulligida yoki universitetning xalqaro boʻlimida aniqlang.",
-  "beforeEntry.next": "\n\nKirganingizdan keyin kirish sanasini yuboring — bot muddatlar rejasini tuzadi."
+  "beforeEntry.next": "\n\nKirganingizdan keyin kirish sanasini yuboring — bot muddatlar rejasini tuzadi.",
+  "btn.pdf": "📄 Reja PDF shaklida",
+  "btn.retry": "Qayta urinish",
+  "pdf.intro": "Rejangiz PDF faylda: muddatlar, huquqiy asoslar va bajarilganlar belgisi. Uni kuratorga yoki universitetga yuborish mumkin. Bu hisoblangan sanalar, IIV qarori emas.",
+  "pdf.loading": "PDF tayyorlanmoqda…",
+  "pdf.failed": "PDF yaratib boʻlmadi. Reja oʻzgarmadi. «Qayta urinish» tugmasini bosing yoki rejaga qayting.",
+  "pdf.title": "Tayyorgarlik rejasi — {uni}",
+  "pdf.demo": "NAMOYISH MAʼLUMOTLARI. Oʻquv profili, idoralarga topshirish uchun emas.",
+  "pdf.date": "{date} holatiga hisob. Muddatlarni bot maʼlumotnoma boʻyicha hisoblagan, bu IIV qarori emas. Bajarilganlar belgisi — talaba soʻzidan.",
+  "pdf.done": "{date} bajarilgan (talaba belgisi)",
+  "pdf.contact": "Joy va hujjatlar toʻplamini {uni} bilan aniqlang: {url}"
 }
