@@ -19,6 +19,7 @@ export function repeatText(texts: Texts, lang: Lang, item: PlanItem): { title: s
   const period = format(texts, lang, months === 12 ? "repeat.yearly" : "repeat.everyMonths", { n: months });
   const date = longDate(lang, completedAt);
   const label = format(texts, lang, "repeat.label", { period });
+  // card.repeat stays its own key: the card writes it as a sentence (capital, full stops), so gluing label and doneOn would change it.
   return { title: `${item.title[lang]}${format(texts, lang, "repeat.separator")}${label}`, label,
     doneOn: format(texts, lang, "repeat.doneOn", { date }), card: format(texts, lang, "card.repeat", { period, date }) };
 }
