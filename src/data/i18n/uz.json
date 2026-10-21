@@ -119,6 +119,7 @@
   "repeat.everyMonths#one": "har {n} oyda",
   "repeat.everyMonths#other": "har {n} oyda",
   "repeat.label": "takroran ({period})",
+  "repeat.separator": ", ",
   "repeat.doneOn": "siz {date} sanada oʻtgansiz",
   "card.repeat": "Takroran ({period}). Siz {date} sanada oʻtgansiz.",
   "visit.reminder": "Ertaga — {title}. Muddat: {due}.\n",

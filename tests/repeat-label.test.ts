@@ -81,6 +81,16 @@ describe("a marked yearly procedure is shown as a repeat", () => {
     }
   });
 
+  it("Chinese joins the title and the label with its own comma, in the plan", () => {
+    const title = rules.rules.find(r => r.id === "medical-examination")!.title.zh!;
+    expect(afterDone("zh").click("plan").text).toContain(`• ${title}，再次办理（每年）`);
+  });
+
+  it("a period other than a year is worded from repeat.everyMonths", () => {
+    const six = { ...ctx, rules: rules.rules.map(r => r.id === "medical-examination" ? { ...r, repeat: { months: 6 } } : r) };
+    expect(shareText(afterDone().session(), six)).toContain("• Медицинское освидетельствование, повторно (раз в 6 мес.) — до ");
+  });
+
   it("English says 'every month' for one month, not 'every 1 months'", () => {
     expect(format(texts, "en", "repeat.everyMonths", { n: 1 })).toBe("every month");
     expect(format(texts, "en", "repeat.everyMonths", { n: 6 })).toBe("every 6 months");

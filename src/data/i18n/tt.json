@@ -119,6 +119,7 @@
   "repeat.everyMonths#one": "һәр {n} айда",
   "repeat.everyMonths#other": "һәр {n} айда",
   "repeat.label": "кабатлап ({period})",
+  "repeat.separator": ", ",
   "repeat.doneOn": "сез {date} көнне узгансыз",
   "card.repeat": "Кабатлап ({period}). Сез {date} көнне узгансыз.",
   "visit.reminder": "Иртәгә — {title}. Срок: {due}\n",

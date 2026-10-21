@@ -125,6 +125,7 @@
   "repeat.everyMonths#many": "раз в {n} мес.",
   "repeat.everyMonths#other": "раз в {n} мес.",
   "repeat.label": "повторно ({period})",
+  "repeat.separator": ", ",
   "repeat.doneOn": "пройдено вами {date}",
   "card.repeat": "Повторно ({period}). Пройдено вами {date}",
   "visit.reminder": "Завтра — {title}. Срок: {due}\n",

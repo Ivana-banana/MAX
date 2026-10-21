@@ -7,6 +7,7 @@ import type { BeforeEntryCard, ProcedureCountdown, University, UniversityProcedu
 import { format, type Texts } from "../data/loadTexts.js";
 import { CALENDAR_FILE, planToIcs } from "./calendar.js";
 import type { PlanPdf } from "./pdf.js";
+import { longDate, repeatText } from "./repeat.js";
 
 // callback buttons come back to the bot; link and clipboard buttons are handled by MAX itself
 export type Button = { text: string; action: string } | { text: string; url: string } | { text: string; copy: string }
@@ -61,7 +62,7 @@ const universityMissing = (s: Session, ctx: DialogueContext) =>
 export const universityLost = (s: Session, ctx: DialogueContext) =>
   universityMissing(s, ctx) && s.step !== "language" && s.step !== "consent" && s.step !== "delete";
 /** Dates in replies are written out in the user's language (Intl), not as ISO strings. */
-const date = (s: Session, iso: string) => new Intl.DateTimeFormat(s.lang, { dateStyle: "long", timeZone: "UTC" }).format(new Date(`${iso}T00:00:00Z`));
+const date = (s: Session, iso: string) => longDate(s.lang, iso);
 const country = (s: Session, ctx: DialogueContext, code: string) =>
   code === "OTHER" ? t(s, ctx, "btn.otherCountry") : new Intl.DisplayNames([s.lang], { type: "region" }).of(code) ?? code;
 /** Typed dates: ISO or the DD.MM.YYYY people write by hand. */
@@ -162,18 +163,12 @@ const languages = (ctx: DialogueContext, except?: Lang) => rows([...ctx.texts.ke
 // Read-only screens: a stale button to them (e.g. in a reminder sent days ago) is still safe to follow.
 const navigation = (action: string) => action === "plan" || action === "help" || action === "calendar" || action === "pdf" ||
   action.startsWith("card:") || action.startsWith("help:");
-/** A repeat round: "repeat (yearly)" and "marked done by you on <date>", the period from the rule's data; empty for a first round. */
-export function repeatParts(s: Session, ctx: DialogueContext, item: PlanItem): { label: string; doneOn: string; card: string } | undefined {
-  if (!item.repeat) return undefined;
-  const { completedAt, months } = item.repeat;
-  const period = t(s, ctx, months === 12 ? "repeat.yearly" : "repeat.everyMonths", { n: months });
-  const done = date(s, completedAt);
-  return { label: t(s, ctx, "repeat.label", { period }), doneOn: t(s, ctx, "repeat.doneOn", { date: done }), card: t(s, ctx, "card.repeat", { period, date: done }) };
-}
+/** A repeat round's texts in the session's language (repeat.ts); empty for a first round. */
+export const repeatParts = (s: Session, ctx: DialogueContext, item: PlanItem) => repeatText(ctx.texts, s.lang, item);
 /** The title with "repeat (yearly)" after it for a repeat round, and the "marked done on" line to put under it; the same in the plan, the shared copy and the reminder. */
 function repeatTitle(s: Session, ctx: DialogueContext, i: PlanItem): { title: string; doneOn: string } {
   const repeat = repeatParts(s, ctx, i);
-  return { title: `${i.title[s.lang]}${repeat ? `, ${repeat.label}` : ""}`, doneOn: repeat ? `\n  ${repeat.doneOn}` : "" };
+  return { title: repeat?.title ?? i.title[s.lang]!, doneOn: repeat ? `\n  ${repeat.doneOn}` : "" };
 }
 function planLine(s: Session, ctx: DialogueContext, i: PlanItem): string {
   const { title, doneOn } = repeatTitle(s, ctx, i);

@@ -53,6 +53,13 @@ describe("calendar export", () => {
     expect(en).toContain("\\, repeat (yearly)");
     expect(en).toContain("marked done by you on September 20\\, 2026");
   });
+  it("a repeat round: Chinese comma before the label, and the label in the alarm too", () => {
+    const plan = buildPlan(rules, profile, { "medical-examination": "2026-09-20" }, "2027-09-24");
+    const title = rules.find(r => r.id === "medical-examination")!.title.zh!;
+    const zh = events(planToIcs(plan, { ...options, lang: "zh", today: "2027-09-24" }).replaceAll("\r\n ", "")).find(e => e.includes("UID:medical-examination-"))!;
+    expect(zh).toContain(`${title}，再次办理（每年）`);
+    expect(zh).toMatch(/BEGIN:VALARM[^]*DESCRIPTION:\[[^\r]*，再次办理（每年） — 2027-10-20/);
+  });
   it("marks demo data, calculated status and the legal source", () => {
     const text = planToIcs(buildPlan(rules, profile, {}, "2026-09-24"), options).replaceAll("\r\n ", "");
     expect(text).toContain("SUMMARY:[ДЕМО] Крайний срок: Медицинское освидетельствование");

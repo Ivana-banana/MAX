@@ -116,6 +116,7 @@
   "repeat.yearly": "每年",
   "repeat.everyMonths#other": "每{n}个月",
   "repeat.label": "再次办理（{period}）",
+  "repeat.separator": "，",
   "repeat.doneOn": "您已于{date}办理",
   "card.repeat": "再次办理（{period}）。您已于{date}办理。",
   "visit.reminder": "明天 — {title}。期限：{due}。\n",
