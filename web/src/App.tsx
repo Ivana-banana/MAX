@@ -238,11 +238,12 @@ function DateStep({ texts, today, prompt, message, title, invalid: invalidKey, p
   const [value, setValue] = useState("");
   const [nonexistent, setNonexistent] = useState(false);
   const t = (key: string) => text(texts, key);
-  const invalid = isText(message, t(invalidKey));
+  const outOfRange = value !== "" && value < today;
+  const invalid = outOfRange || isText(message, t(invalidKey));
   return (
     <div className="stack">
       <h1 className="heading in">{t(title)}</h1>
-      <p className={`prose in d1 ${nonexistent || invalid ? "banner banner-error" : ""}`} role={nonexistent ? "alert" : undefined}>
+      <p className={`prose in d1 ${nonexistent || invalid ? "banner banner-error" : ""}`} role={nonexistent || outOfRange ? "alert" : undefined}>
         {nonexistent ? t("app.entry.nodate") : invalid ? t(`app.${invalidKey}`) : prompt}
       </p>
       <div className="in d2">
@@ -266,11 +267,12 @@ function Completion({ texts, today, message, pending, onAction }: {
   const [value, setValue] = useState("");
   const [nonexistent, setNonexistent] = useState(false);
   const t = (key: string) => text(texts, key);
-  const invalid = isText(message, t("completion.invalid"));
+  const outOfRange = value !== "" && value > today;
+  const invalid = outOfRange || isText(message, t("completion.invalid"));
   return (
     <div className="stack">
       <h1 className="heading in">{t("app.completionTitle")}</h1>
-      <p className={`prose in d1 ${nonexistent || invalid ? "banner banner-error" : ""}`} role={nonexistent ? "alert" : undefined}>
+      <p className={`prose in d1 ${nonexistent || invalid ? "banner banner-error" : ""}`} role={nonexistent || outOfRange ? "alert" : undefined}>
         {nonexistent ? t("app.entry.nodate") : invalid ? t("app.completion.invalid") : t("app.completion.body")}
       </p>
       <div className="in d2">
