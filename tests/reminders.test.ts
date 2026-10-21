@@ -38,7 +38,7 @@ describe("reminders are offered right after the plan", () => {
     await f.click("reminders"); await f.at("2026-09-24T10:00:00+03:00");
     const on = f.sent.at(-1)!;
     expect(on.text).toContain("Напоминания: включены");
-    expect(texts(on)[0]).toBe("Медицинское освидетельствование");
+    expect(texts(on)[0]).toBe("➡ Ближайший шаг: Медицинское освидетельствование");
     expect(texts(on)).toContain("🔕 Выключить напоминания");
   });
 });

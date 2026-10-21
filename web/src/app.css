@@ -299,6 +299,12 @@ body {
   writing-mode: vertical-rl; transform: rotate(180deg);
   font: condensed 800 15px var(--caps); font-variation-settings: "wdth" 75; letter-spacing: .2em; text-transform: uppercase; color: var(--muted);
 }
+.progress { display: grid; gap: 10px; }
+.progress-line { margin: 0; font: 900 26px/1 var(--display); letter-spacing: -.01em; }
+.progress-bar { display: flex; gap: 4px; }
+.progress-bar i { flex: 1; height: 10px; border: 2px solid var(--ink); }
+.progress-bar i.on { background: var(--ink); }
+.progress .small { margin: 0; }
 .task {
   appearance: none; width: 100%; text-align: left; cursor: pointer;
   display: grid; grid-template-columns: 96px 1fr; gap: 12px; align-items: center;

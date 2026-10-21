@@ -45,6 +45,26 @@ describe("university profiles are data", () => {
     // Other languages are checked against the interface languages at startup.
     expect(() => checkTranslated(texts, [], [parseUniversity({ ...good, name: { ru: "ДУ" } })])).toThrow(/нет перевода для demo-u.name/);
   });
+  it("catches citizenship lists of cards that disagree with each other or the profile (#63)", () => {
+    const kfu = universities.find(u => u.id === "kfu")!;
+    const withIn = (id: string, values: string[]) => {
+      const set = <T extends { id: string }>(cards: T[]) => cards.map(c => c.id === id
+        ? { ...c, appliesIf: [{ field: "citizenship" as const, op: "in" as const, values }] } : c);
+      return { ...kfu, beforeEntry: set(kfu.beforeEntry), procedures: set(kfu.procedures) };
+    };
+    expect(() => checkCitizenships([kfu], [])).not.toThrow();
+    // Rule 1: a card names a country the profile does not have.
+    expect(() => checkCitizenships([withIn("visa-extension", ["CN", "IN", "EG", "FR"])], [])).toThrow(/kfu\.visa-extension.*FR.*нет в citizenships/);
+    // Rule 2: a country of the profile is in no card.
+    expect(() => checkCitizenships([{ ...kfu, citizenships: [...kfu.citizenships, "AM"] }], [])).toThrow(/AM.*ни одна карточка/);
+    // One group with a nested list inside it (EG split out) passes: visa-free countries need no card.
+    const spbgeu = universities.find(u => u.id === "spbgeu")!;
+    const nested = { ...spbgeu, beforeEntry: [...spbgeu.beforeEntry, { ...spbgeu.beforeEntry[0]!, id: "invitation-suspended",
+      appliesIf: [{ field: "citizenship" as const, op: "in" as const, values: ["EG"] }] }] };
+    expect(() => checkCitizenships([nested], [])).not.toThrow();
+    // Rule 3: a country is in both the visa and the visa-free list.
+    expect(() => checkCitizenships([withIn("ruid", ["KZ", "UZ", "TJ", "KG", "TR"])], [])).toThrow(/^(?=.*ruid).*пересекается.*TR/);
+  });
   it("adds a university with one JSON file and no code changes", () => {
     const dir = mkdtempSync(join(tmpdir(), "universities-"));
     cleanups.push(() => rmSync(dir, { recursive: true, force: true }));

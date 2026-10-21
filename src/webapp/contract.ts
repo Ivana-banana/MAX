@@ -98,6 +98,8 @@ export interface AppSession {
   /** Demo only, on the entry step: label of the chat's "show an example" button; the app sends `example`. */
   example?: string;
   plan: AppPlanItem[];
+  /** #93: how far the plan is (`planProgress`); `line` is the chat's "Passed 2 of 5"; `nextRuleId` is the one nearest step, absent once all are passed. */
+  progress: { done: number; total: number; line: string; nextRuleId?: string };
   /** The university's procedures without a calculated deadline (`AppUndatedItem`); empty for most profiles. */
   undated: AppUndatedItem[];
   /** On the entry step: cards for a student who has not entered yet; empty when the profile has none. */
