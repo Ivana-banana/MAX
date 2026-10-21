@@ -41,6 +41,18 @@ describe("calendar export", () => {
     expect(next).toContain("DTSTART;VALUE=DATE:20271020");
     expect(ics).toContain("Рекомендуемая дата: 2027-09-20");
   });
+  it("labels a repeat round in the title and the note, and leaves a first round alone", () => {
+    const first = events(planToIcs(buildPlan(rules, profile, {}, "2026-09-24"), options).replaceAll("\r\n ", ""));
+    expect(first.join("")).not.toContain("повторно (");
+    expect(first.join("")).not.toContain("пройдено вами");
+    const plan = buildPlan(rules, profile, { "medical-examination": "2026-09-20" }, "2026-09-24");
+    const next = events(planToIcs(plan, options).replaceAll("\r\n ", "")).find(e => e.includes("UID:medical-examination-"))!;
+    expect(next).toContain("Медицинское освидетельствование\\, повторно (ежегодно)");
+    expect(next).toContain("пройдено вами 20 сентября 2026 г.");
+    const en = events(planToIcs(plan, { ...options, lang: "en" }).replaceAll("\r\n ", "")).find(e => e.includes("UID:medical-examination-"))!;
+    expect(en).toContain("\\, repeat (yearly)");
+    expect(en).toContain("marked done by you on September 20\\, 2026");
+  });
   it("marks demo data, calculated status and the legal source", () => {
     const text = planToIcs(buildPlan(rules, profile, {}, "2026-09-24"), options).replaceAll("\r\n ", "");
     expect(text).toContain("SUMMARY:[ДЕМО] Крайний срок: Медицинское освидетельствование");

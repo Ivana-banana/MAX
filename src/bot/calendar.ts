@@ -38,9 +38,16 @@ export function planToIcs(items: PlanItem[], o: CalendarOptions): string {
   const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//max-first-90-days//RU", "CALSCALE:GREGORIAN", "METHOD:PUBLISH",
     "X-WR-CALNAME:" + escape(t("ics.name"))];
   for (const item of items) {
+    // A repeat round says so in the title and in the note, with the same texts as the plan (repeat.*).
+    const again = item.repeat && (() => {
+      const { months, completedAt } = item.repeat;
+      const period = format(o.texts, o.lang, months === 12 ? "repeat.yearly" : "repeat.everyMonths", { n: months });
+      return { label: ", " + format(o.texts, o.lang, "repeat.label", { period }),
+        doneOn: format(o.texts, o.lang, "repeat.doneOn", { date: new Intl.DateTimeFormat(o.lang, { dateStyle: "long", timeZone: "UTC" }).format(new Date(`${completedAt}T00:00:00Z`)) }) };
+    })();
     // A marked procedure stays under its UID as cancelled: re-importing removes it with its alarms.
     const done = item.status === "done";
-    const note = [item.action[o.lang],
+    const note = [item.action[o.lang], ...(again ? [again.doneOn] : []),
       ...(item.recommendedDate ? [t("ics.recommended") + item.recommendedDate] : []),
       t("ics.calculated"),
       ...(item.provisional ? [t("ics.provisional")] : []),
@@ -48,7 +55,7 @@ export function planToIcs(items: PlanItem[], o: CalendarOptions): string {
     lines.push("BEGIN:VEVENT", `UID:${item.ruleId}-${o.uid}@max-first-90-days`, `DTSTAMP:${stamp}`, `SEQUENCE:${o.sequence}`,
       ...(done ? ["STATUS:CANCELLED"] : []),
       `DTSTART;VALUE=DATE:${compact(item.dueDate)}`, `DTEND;VALUE=DATE:${compact(addDays(item.dueDate, 1))}`,
-      "SUMMARY:" + escape(demo + t("ics.deadline") + item.title[o.lang]),
+      "SUMMARY:" + escape(demo + t("ics.deadline") + item.title[o.lang] + (again?.label ?? "")),
       "DESCRIPTION:" + escape(note), "TRANSP:TRANSPARENT");
     for (const day of done ? [] : reminderDates(item, o.today)) {
       lines.push("BEGIN:VALARM", "ACTION:DISPLAY", `TRIGGER;VALUE=DATE-TIME:${compact(day)}${REMIND_AT}`,
