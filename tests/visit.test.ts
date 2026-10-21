@@ -37,7 +37,7 @@ describe("planning a visit in the chat", () => {
     const ask = f.click("visit:medical-examination");
     expect(f.session.step).toBe("visit");
     expect(ask.text).toContain("в какой день пойдёте");
-    expect(actions(ask)).toEqual(expect.arrayContaining(["2026-09-24", "2026-09-25", "plan"]));
+    expect(actions(ask)).toEqual(expect.arrayContaining(["/today", "/tomorrow", "plan"]));
   });
 
   it("saves the day, shows it on the card and says what the bot will do the evening before", () => {
@@ -65,6 +65,29 @@ describe("planning a visit in the chat", () => {
     f.click("card:medical-examination"); f.click("visit:medical-examination");
     expect(f.type("2026-10-05").text).toContain("позже расчётного срока");
     expect(f.session.visits?.["medical-examination"]).toBe("2026-10-05");
+  });
+
+  it("reads the day buttons when pressed, not when shown: yesterday's \"Today\" and \"Tomorrow\" mean today and tomorrow", () => {
+    const nextDay = { ...ctx, today: "2026-09-25" };
+    for (const [button, expected] of [["/today", "2026-09-25"], ["/tomorrow", "2026-09-26"]] as const) {
+      const f = planned();
+      f.click("card:medical-examination");
+      const shown = f.click("visit:medical-examination");
+      expect(actions(shown)).toContain(button);
+      const s = f.session;
+      const r = transition(s, { text: `${s.nonce}.${s.revision}|${button}`, callback: true }, nextDay);
+      expect(r.session!.visits).toEqual({ "medical-examination": expected });
+    }
+  });
+
+  it("marks a procedure done on the day of the press, not of the shown button", () => {
+    const f = planned();
+    f.click("card:medical-examination");
+    const shown = f.click("done:medical-examination");
+    expect(actions(shown)).toContain("/today");
+    const s = f.session;
+    const r = transition(s, { text: `${s.nonce}.${s.revision}|/today`, callback: true }, { ...ctx, today: "2026-09-25" });
+    expect(r.session!.completions).toEqual({ "medical-examination": "2026-09-25" });
   });
 
   it("does not offer a visit for a procedure already marked as done", () => {
