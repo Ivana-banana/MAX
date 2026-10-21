@@ -5,11 +5,13 @@ import type { Completions, DeadlineRule, Lang, PlanItem, UserProfile } from "../
 import type { BeforeEntryCard, ProcedureCountdown, University, UniversityProcedure } from "../data/loadUniversities.js";
 import { format, type Texts } from "../data/loadTexts.js";
 import { CALENDAR_FILE, planToIcs } from "./calendar.js";
+import type { PlanPdf } from "./pdf.js";
 
 // callback buttons come back to the bot; link and clipboard buttons are handled by MAX itself
 export type Button = { text: string; action: string } | { text: string; url: string } | { text: string; copy: string }
   | { text: string; app: string; payload: string };
-export interface Reply { text: string; buttons: Button[][]; ruleVersion: string; file?: { name: string; content: string } }
+/** `encoding`: binary files (the PDF) travel through the outbox as base64. */
+export interface Reply { text: string; buttons: Button[][]; ruleVersion: string; file?: { name: string; content: string; encoding?: "base64" } }
 export interface Session {
   nonce: string;
   revision: number;
@@ -37,8 +39,12 @@ export interface DialogueContext {
 }
 // locale comes only with bot_started (MAX client language); a ?start= payload arrives as "/start <payload>"
 export interface Input { text: string; callback: boolean; locale?: string }
-/** `expired`: a stale button was refused and nothing changed. */
-export interface Transition { session: Session | null; reply: Reply; expired?: true }
+/**
+ * `expired`: a stale button was refused and nothing changed.
+ * `pdf`: the reply waits for this file, which is built asynchronously (service.ts); `loading` is the
+ * notification on the pressed button, `failed` replaces the reply when the file cannot be built.
+ */
+export interface Transition { session: Session | null; reply: Reply; expired?: true; pdf?: { plan: PlanPdf; loading: string; failed: Reply } }
 // Every user-facing text comes from src/data/i18n/<lang>.json.
 const t = (s: Session, ctx: DialogueContext, key: string, vars?: Record<string, string | number>) => format(ctx.texts, s.lang, key, vars);
 // Only sessions created before university profiles existed (no id) fall back to the default one.
@@ -153,7 +159,7 @@ const link = (text: string, url: string): Button => ({ text, url });
 const languages = (ctx: DialogueContext, except?: Lang) => rows([...ctx.texts.keys()].filter(l => l !== except)
   .map(l => button(format(ctx.texts, l, "language.name"), l)), 3);
 // Read-only screens: a stale button to them (e.g. in a reminder sent days ago) is still safe to follow.
-const navigation = (action: string) => action === "plan" || action === "help" || action === "calendar" ||
+const navigation = (action: string) => action === "plan" || action === "help" || action === "calendar" || action === "pdf" ||
   action.startsWith("card:") || action.startsWith("help:");
 /** A repeat round: "repeat (yearly)" and "marked done by you on <date>", the period from the rule's data; empty for a first round. */
 export function repeatParts(s: Session, ctx: DialogueContext, item: PlanItem): { label: string; doneOn: string; card: string } | undefined {
@@ -183,6 +189,7 @@ function home(s: Session, ctx: DialogueContext, prefix = ""): Reply {
       ...notes.map(n => [button(n.title[s.lang]!, `card:${n.id}`)]),
       ...(s.reminders ? [toggle] : []),
       ...(items.some(i => i.status !== "done") ? [[button(t(s, ctx, "btn.calendar"), "calendar")]] : []),
+      ...(items.length ? [[button(t(s, ctx, "btn.pdf"), "pdf")]] : []),
       // The same plan as a screen; the payload picks the university the way ?start= does.
       ...(ctx.webApp ? [[{ text: t(s, ctx, "btn.app"), app: ctx.webApp, payload: uni(s, ctx).id }]] : []),
       [button(t(s, ctx, "btn.help"), "help")],
@@ -309,6 +316,33 @@ function calendar(s: Session, ctx: DialogueContext): Reply {
     file: { name: CALENDAR_FILE, content: planToIcs(items,
       { lang: s.lang, texts: ctx.texts, demo: ctx.demo, uid: s.nonce, today: ctx.today, sequence: s.revision, ...(s.visits ? { visits: s.visits } : {}),
         procedures: countedProcedures(s, ctx) }) } };
+}
+/**
+ * The plan as a PDF for a curator or the university (#92, D-056): deadlines, marks, legal basis and
+ * the university contact. Like shareText, no citizenship, entry date or MAX ID.
+ */
+export function planPdf(s: Session, ctx: DialogueContext): PlanPdf {
+  const u = uni(s, ctx), name = u.name[s.lang]!;
+  const items = plan(s, ctx).map(item => ({ heading: item.title[s.lang]!, body: [
+    repeatParts(s, ctx, item)?.card ?? "",
+    t(s, ctx, "card.deadline") + date(s, item.dueDate),
+    item.status === "done" ? t(s, ctx, "pdf.done", { date: date(s, s.completions[item.ruleId]!) }) : countdown(s, ctx, item),
+    ...(item.status === "done" ? [] : [(targetText(s, ctx, item) || (item.recommendedDate ? t(s, ctx, "card.recommended") + date(s, item.recommendedDate) : "")).trim()]),
+    ...(item.provisional && item.status !== "done" ? [t(s, ctx, "ics.provisional")] : []),
+    `${item.legal.act}, ${item.legal.article[s.lang]}`, item.legal.url, (t(s, ctx, "card.checked") + date(s, item.legal.checkedAt)).trim(),
+  ].filter(Boolean).join("\n") }));
+  const notes = undated(s, ctx).map(n => ({ heading: n.title[s.lang]!,
+    body: (procedureDueText(s, ctx, n).trim() || t(s, ctx, "card.when") + n.when[s.lang]) + "\n" + procedureSource(s, ctx, n) }));
+  return { lang: s.lang, title: t(s, ctx, "pdf.title", { uni: name }),
+    notes: [...(ctx.demo ? [t(s, ctx, "pdf.demo")] : []), t(s, ctx, "pdf.date", { date: date(s, ctx.today) })],
+    sections: [...items, ...notes], footer: t(s, ctx, "pdf.contact", { uni: name, url: u.contactUrl }) };
+}
+function pdf(s: Session, ctx: DialogueContext): Transition {
+  if (!plan(s, ctx).length) return { session: s, reply: home(s, ctx) };
+  const back = [button(t(s, ctx, "btn.plan"), "plan")];
+  return { session: s, reply: reply(s, ctx, t(s, ctx, "pdf.intro"), [back]),
+    pdf: { plan: planPdf(s, ctx), loading: t(s, ctx, "pdf.loading"),
+      failed: reply(s, ctx, t(s, ctx, "pdf.failed"), [[button(t(s, ctx, "btn.retry"), "pdf")], back]) } };
 }
 /** University deadlines already counted from an entered end date, for the calendar file (D-040). */
 export function countedProcedures(s: Session, ctx: DialogueContext): { id: string; title: string; due: string }[] {
@@ -494,6 +528,7 @@ export function transition(previous: Session | null, input: Input, ctx: Dialogue
     if (action === "reminders") { s.reminders = !s.reminders; }
     else if (action.startsWith("card:")) return { session: s, reply: card(s, ctx, action.slice(5).replace(FROM_REMINDER, "")) };
     else if (action === "calendar") return { session: s, reply: calendar(s, ctx) };
+    else if (action === "pdf") return pdf(s, ctx);
     else if (action.startsWith("doc:")) {
       const [, id, doc] = action.split(":");
       const item = plan(s, ctx).find(i => i.ruleId === id);

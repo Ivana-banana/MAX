@@ -11,7 +11,7 @@ import { DateField } from "./DateField.js";
 import { calendarTicket, ApiError, type ApiFailure } from "./api.js";
 import { downloadFile, insideMax, onBack, platform, tap } from "./bridge.js";
 import { universityPhoto } from "./photos.js";
-import { Accented, Button } from "./ui.js";
+import { Accented, Button, DateNote } from "./ui.js";
 import { useApp } from "./useApp.js";
 import { isText, text, type Texts } from "./texts.js";
 import { Onboarding } from "./screens/Onboarding.js";
@@ -154,11 +154,11 @@ export function App() {
     }
     if (session.step === "visit" || session.step === "docEnd") {
       const [title, invalid] = session.step === "visit" ? ["app.visitTitle", "visit.invalid"] : ["app.endTitle", "docEnd.invalid"];
-      return <DateStep texts={texts} today={status.state.today} prompt={session.prompt} message={status.message}
+      return <DateStep texts={texts} today={status.state.today} prompt={session.prompt} message={status.message} revision={session.revision}
         title={title} invalid={invalid} pending={status.pending} onAction={act} />;
     }
     if (session.step === "completion") {
-      return <Completion texts={texts} today={status.state.today} message={status.message}
+      return <Completion texts={texts} today={status.state.today} message={status.message} revision={session.revision}
         pending={status.pending} onAction={act} />;
     }
     if (session.step !== "plan") {
@@ -232,28 +232,28 @@ function Notice({ title, body, action }: { title: string; body: string; action?:
  * The client shows why a day before today is refused; the server checks the full range and answers
  * with the card. The wording of the question is the chat's.
  */
-function DateStep({ texts, today, prompt, message, title, invalid: invalidKey, pending, onAction }: {
-  texts: Texts; today: string; prompt: string; message: string; title: string; invalid: string;
+function DateStep({ texts, today, prompt, message, revision, title, invalid: invalidKey, pending, onAction }: {
+  texts: Texts; today: string; prompt: string; message: string; revision: number; title: string; invalid: string;
   pending: string | null; onAction: (action: string) => void;
 }) {
   const [value, setValue] = useState("");
   const [nonexistent, setNonexistent] = useState(false);
-  const [edited, setEdited] = useState(false);
+  // The revision whose answer the user has acted on (an edit or Save): its refusal stays hidden until a new answer.
+  const [acted, setActed] = useState<number | null>(null);
   const t = (key: string) => text(texts, key);
   const outOfRange = value !== "" && value < today;
-  const invalid = outOfRange || (!edited && isText(message, t(invalidKey)));
+  const invalid = outOfRange || (acted !== revision && isText(message, t(invalidKey)));
   return (
     <div className="stack">
       <h1 className="heading in">{t(title)}</h1>
-      <p className={`prose in d1 ${nonexistent || invalid ? "banner banner-error" : ""}`} role={nonexistent || invalid ? "alert" : undefined}>
-        {nonexistent ? t("app.entry.nodate") : invalid ? t(`app.${invalidKey}`) : prompt}
-      </p>
+      <DateNote className="in d1" prompt={prompt}
+        error={nonexistent ? t("app.entry.nodate") : invalid ? t(`app.${invalidKey}`) : ""} />
       <div className="in d2">
         <DateField label={t(title)} hint={t("app.entry.hint")}
-          onChange={(iso, display) => { setValue(iso); setEdited(true); setNonexistent(iso === "" && display.length === 10); }} />
+          onChange={(iso, display) => { setValue(iso); setActed(revision); setNonexistent(iso === "" && display.length === 10); }} />
       </div>
       <Button className="in d3" disabled={value === "" || value < today || pending !== null} loading={pending === value}
-        onClick={() => { setEdited(false); onAction(value); }}>
+        onClick={() => { setActed(revision); onAction(value); }}>
         {t("app.save")}
       </Button>
       <button type="button" className="link in d5" disabled={pending !== null} onClick={() => onAction("plan")}>
@@ -263,27 +263,27 @@ function DateStep({ texts, today, prompt, message, title, invalid: invalidKey, p
   );
 }
 
-function Completion({ texts, today, message, pending, onAction }: {
-  texts: Texts; today: string; message: string; pending: string | null; onAction: (action: string) => void;
+function Completion({ texts, today, message, revision, pending, onAction }: {
+  texts: Texts; today: string; message: string; revision: number; pending: string | null; onAction: (action: string) => void;
 }) {
   const [value, setValue] = useState("");
   const [nonexistent, setNonexistent] = useState(false);
-  const [edited, setEdited] = useState(false);
+  // The revision whose answer the user has acted on (an edit or Save): its refusal stays hidden until a new answer.
+  const [acted, setActed] = useState<number | null>(null);
   const t = (key: string) => text(texts, key);
   const outOfRange = value !== "" && value > today;
-  const invalid = outOfRange || (!edited && isText(message, t("completion.invalid")));
+  const invalid = outOfRange || (acted !== revision && isText(message, t("completion.invalid")));
   return (
     <div className="stack">
       <h1 className="heading in">{t("app.completionTitle")}</h1>
-      <p className={`prose in d1 ${nonexistent || invalid ? "banner banner-error" : ""}`} role={nonexistent || invalid ? "alert" : undefined}>
-        {nonexistent ? t("app.entry.nodate") : invalid ? t("app.completion.invalid") : t("app.completion.body")}
-      </p>
+      <DateNote className="in d1" prompt={t("app.completion.body")}
+        error={nonexistent ? t("app.entry.nodate") : invalid ? t("app.completion.invalid") : ""} />
       <div className="in d2">
         <DateField label={t("app.completionTitle")} hint={t("app.entry.hint")}
-          onChange={(iso, display) => { setValue(iso); setEdited(true); setNonexistent(iso === "" && display.length === 10); }} />
+          onChange={(iso, display) => { setValue(iso); setActed(revision); setNonexistent(iso === "" && display.length === 10); }} />
       </div>
       <Button className="in d3" disabled={value === "" || value > today || pending !== null} loading={pending === value}
-        onClick={() => { setEdited(false); onAction(value); }}>
+        onClick={() => { setActed(revision); onAction(value); }}>
         {t("app.save")}
       </Button>
       <Button className="in d4" tone="outline" disabled={pending !== null} loading={pending === "/today"} onClick={() => onAction("/today")}>

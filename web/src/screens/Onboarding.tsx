@@ -12,7 +12,7 @@ import type { AppSession, AppState } from "../api.js";
 import { closingConfirmation, openLink } from "../bridge.js";
 import { DateField } from "../DateField.js";
 import { isText, text, type Texts } from "../texts.js";
-import { Button } from "../ui.js";
+import { Button, DateNote } from "../ui.js";
 import { Question } from "./Card.js";
 
 interface Props {
@@ -155,7 +155,7 @@ export function Onboarding({ session, texts, languages, universities, message, c
     );
   }
 
-  return <EntryDate texts={texts} today={today} message={message} pending={pending} onAction={onAction}
+  return <EntryDate texts={texts} today={today} message={message} revision={session.revision} pending={pending} onAction={onAction}
     cards={session.beforeEntry} {...(session.example === undefined ? {} : { example: session.example })} />;
 }
 
@@ -191,23 +191,23 @@ function SourceNote({ note, url }: { note: string; url: string }) {
   );
 }
 
-function EntryDate({ texts, today, message, pending, onAction, example, cards }: {
-  texts: Texts; today: string; message: string; pending: string | null; onAction: (action: string) => void;
+function EntryDate({ texts, today, message, revision, pending, onAction, example, cards }: {
+  texts: Texts; today: string; message: string; revision: number; pending: string | null; onAction: (action: string) => void;
   cards: AppSession["beforeEntry"];
   /** Demo only: the chat's "show an example" label; the date itself is chosen by the server. */
   example?: string;
 }) {
   const [value, setValue] = useState("");
   const [typed, setTyped] = useState("");
-  const [edited, setEdited] = useState(false);
+  // The revision whose answer the user has acted on (an edit or Save): its refusal stays hidden until a new answer.
+  const [acted, setActed] = useState<number | null>(null);
   const t = (key: string) => text(texts, key);
   const valid = value !== "" && value <= today;
   // Say why Save is off right away, and drop the server's error once the user changes the date.
   const nonexistent = value === "" && typed.length === 10;
-  const prompt = value > today ? t("app.entry.future")
+  const error = value > today ? t("app.entry.future")
     : nonexistent ? t("app.entry.nodate")
-    : !edited && isText(message, t("entry.invalid")) ? t("app.entry.invalid") : t("app.entry.body");
-  const warning = value > today || nonexistent || (!edited && isText(message, t("entry.invalid")));
+    : acted !== revision && isText(message, t("entry.invalid")) ? t("app.entry.invalid") : "";
   // A half-filled date is worth a confirmation before MAX closes the app over it.
   useEffect(() => {
     closingConfirmation(typed !== "");
@@ -218,18 +218,18 @@ function EntryDate({ texts, today, message, pending, onAction, example, cards }:
     <div className="stack">
       <h1 className="display title in">{t("app.entryTitle")}</h1>
       {/* The dialogue's prompt asks for YYYY-MM-DD, which this field does not take. */}
-      <p className={`prose in d1 ${warning ? "banner banner-error" : ""}`} role={warning ? "alert" : undefined}>{prompt}</p>
+      <DateNote className="in d1" prompt={t("app.entry.body")} error={error} />
       <div className="in d2">
         <DateField label={t("app.entryTitle")} hint={t("app.entry.hint")}
-          onChange={(iso, display) => { setValue(iso); setTyped(display); setEdited(true); }} />
+          onChange={(iso, display) => { setValue(iso); setTyped(display); setActed(revision); }} />
       </div>
       <Button className="in d3" loading={pending !== null} disabled={!valid || pending !== null}
-        onClick={() => { setEdited(false); onAction(value); }}>
+        onClick={() => { setActed(revision); onAction(value); }}>
         {t("app.save")}
       </Button>
       {example !== undefined && (
         <Button className="in d3" tone="outline" disabled={pending !== null}
-          onClick={() => { setEdited(false); onAction("example"); }}>
+          onClick={() => { setActed(revision); onAction("example"); }}>
           {example}
         </Button>
       )}
