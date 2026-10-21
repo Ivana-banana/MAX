@@ -146,6 +146,11 @@ test("visit and completion screens: a nonexistent date shows the reason", async 
   await expect(page.getByRole("alert")).toContainText("Такой даты нет");
 
   await visit.fill("");
+  await visit.pressSequentially(moscowDate(1).replaceAll(".", "")); // yesterday: «Save» is off and the reason is shown
+  await expect(save(page)).toBeDisabled();
+  await expect(page.getByRole("alert")).toContainText("Нужна дата не раньше сегодняшней");
+
+  await visit.fill("");
   await visit.pressSequentially("01012099"); // a real day, but over a year ahead: the server refuses
   await save(page).click();
   await expect(page.getByText("Нужна дата не раньше сегодняшней")).toBeVisible();
@@ -158,6 +163,11 @@ test("visit and completion screens: a nonexistent date shows the reason", async 
   await done.pressSequentially("31022026");
   await expect(save(page)).toBeDisabled();
   await expect(page.getByRole("alert")).toContainText("Такой даты нет");
+
+  await done.fill("");
+  await done.pressSequentially(moscowDate(-1).replaceAll(".", "")); // tomorrow: «Save» is off and the reason is shown
+  await expect(save(page)).toBeDisabled();
+  await expect(page.getByRole("alert")).toContainText("Нужна дата между въездом и сегодня");
 
   await done.fill("");
   await done.pressSequentially("01012020"); // a real day, but before entry: the server refuses
