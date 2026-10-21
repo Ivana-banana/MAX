@@ -382,8 +382,9 @@ export function transition(previous: Session | null, input: Input, ctx: Dialogue
     return { session: null, reply: reply(s, ctx, t(s, ctx, "deleted"), [[button(t(s, ctx, "btn.start"), s.university ? `/start ${s.university}` : "/start")]]) };
   }
   if (s.step === "delete" && action === "cancel-delete") { s.step = s.back ?? (profile(s) ? "plan" : "language"); delete s.back; }
-  if (action === "/stop") { s.reminders = false; return { session: s, reply: reply(s, ctx, t(s, ctx, "stopped"),
-    profile(s) ? [[button(t(s, ctx, "btn.plan"), "plan")]] : []) }; }
+  if (action === "/stop") { s.reminders = false; return { session: s, reply: profile(s)
+    ? reply(s, ctx, t(s, ctx, "stopped"), [[button(t(s, ctx, "btn.plan"), "plan")]])
+    : reply(s, ctx, t(s, ctx, "stoppedNoPlan"), [[button(t(s, ctx, "btn.continue"), "continue")]]) }; }
   if (s.ruleVersion !== ctx.version) {
     s.reminders = false;
     return { session: s, reply: reply(s, ctx, t(s, ctx, "rulesChanged")) };

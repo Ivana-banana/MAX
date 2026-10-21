@@ -119,6 +119,7 @@
   "expired": "This button expired. Open /plan or /start.",
   "limited": "Too many actions in a row: the last one was not applied. Wait a minute and try again.",
   "stopped": "Reminders are off. /plan to return.",
+  "stoppedNoPlan": "Reminders are off. Tap “Continue” to return to the current step.",
   "rulesChanged": "Rules changed. Calculations are paused. Use /delete and start again.",
   "reminder": "Reminder: {title} — {due} ({countdown})",
   "reminder.overdue": "Reminder: {title} — the calculated deadline was {due}. You still need to complete it: the card shows what to do and a ready question for your university.",
