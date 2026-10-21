@@ -87,3 +87,36 @@ export function daysBetween(from: string, to: string): number {
 export function compareDates(a: string, b: string): number {
   return toTimestamp(a) - toTimestamp(b);
 }
+
+/** Saturday or Sunday: the days off of the five-day week (ТК РФ ст. 111). */
+export function isWeekend(value: string): boolean {
+  const day = new Date(toTimestamp(value)).getUTCDay();
+  return day === 0 || day === 6;
+}
+
+/**
+ * Days off inside the period the calendar covers, `from` and `to` included. Outside the period
+ * the calendar knows nothing: a missing day off there would silently count as a workday.
+ */
+export interface WorkCalendar {
+  from: string;
+  to: string;
+  daysOff: ReadonlySet<string>;
+}
+
+/**
+ * The `count`-th workday after `start`; `start` itself is not counted, whether it is a workday or
+ * not. `null` when the walk leaves the calendar period: the caller says the norm in words then.
+ */
+export function addWorkdays(start: string, count: number, calendar: WorkCalendar): string | null {
+  if (!Number.isInteger(count) || count < 1) throw new RangeError(`Число рабочих дней — целое от 1, получено: ${count}`);
+  if (compareDates(start, calendar.from) < 0 || compareDates(start, calendar.to) > 0) return null;
+
+  let day = start;
+  for (let left = count; left > 0;) {
+    day = addDays(day, 1);
+    if (compareDates(day, calendar.to) > 0) return null;
+    if (!calendar.daysOff.has(day)) left--;
+  }
+  return day;
+}
