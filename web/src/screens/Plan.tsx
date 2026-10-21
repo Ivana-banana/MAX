@@ -29,14 +29,14 @@ interface Props {
  * One procedure: the number of days, its name and one line under it. The line always carries the
  * chat's words ("68 days left", "17 days ago"), since a bare number would not say which way it counts. The whole countdown is read out to screen readers either way.
  */
-function Task({ item, index, deadline, disabled, onOpen }: {
-  item: AppPlanItem; index: number; deadline: string; disabled: boolean; onOpen: (ruleId: string) => void;
+function Task({ item, index, deadline, separator, disabled, onOpen }: {
+  item: AppPlanItem; index: number; deadline: string; separator: string; disabled: boolean; onOpen: (ruleId: string) => void;
 }) {
   const tone = item.status === "done" ? "done" : item.status === "ok" ? "calm" : "hot";
   const days = String(Math.abs(item.daysLeft)).padStart(2, "0");
   return (
     <button type="button" className={`task task-${tone} in d${Math.min(index + 1, 6)}`} disabled={disabled}
-      aria-label={`${item.title}. ${item.repeat === undefined ? "" : `${item.repeat.label}, ${item.repeat.doneOn}. `}${item.countdown}`} onClick={() => onOpen(item.ruleId)}>
+      aria-label={`${item.title}. ${item.repeat === undefined ? "" : `${item.repeat.label}${separator}${item.repeat.doneOn}. `}${item.countdown}`} onClick={() => onOpen(item.ruleId)}>
       <span className={`n ${days.length > 2 && item.status !== "done" ? "n-long" : ""}`} aria-hidden="true">
         {item.status === "done" ? "✓" : days}
       </span>
@@ -104,7 +104,7 @@ export function Plan({ session, texts, pending, onAction, onOpen, onCalendar, ca
 
       {session.plan.length === 0 && <p className="prose">{t("app.plan.empty")}</p>}
       {session.plan.map((item, index) => (
-        <Task key={item.ruleId} item={item} index={index} deadline={t("app.deadline")} disabled={pending !== null} onOpen={onOpen} />
+        <Task key={item.ruleId} item={item} index={index} deadline={t("app.deadline")} separator={t("repeat.separator")} disabled={pending !== null} onOpen={onOpen} />
       ))}
       {/* Said once for the whole list rather than on every card. */}
       {session.plan.some(item => item.provisional && item.status !== "done") && (

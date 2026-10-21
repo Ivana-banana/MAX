@@ -148,6 +148,11 @@ describe("mini app actions on the shared session", () => {
     expect(en.texts["app.title"]).toBe("First 90 days");
     expect(en.session?.plan[0]?.title).not.toBe(ru.session?.plan[0]?.title);
   });
+  it("gives the app the repeat separator of the user's language, so a screen reader does not read a Latin comma in zh", async () => {
+    const f = await fixture();
+    for (const action of ["/start", "zh", "accept", "yes", "KZ", "2026-09-01"]) await applyAction(f.service, 7, action, false);
+    expect((await readState(f.service, 7, false)).texts["repeat.separator"]).not.toContain(",");
+  });
   it("after deleting, the app's texts and the chat's reply are in the user's language", async () => {
     const f = await fixture();
     for (const action of ["/start", "zh", "accept", "yes", "KZ", "2026-09-01"]) await applyAction(f.service, 7, action, false);
