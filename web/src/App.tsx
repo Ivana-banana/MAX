@@ -229,7 +229,8 @@ function Notice({ title, body, action }: { title: string; body: string; action?:
 
 /**
  * The chat's steps that ask for a day from today on — a visit (D-039) or a document end date (D-040).
- * The server checks the range and answers with the card; the wording of the question is the chat's.
+ * The client shows why a day before today is refused; the server checks the full range and answers
+ * with the card. The wording of the question is the chat's.
  */
 function DateStep({ texts, today, prompt, message, title, invalid: invalidKey, pending, onAction }: {
   texts: Texts; today: string; prompt: string; message: string; title: string; invalid: string;
@@ -238,12 +239,13 @@ function DateStep({ texts, today, prompt, message, title, invalid: invalidKey, p
   const [value, setValue] = useState("");
   const [nonexistent, setNonexistent] = useState(false);
   const t = (key: string) => text(texts, key);
-  const invalid = isText(message, t(invalidKey));
+  const outOfRange = value !== "" && value < today;
+  const invalid = outOfRange || isText(message, t(invalidKey));
   return (
     <div className="stack">
       <h1 className="heading in">{t(title)}</h1>
-      <p className={`prose in d1 ${nonexistent || invalid ? "banner banner-error" : ""}`} role={nonexistent ? "alert" : undefined}>
-        {nonexistent ? t("app.entry.nodate") : invalid ? t(invalidKey) : prompt}
+      <p className={`prose in d1 ${nonexistent || invalid ? "banner banner-error" : ""}`} role={nonexistent || outOfRange ? "alert" : undefined}>
+        {nonexistent ? t("app.entry.nodate") : invalid ? t(`app.${invalidKey}`) : prompt}
       </p>
       <div className="in d2">
         <DateField label={t(title)} hint={t("app.entry.hint")}
@@ -266,11 +268,12 @@ function Completion({ texts, today, message, pending, onAction }: {
   const [value, setValue] = useState("");
   const [nonexistent, setNonexistent] = useState(false);
   const t = (key: string) => text(texts, key);
-  const invalid = isText(message, t("completion.invalid"));
+  const outOfRange = value !== "" && value > today;
+  const invalid = outOfRange || isText(message, t("completion.invalid"));
   return (
     <div className="stack">
       <h1 className="heading in">{t("app.completionTitle")}</h1>
-      <p className={`prose in d1 ${nonexistent || invalid ? "banner banner-error" : ""}`} role={nonexistent ? "alert" : undefined}>
+      <p className={`prose in d1 ${nonexistent || invalid ? "banner banner-error" : ""}`} role={nonexistent || outOfRange ? "alert" : undefined}>
         {nonexistent ? t("app.entry.nodate") : invalid ? t("app.completion.invalid") : t("app.completion.body")}
       </p>
       <div className="in d2">

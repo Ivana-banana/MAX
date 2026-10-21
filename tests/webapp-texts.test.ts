@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { readTexts } from "../src/data/loadTexts.js";
 import { isText } from "../web/src/texts.js";
 
 describe("mini app text match", () => {
@@ -12,5 +13,21 @@ describe("mini app text match", () => {
   it("does not match other messages or an empty template", () => {
     expect(isText("Дата въезда: ДД.ММ.ГГГГ или ГГГГ-ММ-ДД", template)).toBe(false);
     expect(isText("anything", "{from}")).toBe(false);
+  });
+});
+
+describe("mini app texts", () => {
+  const command = /(?<![\p{L}\p{N}\/:.])\/[a-z]+/u;
+
+  it("the pattern finds a command in a chat text", () => {
+    expect(readTexts("src/data/i18n").get("zh")!["visit.invalid"]).toMatch(command);
+  });
+
+  it("name no chat command in any language", () => {
+    for (const [lang, texts] of readTexts("src/data/i18n")) {
+      for (const [key, value] of Object.entries(texts)) {
+        if (key.startsWith("app.")) expect(value, `${lang} ${key}`).not.toMatch(command);
+      }
+    }
   });
 });
