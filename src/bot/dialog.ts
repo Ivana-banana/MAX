@@ -343,7 +343,7 @@ export function prompt(s: Session, ctx: DialogueContext): Reply {
         .map(row => row.map(code => button(country(s, ctx, code), code))));
     case "entry": return reply(s, ctx, t(s, ctx, "entry", { from: date(s, coverage(ctx.rules).from) }), entryRows(s, ctx));
     case "completion": return reply(s, ctx, t(s, ctx, "completion"),
-      [[button(t(s, ctx, "btn.today"), ctx.today)], [button(t(s, ctx, "btn.cancel"), "plan")]]);
+      [[button(t(s, ctx, "btn.today"), "/today")], [button(t(s, ctx, "btn.cancel"), "plan")]]);
     case "docEnd": {
       const note = undated(s, ctx).find(n => n.id === s.selected);
       return reply(s, ctx, t(s, ctx, `docEnd.${note?.countdown?.from ?? "visa-end"}`), [[button(t(s, ctx, "btn.cancel"), "plan")]]);
@@ -351,7 +351,7 @@ export function prompt(s: Session, ctx: DialogueContext): Reply {
     case "visit": {
       const item = plan(s, ctx).find(i => i.ruleId === s.selected);
       return reply(s, ctx, t(s, ctx, "visit", { title: item?.title[s.lang] ?? "" }),
-        [[button(t(s, ctx, "btn.today"), ctx.today), button(t(s, ctx, "btn.tomorrow"), addDays(ctx.today, 1))],
+        [[button(t(s, ctx, "btn.today"), "/today"), button(t(s, ctx, "btn.tomorrow"), "/tomorrow")],
           [button(t(s, ctx, "btn.cancel"), "plan")]]);
     }
     case "delete": return reply(s, ctx, t(s, ctx, "delete"),
@@ -463,7 +463,8 @@ export function transition(previous: Session | null, input: Input, ctx: Dialogue
     s.ends = { ...s.ends, [note.countdown.from]: end }; s.step = "plan"; delete s.selected;
     return { session: s, reply: procedureCard(s, ctx, note) };
   } else if (s.step === "visit") {
-    const day = typedDate(action);
+    // The buttons carry the action, not a date: a button shown yesterday must still mean today.
+    const day = action === "/today" ? ctx.today : action === "/tomorrow" ? addDays(ctx.today, 1) : typedDate(action);
     const item = plan(s, ctx).find(i => i.ruleId === s.selected && i.status !== "done");
     if (!item || !isValidDate(day) || day < ctx.today || day > addDays(ctx.today, VISIT_HORIZON_DAYS)) {
       return { session: s, reply: reply(s, ctx, t(s, ctx, "visit.invalid")) };

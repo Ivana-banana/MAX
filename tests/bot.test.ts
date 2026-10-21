@@ -492,8 +492,8 @@ describe("review fixes in the dialogue", () => {
     s = click("card:medical-examination").session!;
     const asked = click("done:medical-examination");
     s = asked.session!;
-    expect(actions(asked.reply)).toContain("2026-09-24");
-    const date = click("2026-09-24");
+    expect(actions(asked.reply)).toContain("/today");
+    const date = click("/today");
     expect(date.session!.step).toBe("plan");
     expect(date.session!.completions["medical-examination"]).toBe("2026-09-24");
   });
