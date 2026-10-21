@@ -37,8 +37,10 @@ async function toEntryDate(page: Page) {
 
 const dateField = (page: Page) => page.getByRole("textbox", { name: "Дата въезда" });
 const save = (page: Page) => page.getByRole("button", { name: "Сохранить" });
-/** Alerts with text: the date screens keep an empty alert region on the page, so a new reason is announced. */
+/** Alerts with text: the error banners and the date screens keep empty alert regions on the page, so a new reason is announced. */
 const alert = (page: Page) => page.getByRole("alert").filter({ hasText: /\S/ });
+/** The alert regions of the two error banners over the screen: the action's and the calendar's. */
+const bannerAlerts = (page: Page) => page.locator(".banners").getByRole("alert");
 
 test("entry date → plan with deadlines", async ({ page }, testInfo) => {
   await toEntryDate(page);
@@ -65,6 +67,7 @@ test("entry date → change the citizenship and choose again", async ({ page }, 
 test("API failure → clear message, retry works without a restart", async ({ page }, testInfo) => {
   await toEntryDate(page);
   await dateField(page).fill(moscowDate(7));
+  await expect(bannerAlerts(page)).toHaveText(["", ""]); // the regions are on the page before the first failure
 
   await page.route("**/api/action", route => route.fulfill({ status: 500, body: "{}" }));
   await save(page).click();
@@ -86,6 +89,7 @@ test("API failure → clear message, retry works without a restart", async ({ pa
   await save(page).click();
   await expect(page.getByRole("heading", { name: "Ваш план" })).toBeVisible();
   await expect(alert(page)).toHaveCount(0);
+  await expect(bannerAlerts(page)).toHaveText(["", ""]); // the failure is gone, the regions stay
 });
 
 test("empty and invalid date: Save stays off or the reason is shown", async ({ page }, testInfo) => {
@@ -119,7 +123,7 @@ test("empty and invalid date: Save stays off or the reason is shown", async ({ p
 
 test("a server refusal shows again on a repeated Save; a network failure does not show it", async ({ page }) => {
   await toEntryDate(page);
-  await expect(page.getByRole("alert")).toHaveText(""); // the live region is on the page before any reason
+  await expect(page.getByRole("alert")).toHaveText(["", "", ""]); // two banners and the date line, before any reason
   await dateField(page).fill("01.01.2020");
   await save(page).click();
   await expect(alert(page)).toContainText("Дата вне сценария");

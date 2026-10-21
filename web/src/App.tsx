@@ -195,10 +195,10 @@ export function App() {
         <div className="banners">
           {status.state?.demo === true && <Banner tone="demo">{t("banner.demo").trim()}</Banner>}
           {status.state?.mocked === true && <Banner tone="mocked">{t("app.banner.mocked")}</Banner>}
-          {status.error !== null && status.error !== "no_launch" && status.state !== null && (
-            <Banner tone="error" onDismiss={dismiss}>{failure(status.error)}</Banner>
-          )}
-          {calendarError !== null && <Banner tone="error" onDismiss={() => setCalendarError(null)}>{failure(calendarError)}</Banner>}
+          <Banner tone="error" onDismiss={dismiss}>
+            {status.error !== null && status.error !== "no_launch" && status.state !== null ? failure(status.error) : ""}
+          </Banner>
+          <Banner tone="error" onDismiss={() => setCalendarError(null)}>{calendarError === null ? "" : failure(calendarError)}</Banner>
         </div>
         {body()}
       </main>
@@ -206,13 +206,19 @@ export function App() {
   );
 }
 
+/**
+ * A line over the screen. An error banner stays on the page with an empty alert region and only its text
+ * changes, so a screen reader announces every new failure (the same as DateNote).
+ */
 function Banner({ tone, children, onDismiss }: {
   tone: "demo" | "mocked" | "error"; children: string; onDismiss?: () => void;
 }) {
+  if (tone !== "error") return <div className={`banner banner-${tone}`} role="note"><span>{children}</span></div>;
   return (
-    <div className={`banner banner-${tone}`} role={tone === "error" ? "alert" : "note"}>
-      <span>{children}</span>
-      {onDismiss !== undefined && <button type="button" className="banner-close" onClick={onDismiss} aria-label="×">×</button>}
+    <div className={children === "" ? "banner-idle" : "banner banner-error"}>
+      <span role="alert">{children}</span>
+      {children !== "" && onDismiss !== undefined
+        && <button type="button" className="banner-close" onClick={onDismiss} aria-label="×">×</button>}
     </div>
   );
 }
