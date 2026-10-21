@@ -231,6 +231,9 @@ test("a saved visit comes back to the card with a confirmation, and a warning wh
   await save(page).click();
   await expect(page.getByRole("status")).toHaveText(`Визит записан: ${moscowDate(-1)}`);
   await expect(page.getByText(late)).toHaveCount(0);
+  await page.getByRole("checkbox", { name: /Паспорт$/ }).click(); // the next action: the confirmation was about the save only
+  await expect(page.getByRole("checkbox", { name: /Паспорт$/ })).toHaveAttribute("aria-checked", "true");
+  await expect(page.getByRole("status")).toHaveCount(0);
 
   // Cancel leaves the question for the plan, as before; the confirmation is about a save only.
   await page.getByRole("button", { name: "Изменить день визита" }).click();
