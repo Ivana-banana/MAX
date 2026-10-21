@@ -168,6 +168,8 @@
   "app.entry.nodate": "Bunday sana taqvimda yoʻq. Kun va oyni tekshiring.",
   "app.completion.body": "Oʻtgan sana KK.OO.YYYY formatida. Bu oʻz belgingiz, IIV tasdigʻi emas.",
   "app.completion.invalid": "Sana kirgan kun bilan bugun oraligʻida va oldingi belgidan keyin boʻlishi kerak.",
+  "app.visit.invalid": "Sana bugundan oldin boʻlmasligi va bir yildan oshmasligi kerak.",
+  "app.docEnd.invalid": "Sana bugundan oldin boʻlmasligi va ikki yildan oshmasligi kerak.",
   "app.save": "Saqlash",
   "app.today": "Bugun",
   "app.reminders": "Chatdagi eslatmalar",

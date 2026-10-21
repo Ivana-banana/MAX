@@ -243,7 +243,7 @@ function DateStep({ texts, today, prompt, message, title, invalid: invalidKey, p
     <div className="stack">
       <h1 className="heading in">{t(title)}</h1>
       <p className={`prose in d1 ${nonexistent || invalid ? "banner banner-error" : ""}`} role={nonexistent ? "alert" : undefined}>
-        {nonexistent ? t("app.entry.nodate") : invalid ? t(invalidKey) : prompt}
+        {nonexistent ? t("app.entry.nodate") : invalid ? t(`app.${invalidKey}`) : prompt}
       </p>
       <div className="in d2">
         <DateField label={t(title)} hint={t("app.entry.hint")}

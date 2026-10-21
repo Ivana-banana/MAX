@@ -144,6 +144,12 @@ test("visit and completion screens: a nonexistent date shows the reason", async 
   await visit.pressSequentially("31022027");
   await expect(save(page)).toBeDisabled();
   await expect(page.getByRole("alert")).toContainText("Такой даты нет");
+
+  await visit.fill("");
+  await visit.pressSequentially("01012099"); // a real day, but over a year ahead: the server refuses
+  await save(page).click();
+  await expect(page.getByText("Нужна дата не раньше сегодняшней")).toBeVisible();
+  await expect(page.locator("body")).not.toContainText("/plan");
   await page.getByRole("button", { name: "Отмена" }).click();
 
   await page.getByRole("button", { name: /Медицинское освидетельствование/ }).click();
