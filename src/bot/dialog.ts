@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { buildPlan, coverage, matchesCondition, REMINDER_OFFSETS } from "../core/deadlines.js";
+import { planProgress } from "../core/progress.js";
 import { addDays, compareDates, daysBetween, isValidDate } from "../core/dates.js";
 import type { Completions, DeadlineRule, Lang, PlanItem, UserProfile } from "../core/types.js";
 import type { BeforeEntryCard, ProcedureCountdown, University, UniversityProcedure } from "../data/loadUniversities.js";
@@ -167,8 +168,19 @@ function planLine(s: Session, ctx: DialogueContext, i: PlanItem): string {
   const repeat = repeatParts(s, ctx, i);
   return `• ${i.title[s.lang]}${repeat ? `, ${repeat.label}` : ""}: ${date(s, i.dueDate)} — ${countdown(s, ctx, i)}${repeat ? `\n  ${repeat.doneOn}` : ""}`;
 }
+/** #93: "Passed 2 of 5" and the one nearest step, for the top of the plan; the app shows both too. Empty without a plan. */
+export function progressParts(s: Session, ctx: DialogueContext, items: PlanItem[]): { done: number; total: number; line: string; text: string; next?: PlanItem } {
+  const { done, total, next } = planProgress(items);
+  if (total === 0) return { done, total, line: "", text: "" };
+  const line = t(s, ctx, "progress.line", { done, total });
+  const text = next
+    ? t(s, ctx, "progress.home.next", { line, title: next.title[s.lang]!, due: date(s, next.dueDate), countdown: countdown(s, ctx, next) })
+    : t(s, ctx, "progress.home.all", { line });
+  return { done, total, line, text, ...(next ? { next } : {}) };
+}
 function home(s: Session, ctx: DialogueContext, prefix = ""): Reply {
   const items = plan(s, ctx);
+  const progress = progressParts(s, ctx, items);
   const lines = items.map(i => planLine(s, ctx, i));
   const notes = undated(s, ctx);
   const noteLines = notes.length ? t(s, ctx, "home.undated") + notes.map(n => {
@@ -177,9 +189,11 @@ function home(s: Session, ctx: DialogueContext, prefix = ""): Reply {
   }).join("\n") : "";
   // Reminders are the core mechanic, so while they are off the switch comes first, right under the text.
   const toggle = [button(t(s, ctx, s.reminders ? "btn.remindersOff" : "btn.remindersOn"), "reminders")];
-  return reply(s, ctx, prefix + t(s, ctx, "home.title") + lines.join("\n") + noteLines + t(s, ctx, "home.scope") +
+  return reply(s, ctx, prefix + t(s, ctx, "home.title") + progress.text + lines.join("\n") + noteLines + t(s, ctx, "home.scope") +
     t(s, ctx, s.reminders ? "home.reminders.on" : "home.reminders.off"),
-    [...(s.reminders ? [] : [toggle]), ...items.map(i => [button(i.title[s.lang]!, `card:${i.ruleId}`)]),
+    [...(s.reminders ? [] : [toggle]),
+      ...(progress.next ? [[button(t(s, ctx, "btn.next", { title: progress.next.title[s.lang]! }), `card:${progress.next.ruleId}`)]] : []),
+      ...items.map(i => [button(i.title[s.lang]!, `card:${i.ruleId}`)]),
       ...notes.map(n => [button(n.title[s.lang]!, `card:${n.id}`)]),
       ...(s.reminders ? [toggle] : []),
       ...(items.some(i => i.status !== "done") ? [[button(t(s, ctx, "btn.calendar"), "calendar")]] : []),

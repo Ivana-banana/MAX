@@ -12,7 +12,7 @@ import { coverage } from "../core/deadlines.js";
 import { isValidDate } from "../core/dates.js";
 import type { Lang, PlanItem } from "../core/types.js";
 import {
-  beforeEntry, beforeEntryNote, consequenceText, countdown, documentsNote, mapUrl, pageLabel, placeText, plan, repeatParts, targetText, procedureDue, procedureDueText, procedureSource, profile, prompt, shareText, transition, undated, universityLost, type DialogueContext, type Input, type Session,
+  beforeEntry, beforeEntryNote, consequenceText, countdown, documentsNote, mapUrl, pageLabel, placeText, plan, progressParts, repeatParts, targetText, procedureDue, procedureDueText, procedureSource, profile, prompt, shareText, transition, undated, universityLost, type DialogueContext, type Input, type Session,
 } from "../bot/dialog.js";
 import { funnelEvents, funnelUniversity } from "../bot/funnel.js";
 import { BASE_LANG, format } from "../data/loadTexts.js";
@@ -107,6 +107,11 @@ function repeatView(session: Session, ctx: DialogueContext, item: PlanItem) {
   return repeat ? { repeat: { label: repeat.label, doneOn: repeat.doneOn } } : {};
 }
 
+/** #93: how many procedures are passed and which one is next, the chat's own wording of the first. */
+function progressView(session: Session, ctx: DialogueContext, items: PlanItem[]) {
+  const { done, total, line, next } = progressParts(session, ctx, items);
+  return { done, total, line, ...(next ? { nextRuleId: next.ruleId } : {}) };
+}
 /** D-040 fields of an undated procedure: the button to enter the end date, and the counted dates once entered. */
 function countdownView(session: Session, ctx: DialogueContext, note: ReturnType<typeof undated>[number]) {
   if (!note.countdown) return {};
@@ -162,6 +167,7 @@ function view(session: Session | null, ctx: DialogueContext, mocked: boolean, hi
         ...placeView(session, ctx, item.ruleId),
         ...(targetText(session, ctx, item) ? { target: targetText(session, ctx, item).trim() } : {}),
       })) : [],
+      progress: progressView(session, ctx, profile(session) && !stale ? plan(session, ctx) : []),
       undated: profile(session) && !stale ? undated(session, ctx).map(note => ({
         id: note.id,
         title: localized(note.title),

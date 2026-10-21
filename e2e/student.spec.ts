@@ -45,7 +45,9 @@ test("entry date → plan with deadlines", async ({ page }, testInfo) => {
   expect(await page.evaluate(() => (globalThis as unknown as { closingConfirmation: boolean[] }).closingConfirmation.at(-1))).toBe(true);
   await save(page).click();
   await expect(page.getByRole("heading", { name: "Ваш план" })).toBeVisible();
-  await expect(page.getByRole("button", { name: /Медицинское освидетельствование/ })).toContainText(/Срок: .*осталось \d+/);
+  await expect(page.getByRole("button", { name: /^Медицинское освидетельствование/ })).toContainText(/Срок: .*осталось \d+/);
+  await expect(page.getByRole("progressbar")).toHaveText("Пройдено 0 из 2");
+  await expect(page.getByRole("button", { name: /^Ближайший шаг: / })).toBeVisible();
   await page.screenshot({ path: testInfo.outputPath("1-plan.png"), fullPage: true, animations: "disabled" });
 });
 
@@ -137,7 +139,7 @@ test("visit and completion screens: a nonexistent date shows the reason", async 
   await toEntryDate(page);
   await dateField(page).fill(moscowDate(7));
   await save(page).click();
-  await page.getByRole("button", { name: /Медицинское освидетельствование/ }).click();
+  await page.getByRole("button", { name: /^Медицинское освидетельствование/ }).click();
 
   await page.getByRole("button", { name: "Запланировать визит" }).click();
   const visit = page.getByRole("textbox", { name: "Когда пойдёте?" });
@@ -160,7 +162,7 @@ test("visit and completion screens: a nonexistent date shows the reason", async 
   await expect(page.getByRole("alert")).toHaveCount(0);
   await page.getByRole("button", { name: "Отмена" }).click();
 
-  await page.getByRole("button", { name: /Медицинское освидетельствование/ }).click();
+  await page.getByRole("button", { name: /^Медицинское освидетельствование/ }).click();
   await page.getByRole("button", { name: "Процедура пройдена" }).click();
   const done = page.getByRole("textbox", { name: "Когда вы прошли процедуру?" });
   await done.pressSequentially("31022026");
@@ -186,12 +188,12 @@ test("a marked yearly procedure comes back labelled as a repeat, with the date i
   await toEntryDate(page);
   await dateField(page).fill(moscowDate(7));
   await save(page).click();
-  await page.getByRole("button", { name: /Медицинское освидетельствование/ }).click();
+  await page.getByRole("button", { name: /^Медицинское освидетельствование/ }).click();
   await page.getByRole("button", { name: "Процедура пройдена" }).click();
   await page.getByRole("textbox", { name: "Когда вы прошли процедуру?" }).fill(moscowDate(2));
   await save(page).click();
   await expect(page.getByRole("heading", { name: "Ваш план" })).toBeVisible();
-  const tile = page.getByRole("button", { name: /Медицинское освидетельствование/ });
+  const tile = page.getByRole("button", { name: /^Медицинское освидетельствование/ });
   await expect(tile).toContainText("повторно (ежегодно)");
   await expect(tile).toContainText("пройдено вами");
   await tile.click();
