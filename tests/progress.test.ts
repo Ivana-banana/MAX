@@ -20,6 +20,12 @@ describe("planProgress", () => {
     expect(planProgress([repeat, open])).toEqual({ done: 1, total: 2, next: open });
   });
 
+  it("opens a repeat round again once its date is near or missed (#103)", () => {
+    const passed = item("done"), soon = item("dueSoon", true), late = item("overdue", true);
+    expect(planProgress([passed, soon])).toEqual({ done: 1, total: 2, next: soon });
+    expect(planProgress([passed, late])).toEqual({ done: 1, total: 2, next: late });
+  });
+
   it("has no next step once everything is passed", () => {
     expect(planProgress([item("done"), item("ok", true)])).toEqual({ done: 2, total: 2 });
   });
