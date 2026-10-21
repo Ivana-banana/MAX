@@ -164,6 +164,7 @@
   "app.entry.future": "入境日期不能是将来的日期：期限从实际入境日起计算。",
   "app.entry.nodate": "日历上没有这个日期。请检查日和月。",
   "app.completion.body": "办理日期，格式为 DD.MM.YYYY。这是您的自我标记，不是内务部的确认。",
+  "app.completion.invalid": "日期需在入境日期和今天之间，并晚于上一次标记。",
   "app.save": "保存",
   "app.today": "今天",
   "app.reminders": "聊天提醒",

@@ -271,7 +271,7 @@ function Completion({ texts, today, message, pending, onAction }: {
     <div className="stack">
       <h1 className="heading in">{t("app.completionTitle")}</h1>
       <p className={`prose in d1 ${nonexistent || invalid ? "banner banner-error" : ""}`} role={nonexistent ? "alert" : undefined}>
-        {nonexistent ? t("app.entry.nodate") : invalid ? t("completion.invalid") : t("app.completion.body")}
+        {nonexistent ? t("app.entry.nodate") : invalid ? t("app.completion.invalid") : t("app.completion.body")}
       </p>
       <div className="in d2">
         <DateField label={t("app.completionTitle")} hint={t("app.entry.hint")}

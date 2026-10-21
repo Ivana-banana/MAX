@@ -166,6 +166,7 @@
   "app.entry.future": "Kirgan sana kelajakda boʻla olmaydi: muddatlar haqiqiy kirgan kundan hisoblanadi.",
   "app.entry.nodate": "Bunday sana taqvimda yoʻq. Kun va oyni tekshiring.",
   "app.completion.body": "Oʻtgan sana KK.OO.YYYY formatida. Bu oʻz belgingiz, IIV tasdigʻi emas.",
+  "app.completion.invalid": "Sana kirgan kun bilan bugun oraligʻida va oldingi belgidan keyin boʻlishi kerak.",
   "app.save": "Saqlash",
   "app.today": "Bugun",
   "app.reminders": "Chatdagi eslatmalar",

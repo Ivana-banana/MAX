@@ -152,4 +152,10 @@ test("visit and completion screens: a nonexistent date shows the reason", async 
   await done.pressSequentially("31022026");
   await expect(save(page)).toBeDisabled();
   await expect(page.getByRole("alert")).toContainText("Такой даты нет");
+
+  await done.fill("");
+  await done.pressSequentially("01012020"); // a real day, but before entry: the server refuses
+  await save(page).click();
+  await expect(page.getByText("Нужна дата между въездом и сегодня")).toBeVisible();
+  await expect(page.locator("body")).not.toContainText("/plan");
 });
