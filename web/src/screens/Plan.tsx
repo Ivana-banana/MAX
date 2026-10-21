@@ -53,10 +53,9 @@ function Task({ item, index, deadline, disabled, onOpen }: {
 export function Plan({ session, texts, pending, onAction, onOpen, onCalendar, calendarBusy }: Props) {
   const t = (key: string) => text(texts, key);
   const unfinished = session.plan.some(item => item.status !== "done");
-  // A marked first-round procedure is replaced by its repeat a year later, so "everything done"
-  // means every first-round procedure is marked; repeats stay listed below the finale.
-  const firstRound = session.plan.filter(item => !item.isRepeat);
-  const finished = session.plan.length > 0 && firstRound.every(item => item.status === "done");
+  // "Everything done" is the server's progress with no next step: every first-round procedure is
+  // marked and no repeat is near or missed (#103), so the screen and the chat agree; repeats stay listed below the finale.
+  const finished = session.plan.length > 0 && session.progress.nextRuleId === undefined;
   const next = session.plan.find(item => item.ruleId === session.progress.nextRuleId);
   const photo = universityPhoto(session.university.id);
   // Outside MAX the plan text goes to the clipboard; null until the first press.

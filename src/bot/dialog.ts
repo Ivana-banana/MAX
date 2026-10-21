@@ -170,9 +170,14 @@ export function repeatParts(s: Session, ctx: DialogueContext, item: PlanItem): {
   const done = date(s, completedAt);
   return { label: t(s, ctx, "repeat.label", { period }), doneOn: t(s, ctx, "repeat.doneOn", { date: done }), card: t(s, ctx, "card.repeat", { period, date: done }) };
 }
-function planLine(s: Session, ctx: DialogueContext, i: PlanItem): string {
+/** The title with "repeat (yearly)" after it for a repeat round, and the "marked done on" line to put under it; the same in the plan, the shared copy and the reminder. */
+function repeatTitle(s: Session, ctx: DialogueContext, i: PlanItem): { title: string; doneOn: string } {
   const repeat = repeatParts(s, ctx, i);
-  return `• ${i.title[s.lang]}${repeat ? `, ${repeat.label}` : ""}: ${date(s, i.dueDate)} — ${countdown(s, ctx, i)}${repeat ? `\n  ${repeat.doneOn}` : ""}`;
+  return { title: `${i.title[s.lang]}${repeat ? `, ${repeat.label}` : ""}`, doneOn: repeat ? `\n  ${repeat.doneOn}` : "" };
+}
+function planLine(s: Session, ctx: DialogueContext, i: PlanItem): string {
+  const { title, doneOn } = repeatTitle(s, ctx, i);
+  return `• ${title}: ${date(s, i.dueDate)} — ${countdown(s, ctx, i)}${doneOn}`;
 }
 /** #93: "Passed 2 of 5" and the one nearest step, for the top of the plan; the app shows both too. Empty without a plan. */
 export function progressParts(s: Session, ctx: DialogueContext, items: PlanItem[]): { done: number; total: number; line: string; text: string; next?: PlanItem } {
@@ -218,7 +223,10 @@ export function shareText(s: Session, ctx: DialogueContext): string {
   const items = plan(s, ctx);
   if (!items.length) return "";
   const name = uni(s, ctx).name[s.lang]!;
-  const lines = items.map(i => t(s, ctx, i.status === "done" ? "share.done" : "share.item", { title: i.title[s.lang]!, due: date(s, i.dueDate) }));
+  const lines = items.map(i => {
+    const { title, doneOn } = repeatTitle(s, ctx, i);
+    return t(s, ctx, i.status === "done" ? "share.done" : "share.item", { title, due: date(s, i.dueDate) }) + doneOn;
+  });
   return (ctx.demo ? t(s, ctx, "banner.demo") : "") + t(s, ctx, "share.plan", { uni: name, lines: lines.join("\n") }) +
     (items.some(i => i.provisional && i.status !== "done") ? t(s, ctx, "share.provisional", { uni: name }) : "");
 }
@@ -581,6 +589,7 @@ export function visitReply(s: Session, ctx: DialogueContext, item: PlanItem): Re
     [[button(t(s, ctx, "btn.details"), `card:${item.ruleId}`)], [button(t(s, ctx, "btn.planShort"), "plan")]]);
 }
 export function reminderReply(s: Session, ctx: DialogueContext, item: PlanItem): Reply {
-  return reply(s, ctx, t(s, ctx, item.status === "overdue" ? "reminder.overdue" : "reminder", { title: item.title[s.lang]!, due: date(s, item.dueDate), countdown: countdown(s, ctx, item) }),
+  const { title, doneOn } = repeatTitle(s, ctx, item);
+  return reply(s, ctx, t(s, ctx, item.status === "overdue" ? "reminder.overdue" : "reminder", { title, due: date(s, item.dueDate), countdown: countdown(s, ctx, item) }) + doneOn,
     [[button(t(s, ctx, "btn.details"), `card:${item.ruleId}${FROM_REMINDER}`)], [button(t(s, ctx, "btn.planShort"), "plan")]]);
 }

@@ -289,10 +289,41 @@ export function checkRuleTargets(universities: University[], rules: readonly Dea
   }
 }
 
-/** A citizenship the rules exclude must not look covered: it is offered separately and leads to help. */
+/**
+ * A citizenship the rules exclude must not look covered: it is offered separately and leads to help.
+ * The `citizenship in` lists must agree (#63): each is inside `citizenships`, any two are disjoint or nested;
+ * with two or more groups (maximal lists) their union equals `citizenships`; a profile with one group is not
+ * checked for coverage. Not caught: a country dropped from one list only; a visa list that fully includes the visa-free group.
+ */
 export function checkCitizenships(universities: University[], excluded: string[]): void {
   for (const u of universities) {
     const clash = u.citizenships.filter(c => excluded.includes(c));
     if (clash.length) throw new UniversityValidationError(u.id, `гражданства ${clash.join(", ")} исключены нормами — уберите их из профиля`);
+    checkCitizenshipLists(u);
+  }
+}
+
+/** Visa and visa-free cards repeat country lists; each list is inside the profile, together they cover it, none overlaps partly. */
+function checkCitizenshipLists(u: University): void {
+  const lists = [...u.beforeEntry, ...u.procedures].flatMap(card =>
+    card.appliesIf.filter(c => c.op === "in").map(c => ({ card: card.id, values: c.values })));
+  if (lists.length === 0) return;
+  for (const { card, values } of lists) {
+    const outside = values.filter(c => !u.citizenships.includes(c));
+    if (outside.length) throw new UniversityValidationError(`${u.id}.${card}`, `страны ${outside.join(", ")} есть в списке карточки, но нет в citizenships профиля`);
+  }
+  // A group is a list not inside another one; one group (only visa cards) leaves the others without a card on purpose.
+  const groups = lists.filter((l, i) => !lists.some((o, j) => o.values.length > l.values.length || (o.values.length === l.values.length && j < i)
+    ? l.values.every(c => o.values.includes(c)) : false));
+  const lost = groups.length > 1 ? u.citizenships.filter(c => !lists.some(l => l.values.includes(c))) : [];
+  if (lost.length) throw new UniversityValidationError(u.id, `страны ${lost.join(", ")} есть в citizenships, но ни одна карточка их не охватывает`);
+  for (const [i, a] of lists.entries()) {
+    for (const b of lists.slice(i + 1)) {
+      const shared = a.values.filter(c => b.values.includes(c));
+      const nested = shared.length === a.values.length || shared.length === b.values.length;
+      if (shared.length && !nested) {
+        throw new UniversityValidationError(`${u.id}.${a.card}`, `список пересекается с карточкой «${b.card}» только частью (${shared.join(", ")}): страна попала в два разных списка`);
+      }
+    }
   }
 }
