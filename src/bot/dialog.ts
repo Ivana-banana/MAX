@@ -382,8 +382,9 @@ export function transition(previous: Session | null, input: Input, ctx: Dialogue
     return { session: null, reply: reply(s, ctx, t(s, ctx, "deleted"), [[button(t(s, ctx, "btn.start"), s.university ? `/start ${s.university}` : "/start")]]) };
   }
   if (s.step === "delete" && action === "cancel-delete") { s.step = s.back ?? (profile(s) ? "plan" : "language"); delete s.back; }
-  if (action === "/stop") { s.reminders = false; return { session: s, reply: reply(s, ctx, t(s, ctx, "stopped"),
-    profile(s) ? [[button(t(s, ctx, "btn.plan"), "plan")]] : []) }; }
+  if (action === "/stop") { s.reminders = false; return { session: s, reply: profile(s)
+    ? reply(s, ctx, t(s, ctx, "stopped"), [[button(t(s, ctx, "btn.plan"), "plan")]])
+    : reply(s, ctx, t(s, ctx, "stoppedNoPlan"), [[button(t(s, ctx, "btn.continue"), "continue")]]) }; }
   if (s.ruleVersion !== ctx.version) {
     s.reminders = false;
     return { session: s, reply: reply(s, ctx, t(s, ctx, "rulesChanged")) };
@@ -399,6 +400,8 @@ export function transition(previous: Session | null, input: Input, ctx: Dialogue
     delete s.university; delete s.citizenship; delete s.entryDate; delete s.selected; delete s.back; delete s.visits; delete s.ends;
     s.completions = {}; s.documents = {}; s.reminders = false; s.step = "scope";
   }
+  // After /stop before the plan: the current step's question again, not an answer to it.
+  if (action === "continue") return { session: s, reply: prompt(s, ctx) };
   const start = /^\/start(?:\s+(\S+))?$/.exec(action);
   if (start) {
     // A university's QR code opens max.ru/<bot>?start=<id>; the choice is fixed once the plan exists.
