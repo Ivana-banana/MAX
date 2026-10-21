@@ -69,7 +69,7 @@
   "help.intro.overdue": "The calculated date has passed. Do not put it off: tell {uni} and ask how to complete the procedure now. The bot does not assess the consequences and is not legal advice. A ready question: copy it, replace ___ with the reason and send it yourself:\n\n",
   "help.contacts": "\n\n{uni} contacts: {url}",
   "consent": "The bot stores your MAX ID, language, dates and checkmarks in its database until deletion or 400 days of inactivity. To measure usefulness it only counts daily totals of actions, without your MAX ID. Do not send passports or medical files. /delete removes your profile and queued jobs; event fingerprints expire within 7 days. This is preparation support, not legal advice. Continue?",
-  "scope": "Scope: age 18+, first entry for study longer than 90 days, {uni} dormitory, no residence permit and no previously completed procedures. Entry from {from}. Does everything match? In demo, answer for a fictional student.",
+  "scope": "Scope: age 18+, first entry for study longer than 90 days, {uni} dormitory, no residence permit and no previously completed procedures. Entry from {from}. Does everything match? Not entered yet — answer “Yes” too: a “Not in Russia yet” button comes later. In demo, answer for a fictional student.",
   "btn.otherUniversity": "🏫 I study at another university",
   "btn.universities": "← Back to the list",
   "btn.noUniversity": "My university is not listed",
@@ -215,5 +215,15 @@
   "beforeEntry.fact": "University fact — {uni} page: {url} (checked {date}).",
   "beforeEntry.assumption": "\nBot's assumption: {text}",
   "beforeEntry.scope": "\n\nThis is not a full list: it shows only what the university writes on its own pages. Check the general rules of entry to Russia for your country (a visa or the Gosuslugi RuID app) with the Russian consulate or the university's international office.",
-  "beforeEntry.next": "\n\nOnce you have entered, send your entry date — the bot will build your deadline plan."
+  "beforeEntry.next": "\n\nOnce you have entered, send your entry date — the bot will build your deadline plan.",
+  "btn.pdf": "📄 Plan as PDF",
+  "btn.retry": "Try again",
+  "pdf.intro": "A PDF of your plan: deadlines, legal basis and completed steps. You can forward it to your curator or the university. These are calculated dates, not an official decision.",
+  "pdf.loading": "Preparing the PDF…",
+  "pdf.failed": "Could not build the PDF. Your plan has not changed. Tap \"Try again\" or go back to the plan.",
+  "pdf.title": "Preparation plan — {uni}",
+  "pdf.demo": "DEMONSTRATION DATA. A training profile, not for submission to authorities.",
+  "pdf.date": "Calculated on {date}. The bot calculated the deadlines from its reference data; this is not an official decision. Completed steps are as marked by the student.",
+  "pdf.done": "Completed on {date} (marked by the student)",
+  "pdf.contact": "Check the place and the documents with {uni}: {url}"
 }
