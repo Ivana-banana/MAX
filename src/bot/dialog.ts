@@ -155,9 +155,21 @@ const languages = (ctx: DialogueContext, except?: Lang) => rows([...ctx.texts.ke
 // Read-only screens: a stale button to them (e.g. in a reminder sent days ago) is still safe to follow.
 const navigation = (action: string) => action === "plan" || action === "help" || action === "calendar" ||
   action.startsWith("card:") || action.startsWith("help:");
+/** A repeat round: "repeat (yearly)" and "marked done by you on <date>", the period from the rule's data; empty for a first round. */
+export function repeatParts(s: Session, ctx: DialogueContext, item: PlanItem): { label: string; doneOn: string; card: string } | undefined {
+  if (!item.repeat) return undefined;
+  const { completedAt, months } = item.repeat;
+  const period = t(s, ctx, months === 12 ? "repeat.yearly" : "repeat.everyMonths", { n: months });
+  const done = date(s, completedAt);
+  return { label: t(s, ctx, "repeat.label", { period }), doneOn: t(s, ctx, "repeat.doneOn", { date: done }), card: t(s, ctx, "card.repeat", { period, date: done }) };
+}
+function planLine(s: Session, ctx: DialogueContext, i: PlanItem): string {
+  const repeat = repeatParts(s, ctx, i);
+  return `• ${i.title[s.lang]}${repeat ? `, ${repeat.label}` : ""}: ${date(s, i.dueDate)} — ${countdown(s, ctx, i)}${repeat ? `\n  ${repeat.doneOn}` : ""}`;
+}
 function home(s: Session, ctx: DialogueContext, prefix = ""): Reply {
   const items = plan(s, ctx);
-  const lines = items.map(i => `• ${i.title[s.lang]}: ${date(s, i.dueDate)} — ${countdown(s, ctx, i)}`);
+  const lines = items.map(i => planLine(s, ctx, i));
   const notes = undated(s, ctx);
   const noteLines = notes.length ? t(s, ctx, "home.undated") + notes.map(n => {
     const counted = procedureDue(s, ctx, n);
@@ -228,7 +240,8 @@ function card(s: Session, ctx: DialogueContext, id: string, prefix = ""): Reply 
   // Only the consequence the law states directly; no fines: liability is for evasion, not lateness (docs/legal-review.md, 5).
   const late = overdue ? t(s, ctx, "card.overdue", { uni: u.name[s.lang]! }) : "";
   const visit = item.status === "done" ? undefined : s.visits?.[id];
-  return reply(s, ctx, prefix + `${item.title[s.lang]}\n${item.action[s.lang]}\n` + t(s, ctx, "card.deadline") + date(s, item.dueDate) +
+  const repeat = repeatParts(s, ctx, item);
+  return reply(s, ctx, prefix + `${item.title[s.lang]}\n${repeat ? repeat.card + "\n" : ""}${item.action[s.lang]}\n` + t(s, ctx, "card.deadline") + date(s, item.dueDate) +
     (item.status === "done" ? "" : ` (${countdown(s, ctx, item)})`) + target + late +
     (item.status === "done" ? "" : consequenceText(s, ctx, item)) +
     (visit ? t(s, ctx, "card.visit", { date: date(s, visit) }) : "") + placeText(s, ctx, id) +

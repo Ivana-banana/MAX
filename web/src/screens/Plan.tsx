@@ -36,12 +36,13 @@ function Task({ item, index, deadline, disabled, onOpen }: {
   const days = String(Math.abs(item.daysLeft)).padStart(2, "0");
   return (
     <button type="button" className={`task task-${tone} in d${Math.min(index + 1, 6)}`} disabled={disabled}
-      aria-label={`${item.title}. ${item.countdown}`} onClick={() => onOpen(item.ruleId)}>
+      aria-label={`${item.title}. ${item.repeat === undefined ? "" : `${item.repeat.label}, ${item.repeat.doneOn}. `}${item.countdown}`} onClick={() => onOpen(item.ruleId)}>
       <span className={`n ${days.length > 2 && item.status !== "done" ? "n-long" : ""}`} aria-hidden="true">
         {item.status === "done" ? "✓" : days}
       </span>
       <span aria-hidden="true">
         <span className="t">{item.title}</span>
+        {item.repeat !== undefined && <span className="d">{`${item.repeat.label} · ${item.repeat.doneOn}`}</span>}
         {/* The countdown comes from the server: plural forms live in the shared text data. */}
         <span className="d">{item.status === "ok" || item.status === "dueSoon" ? `${deadline}: ${dotted(item.dueDate)} · ${item.countdown}` : item.countdown}</span>
       </span>

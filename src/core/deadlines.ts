@@ -123,6 +123,7 @@ export function buildPlan(
       ...(rule.consequence === undefined ? {} : { consequence: rule.consequence }),
       legal: rule.legal,
       isRepeat,
+      ...(isRepeat ? { repeat: { completedAt, months: rule.repeat!.months } } : {}),
       provisional: rule.legal.status !== "approved",
     });
   }

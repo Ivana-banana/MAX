@@ -120,6 +120,15 @@ describe("mini app actions on the shared session", () => {
     expect(state.session?.plan[0]?.legal.url).toContain("consultant.ru");
     expect(state.demo).toBe(true);
   });
+  it("gives a marked yearly procedure the chat's repeat label and the date it was done", async () => {
+    const f = await fixture();
+    for (const action of ONBOARDING) await applyAction(f.service, 7, action, false);
+    for (const action of ["done:medical-examination", "2026-09-20"]) await applyAction(f.service, 7, action, false);
+    const plan = (await readState(f.service, 7, false)).session!.plan;
+    expect(plan.find(i => i.ruleId === "medical-examination")?.repeat)
+      .toEqual({ label: "повторно (ежегодно)", doneOn: "пройдено вами 20 сентября 2026 г." });
+    expect(plan.find(i => i.ruleId === "fingerprinting")?.repeat).toBeUndefined();
+  });
   it("takes every text from src/data/i18n instead of a dictionary of its own", async () => {
     const f = await fixture();
     for (const action of ONBOARDING) await applyAction(f.service, 7, action, false);
