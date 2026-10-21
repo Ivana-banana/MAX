@@ -487,7 +487,7 @@ describe("review fixes in the dialogue", () => {
     const stopped = transition(s, { text: "/stop", callback: false }, ctx);
     expect(stopped.reply.text).not.toContain("/plan");
     s = stopped.session!;
-    const back = stopped.reply.buttons.flat()[0];
+    const back = stopped.reply.buttons.flat()[0]!;
     expect("action" in back && click(back.action.slice(back.action.indexOf("|") + 1)).reply.text).toBe(transition(s, { text: "", callback: false }, ctx).reply.text);
     expect(s.step).toBe(step);
   });
