@@ -13,7 +13,7 @@ export interface PlanPdf {
   footer: string;
 }
 export const PLAN_FILE = "first-90-days-plan.pdf";
-// Noto fonts, SIL OFL 1.1 (src/data/fonts, D-055). Noto Sans has Latin and Cyrillic with the Uzbek
+// Noto fonts, SIL OFL 1.1 (src/data/fonts, D-056). Noto Sans has Latin and Cyrillic with the Uzbek
 // and Tatar letters; Chinese takes Noto Sans SC. pdfkit embeds only the glyphs the file uses.
 const FONTS_DIR = "./src/data/fonts";
 const fontFor = (lang: Lang) => join(FONTS_DIR, lang === "zh" ? "NotoSansSC-Regular.otf" : "NotoSans-Regular.ttf");

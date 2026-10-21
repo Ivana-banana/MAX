@@ -52,7 +52,7 @@ export function createTransport(config: Config): Transport {
       }
     },
     // `notification` is in the body of POST /answers in the official SDK source (max-bot-api-client-ts) and
-    // the Go client, but not yet in the 0.3.1 types; the SDK passes the body through as is (D-055).
+    // the Go client, but not yet in the 0.3.1 types; the SDK passes the body through as is (D-056).
     async answer(id, notification) {
       await pace();
       const extra: Parameters<typeof bot.api.answerOnCallback>[1] & { notification?: string } = notification ? { notification } : {};

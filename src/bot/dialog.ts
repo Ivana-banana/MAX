@@ -305,7 +305,7 @@ function calendar(s: Session, ctx: DialogueContext): Reply {
         procedures: countedProcedures(s, ctx) }) } };
 }
 /**
- * The plan as a PDF for a curator or the university (#92, D-055): deadlines, marks, legal basis and
+ * The plan as a PDF for a curator or the university (#92, D-056): deadlines, marks, legal basis and
  * the university contact. Like shareText, no citizenship, entry date or MAX ID.
  */
 export function planPdf(s: Session, ctx: DialogueContext): PlanPdf {
