@@ -17,10 +17,16 @@ describe("mini app text match", () => {
 });
 
 describe("mini app texts", () => {
+  const command = /(?<![\p{L}\p{N}\/:.])\/[a-z]+/u;
+
+  it("the pattern finds a command in a chat text", () => {
+    expect(readTexts("src/data/i18n").get("zh")!["visit.invalid"]).toMatch(command);
+  });
+
   it("name no chat command in any language", () => {
     for (const [lang, texts] of readTexts("src/data/i18n")) {
       for (const [key, value] of Object.entries(texts)) {
-        if (key.startsWith("app.")) expect(value, `${lang} ${key}`).not.toMatch(/(^|[\s(«])\/[a-z]+/);
+        if (key.startsWith("app.")) expect(value, `${lang} ${key}`).not.toMatch(command);
       }
     }
   });
