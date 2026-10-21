@@ -156,6 +156,7 @@
   "app.entry.future": "Entry date cannot be in the future: deadlines count from your actual entry.",
   "app.entry.nodate": "This date does not exist in the calendar. Check the day and the month.",
   "app.completion.body": "Completion date as DD.MM.YYYY. This is self-reported, not confirmation from the authorities.",
+  "app.completion.invalid": "Use a date between entry and today, later than the previous completion.",
   "app.save": "Save",
   "app.today": "Today",
   "app.reminders": "Reminders in the chat",
