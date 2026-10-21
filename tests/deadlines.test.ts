@@ -141,6 +141,12 @@ describe("buildPlan", () => {
     expect(plan[0]?.status).toBe("ok");
   });
 
+  it("повторный круг помнит дату отметки и период из правила, первый круг — нет", () => {
+    const plan = buildPlan([medical], profile, { medical: "2026-09-20" }, "2026-09-25");
+    expect(plan[0]?.repeat).toEqual({ completedAt: "2026-09-20", months: medical.repeat!.months });
+    expect(buildPlan([medical], profile, {}, "2026-09-25")[0]?.repeat).toBeUndefined();
+  });
+
   it("выполненные опускаются в конец списка", () => {
     const plan = buildPlan([medical, fingerprints], profile, { fingerprints: "2026-09-10" }, "2026-09-16");
     expect(plan.at(-1)?.ruleId).toBe("fingerprints");

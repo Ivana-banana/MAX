@@ -5,10 +5,12 @@ import type { PostgresJob, PostgresStore, PostgresStoreTx } from "../db/postgres
 import { errorInfo } from "../log.js";
 import { limitedReply, plan, procedureDue, procedureReminderReply, reminderReply, transition, undated, visitReply, type DialogueContext, type Input, type Reply, type Session } from "./dialog.js";
 import { funnelEvents, funnelUniversity, type FunnelEvent } from "./funnel.js";
+import { PLAN_FILE, renderPlanPdf } from "./pdf.js";
 import { RateLimit } from "./rate.js";
 
 export interface Incoming { id: string; user: number; input: Input; callbackId?: string }
-export interface Transport { send(user: number, reply: Reply): Promise<void>; answer?(id: string): Promise<void> }
+/** `notification`: a one-time notice on the pressed button (POST /answers). */
+export interface Transport { send(user: number, reply: Reply): Promise<void>; answer?(id: string, notification?: string): Promise<void> }
 const object = (v: unknown): Record<string, unknown> | undefined => v !== null && typeof v === "object" && !Array.isArray(v) ? v as Record<string, unknown> : undefined;
 export function parseUpdate(raw: unknown): Incoming | null {
   const u = object(raw);
@@ -60,9 +62,10 @@ export class Service {
   constructor(readonly store: PostgresStore, readonly context: Omit<DialogueContext, "today">, readonly transport: Transport, readonly clock: () => number = Date.now,
     readonly limit = new RateLimit(Infinity), readonly sendTimeoutMs = 30_000) {}
   ctx(): DialogueContext { return { ...this.context, today: moscowDate(this.clock()) }; }
-  // Resolves after COMMIT: the webhook answers 200 only for a stored update.
-  async receive(update: Incoming): Promise<void> {
+  // Resolves after COMMIT: the webhook answers 200 only for a stored update. Returns the notice for the pressed button.
+  async receive(update: Incoming): Promise<string | undefined> {
     const now = this.clock();
+    let notice: string | undefined;
     await this.store.transaction(update.user, async tx => {
       if (await tx.seen(update.id, now)) return;
       // After seen(): a redelivered update must not spend the limit. Over it the update is dropped, not
@@ -74,6 +77,13 @@ export class Service {
       }
       const before = await tx.get(), ctx = this.ctx();
       const outcome = transition(before, update.input, ctx);
+      let reply = outcome.reply;
+      if (outcome.pdf) {
+        notice = outcome.pdf.loading;
+        // A file that cannot be built is said in the chat with a retry, not sent as an empty success.
+        try { reply = { ...reply, file: { name: PLAN_FILE, content: (await renderPlanPdf(outcome.pdf.plan)).toString("base64"), encoding: "base64" } }; }
+        catch (e) { console.error(`Plan PDF failed (${errorInfo(e)}); the user is offered a retry.`); reply = outcome.pdf.failed; }
+      }
       const university = funnelUniversity(outcome.session ?? before, ctx);
       // A refused stale button (a double tap) changed nothing: it must neither count as a step nor
       // replace the screen the first tap queued, or the user gets only "the button is outdated".
@@ -84,9 +94,10 @@ export class Service {
       await tx.cancelReminders();
       if (outcome.session) await tx.save(outcome.session, now);
       else await tx.remove();
-      await tx.enqueue(update.id, outcome.reply, "reply", now, now);
+      await tx.enqueue(update.id, reply, "reply", now, now);
       await this.scheduleUser(tx, update.user, outcome.session);
     });
+    return notice;
   }
   async scheduleUser(tx: PostgresStoreTx, user: number, state: Session | null): Promise<void> {
     const now = this.clock(), ctx = this.ctx();

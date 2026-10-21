@@ -38,10 +38,11 @@ export function webhookServer(service: Service, secret: string, extra?: ExtraRou
     let update;
     try { update = parseUpdate(raw); }
     catch (e) { console.error(`Webhook update rejected (${errorInfo(e)}).`); send(400, { error: "invalid_update" }); return; }
-    try { if (update) await service.receive(update); }
+    let notice: string | undefined;
+    try { if (update) notice = await service.receive(update); }
     catch (e) { console.error(`Webhook update failed (${errorInfo(e)}).`); send(503, { error: "storage_or_processing_failure" }); return; }
     send(200, { success: true });
-    if (update?.callbackId) void service.transport.answer?.(update.callbackId).catch((e: unknown) => { console.error(`Callback answer failed (${errorInfo(e)}).`); });
+    if (update?.callbackId) void service.transport.answer?.(update.callbackId, notice).catch((e: unknown) => { console.error(`Callback answer failed (${errorInfo(e)}).`); });
   };
   return createServer((req, res) => void handle(req, res));
 }

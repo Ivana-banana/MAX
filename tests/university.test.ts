@@ -193,4 +193,11 @@ describe("a student who has not entered yet (#25)", () => {
     for (const a of ["ru", "accept", "yes", "KZ"]) r = click(r.session!, a, c);
     expect(buttons(r).map(b => b.action?.split("|")[1])).not.toContain("before-entry");
   });
+  it("offers the branch to every listed citizenship, as the scope question promises (#62)", () => {
+    for (const u of universities) for (const c of u.citizenships) {
+      let r = step(null, { text: `/start ${u.id}`, callback: false });
+      for (const a of ["ru", "accept", "yes", c]) r = click(r.session!, a);
+      expect(buttons(r).map(b => b.action?.split("|")[1]), `${u.id} ${c}`).toContain("before-entry");
+    }
+  });
 });
