@@ -262,6 +262,16 @@ describe("mini app shows what the chat shows", () => {
     expect(items.find(i => i.ruleId === "medical-examination")?.documentsNote).toContain("Комплект — по странице https://");
     expect(items.find(i => i.ruleId === "fingerprinting")?.documentsNote).toContain("Комплект — по странице https://www.consultant.ru/");
   });
+  it("shows the chat's consequence line until the procedure is done (#75)", async () => {
+    const f = await fixture();
+    for (const action of ONBOARDING) await applyAction(f.service, 7, action, false);
+    const before = (await readState(f.service, 7, false)).session!.plan;
+    expect(before.find(i => i.ruleId === "fingerprinting")?.consequence).toMatch(/^Если не пройти: срок вашего пребывания в России сокращают — .+, ст\. 5, п\. 23/);
+    await applyAction(f.service, 7, "done:fingerprinting", false);
+    await applyAction(f.service, 7, "2026-09-10", false);
+    const after = (await readState(f.service, 7, false)).session!.plan;
+    expect(after.find(i => i.ruleId === "fingerprinting")?.consequence).toBeUndefined();
+  });
   it("offers the citizenships the rules exclude, which lead to help as in the chat", async () => {
     const f = await fixture();
     for (const action of ONBOARDING.slice(0, 4)) await applyAction(f.service, 7, action, false);

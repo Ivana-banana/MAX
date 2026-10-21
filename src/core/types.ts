@@ -64,6 +64,13 @@ export interface RequiredDocument {
   title: Localized;
 }
 
+/** What the law says happens if the procedure is not done; the clause is in the same act as `legal`. */
+export interface Consequence {
+  text: Localized;
+  article: Localized;
+  checkedAt: PlainDate;
+}
+
 /** Where the checklist comes from; absent when no official list is published. */
 export interface DocumentsSource {
   url: string;
@@ -91,6 +98,7 @@ export interface DeadlineRule {
   appliesIf: Condition[];
   documents: RequiredDocument[];
   documentsSource?: DocumentsSource;
+  consequence?: Consequence;
   legal: LegalBasis;
 }
 
@@ -118,6 +126,7 @@ export interface PlanItem {
   status: PlanItemStatus;
   documents: RequiredDocument[];
   documentsSource?: DocumentsSource;
+  consequence?: Consequence;
   legal: LegalBasis;
   /** True when the term is a repeat round rather than the first one. */
   isRepeat: boolean;

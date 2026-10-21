@@ -120,6 +120,7 @@ export function buildPlan(
       status: statusFor(dueDate, today, done),
       documents: rule.documents,
       ...(rule.documentsSource === undefined ? {} : { documentsSource: rule.documentsSource }),
+      ...(rule.consequence === undefined ? {} : { consequence: rule.consequence }),
       legal: rule.legal,
       isRepeat,
       provisional: rule.legal.status !== "approved",

@@ -12,7 +12,7 @@ import { coverage } from "../core/deadlines.js";
 import { isValidDate } from "../core/dates.js";
 import type { Lang } from "../core/types.js";
 import {
-  beforeEntry, beforeEntryNote, countdown, documentsNote, mapUrl, pageLabel, placeText, plan, targetText, procedureDue, procedureDueText, procedureSource, profile, prompt, shareText, transition, undated, universityLost, type DialogueContext, type Input, type Session,
+  beforeEntry, beforeEntryNote, consequenceText, countdown, documentsNote, mapUrl, pageLabel, placeText, plan, targetText, procedureDue, procedureDueText, procedureSource, profile, prompt, shareText, transition, undated, universityLost, type DialogueContext, type Input, type Session,
 } from "../bot/dialog.js";
 import { funnelEvents, funnelUniversity } from "../bot/funnel.js";
 import { BASE_LANG, format } from "../data/loadTexts.js";
@@ -150,6 +150,7 @@ function view(session: Session | null, ctx: DialogueContext, mocked: boolean, hi
         })),
         documentsNote: documentsNote(session, ctx, item),
         legal: { ...item.legal, article: localized(item.legal.article) },
+        ...(item.status === "done" || !consequenceText(session, ctx, item) ? {} : { consequence: consequenceText(session, ctx, item).trim() }),
         ...(item.status === "done" || session.visits?.[item.ruleId] === undefined ? {} : { visit: session.visits[item.ruleId] }),
         ...placeView(session, ctx, item.ruleId),
         ...(targetText(session, ctx, item) ? { target: targetText(session, ctx, item).trim() } : {}),

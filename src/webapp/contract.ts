@@ -30,6 +30,8 @@ export interface AppPlanItem {
   /** The chat's line on where the checklist comes from, or that no official list exists (D-027). */
   documentsNote: string;
   legal: Omit<LegalBasis, "article"> & { article: string };
+  /** #75: the chat's line on what the law says happens if the procedure is skipped; absent when done or unknown. */
+  consequence?: string;
   /** Planned visit day (D-039); absent when none or the procedure is done. */
   visit?: string;
   /** D-041: where the university sends its students for this procedure (the chat's line) and a map link. */

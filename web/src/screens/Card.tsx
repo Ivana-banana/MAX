@@ -96,6 +96,7 @@ export function Card({ session, texts, item, pending, copy, onAction }: Props) {
       <div className="in d4">
         <h2 className="section"><span>{t("app.source")}</span></h2>
         <p className="law">{item.legal.act}<small>{`${item.legal.article} · ${t("app.checkedAt")}: ${dotted(item.legal.checkedAt)}`}</small></p>
+        {item.consequence !== undefined && <p className="prose">{item.consequence}</p>}
       </div>
 
       {item.place !== undefined && (

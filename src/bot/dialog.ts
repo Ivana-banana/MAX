@@ -208,6 +208,11 @@ export function documentsNote(s: Session, ctx: DialogueContext, item: PlanItem):
     ? t(s, ctx, "card.docsSource", { url: item.documentsSource.url, date: date(s, item.documentsSource.checkedAt) })
     : t(s, ctx, "card.docsNoSource", { uni: uni(s, ctx).name[s.lang]! });
 }
+/** What the law says happens if the procedure is skipped, with the clause (#75); the app shows it too. */
+export function consequenceText(s: Session, ctx: DialogueContext, item: PlanItem): string {
+  const c = item.consequence;
+  return c ? t(s, ctx, "card.consequence", { text: c.text[s.lang]!, act: item.legal.act, article: c.article[s.lang]!, date: date(s, c.checkedAt) }) : "";
+}
 /** A visit can be planned from today up to a year ahead. */
 const VISIT_HORIZON_DAYS = 365;
 function card(s: Session, ctx: DialogueContext, id: string, prefix = ""): Reply {
@@ -220,11 +225,12 @@ function card(s: Session, ctx: DialogueContext, id: string, prefix = ""): Reply 
   const docs = item.documents.map(d => `${s.documents[`${key}:${d.id}`] ? "✓" : "□"} ${d.title[s.lang]}`);
   const target = targetText(s, ctx, item) || (item.recommendedDate ? t(s, ctx, "card.recommended") + date(s, item.recommendedDate) : "");
   const u = uni(s, ctx), overdue = item.status === "overdue";
-  // No consequences or fines here: the law text on liability is not reviewed (docs/legal-review.md).
+  // Only the consequence the law states directly; no fines: liability is for evasion, not lateness (docs/legal-review.md, 5).
   const late = overdue ? t(s, ctx, "card.overdue", { uni: u.name[s.lang]! }) : "";
   const visit = item.status === "done" ? undefined : s.visits?.[id];
   return reply(s, ctx, prefix + `${item.title[s.lang]}\n${item.action[s.lang]}\n` + t(s, ctx, "card.deadline") + date(s, item.dueDate) +
     (item.status === "done" ? "" : ` (${countdown(s, ctx, item)})`) + target + late +
+    (item.status === "done" ? "" : consequenceText(s, ctx, item)) +
     (visit ? t(s, ctx, "card.visit", { date: date(s, visit) }) : "") + placeText(s, ctx, id) +
     "\n\n" + docs.join("\n") + "\n" + documentsNote(s, ctx, item) + "\n\n" + item.legal.act + ", " + item.legal.article[s.lang] +
     "\n" + item.legal.url + t(s, ctx, "card.checked") + date(s, item.legal.checkedAt) +

@@ -99,6 +99,23 @@
         "url": "https://kpfu.ru/international/migracionnoe-soprovozhdenie-inostrannyh-grazhdan/daktiloskopiya-i-medicinskoe-osvidetelstvovanie",
         "checkedAt": "2026-09-24"
       },
+      "consequence": {
+        "text": {
+          "ru": "срок вашего пребывания в России сокращают",
+          "en": "your permitted stay in Russia is shortened",
+          "zh": "您在俄罗斯的停留期限将被缩短",
+          "uz": "Rossiyada boʻlish muddatingiz qisqartiriladi",
+          "tt": "Россиядә булу срогыгыз кыскартыла"
+        },
+        "article": {
+          "ru": "ст. 5, п. 23",
+          "en": "Art. 5, cl. 23",
+          "zh": "第5条第23款",
+          "uz": "5-modda, 23-band",
+          "tt": "5 статья, 23 пункт"
+        },
+        "checkedAt": "2026-10-21"
+      },
       "legal": {
         "act": "Федеральный закон от 25.07.2002 № 115-ФЗ",
         "article": {
@@ -180,6 +197,23 @@
       "documentsSource": {
         "url": "https://www.consultant.ru/document/cons_doc_LAW_479155/297329e0d4d3d3cbcf7c187f5ce3af4795c3ac73/",
         "checkedAt": "2026-10-19"
+      },
+      "consequence": {
+        "text": {
+          "ru": "срок вашего пребывания в России сокращают",
+          "en": "your permitted stay in Russia is shortened",
+          "zh": "您在俄罗斯的停留期限将被缩短",
+          "uz": "Rossiyada boʻlish muddatingiz qisqartiriladi",
+          "tt": "Россиядә булу срогыгыз кыскартыла"
+        },
+        "article": {
+          "ru": "ст. 5, п. 23",
+          "en": "Art. 5, cl. 23",
+          "zh": "第5条第23款",
+          "uz": "5-modda, 23-band",
+          "tt": "5 статья, 23 пункт"
+        },
+        "checkedAt": "2026-10-21"
       },
       "legal": {
         "act": "Федеральный закон от 25.07.2002 № 115-ФЗ",

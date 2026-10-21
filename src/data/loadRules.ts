@@ -9,6 +9,7 @@
 import { isValidDate } from "../core/dates.js";
 import type {
   Condition,
+  Consequence,
   DeadlineRule,
   LegalBasis,
   Localized,
@@ -141,6 +142,15 @@ function asDocumentsSource(value: unknown, path: string): DocumentsSource {
   return { url, checkedAt: asDate(record.checkedAt, `${path}.checkedAt`) };
 }
 
+function asConsequence(value: unknown, path: string): Consequence {
+  const record = asRecord(value, path);
+  return {
+    text: asLocalized(record.text, `${path}.text`),
+    article: asLocalized(record.article, `${path}.article`),
+    checkedAt: asDate(record.checkedAt, `${path}.checkedAt`),
+  };
+}
+
 function asRule(value: unknown, path: string): DeadlineRule {
   const record = asRecord(value, path);
   const term = asRecord(record.term, `${path}.term`);
@@ -193,6 +203,7 @@ function asRule(value: unknown, path: string): DeadlineRule {
     appliesIf: appliesIfRaw.map((c, i) => asCondition(c, `${path}.appliesIf[${i}]`)),
     documents: documentsRaw.map((d, i) => asDocument(d, `${path}.documents[${i}]`)),
     ...(record.documentsSource === undefined ? {} : { documentsSource: asDocumentsSource(record.documentsSource, `${path}.documentsSource`) }),
+    ...(record.consequence === undefined ? {} : { consequence: asConsequence(record.consequence, `${path}.consequence`) }),
     legal: asLegalBasis(record.legal, `${path}.legal`),
   };
 }

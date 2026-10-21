@@ -69,6 +69,16 @@ describe("where the checklist comes from", () => {
     expect(card("fingerprinting")).toContain("Комплект — по странице https://www.consultant.ru/document/cons_doc_LAW_479155/297329e0d4d3d3cbcf7c187f5ce3af4795c3ac73/ (сверено 19 октября 2026 г.)");
     expect(card("fingerprinting")).not.toContain("Миграционная карта");
   });
+  it("states the consequence of skipping each procedure with its clause (#75)", () => {
+    expect(rules.rules.map(r => r.consequence?.article.ru)).toEqual(["ст. 5, п. 23", "ст. 5, п. 23"]);
+    const entry = walk(base, "entry");
+    entry.type("01.09.2026");
+    const s = entry.s;
+    for (const id of ["medical-examination", "fingerprinting"]) {
+      expect(transition(s, { text: `${s.nonce}.${s.revision}|card:${id}`, callback: true }, base).reply.text)
+        .toContain("Если не пройти: срок вашего пребывания в России сокращают — Федеральный закон от 25.07.2002 № 115-ФЗ, ст. 5, п. 23 (сверено 21 октября 2026 г.).");
+    }
+  });
   it("rejects a checklist source that is not an https page", () => {
     const broken = structuredClone(raw) as { rules: { documentsSource?: { url: string } }[] };
     broken.rules[0]!.documentsSource!.url = "http://kpfu.ru/";

@@ -18,6 +18,7 @@ function withKazakh(): DialogueContext {
   const all: Texts = new Map([...texts, ["kk", kk]]);
   const tr = (l: Record<string, string>) => ({ ...l, kk: `[kk] ${l.en}` });
   const kkRules = rules.rules.map(r => ({ ...r, title: tr(r.title), action: tr(r.action), legal: { ...r.legal, article: tr(r.legal.article) },
+    ...(r.consequence ? { consequence: { ...r.consequence, text: tr(r.consequence.text), article: tr(r.consequence.article) } } : {}),
     documents: r.documents.map(d => ({ ...d, title: tr(d.title) })) }));
   const kkUniversities = universities.map(u => ({ ...u, name: tr(u.name),
     procedures: u.procedures.map(p => ({ ...p, title: tr(p.title), action: tr(p.action), when: tr(p.when),
