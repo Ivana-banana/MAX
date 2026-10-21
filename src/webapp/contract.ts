@@ -26,6 +26,8 @@ export interface AppPlanItem {
   /** The legal basis is not confirmed by a lawyer yet: the screen must say so. */
   provisional: boolean;
   isRepeat: boolean;
+  /** A repeat round, in the chat's words: the label with the period, and when the student marked the previous round. */
+  repeat?: { label: string; doneOn: string };
   documents: AppDocument[];
   /** The chat's line on where the checklist comes from, or that no official list exists (D-027). */
   documentsNote: string;

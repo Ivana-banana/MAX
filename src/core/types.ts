@@ -130,6 +130,8 @@ export interface PlanItem {
   legal: LegalBasis;
   /** True when the term is a repeat round rather than the first one. */
   isRepeat: boolean;
+  /** For a repeat round: when the student marked the previous round and the rule's period, so the UI can say both. */
+  repeat?: { completedAt: PlainDate; months: number };
   /**
    * True when the legal basis has not been confirmed by a human yet. The UI must
    * show these as provisional (docs/architecture.md, "Обновление официальных данных").

@@ -181,3 +181,19 @@ test("visit and completion screens: a nonexistent date shows the reason", async 
   await done.pressSequentially(moscowDate(0).replaceAll(".", ""));
   await expect(page.getByRole("alert")).toHaveCount(0);
 });
+
+test("a marked yearly procedure comes back labelled as a repeat, with the date it was done", async ({ page }) => {
+  await toEntryDate(page);
+  await dateField(page).fill(moscowDate(7));
+  await save(page).click();
+  await page.getByRole("button", { name: /Медицинское освидетельствование/ }).click();
+  await page.getByRole("button", { name: "Процедура пройдена" }).click();
+  await page.getByRole("textbox", { name: "Когда вы прошли процедуру?" }).fill(moscowDate(2));
+  await save(page).click();
+  await expect(page.getByRole("heading", { name: "Ваш план" })).toBeVisible();
+  const tile = page.getByRole("button", { name: /Медицинское освидетельствование/ });
+  await expect(tile).toContainText("повторно (ежегодно)");
+  await expect(tile).toContainText("пройдено вами");
+  await tile.click();
+  await expect(page.getByText("повторно (ежегодно) · пройдено вами")).toBeVisible();
+});
