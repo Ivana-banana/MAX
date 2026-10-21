@@ -35,6 +35,11 @@ describe("interface texts live in data", () => {
     expect(() => checkTexts(texts)).not.toThrow();
     expect(() => checkTranslated(texts, rules.rules, universities)).not.toThrow();
   });
+  it("gives no fixed example date for a day from today on, which would fall in the past (#97)", () => {
+    for (const [lang, t] of texts) for (const key of ["visit.invalid", "docEnd.invalid"])
+      expect(t[key], `${lang} ${key}`).not.toMatch(/\d{2}\.\d{2}\.\d{4}/);
+  });
+
   it("rejects a file that would show a hole or a broken sentence", () => {
     const ru = texts.get("ru")!, en = texts.get("en")!;
     const broken = (patch: Record<string, string | undefined>) => {
