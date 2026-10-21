@@ -10,9 +10,9 @@
 
 import { coverage } from "../core/deadlines.js";
 import { isValidDate } from "../core/dates.js";
-import type { Lang } from "../core/types.js";
+import type { Lang, PlanItem } from "../core/types.js";
 import {
-  beforeEntry, beforeEntryNote, consequenceText, countdown, documentsNote, mapUrl, pageLabel, placeText, plan, targetText, procedureDue, procedureDueText, procedureSource, profile, prompt, shareText, transition, undated, universityLost, type DialogueContext, type Input, type Session,
+  beforeEntry, beforeEntryNote, consequenceText, countdown, documentsNote, mapUrl, pageLabel, placeText, plan, repeatParts, targetText, procedureDue, procedureDueText, procedureSource, profile, prompt, shareText, transition, undated, universityLost, type DialogueContext, type Input, type Session,
 } from "../bot/dialog.js";
 import { funnelEvents, funnelUniversity } from "../bot/funnel.js";
 import { BASE_LANG, format } from "../data/loadTexts.js";
@@ -101,6 +101,12 @@ function placeView(session: Session, ctx: DialogueContext, ruleId: string): { pl
   return place ? { place: { text: placeText(session, ctx, ruleId).trim(), mapUrl: mapUrl(place.map) } } : {};
 }
 
+/** The repeat round's label and "marked done on" line, the chat's own wording. */
+function repeatView(session: Session, ctx: DialogueContext, item: PlanItem) {
+  const repeat = repeatParts(session, ctx, item);
+  return repeat ? { repeat: { label: repeat.label, doneOn: repeat.doneOn } } : {};
+}
+
 /** D-040 fields of an undated procedure: the button to enter the end date, and the counted dates once entered. */
 function countdownView(session: Session, ctx: DialogueContext, note: ReturnType<typeof undated>[number]) {
   if (!note.countdown) return {};
@@ -143,6 +149,7 @@ function view(session: Session | null, ctx: DialogueContext, mocked: boolean, hi
         status: item.status,
         provisional: item.provisional,
         isRepeat: item.isRepeat,
+        ...repeatView(session, ctx, item),
         documents: item.documents.map(d => ({
           id: d.id,
           title: localized(d.title),

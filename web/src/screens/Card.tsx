@@ -65,6 +65,7 @@ export function Card({ session, texts, item, pending, copy, onAction }: Props) {
       </div>
 
       <div className="facts in d1">
+        {item.repeat !== undefined && <span>{`${item.repeat.label} · ${item.repeat.doneOn}`}</span>}
         {item.target !== undefined ? <span>{item.target}</span>
           : item.recommendedDate !== undefined && <span>{`${t("app.recommended")}: ${dotted(item.recommendedDate)}`}</span>}
         {item.provisional && <span>{t("app.provisional")}</span>}
