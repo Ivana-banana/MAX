@@ -238,21 +238,22 @@ function DateStep({ texts, today, prompt, message, title, invalid: invalidKey, p
 }) {
   const [value, setValue] = useState("");
   const [nonexistent, setNonexistent] = useState(false);
+  const [edited, setEdited] = useState(false);
   const t = (key: string) => text(texts, key);
   const outOfRange = value !== "" && value < today;
-  const invalid = outOfRange || isText(message, t(invalidKey));
+  const invalid = outOfRange || (!edited && isText(message, t(invalidKey)));
   return (
     <div className="stack">
       <h1 className="heading in">{t(title)}</h1>
-      <p className={`prose in d1 ${nonexistent || invalid ? "banner banner-error" : ""}`} role={nonexistent || outOfRange ? "alert" : undefined}>
+      <p className={`prose in d1 ${nonexistent || invalid ? "banner banner-error" : ""}`} role={nonexistent || invalid ? "alert" : undefined}>
         {nonexistent ? t("app.entry.nodate") : invalid ? t(`app.${invalidKey}`) : prompt}
       </p>
       <div className="in d2">
         <DateField label={t(title)} hint={t("app.entry.hint")}
-          onChange={(iso, display) => { setValue(iso); setNonexistent(iso === "" && display.length === 10); }} />
+          onChange={(iso, display) => { setValue(iso); setEdited(true); setNonexistent(iso === "" && display.length === 10); }} />
       </div>
       <Button className="in d3" disabled={value === "" || value < today || pending !== null} loading={pending === value}
-        onClick={() => onAction(value)}>
+        onClick={() => { setEdited(false); onAction(value); }}>
         {t("app.save")}
       </Button>
       <button type="button" className="link in d5" disabled={pending !== null} onClick={() => onAction("plan")}>
@@ -267,21 +268,22 @@ function Completion({ texts, today, message, pending, onAction }: {
 }) {
   const [value, setValue] = useState("");
   const [nonexistent, setNonexistent] = useState(false);
+  const [edited, setEdited] = useState(false);
   const t = (key: string) => text(texts, key);
   const outOfRange = value !== "" && value > today;
-  const invalid = outOfRange || isText(message, t("completion.invalid"));
+  const invalid = outOfRange || (!edited && isText(message, t("completion.invalid")));
   return (
     <div className="stack">
       <h1 className="heading in">{t("app.completionTitle")}</h1>
-      <p className={`prose in d1 ${nonexistent || invalid ? "banner banner-error" : ""}`} role={nonexistent || outOfRange ? "alert" : undefined}>
+      <p className={`prose in d1 ${nonexistent || invalid ? "banner banner-error" : ""}`} role={nonexistent || invalid ? "alert" : undefined}>
         {nonexistent ? t("app.entry.nodate") : invalid ? t("app.completion.invalid") : t("app.completion.body")}
       </p>
       <div className="in d2">
         <DateField label={t("app.completionTitle")} hint={t("app.entry.hint")}
-          onChange={(iso, display) => { setValue(iso); setNonexistent(iso === "" && display.length === 10); }} />
+          onChange={(iso, display) => { setValue(iso); setEdited(true); setNonexistent(iso === "" && display.length === 10); }} />
       </div>
       <Button className="in d3" disabled={value === "" || value > today || pending !== null} loading={pending === value}
-        onClick={() => onAction(value)}>
+        onClick={() => { setEdited(false); onAction(value); }}>
         {t("app.save")}
       </Button>
       <Button className="in d4" tone="outline" disabled={pending !== null} loading={pending === "/today"} onClick={() => onAction("/today")}>

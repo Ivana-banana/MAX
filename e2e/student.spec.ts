@@ -153,8 +153,11 @@ test("visit and completion screens: a nonexistent date shows the reason", async 
   await visit.fill("");
   await visit.pressSequentially("01012099"); // a real day, but over a year ahead: the server refuses
   await save(page).click();
-  await expect(page.getByText("Нужна дата не раньше сегодняшней")).toBeVisible();
+  await expect(page.getByRole("alert")).toContainText("Нужна дата не раньше сегодняшней");
   await expect(page.locator("body")).not.toContainText("/plan");
+  await visit.fill("");
+  await visit.pressSequentially(moscowDate(0).replaceAll(".", "")); // the field is changed: the server's refusal goes away
+  await expect(page.getByRole("alert")).toHaveCount(0);
   await page.getByRole("button", { name: "Отмена" }).click();
 
   await page.getByRole("button", { name: /Медицинское освидетельствование/ }).click();
@@ -172,8 +175,11 @@ test("visit and completion screens: a nonexistent date shows the reason", async 
   await done.fill("");
   await done.pressSequentially("01012020"); // a real day, but before entry: the server refuses
   await save(page).click();
-  await expect(page.getByText("Нужна дата между въездом и сегодня")).toBeVisible();
+  await expect(page.getByRole("alert")).toContainText("Нужна дата между въездом и сегодня");
   await expect(page.locator("body")).not.toContainText("/plan");
+  await done.fill("");
+  await done.pressSequentially(moscowDate(0).replaceAll(".", ""));
+  await expect(page.getByRole("alert")).toHaveCount(0);
 });
 
 test("a marked yearly procedure comes back labelled as a repeat, with the date it was done", async ({ page }) => {
