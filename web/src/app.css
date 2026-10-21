@@ -141,6 +141,8 @@ body {
 .banner-demo { align-self: flex-start; background: var(--ink); color: var(--paper); padding: 2px 8px; font: condensed 800 13px/1.3 var(--caps); font-variation-settings: "wdth" 75; letter-spacing: .1em; text-transform: uppercase; }
 .banner-mocked { color: var(--muted); }
 .banner-error { background: var(--red); color: var(--on-red); padding: 10px 12px; font-size: 14px; }
+/* An idle error banner keeps its empty alert region on the page but takes no place in the column (no extra gap). */
+.banner-idle { position: absolute; }
 .banner-close {
   margin-left: auto;
   border: 0;
