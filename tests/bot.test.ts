@@ -529,6 +529,18 @@ describe("example profile for reviewers (demo only)", () => {
     expect(exampleEntry({ rules: rules.rules, today: "2026-10-14" })).toBe("2026-09-22");
     expect(exampleEntry({ rules: rules.rules, today: "2026-09-10" })).toBe("2026-09-01");
   });
+  it("offers a Start button after /delete that begins a new session", () => {
+    let s: Session = transition(null, { text: "/start", callback: false }, ctx).session!;
+    s = transition(s, { text: "/delete", callback: false }, ctx).session!;
+    const deleted = transition(s, { text: `${s.nonce}.${s.revision}|confirm-delete`, callback: true }, ctx);
+    expect(deleted.session).toBeNull();
+    const start = deleted.reply.buttons.flat()[0]!;
+    expect("action" in start && start.text).toBe("Начать");
+    const again = transition(null, { text: "action" in start ? start.action : "", callback: true }, ctx);
+    expect(again.expired).toBeUndefined();
+    expect(again.session?.step).not.toBe("plan");
+    expect(again.reply.text).toBe(transition(null, { text: "/start", callback: false }, ctx).reply.text);
+  });
   it("offers the next step as a button after /stop and on the completion date", () => {
     let s: Session = transition(null, { text: "/start", callback: false }, ctx).session!;
     const click = (action: string) => transition(s, { text: `${s.nonce}.${s.revision}|${action}`, callback: true }, ctx);

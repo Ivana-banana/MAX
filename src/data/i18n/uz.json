@@ -102,6 +102,7 @@
   "btn.visit": "🗓 Tashrifni rejalashtirish",
   "btn.visitChange": "🗓 Tashrif kunini oʻzgartirish",
   "btn.today": "Bugun",
+  "btn.start": "Boshlash",
   "btn.tomorrow": "Ertaga",
   "visit": "{title}: qaysi kuni borasiz? Sana KK.OO.YYYY koʻrinishida — bugundan boshlab va bir yildan kechiktirmay. Bir kun oldin soat 18:00 da (Moskva vaqti) bot roʻyxatdagi qaysi hujjatlar hali yetishmasligini yozadi.",
   "visit.invalid": "Sana bugundan oldin boʻlmasligi va bir yildan oshmasligi kerak, masalan 05.10.2026. /plan — bekor qilish.",

@@ -366,6 +366,8 @@ export function transition(previous: Session | null, input: Input, ctx: Dialogue
     const separator = action.indexOf("|"), stamp = action.slice(0, separator);
     action = action.slice(separator + 1);
     const current = stamp === `${s.nonce}.${s.revision}`;
+    // After /delete there is no session: the "Start" button of the last reply still begins a new one.
+    if (!previous && action === "/start") return transition(null, { ...input, text: action, callback: false }, ctx);
     if (!previous || !(current || (stamp.startsWith(`${s.nonce}.`) && navigation(action) && profile(s)))) {
       return { session: previous, reply: reply(s, ctx, t(s, ctx, "expired")), expired: true };
     }
@@ -377,7 +379,7 @@ export function transition(previous: Session | null, input: Input, ctx: Dialogue
     s.step = "delete"; return { session: s, reply: prompt(s, ctx) };
   }
   if (s.step === "delete" && action === "confirm-delete") {
-    return { session: null, reply: reply(s, ctx, t(s, ctx, "deleted")) };
+    return { session: null, reply: reply(s, ctx, t(s, ctx, "deleted"), [[button(t(s, ctx, "btn.start"), "/start")]]) };
   }
   if (s.step === "delete" && action === "cancel-delete") { s.step = s.back ?? (profile(s) ? "plan" : "language"); delete s.back; }
   if (action === "/stop") { s.reminders = false; return { session: s, reply: reply(s, ctx, t(s, ctx, "stopped"),

@@ -102,6 +102,7 @@
   "btn.visit": "🗓 Plan a visit",
   "btn.visitChange": "🗓 Change the visit day",
   "btn.today": "Today",
+  "btn.start": "Start",
   "btn.tomorrow": "Tomorrow",
   "visit": "{title}: which day will you go? A date as DD.MM.YYYY — from today and no more than a year ahead. At 18:00 Moscow time the day before, the bot will tell you which documents from the list are still missing.",
   "visit.invalid": "The date must be today or later and no more than a year ahead, e.g. 05.10.2026. /plan — cancel.",
