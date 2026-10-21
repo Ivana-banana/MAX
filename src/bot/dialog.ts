@@ -343,7 +343,7 @@ export function prompt(s: Session, ctx: DialogueContext): Reply {
         .map(row => row.map(code => button(country(s, ctx, code), code))));
     case "entry": return reply(s, ctx, t(s, ctx, "entry", { from: date(s, coverage(ctx.rules).from) }), entryRows(s, ctx));
     case "completion": return reply(s, ctx, t(s, ctx, "completion"),
-      [[button(t(s, ctx, "btn.today"), ctx.today)], [button(t(s, ctx, "btn.cancel"), "plan")]]);
+      [[button(t(s, ctx, "btn.today"), "/today")], [button(t(s, ctx, "btn.cancel"), "plan")]]);
     case "docEnd": {
       const note = undated(s, ctx).find(n => n.id === s.selected);
       return reply(s, ctx, t(s, ctx, `docEnd.${note?.countdown?.from ?? "visa-end"}`), [[button(t(s, ctx, "btn.cancel"), "plan")]]);
@@ -351,7 +351,7 @@ export function prompt(s: Session, ctx: DialogueContext): Reply {
     case "visit": {
       const item = plan(s, ctx).find(i => i.ruleId === s.selected);
       return reply(s, ctx, t(s, ctx, "visit", { title: item?.title[s.lang] ?? "" }),
-        [[button(t(s, ctx, "btn.today"), ctx.today), button(t(s, ctx, "btn.tomorrow"), addDays(ctx.today, 1))],
+        [[button(t(s, ctx, "btn.today"), "/today"), button(t(s, ctx, "btn.tomorrow"), "/tomorrow")],
           [button(t(s, ctx, "btn.cancel"), "plan")]]);
     }
     case "delete": return reply(s, ctx, t(s, ctx, "delete"),
@@ -382,8 +382,9 @@ export function transition(previous: Session | null, input: Input, ctx: Dialogue
     return { session: null, reply: reply(s, ctx, t(s, ctx, "deleted"), [[button(t(s, ctx, "btn.start"), s.university ? `/start ${s.university}` : "/start")]]) };
   }
   if (s.step === "delete" && action === "cancel-delete") { s.step = s.back ?? (profile(s) ? "plan" : "language"); delete s.back; }
-  if (action === "/stop") { s.reminders = false; return { session: s, reply: reply(s, ctx, t(s, ctx, "stopped"),
-    profile(s) ? [[button(t(s, ctx, "btn.plan"), "plan")]] : []) }; }
+  if (action === "/stop") { s.reminders = false; return { session: s, reply: profile(s)
+    ? reply(s, ctx, t(s, ctx, "stopped"), [[button(t(s, ctx, "btn.plan"), "plan")]])
+    : reply(s, ctx, t(s, ctx, "stoppedNoPlan"), [[button(t(s, ctx, "btn.continue"), "continue")]]) }; }
   if (s.ruleVersion !== ctx.version) {
     s.reminders = false;
     return { session: s, reply: reply(s, ctx, t(s, ctx, "rulesChanged")) };
@@ -399,6 +400,8 @@ export function transition(previous: Session | null, input: Input, ctx: Dialogue
     delete s.university; delete s.citizenship; delete s.entryDate; delete s.selected; delete s.back; delete s.visits; delete s.ends;
     s.completions = {}; s.documents = {}; s.reminders = false; s.step = "scope";
   }
+  // After /stop before the plan: the current step's question again, not an answer to it.
+  if (action === "continue") return { session: s, reply: prompt(s, ctx) };
   const start = /^\/start(?:\s+(\S+))?$/.exec(action);
   if (start) {
     // A university's QR code opens max.ru/<bot>?start=<id>; the choice is fixed once the plan exists.
@@ -463,7 +466,8 @@ export function transition(previous: Session | null, input: Input, ctx: Dialogue
     s.ends = { ...s.ends, [note.countdown.from]: end }; s.step = "plan"; delete s.selected;
     return { session: s, reply: procedureCard(s, ctx, note) };
   } else if (s.step === "visit") {
-    const day = typedDate(action);
+    // The buttons carry the action, not a date: a button shown yesterday must still mean today.
+    const day = action === "/today" ? ctx.today : action === "/tomorrow" ? addDays(ctx.today, 1) : typedDate(action);
     const item = plan(s, ctx).find(i => i.ruleId === s.selected && i.status !== "done");
     if (!item || !isValidDate(day) || day < ctx.today || day > addDays(ctx.today, VISIT_HORIZON_DAYS)) {
       return { session: s, reply: reply(s, ctx, t(s, ctx, "visit.invalid")) };
