@@ -57,6 +57,11 @@ describe("university profiles are data", () => {
     expect(() => checkCitizenships([withIn("visa-extension", ["CN", "IN", "EG", "FR"])], [])).toThrow(/kfu\.visa-extension.*FR.*нет в citizenships/);
     // Rule 2: a country of the profile is in no card.
     expect(() => checkCitizenships([{ ...kfu, citizenships: [...kfu.citizenships, "AM"] }], [])).toThrow(/AM.*ни одна карточка/);
+    // One group with a nested list inside it (EG split out) passes: visa-free countries need no card.
+    const spbgeu = universities.find(u => u.id === "spbgeu")!;
+    const nested = { ...spbgeu, beforeEntry: [...spbgeu.beforeEntry, { ...spbgeu.beforeEntry[0]!, id: "invitation-suspended",
+      appliesIf: [{ field: "citizenship" as const, op: "in" as const, values: ["EG"] }] }] };
+    expect(() => checkCitizenships([nested], [])).not.toThrow();
     // Rule 3: a country is in both the visa and the visa-free list.
     expect(() => checkCitizenships([withIn("ruid", ["KZ", "UZ", "TJ", "KG", "TR"])], [])).toThrow(/^(?=.*ruid).*пересекается.*TR/);
   });

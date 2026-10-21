@@ -291,8 +291,9 @@ export function checkRuleTargets(universities: University[], rules: readonly Dea
 
 /**
  * A citizenship the rules exclude must not look covered: it is offered separately and leads to help.
- * The `citizenship in` lists of beforeEntry and procedures must also agree (#63); a country dropped
- * from one list but still present in another is not caught.
+ * The `citizenship in` lists must agree (#63): each is inside `citizenships`, any two are disjoint or nested;
+ * with two or more groups (maximal lists) their union equals `citizenships`; a profile with one group is not
+ * checked for coverage. Not caught: a country dropped from one list only; a visa list that fully includes the visa-free group.
  */
 export function checkCitizenships(universities: University[], excluded: string[]): void {
   for (const u of universities) {
@@ -311,9 +312,10 @@ function checkCitizenshipLists(u: University): void {
     const outside = values.filter(c => !u.citizenships.includes(c));
     if (outside.length) throw new UniversityValidationError(`${u.id}.${card}`, `страны ${outside.join(", ")} есть в списке карточки, но нет в citizenships профиля`);
   }
-  // A profile with one group of countries (only visa cards) leaves the others without a card on purpose.
-  const split = new Set(lists.map(l => [...l.values].sort().join())).size > 1;
-  const lost = split ? u.citizenships.filter(c => !lists.some(l => l.values.includes(c))) : [];
+  // A group is a list not inside another one; one group (only visa cards) leaves the others without a card on purpose.
+  const groups = lists.filter((l, i) => !lists.some((o, j) => o.values.length > l.values.length || (o.values.length === l.values.length && j < i)
+    ? l.values.every(c => o.values.includes(c)) : false));
+  const lost = groups.length > 1 ? u.citizenships.filter(c => !lists.some(l => l.values.includes(c))) : [];
   if (lost.length) throw new UniversityValidationError(u.id, `страны ${lost.join(", ")} есть в citizenships, но ни одна карточка их не охватывает`);
   for (const [i, a] of lists.entries()) {
     for (const b of lists.slice(i + 1)) {
