@@ -81,6 +81,8 @@ body {
 
 .stack { display: flex; flex-direction: column; gap: 14px; }
 .prose { white-space: pre-wrap; margin: 0; }
+/* #91: the chat's card carries bare source URLs; they wrap instead of widening the page. */
+.change-card { overflow-wrap: anywhere; }
 .muted { color: var(--muted); }
 .small { font-size: 12px; line-height: 1.4; }
 

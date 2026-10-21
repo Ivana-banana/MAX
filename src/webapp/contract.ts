@@ -8,7 +8,7 @@
 import type { Lang, LegalBasis, PlanItemStatus } from "../core/types.js";
 
 /** Steps of the shared dialogue (src/bot/dialog.ts); the app renders a screen per step. */
-export type AppStep = "language" | "consent" | "scope" | "citizenship" | "entry" | "plan" | "completion" | "visit" | "docEnd" | "delete";
+export type AppStep = "language" | "consent" | "scope" | "citizenship" | "entry" | "plan" | "completion" | "visit" | "docEnd" | "changeDate" | "delete";
 
 export interface AppDocument { id: string; title: string; checked: boolean }
 
@@ -71,6 +71,26 @@ export interface AppUndatedItem {
 /** #25: what the university asks to prepare before entry; `note` is the chat's "university fact / assumption" line. */
 export interface AppBeforeEntryItem { id: string; title: string; text: string; note: string; url: string }
 
+/**
+ * #91: a change of circumstances (D-061), as the chat's /change shows it. The app sends the chat's
+ * actions: `change:<id>` asks for the event date (step `changeDate`), `change-done:<id>` closes the deadline.
+ */
+export interface AppChange {
+  id: string;
+  title: string;
+  /** The norm counts working days, so the app asks for the event date; false for a new passport. */
+  dated: boolean;
+  /** The entered day of the event; absent until the student enters it. */
+  event?: string;
+  /** The counted deadline; absent before the date and when the count leaves the calendar (the card says the norm in words). */
+  due?: string;
+  /** The plan's line in the chat's words (whose deadline, when, how long left), once the date is entered. */
+  line?: string;
+  /** The chat's card word for word, without the title: norm, assumptions, both grounds, the deadline, what to hand over and where. */
+  card: string;
+  lawUrl: string;
+}
+
 export interface AppUniversity { id: string; name: string; contactUrl: string }
 
 export interface AppSession {
@@ -106,6 +126,10 @@ export interface AppSession {
   beforeEntry: AppBeforeEntryItem[];
   /** The plan as a message to forward (`shareText`): procedures and deadlines only; empty without a plan. */
   share: string;
+  /** #91: the cases of /change, in the data file's order; empty without a plan and while /change is off (live mode with draft norms). */
+  changes: AppChange[];
+  /** The chat's text above the cases, or its "/change is off for now" reply when `changes` is empty; empty without a plan. */
+  changeIntro: string;
 }
 
 export interface AppState {

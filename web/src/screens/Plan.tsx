@@ -12,15 +12,19 @@ import { useState } from "react";
 import { openLink, shareInMax, tap } from "../bridge.js";
 import { universityPhoto } from "../photos.js";
 import { text, type Texts } from "../texts.js";
-import { Button, Switch, dotted, ordinal } from "../ui.js";
+import { Button, Switch, dayMonth, dotted, ordinal } from "../ui.js";
 import { copyText } from "./Card.js";
+import { CHANGE_LIST } from "./Change.js";
 
 interface Props {
   session: AppSession;
   texts: Texts;
+  today: string;
   pending: string | null;
   onAction: (action: string) => void;
   onOpen: (ruleId: string) => void;
+  /** #91: opens the list of changed circumstances (CHANGE_LIST) or one reported case. */
+  onChange: (id: string) => void;
   onCalendar: () => void;
   calendarBusy: boolean;
 }
@@ -50,9 +54,11 @@ function Task({ item, index, deadline, separator, disabled, onOpen }: {
   );
 }
 
-export function Plan({ session, texts, pending, onAction, onOpen, onCalendar, calendarBusy }: Props) {
+export function Plan({ session, texts, today, pending, onAction, onOpen, onChange, onCalendar, calendarBusy }: Props) {
   const t = (key: string) => text(texts, key);
-  const unfinished = session.plan.some(item => item.status !== "done");
+  // A change deadline still ahead goes into the calendar file too (#41), as in the chat.
+  const unfinished = session.plan.some(item => item.status !== "done") || session.changes.some(c => c.due !== undefined && c.due >= today);
+  const reported = session.changes.filter(c => c.line !== undefined);
   // "Everything done" is the server's progress with no next step: every first-round procedure is
   // marked and no repeat is near or missed (#103), so the screen and the chat agree; repeats stay listed below the finale.
   const finished = session.plan.length > 0 && session.progress.nextRuleId === undefined;
@@ -144,6 +150,18 @@ export function Plan({ session, texts, pending, onAction, onOpen, onCalendar, ca
           ))}
         </div>
       )}
+
+      {/* #91: the chat's /change. The button stays while it is off: the next screen says so and where to ask. */}
+      <div className="in d4 stack">
+        <h2 className="section"><span>{t("btn.change")}</span></h2>
+        {reported.map(change => (
+          <button key={change.id} type="button" className="task task-hot" disabled={pending !== null} onClick={() => onChange(change.id)}>
+            <span className="n n-long" aria-hidden="true">{change.due === undefined ? "—" : dayMonth(change.due)}</span>
+            <span className="t">{change.line}</span>
+          </button>
+        ))}
+        <Button tone="outline" disabled={pending !== null} onClick={() => onChange(CHANGE_LIST)}>{t("btn.change")}</Button>
+      </div>
 
       <div className="toggle in d4">
         <span>{t("app.reminders")}</span>

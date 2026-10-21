@@ -9,7 +9,7 @@ import type { AppResult, AppStateResponse, AppTicket } from "../../src/webapp/co
 import { initData } from "./bridge.js";
 
 export type {
-  AppDocument, AppLaunch, AppPlanItem, AppResult, AppSession, AppState, AppStep, AppUniversity,
+  AppChange, AppDocument, AppLaunch, AppPlanItem, AppResult, AppSession, AppState, AppStep, AppUniversity,
 } from "../../src/webapp/contract.js";
 
 /** Why a request could not be made or was refused. The UI shows a sentence per case. */

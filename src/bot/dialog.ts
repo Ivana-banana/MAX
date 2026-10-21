@@ -201,9 +201,7 @@ function home(s: Session, ctx: DialogueContext, prefix = ""): Reply {
     return counted ? t(s, ctx, "home.undatedDue", { title: n.title[s.lang]!, due: date(s, counted.due) }) : `• ${n.title[s.lang]}`;
   }).join("\n") : "";
   const changes = reportedChanges(s, ctx);
-  const changeLines = changes.length ? t(s, ctx, "home.changes") + changes.map(({ situation: c, deadline: d }) => d.due
-    ? t(s, ctx, "home.change", { title: c.title[s.lang]!, what: dueWhat(s, ctx, c, d), due: date(s, d.due), countdown: changeCountdown(s, ctx, d.due) })
-    : t(s, ctx, "home.changeWords", { title: c.title[s.lang]! })).join("\n") : "";
+  const changeLines = changes.length ? t(s, ctx, "home.changes") + changes.map(({ situation: c, deadline: d }) => changeLine(s, ctx, c, d)).join("\n") : "";
   // Reminders are the core mechanic, so while they are off the switch comes first, right under the text.
   const toggle = [button(t(s, ctx, s.reminders ? "btn.remindersOff" : "btn.remindersOn"), "reminders")];
   return reply(s, ctx, prefix + t(s, ctx, "home.title") + progress.text + lines.join("\n") + noteLines + changeLines + t(s, ctx, "home.scope") +
@@ -350,15 +348,24 @@ const filer = (s: Session, ctx: DialogueContext, c: ChangeSituation) =>
 /** Whose date the deadline is: the university's own term for the student, or the receiving side's filing deadline. */
 const dueWhat = (s: Session, ctx: DialogueContext, c: ChangeSituation, d: ChangeDeadline) => d.stricter === "university"
   ? t(s, ctx, "change.what.university", { uni: uni(s, ctx).name[s.lang]! }) : t(s, ctx, "change.what.filing", { who: filer(s, ctx, c) });
+/** A reported change in the plan: whose date it is and when, or that the card says the norm in words. The app lists the same line (#91). */
+export const changeLine = (s: Session, ctx: DialogueContext, c: ChangeSituation, d: ChangeDeadline) => d.due
+  ? t(s, ctx, "home.change", { title: c.title[s.lang]!, what: dueWhat(s, ctx, c, d), due: date(s, d.due), countdown: changeCountdown(s, ctx, d.due) })
+  : t(s, ctx, "home.changeWords", { title: c.title[s.lang]! });
 /** Days left to a change deadline, in the plan's words. */
 function changeCountdown(s: Session, ctx: DialogueContext, due: string): string {
   const n = daysBetween(ctx.today, due);
   if (n < 0) return t(s, ctx, "countdown.passed", { days: t(s, ctx, "days", { n: -n }) });
   return n === 0 ? t(s, ctx, "countdown.today") : t(s, ctx, "countdown.upcoming", { left: t(s, ctx, "left", { n }) });
 }
-function changeList(s: Session, ctx: DialogueContext): Reply {
+export function changeList(s: Session, ctx: DialogueContext): Reply {
   return reply(s, ctx, t(s, ctx, "change.choose", { uni: uni(s, ctx).name[s.lang]! }),
     [...ctx.changes!.situations.map(c => [button(c.title[s.lang]!, `change:${c.id}`)]), [button(t(s, ctx, "btn.plan"), "plan")]]);
+}
+/** Live mode with draft norms (D-061): /change is off, and the reply says where to ask instead. */
+export function changeOff(s: Session, ctx: DialogueContext): Reply {
+  return reply(s, ctx, t(s, ctx, "change.off", { uni: uni(s, ctx).name[s.lang]!, url: uni(s, ctx).contactUrl }),
+    [[link(pageLabel(s, ctx), uni(s, ctx).contactUrl)], [button(t(s, ctx, profile(s) ? "btn.plan" : "btn.continue"), profile(s) ? "plan" : "continue")]]);
 }
 /** The question for the event date and, on a wrong date, the same buttons again, so they never go stale. */
 const changeDateRows = (s: Session, ctx: DialogueContext): Button[][] =>
@@ -367,7 +374,7 @@ const changeDateRows = (s: Session, ctx: DialogueContext): Button[][] =>
  * A change of circumstances: the norm (fact), the university's own term with its source or that none is
  * confirmed, the stricter date (calculation) with how it is counted (assumption), what to hand over and where.
  */
-function changeCard(s: Session, ctx: DialogueContext, c: ChangeSituation, prefix = ""): Reply {
+export function changeCard(s: Session, ctx: DialogueContext, c: ChangeSituation, prefix = ""): Reply {
   const u = uni(s, ctx), name = u.name[s.lang]!, filing = ctx.changes!.filing, norm = c.norm[s.lang]!;
   const d = changeDue(s, ctx, c), term = u.changeTerms[c.id];
   const law = t(s, ctx, "change.law", { act: c.legal.act, article: c.legal.article[s.lang]!, url: c.legal.url, date: date(s, c.legal.checkedAt) });
@@ -574,8 +581,7 @@ export function transition(previous: Session | null, input: Input, ctx: Dialogue
   // #41: from any step once the plan exists; before it the student answers the current question first.
   if (action === "/change" || action === "change") {
     // Live mode with draft norms: say so instead of showing the plan silently.
-    if (!ctx.changes) return { session: s, reply: reply(s, ctx, t(s, ctx, "change.off", { uni: uni(s, ctx).name[s.lang]!, url: uni(s, ctx).contactUrl }),
-      [[link(pageLabel(s, ctx), uni(s, ctx).contactUrl)], [button(t(s, ctx, profile(s) ? "btn.plan" : "btn.continue"), profile(s) ? "plan" : "continue")]]) };
+    if (!ctx.changes) return { session: s, reply: changeOff(s, ctx) };
     if (!profile(s)) return { session: s, reply: reply(s, ctx, t(s, ctx, "change.noPlan"), [[button(t(s, ctx, "btn.continue"), "continue")]]) };
     s.step = "plan"; delete s.selected;
     return { session: s, reply: changeList(s, ctx) };

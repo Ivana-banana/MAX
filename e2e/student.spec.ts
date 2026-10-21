@@ -222,3 +222,30 @@ test("a marked yearly procedure comes back labelled as a repeat, with the date i
   await tile.click();
   await expect(page.getByText("повторно (ежегодно) · пройдено вами")).toBeVisible();
 });
+
+test("circumstances changed (#91): case → event date → the chat's card → the deadline in the plan", async ({ page }, testInfo) => {
+  await page.evaluate(() => {
+    const w = globalThis as unknown as { WebApp: { HapticFeedback?: object }; haptics: string[] };
+    w.haptics = [];
+    w.WebApp.HapticFeedback = { notificationOccurred: (type: string) => w.haptics.push(type), selectionChanged: () => {} };
+  });
+  await toEntryDate(page);
+  await dateField(page).fill(moscowDate(7));
+  await save(page).click();
+  await page.getByRole("button", { name: "Изменились обстоятельства" }).click();
+  await expect(page.getByText("Что изменилось? Выберите случай")).toBeVisible();
+  await page.getByRole("button", { name: "Переезд" }).click();
+  await expect(page.getByRole("heading", { name: "Дата события" })).toBeVisible();
+  await page.screenshot({ path: testInfo.outputPath("change-date.png"), fullPage: true, animations: "disabled" });
+  await page.getByRole("button", { name: "Вчера" }).click();
+  await expect(page.getByRole("status")).toHaveText("Дата сохранена.");
+  await expect(page.getByRole("heading", { name: "Переезд" })).toBeVisible();
+  await expect(page.locator("body")).toContainText("Ваш шаг — сейчас: сразу после заселения или возвращения передайте паспорт и миграционную карту");
+  await expect(page.locator("body")).toContainText("Допущение: если вы живёте в общежитии");
+  await expect(page.locator("body")).not.toContainText("/plan");
+  expect(await page.evaluate(() => (globalThis as unknown as { haptics: string[] }).haptics)).toContain("success");
+  await page.screenshot({ path: testInfo.outputPath("change-card.png"), fullPage: true, animations: "disabled" });
+  await page.reload();
+  await expect(page.getByRole("button", { name: /^Переезд — / })).toBeVisible();
+  await page.screenshot({ path: testInfo.outputPath("change-plan.png"), fullPage: true, animations: "disabled" });
+});

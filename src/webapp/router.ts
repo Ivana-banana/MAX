@@ -13,7 +13,7 @@ import { stat } from "node:fs/promises";
 import { pipeline } from "node:stream/promises";
 import { join, normalize, resolve, sep } from "node:path";
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { countedProcedures, plan } from "../bot/dialog.js";
+import { countedChanges, countedProcedures, plan } from "../bot/dialog.js";
 import { CALENDAR_FILE, planToIcs } from "../bot/calendar.js";
 import type { Service } from "../bot/service.js";
 import { errorInfo } from "../log.js";
@@ -146,11 +146,12 @@ async function icsFor(service: Service, user: number): Promise<string | null> {
   const ctx = service.ctx();
   // The chat has stopped a plan built on older rules (rulesChanged); no calendar for it either.
   if (!session || session.ruleVersion !== ctx.version) return null;
-  const items = plan(session, ctx);
-  if (!items.some(i => i.status !== "done")) return null;
+  const items = plan(session, ctx), changes = countedChanges(session, ctx);
+  // A change deadline ahead (#41) goes into the file too, as in the chat's calendar.
+  if (!items.some(i => i.status !== "done") && !changes.length) return null;
   return planToIcs(items,
     { lang: session.lang, texts: ctx.texts, demo: ctx.demo, uid: session.nonce, today: ctx.today, sequence: session.revision,
-      ...(session.visits ? { visits: session.visits } : {}), procedures: countedProcedures(session, ctx) });
+      ...(session.visits ? { visits: session.visits } : {}), procedures: countedProcedures(session, ctx), changes });
 }
 
 /**

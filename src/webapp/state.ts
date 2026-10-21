@@ -12,15 +12,15 @@ import { coverage } from "../core/deadlines.js";
 import { isValidDate } from "../core/dates.js";
 import type { Lang, PlanItem } from "../core/types.js";
 import {
-  beforeEntry, beforeEntryNote, consequenceText, countdown, documentsNote, mapUrl, pageLabel, placeText, plan, progressParts, repeatParts, targetText, procedureDue, procedureDueText, procedureSource, profile, prompt, shareText, transition, undated, universityLost, type DialogueContext, type Input, type Session,
+  beforeEntry, beforeEntryNote, changeCard, changeDue, changeLine, changeList, changeOff, consequenceText, countdown, documentsNote, mapUrl, pageLabel, placeText, plan, progressParts, repeatParts, targetText, procedureDue, procedureDueText, procedureSource, profile, prompt, shareText, transition, undated, universityLost, type DialogueContext, type Input, type Session,
 } from "../bot/dialog.js";
 import { funnelEvents, funnelUniversity } from "../bot/funnel.js";
 import { BASE_LANG, format } from "../data/loadTexts.js";
 import { countEvents, type Service } from "../bot/service.js";
-import type { AppResult, AppState, AppUniversity } from "./contract.js";
+import type { AppChange, AppResult, AppState, AppUniversity } from "./contract.js";
 
 export type {
-  AppBeforeEntryItem, AppDocument, AppLaunch, AppPlanItem, AppResult, AppSession, AppState, AppStateResponse, AppStep, AppTicket, AppUniversity,
+  AppBeforeEntryItem, AppChange, AppDocument, AppLaunch, AppPlanItem, AppResult, AppSession, AppState, AppStateResponse, AppStep, AppTicket, AppUniversity,
 } from "./contract.js";
 
 /** Another tab (or the chat) moved the session on while this screen was open. */
@@ -47,6 +47,8 @@ export function isAppAction(action: string): boolean {
     // "Change citizenship" on the entry step; elsewhere it changes nothing: before the plan it repeats the question
     || action === "back"
     || action === "plan" || action === "reminders" || action === "/today"
+    // #41, #91: a change of circumstances, its event date ("/yesterday" too) and the received torn-off part
+    || action === "/yesterday" || /^change:[a-z0-9-]{1,64}$/.test(action) || /^change-done:[a-z0-9-]{1,64}$/.test(action)
     || action === "/delete" || action === "confirm-delete" || action === "cancel-delete"
     || /^[A-Z]{2}$/.test(action) || action === "OTHER"
     || isValidDate(action)
@@ -121,6 +123,21 @@ function countdownView(session: Session, ctx: DialogueContext, note: ReturnType<
     : { endLabel: label };
 }
 
+/** #91: the cases of /change with the chat's card and plan line; none while /change is off. */
+function changesView(session: Session, ctx: DialogueContext): AppChange[] {
+  return (ctx.changes?.situations ?? []).map(c => {
+    const title = c.title[session.lang]!, d = changeDue(session, ctx, c);
+    return {
+      id: c.id, title, dated: c.workdays !== undefined,
+      ...(d ? { event: d.event, line: changeLine(session, ctx, c, d).replace(/^• /, "") } : {}),
+      ...(d?.due ? { due: d.due } : {}),
+      // The card opens with the title; the app shows it as the heading.
+      card: withoutBanner(changeCard(session, ctx, c).text, ctx).slice(title.length).trimStart(),
+      lawUrl: c.legal.url,
+    };
+  });
+}
+
 /** `hint`: the MAX interface language, for the screen shown before a session exists. */
 function view(session: Session | null, ctx: DialogueContext, mocked: boolean, hint?: string): AppState {
   const hinted = hint?.slice(0, 2).toLowerCase();
@@ -130,8 +147,7 @@ function view(session: Session | null, ctx: DialogueContext, mocked: boolean, hi
   return {
     session: session === null ? null : {
       revision: session.revision,
-      // The app has no screen for the chat's question about the date of a change (#41): it shows the plan.
-      step: session.step === "changeDate" ? "plan" : session.step,
+      step: session.step,
       lang: session.lang,
       university: university(session.university, ctx, lang),
       citizenships: [...(ctx.universities.find(u => u.id === session.university) ?? ctx.universities[0]!).citizenships,
@@ -184,6 +200,8 @@ function view(session: Session | null, ctx: DialogueContext, mocked: boolean, hi
         ...(note.place ? { mapUrl: mapUrl(note.place.map) } : {}),
       })) : [],
       share: profile(session) && !stale ? shareText(session, ctx) : "",
+      changes: profile(session) && !stale ? changesView(session, ctx) : [],
+      changeIntro: profile(session) && !stale ? withoutBanner((ctx.changes ? changeList(session, ctx) : changeOff(session, ctx)).text, ctx) : "",
       beforeEntry: session.step === "entry" && !stale ? beforeEntry(session, ctx).map(card => ({
         id: card.id, title: localized(card.title), text: localized(card.text), note: beforeEntryNote(session, ctx, card).trim(), url: card.source.url,
       })) : [],
@@ -222,8 +240,7 @@ export async function applyAction(
     }
     // The MAX interface language picks the first screen's language on /start, as bot_started does in the chat.
     const input: Input = { text: action, callback: false, ...(locale === undefined ? {} : { locale }) };
-    // #41: the app's action starts from the plan, as the chat's "Cancel" on the date question does.
-    const outcome = transition(before?.step === "changeDate" ? { ...before, step: "plan" } : before, input, ctx);
+    const outcome = transition(before, input, ctx);
     const target = funnelUniversity(outcome.session ?? before, ctx);
     await countEvents(tx, user, ctx.today, target, funnelEvents(before, outcome.session, input, ctx), service.clock());
     // A chat reply queued earlier carries buttons stamped with the previous revision. The dialogue

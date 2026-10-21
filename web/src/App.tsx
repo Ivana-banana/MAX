@@ -17,6 +17,7 @@ import { isText, text, type Texts } from "./texts.js";
 import { Onboarding } from "./screens/Onboarding.js";
 import { Plan } from "./screens/Plan.js";
 import { Card } from "./screens/Card.js";
+import { CHANGE_LIST, ChangeCard, ChangeList } from "./screens/Change.js";
 
 /** MAX UI styles iOS and Android; a desktop or web client gets the Android look. */
 const appearance = (): "ios" | "android" => (platform() === "ios" ? "ios" : "android");
@@ -33,6 +34,8 @@ const BOOT_FAILED = "Не удалось загрузить. Проверьте 
 export function App() {
   const { status, dispatch, reload, dismiss } = useApp();
   const [openCard, setOpenCard] = useState<string | null>(null);
+  // #91: the list of changed circumstances (CHANGE_LIST) or the id of one case.
+  const [openChange, setOpenChange] = useState<string | null>(null);
   const [calendarBusy, setCalendarBusy] = useState(false);
   const [calendarError, setCalendarError] = useState<ApiFailure | "download" | null>(null);
   const session = status.state?.session ?? null;
@@ -40,15 +43,22 @@ export function App() {
   const t = (key: string) => text(texts, key);
 
   // The card is a nested screen, so the native back button has to leave it.
-  const closeCard = useCallback(() => setOpenCard(null), []);
-  useEffect(() => (openCard === null ? undefined : onBack(closeCard)), [openCard, closeCard]);
+  const closeCard = useCallback(() => { setOpenCard(null); setOpenChange(null); }, []);
+  const nested = openCard !== null || openChange !== null;
+  useEffect(() => (nested ? onBack(closeCard) : undefined), [nested, closeCard]);
   // A step change on the server (a completed procedure, a deletion) invalidates an open card.
   // Adjusted during render, not in an effect: https://react.dev/learn/you-might-not-need-an-effect
   const [shownStep, setShownStep] = useState(session?.step);
   if (shownStep !== session?.step) {
     setShownStep(session?.step);
     if (session?.step !== "plan") setOpenCard(null);
+    // The date question keeps its case open, so a saved date comes back to the case's card; Cancel goes to the plan.
+    if (session?.step === "changeDate") setOpenChange(session.selected ?? null);
+    else if (session?.step !== "plan" || !isText(status.message, t("change.saved"))) setOpenChange(null);
   }
+  // Haptics once the server confirms a saved date or a closed deadline; silently absent on desktop and web.
+  const changeSaved = session?.step === "plan" && (isText(status.message, t("change.saved")) || isText(status.message, t("change.closed")));
+  useEffect(() => { if (changeSaved) tap("success"); }, [changeSaved, session?.revision]);
 
   const act = useCallback((action: string) => { tap(); void dispatch(action); }, [dispatch]);
 
@@ -154,8 +164,13 @@ export function App() {
     }
     if (session.step === "visit" || session.step === "docEnd") {
       const [title, invalid] = session.step === "visit" ? ["app.visitTitle", "visit.invalid"] : ["app.endTitle", "docEnd.invalid"];
-      return <DateStep texts={texts} today={status.state.today} prompt={session.prompt} message={status.message} revision={session.revision}
+      return <DateStep texts={texts} min={status.state.today} prompt={session.prompt} message={status.message} revision={session.revision}
         title={title} invalid={invalid} pending={status.pending} onAction={act} />;
+    }
+    if (session.step === "changeDate") {
+      return <DateStep texts={texts} min={session.entryDate ?? status.state.today} prompt={session.prompt}
+        message={status.message} revision={session.revision} title="app.changeTitle" invalid="change.invalid" pending={status.pending} onAction={act}
+        shortcuts={[{ label: t("btn.today"), action: "/today" }, { label: t("btn.yesterday"), action: "/yesterday" }]} />;
     }
     if (session.step === "completion") {
       return <Completion texts={texts} today={status.state.today} message={status.message} revision={session.revision}
@@ -165,17 +180,30 @@ export function App() {
       return <Onboarding session={session} texts={texts} languages={status.state.languages}
         universities={status.state.universities} message={status.message} copy={status.copy} today={status.state.today} pending={status.pending} onAction={act} />;
     }
+    const back = !insideMax() && <button type="button" className="link back" onClick={closeCard}>{`← ${t("app.back")}`}</button>;
+    if (openChange === CHANGE_LIST) {
+      return <div className="stack">{back}<ChangeList session={session} texts={texts} pending={status.pending} onAction={act} onOpen={setOpenChange} /></div>;
+    }
+    const change = openChange === null ? undefined : session.changes.find(c => c.id === openChange);
+    if (change !== undefined) {
+      return (
+        <div className="stack">
+          {back}
+          <ChangeCard key={change.id} session={session} texts={texts} change={change} message={status.message} pending={status.pending} onAction={act} />
+        </div>
+      );
+    }
     const item = openCard === null ? undefined : session.plan.find(i => i.ruleId === openCard);
     if (item !== undefined) {
       return (
         <div className="stack">
-          {!insideMax() && <button type="button" className="link back" onClick={closeCard}>{`← ${t("app.back")}`}</button>}
+          {back}
           <Card key={item.ruleId} session={session} texts={texts} item={item} pending={status.pending} copy={status.copy} onAction={act} />
         </div>
       );
     }
     return (
-      <Plan session={session} texts={texts} pending={status.pending} onAction={act} onOpen={setOpenCard}
+      <Plan session={session} texts={texts} today={status.state.today} pending={status.pending} onAction={act} onOpen={setOpenCard} onChange={setOpenChange}
         onCalendar={() => void exportCalendar()} calendarBusy={calendarBusy} />
     );
   };
@@ -228,20 +256,21 @@ function Notice({ title, body, action }: { title: string; body: string; action?:
 }
 
 /**
- * The chat's steps that ask for a day from today on — a visit (D-039) or a document end date (D-040).
- * The client shows why a day before today is refused; the server checks the full range and answers
- * with the card. The wording of the question is the chat's.
+ * The chat's steps that ask for a day — a visit (D-039) or a document end date (D-040) from today on,
+ * the day of a change of circumstances (#91) from the entry on. The client shows why a day before
+ * `min` is refused; the server checks the full range and answers with the card. The wording of the
+ * question is the chat's, and so are the `shortcuts` ("Today", "Yesterday").
  */
-function DateStep({ texts, today, prompt, message, revision, title, invalid: invalidKey, pending, onAction }: {
-  texts: Texts; today: string; prompt: string; message: string; revision: number; title: string; invalid: string;
-  pending: string | null; onAction: (action: string) => void;
+function DateStep({ texts, min, prompt, message, revision, title, invalid: invalidKey, pending, onAction, shortcuts = [] }: {
+  texts: Texts; min: string; prompt: string; message: string; revision: number; title: string; invalid: string;
+  pending: string | null; onAction: (action: string) => void; shortcuts?: { label: string; action: string }[];
 }) {
   const [value, setValue] = useState("");
   const [nonexistent, setNonexistent] = useState(false);
   // The revision whose answer the user has acted on (an edit or Save): its refusal stays hidden until a new answer.
   const [acted, setActed] = useState<number | null>(null);
   const t = (key: string) => text(texts, key);
-  const outOfRange = value !== "" && value < today;
+  const outOfRange = value !== "" && value < min;
   const invalid = outOfRange || (acted !== revision && isText(message, t(invalidKey)));
   return (
     <div className="stack">
@@ -252,10 +281,16 @@ function DateStep({ texts, today, prompt, message, revision, title, invalid: inv
         <DateField label={t(title)} hint={t("app.entry.hint")}
           onChange={(iso, display) => { setValue(iso); setActed(revision); setNonexistent(iso === "" && display.length === 10); }} />
       </div>
-      <Button className="in d3" disabled={value === "" || value < today || pending !== null} loading={pending === value}
+      <Button className="in d3" disabled={value === "" || value < min || pending !== null} loading={pending === value}
         onClick={() => { setActed(revision); onAction(value); }}>
         {t("app.save")}
       </Button>
+      {shortcuts.map(s => (
+        <Button key={s.action} className="in d4" tone="outline" disabled={pending !== null} loading={pending === s.action}
+          onClick={() => { setActed(revision); onAction(s.action); }}>
+          {s.label}
+        </Button>
+      ))}
       <button type="button" className="link in d5" disabled={pending !== null} onClick={() => onAction("plan")}>
         {t("btn.cancel")}
       </button>
