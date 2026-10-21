@@ -218,6 +218,8 @@ body {
   align-self: center;
 }
 .link:disabled { opacity: .45; }
+/* The pressed text button waits for the server like a .btn: a blinking ellipsis after the label. */
+.link[aria-busy="true"]::after { content: " …"; animation: blink .6s steps(2) infinite; }
 .back { align-self: flex-start; padding-left: 0; text-decoration: none; }
 
 /* ── Lists: numbered rows and code tiles ────────────────── */
@@ -363,6 +365,8 @@ body {
 }
 .doc[aria-checked="true"] .txt { text-decoration: line-through; text-decoration-color: var(--red); text-decoration-thickness: 2px; color: var(--muted); }
 .doc:disabled { cursor: default; }
+/* The tapped document's box blinks until the server answers, so a slow tap does not look ignored. */
+.doc[aria-busy="true"] .box { animation: blink .6s steps(2) infinite; }
 .law { font: 700 15px/1.35 var(--text); margin: 8px 0 0; }
 .law small { display: block; font-weight: 500; color: var(--muted); margin-top: 3px; }
 

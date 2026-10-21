@@ -135,7 +135,7 @@ export function Plan({ session, texts, today, pending, onAction, onOpen, onChang
               )}
               {item.documents.map((document, index) => (
                 <button key={document.id} type="button" role="checkbox" aria-checked={document.checked} className="doc"
-                  disabled={pending !== null} onClick={() => { tap(); onAction(`doc:${item.id}:${document.id}`); }}>
+                  aria-busy={pending === `doc:${item.id}:${document.id}`} disabled={pending !== null} onClick={() => { tap(); onAction(`doc:${item.id}:${document.id}`); }}>
                   <span className="num">{ordinal(index)}</span>
                   <span className="txt">{document.title}</span>
                   <span className="box" aria-hidden="true" />
@@ -184,7 +184,7 @@ export function Plan({ session, texts, today, pending, onAction, onOpen, onChang
 
       <p className="small muted prose in d6">{t("app.selfReported")}</p>
 
-      <button type="button" className="link" disabled={pending !== null} onClick={() => onAction("/delete")}>
+      <button type="button" className="link" aria-busy={pending === "/delete"} disabled={pending !== null} onClick={() => onAction("/delete")}>
         {t("btn.delete")}
       </button>
     </div>

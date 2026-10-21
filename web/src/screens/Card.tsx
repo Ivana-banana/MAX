@@ -82,6 +82,7 @@ export function Card({ session, texts, item, pending, copy, onAction }: Props) {
             type="button"
             role="checkbox"
             aria-checked={document.checked}
+            aria-busy={pending === `doc:${item.ruleId}:${document.id}`}
             className="doc"
             disabled={pending !== null}
             onClick={() => { tap(); onAction(`doc:${item.ruleId}:${document.id}`); }}

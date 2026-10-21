@@ -211,6 +211,43 @@ test("visit and completion screens: a nonexistent date shows the reason", async 
   await expect(alert(page)).toHaveCount(0);
 });
 
+test("a tap shows it is waiting for the server: the document box and the text buttons", async ({ page }, testInfo) => {
+  await toEntryDate(page);
+  await dateField(page).fill(moscowDate(7));
+  await save(page).click();
+  await page.getByRole("button", { name: /^Медицинское освидетельствование/ }).click();
+
+  // Hold the server's answers, so the waiting state stays on the screen; answer() lets the oldest one through.
+  const held: (() => void)[] = [];
+  await page.route("**/api/action", async route => {
+    await new Promise<void>(resolve => held.push(resolve));
+    await route.continue();
+  });
+  const answer = async () => { await expect.poll(() => held.length).toBeGreaterThan(0); held.shift()!(); };
+
+  const passport = page.getByRole("checkbox", { name: /Паспорт$/ });
+  await passport.click();
+  await expect(passport).toHaveAttribute("aria-busy", "true");
+  await page.screenshot({ path: testInfo.outputPath("6-document-waiting.png"), animations: "disabled" });
+  await answer();
+  await expect(passport).toHaveAttribute("aria-checked", "true");
+  await expect(passport).toHaveAttribute("aria-busy", "false");
+
+  await page.getByRole("button", { name: "Процедура пройдена" }).click();
+  await answer();
+  const cancel = page.getByRole("button", { name: "Отмена" });
+  await cancel.click();
+  await expect(cancel).toHaveAttribute("aria-busy", "true");
+  await answer();
+  await expect(page.getByRole("heading", { name: "Ваш план" })).toBeVisible();
+
+  const remove = page.getByRole("button", { name: "Удалить мои данные" });
+  await remove.click();
+  await expect(remove).toHaveAttribute("aria-busy", "true");
+  await answer();
+  await expect(page.getByRole("button", { name: "Да, удалить" })).toBeVisible();
+});
+
 test("a marked yearly procedure comes back labelled as a repeat, with the date it was done", async ({ page }) => {
   await toEntryDate(page);
   await dateField(page).fill(moscowDate(7));

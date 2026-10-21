@@ -130,7 +130,8 @@ export function App() {
             disabled={status.pending !== null} onClick={() => act("confirm-delete")}>
             {t("btn.confirmDelete")}
           </Button>
-          <button type="button" className="link in d3" disabled={status.pending !== null} onClick={() => act("cancel-delete")}>
+          <button type="button" className="link in d3" aria-busy={status.pending === "cancel-delete"} disabled={status.pending !== null}
+            onClick={() => act("cancel-delete")}>
             {t("btn.cancel")}
           </button>
         </div>
@@ -300,7 +301,7 @@ function DateStep({ texts, min, prompt, message, revision, title, invalid: inval
           {s.label}
         </Button>
       ))}
-      <button type="button" className="link in d5" disabled={pending !== null} onClick={() => onAction("plan")}>
+      <button type="button" className="link in d5" aria-busy={pending === "plan"} disabled={pending !== null} onClick={() => onAction("plan")}>
         {t("btn.cancel")}
       </button>
     </div>
@@ -333,7 +334,7 @@ function Completion({ texts, today, message, revision, pending, onAction }: {
       <Button className="in d4" tone="outline" disabled={pending !== null} loading={pending === "/today"} onClick={() => onAction("/today")}>
         {t("app.today")}
       </Button>
-      <button type="button" className="link in d5" disabled={pending !== null} onClick={() => onAction("plan")}>
+      <button type="button" className="link in d5" aria-busy={pending === "plan"} disabled={pending !== null} onClick={() => onAction("plan")}>
         {t("btn.cancel")}
       </button>
     </div>

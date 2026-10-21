@@ -121,7 +121,7 @@ export function Onboarding({ session, texts, languages, universities, message, c
           {t("btn.continue")}
         </Button>
         {other !== undefined && (
-          <button type="button" className="link in d3" disabled={busy} onClick={() => onAction(other.code)}>
+          <button type="button" className="link in d3" aria-busy={pending === other.code} disabled={busy} onClick={() => onAction(other.code)}>
             {other.name}
           </button>
         )}
@@ -147,7 +147,7 @@ export function Onboarding({ session, texts, languages, universities, message, c
             </button>
           ))}
           <button type="button" className="tile tile-wide" disabled={busy} onClick={() => onAction("OTHER")}>
-            <span className="name">{t("app.citizenshipOther")}</span>
+            <span className="name">{pending === "OTHER" ? "…" : t("app.citizenshipOther")}</span>
           </button>
         </div>
         {copy !== "" && <Unsupported session={session} texts={texts} copy={copy} />}
@@ -233,7 +233,7 @@ function EntryDate({ texts, today, message, revision, pending, onAction, example
           {example}
         </Button>
       )}
-      <button type="button" className="link in d3" disabled={pending !== null} onClick={() => onAction("back")}>
+      <button type="button" className="link in d3" aria-busy={pending === "back"} disabled={pending !== null} onClick={() => onAction("back")}>
         {t("btn.changeCitizenship")}
       </button>
       <BeforeEntry cards={cards} texts={texts} />
