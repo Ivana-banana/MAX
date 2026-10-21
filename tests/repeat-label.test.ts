@@ -64,6 +64,14 @@ describe("a marked yearly procedure is shown as a repeat", () => {
     expect(reminderReply(f.session(), c, first).text).not.toContain("овторно");
   });
 
+  it("overdue reminder of a repeat: keeps the label and the previous round's date", () => {
+    const f = afterDone(), c = { ...ctx, today: "2027-11-30" };
+    const item = plan(f.session(), c).find(i => i.ruleId === "medical-examination")!;
+    const text = reminderReply(f.session(), c, item).text;
+    expect(text).toContain("повторно (ежегодно)");
+    expect(text).toContain("пройдено вами 24 сентября 2026 г.");
+  });
+
   it("every language: the shared plan and the reminder carry the repeat label", () => {
     for (const lang of texts.keys()) {
       const f = afterDone(lang), t = texts.get(lang)!, label = t["repeat.label"]!.replace("{period}", t["repeat.yearly"]!);
