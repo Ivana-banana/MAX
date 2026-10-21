@@ -79,20 +79,21 @@ function yearDaysOff(year: number, holidays: Holiday[], transfers: { from: strin
   if (from.size !== transfers.length || to.size !== transfers.length) throw new CalendarValidationError(`${path}.transfers`, "день встречается в переносах дважды");
 
   // Labour Code, ст. 112 ч. 2: a weekend that fell on a holiday moves to the next workday after it.
+  // A Saturday that the decree made a workday is a workday here too.
+  const workingWeekend = (day: string) => isWeekend(day) && from.has(day) && !holidayDates.has(day);
   const shifted = new Set<string>();
   for (const h of holidays) {
     const date = `${year}-${h.day}`;
     if (!h.shiftIfWeekend || !isWeekend(date) || from.has(date)) continue;
     let next = date;
-    do next = addDays(next, 1); while (isWeekend(next) || holidayDates.has(next) || to.has(next) || shifted.has(next));
+    do next = addDays(next, 1); while ((isWeekend(next) && !workingWeekend(next)) || holidayDates.has(next) || to.has(next) || shifted.has(next));
     if (!next.startsWith(`${year}-`)) throw new CalendarValidationError(path, `выходной ${date} переносится за пределы года: ${next}`);
     shifted.add(next);
   }
 
   const daysOff: string[] = [];
   for (let day = `${year}-01-01`; day.startsWith(`${year}-`); day = addDays(day, 1)) {
-    const workingWeekend = isWeekend(day) && from.has(day) && !holidayDates.has(day);
-    if ((isWeekend(day) && !workingWeekend) || holidayDates.has(day) || to.has(day) || shifted.has(day)) daysOff.push(day);
+    if ((isWeekend(day) && !workingWeekend(day)) || holidayDates.has(day) || to.has(day) || shifted.has(day)) daysOff.push(day);
   }
   return daysOff;
 }

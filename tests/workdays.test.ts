@@ -77,6 +77,16 @@ describe("parseCalendar refuses an inconsistent file", () => {
     expect(c.daysOff.has("2026-03-09")).toBe(true); // 8 March 2026 is a Sunday
   });
 
+  it("moves a holiday weekend onto a Saturday that the decree made a workday", () => {
+    // Synthetic: 8 March 2026 is a Sunday; Mon 9 - Fri 13 are already off by transfers, so the next
+    // workday after the holiday is Saturday 14 March, worked by the decree.
+    const transfers = [["03-14", "03-09"], ["03-15", "03-10"], ["03-21", "03-11"], ["03-22", "03-12"], ["03-28", "03-13"]]
+      .map(([from, to]) => ({ from: `2026-${from}`, to: `2026-${to}` }));
+    const { calendar: c } = load([year({ transfers })]);
+    expect(c.daysOff.has("2026-03-14")).toBe(true);
+    expect(c.daysOff.has("2026-03-16")).toBe(false);
+  });
+
   it("refuses a transfer from a weekday", () => {
     expect(() => load([year({ transfers: [{ from: "2026-09-02", to: "2026-09-05" }] })])).toThrow(CalendarValidationError);
   });
