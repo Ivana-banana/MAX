@@ -7,7 +7,7 @@
  */
 
 import type { ReactNode } from "react";
-import { BOLD } from "./texts.js";
+import { EMPHASIS } from "./texts.js";
 
 export function Button({ children, onClick, tone = "red", loading = false, disabled = false, arrow = "→", className = "" }: {
   children: ReactNode;
@@ -70,7 +70,8 @@ export function DateNote({ prompt, error, className }: { prompt: string; error: 
   );
 }
 
-/** A chat message as the chat shows it (#114): **…** in bold, no HTML from the text itself. */
+/** A chat message as the chat shows it (#114): **…** in bold, *…* in italics, no HTML from the text itself. */
 export function Rich({ text }: { text: string }) {
-  return <>{text.split(BOLD).map((part, i) => (i % 2 ? <strong key={i}>{part}</strong> : part))}</>;
+  return <>{text.split(EMPHASIS).map((part, i) => i % 2 === 0 ? part
+    : part.startsWith("**") ? <strong key={i}>{part.slice(2, -2)}</strong> : <em key={i}>{part.slice(1, -1)}</em>)}</>;
 }

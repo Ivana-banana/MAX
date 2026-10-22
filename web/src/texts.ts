@@ -18,11 +18,11 @@ export type Texts = AppState["texts"];
 export const text = (texts: Texts, key: string): string => plain(texts[key] ?? key);
 
 /**
- * Chat texts mark bold as **…** (#114). Headings, buttons and labels take the words only; a chat
- * message shown as is goes through `Rich` (ui.tsx), which draws the bold.
+ * Chat texts mark bold as **…** and italics as *…* (#114). Headings, buttons and labels take the
+ * words only; a chat message shown as is goes through `Rich` (ui.tsx), which draws the emphasis.
  */
-export const BOLD = /\*\*(.+?)\*\*/gs;
-export const plain = (value: string): string => value.replace(BOLD, "$1");
+export const EMPHASIS = /(\*\*.+?\*\*|\*.+?\*)/s;
+export const plain = (value: string): string => value.replace(/\*\*(.+?)\*\*/gs, "$1").replace(/\*(.+?)\*/gs, "$1");
 
 /**
  * Whether a server message is the given text. Texts may carry placeholders (`{from}`) the server

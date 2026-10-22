@@ -8,6 +8,7 @@
 import qrcode from "qrcode-generator";
 import { format, type Texts } from "./data/loadTexts.js";
 import type { University } from "./data/loadUniversities.js";
+import { plain } from "./core/markup.js";
 
 export interface PosterOptions { botLink: string; demo: boolean }
 
@@ -53,7 +54,8 @@ export function posterSvg(university: University, texts: Texts, o: PosterOptions
   const langs = university.posterLanguages ?? [...texts.keys()];
   const unknown = langs.filter(lang => !texts.has(lang));
   if (unknown.length) throw new Error(`posterLanguages of ${university.id}: no interface texts for ${unknown.join(", ")}`);
-  const tr = (lang: string, key: string) => format(texts, lang, key, { uni: university.name[lang] ?? university.name.ru! });
+  // The poster is printed plain: chat emphasis markers (#114) are dropped.
+  const tr = (lang: string, key: string) => plain(format(texts, lang, key, { uni: university.name[lang] ?? university.name.ru! }));
   const out: string[] = [];
   const text = (y: number, size: number, value: string, weight = 400, fill = "#1b1f24") =>
     out.push(`<text x="105" y="${y}" font-size="${size}" font-weight="${weight}" fill="${fill}" text-anchor="middle">${escape(value)}</text>`);

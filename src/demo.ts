@@ -10,6 +10,7 @@ import { Service, moscowDate } from "./bot/service.js";
 import { loadChanges } from "./bot/config.js";
 import { addDays } from "./core/dates.js";
 import type { Reply } from "./bot/dialog.js";
+import { plain } from "./core/markup.js";
 
 const scripted = process.argv.includes("--script");
 const rules = parseRuleSet(JSON.parse(readFileSync("./src/data/rules/ru-student.json", "utf8")));
@@ -32,7 +33,8 @@ const service = new Service(store, { rules: rules.rules, universities, texts, ve
   send(_user, reply) {
     last = reply;
     if (reply.text.includes("Напоминание:")) reminderCount++;
-    console.log("\n[MOCKED: MAX transport] " + reply.text);
+    // A terminal shows no bold or italics: the words only (#114).
+    console.log("\n[MOCKED: MAX transport] " + plain(reply.text));
     if (reply.file) console.log(`[MOCKED: MAX file upload] ${reply.file.name}, ${reply.file.content.length} bytes`);
     reply.buttons.flat().forEach((b, i) => console.log(`${i + 1}. ${b.text}` +
       ("url" in b ? ` → ${b.url}` : "copy" in b ? " → [MOCKED: copied to clipboard]" : "")));

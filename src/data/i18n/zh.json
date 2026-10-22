@@ -2,7 +2,7 @@
   "$comment": "界面文本（中文）。机器翻译，经人工决定允许使用（D-020）。键和占位符与 ru.json 相同。",
   "language.name": "中文",
   "language.choose": "选择语言",
-  "banner.demo": "演示 · 练习数据。\n",
+  "banner.demo": "*演示 · 练习数据。*\n\n",
   "days#other": "{n}天",
   "left#other": "还剩{n}天",
   "countdown.done": "已由您标记",

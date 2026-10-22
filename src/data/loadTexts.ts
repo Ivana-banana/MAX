@@ -37,8 +37,9 @@ export function parseTexts(lang: Lang, raw: unknown, path = lang): Record<string
   for (const [key, value] of Object.entries(raw)) {
     if (key.startsWith("$")) continue;
     if (typeof value !== "string" || !value.trim()) throw new TextsValidationError(`${path}.${key}`, "ожидается непустая строка");
-    // An unclosed **…** (#114) would leave stars in plain channels and turn the rest of a chat message bold.
+    // An unclosed **…** or *…* (#114) would leave stars in plain channels and turn the rest of a chat message bold or italic.
     if ((value.match(/\*\*/g)?.length ?? 0) % 2) throw new TextsValidationError(`${path}.${key}`, "незакрытое выделение **");
+    if ((value.replaceAll("**", "").match(/\*/g)?.length ?? 0) % 2) throw new TextsValidationError(`${path}.${key}`, "незакрытый курсив *");
     texts[key] = value;
   }
   return texts;

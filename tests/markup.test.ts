@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { MaxError } from "@maxhub/max-bot-api";
 import { plain, toHtml } from "../src/core/markup.js";
-import { parseTexts } from "../src/data/loadTexts.js";
+import { parseTexts, readTexts } from "../src/data/loadTexts.js";
 import { createTransport } from "../src/bot/transport.js";
 import type { Config } from "../src/bot/config.js";
 
@@ -27,6 +27,11 @@ describe("emphasis in interface texts (#114)", () => {
     expect(toHtml("**Сценарий**\n• вам 18+\n\n**Всё совпадает?** Да")).toBe("<b>Сценарий</b>\n• вам 18+\n\n<b>Всё совпадает?</b> Да");
   });
 
+  it("italics go as <i>; the demo banner is italic in every language", () => {
+    expect(toHtml("*ДЕМО · учебные данные.*\n\n**Ваш план**")).toBe("<i>ДЕМО · учебные данные.</i>\n\n<b>Ваш план</b>");
+    for (const [lang, table] of readTexts("src/data/i18n")) expect(toHtml(table["banner.demo"]!), lang).toMatch(/^<i>[^<]+<\/i>\n\n$/);
+  });
+
   it("an address becomes a link named by its domain; the sentence's punctuation stays outside", () => {
     const law = "https://www.consultant.ru/document/cons_doc_LAW_37868/e9d581e7e11d7901295efd89c869ae044dd3d20f/";
     expect(toHtml(`Основание:\n${law}\nСверка`)).toBe(`Основание:\n<a href="${law}">consultant.ru</a>\nСверка`);
@@ -35,18 +40,20 @@ describe("emphasis in interface texts (#114)", () => {
     expect(toHtml("https://yandex.ru/maps/?text=a&b=c")).toBe('<a href="https://yandex.ru/maps/?text=a&amp;b=c">yandex.ru</a>');
   });
 
-  it("underscores in an address do not turn into italics or bold", () => {
+  it("underscores stay text: in an address and in the drafts' blanks", () => {
     expect(toHtml("**cons_doc_LAW_37868** https://x.ru/cons_doc_LAW_1")).toBe('<b>cons_doc_LAW_37868</b> <a href="https://x.ru/cons_doc_LAW_1">x.ru</a>');
+    expect(toHtml("Проблема: ___. Ответ: __")).toBe("Проблема: ___. Ответ: __");
   });
 
   it("plain channels keep the words and the full address", () => {
-    expect(plain("**Ваш план**\n• **Медосвидетельствование**\n  **30 сентября** — https://kpfu.ru/a"))
-      .toBe("Ваш план\n• Медосвидетельствование\n  30 сентября — https://kpfu.ru/a");
+    expect(plain("*ДЕМО*\n\n**Ваш план**\n• **Медосвидетельствование**\n  **30 сентября** — https://kpfu.ru/a"))
+      .toBe("ДЕМО\n\nВаш план\n• Медосвидетельствование\n  30 сентября — https://kpfu.ru/a");
   });
 
   it("refuses a text with an unclosed marker", () => {
     expect(() => parseTexts("ru", { scope: "**Сценарий: вам 18+" })).toThrow(/незакрытое выделение/);
-    expect(() => parseTexts("ru", { scope: "**Сценарий** вам 18+" })).not.toThrow();
+    expect(() => parseTexts("ru", { "banner.demo": "*ДЕМО · учебные данные.\n" })).toThrow(/незакрытый курсив/);
+    expect(() => parseTexts("ru", { scope: "**Сценарий** вам 18+", "banner.demo": "*ДЕМО*\n" })).not.toThrow();
   });
 });
 
