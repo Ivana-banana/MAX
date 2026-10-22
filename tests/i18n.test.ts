@@ -36,6 +36,13 @@ describe("interface texts live in data", () => {
     expect(() => checkTexts(texts)).not.toThrow();
     expect(() => checkTranslated(texts, rules.rules, universities)).not.toThrow();
   });
+  it("lays out every text the same way in every language: bold, italics, list items, line breaks (#114)", () => {
+    const layout = (v: string) => ({ bold: v.split("**").length - 1, italic: v.replaceAll("**", "").split("*").length - 1,
+      items: v.split("•").length - 1, lines: v.split("\n").length - 1 });
+    const reference = texts.get("ru")!;
+    const formatted = Object.keys(reference).filter(k => reference[k]!.includes("*"));
+    for (const [lang, table] of texts) for (const key of formatted) expect(layout(table[key]!), `${lang}.${key}`).toEqual(layout(reference[key]!));
+  });
   it("gives no fixed example date for a day from today on, which would fall in the past (#97)", () => {
     for (const [lang, t] of texts) for (const key of ["visit.invalid", "docEnd.invalid"])
       expect(t[key], `${lang} ${key}`).not.toMatch(/\d{2}\.\d{2}\.\d{4}/);
@@ -87,7 +94,7 @@ describe("interface texts live in data", () => {
     for (const a of ["accept", "yes", "KZ"]) click(a);
     const home = transition(s, { text: "2026-09-01", callback: false }, ctx);
     s = home.session!;
-    expect(home.reply.text).toContain("[kk] Your preparation plan");
+    expect(home.reply.text).toContain("[kk] **Your preparation plan**");
     expect(home.reply.text).toContain("**[kk] Medical examination**\n  **2026 ж. 30 қыркүйек** — [kk] due soon, [kk] 6 days left");
     expect(click("card:medical-examination").text).toContain("[kk] \nConfirm location and checklist with [kk] KFU: ");
   });
