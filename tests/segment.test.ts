@@ -48,7 +48,7 @@ describe("dates people can read and type", () => {
     const entry = walk(base, "entry");
     entry.type("1.9.2026");
     expect(entry.s.entryDate).toBe("2026-09-01");
-    expect(entry.reply.text).toContain("Медицинское освидетельствование: 30 сентября 2026 г. — скоро, осталось 6 дней");
+    expect(entry.reply.text).toContain("**Медицинское освидетельствование**\n  **30 сентября 2026 г.** — скоро, осталось 6 дней");
     const s = entry.s;
     const r1 = transition(s, { text: `${s.nonce}.${s.revision}|done:medical-examination`, callback: true }, base);
     const r2 = transition(r1.session, { text: "20.09.2026", callback: false }, base);

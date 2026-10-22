@@ -3,6 +3,7 @@ import { CHANGE_REMINDER_OFFSETS } from "../core/changes.js";
 import { addDays } from "../core/dates.js";
 import type { Lang, PlanItem } from "../core/types.js";
 import { format, type Texts } from "../data/loadTexts.js";
+import { plain } from "../core/markup.js";
 import { repeatText } from "./repeat.js";
 
 // iCalendar (RFC 5545) export of the personal plan: deadlines land in the phone's own
@@ -36,7 +37,7 @@ function fold(line: string): string {
   return out.join("\r\n ");
 }
 export function planToIcs(items: PlanItem[], o: CalendarOptions): string {
-  const t = (key: string) => format(o.texts, o.lang, key);
+  const t = (key: string) => plain(format(o.texts, o.lang, key));
   const demo = o.demo ? t("ics.demo") : "";
   const stamp = compact(o.today) + "T000000Z";
   const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//max-first-90-days//RU", "CALSCALE:GREGORIAN", "METHOD:PUBLISH",

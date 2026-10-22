@@ -9,7 +9,7 @@
 import type { AppChange, AppSession } from "../api.js";
 import { openLink } from "../bridge.js";
 import { isText, text, type Texts } from "../texts.js";
-import { Button } from "../ui.js";
+import { Button, Rich } from "../ui.js";
 
 /** `openChange` value for the list of cases; any other value is the id of a case. */
 export const CHANGE_LIST = "";
@@ -22,7 +22,7 @@ export function ChangeList({ session, texts, pending, onAction, onOpen }: {
   return (
     <div className="stack">
       <h1 className="heading in">{t("btn.change")}</h1>
-      <p className="prose in d1">{session.changeIntro}</p>
+      <p className="prose in d1"><Rich text={session.changeIntro} /></p>
       <div className="in d2 stack">
         {session.changes.map(change => (
           // A counted case asks for the date first, as the chat does; a new passport has no date: its card at once.
@@ -47,7 +47,7 @@ export function ChangeCard({ session, texts, change, message, pending, onAction 
     <div className="stack">
       {result !== undefined && <p className="caps in" role="status">{t(result).trim()}</p>}
       <h1 className="heading in">{change.title}</h1>
-      <p className="prose change-card in d1">{change.card}</p>
+      <p className="prose change-card in d1"><Rich text={change.card} /></p>
       {change.event !== undefined && (
         <Button className="in d2" arrow="✓" loading={pending === `change-done:${change.id}`} disabled={pending !== null}
           onClick={() => onAction(`change-done:${change.id}`)}>

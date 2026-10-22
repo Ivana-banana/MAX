@@ -33,7 +33,7 @@ describe("reminders are offered right after the plan", () => {
   it("puts the switch first while reminders are off and explains what they do", async () => {
     const f = await fixture("2026-09-24T10:00:00+03:00"); await f.onboard(); await f.at("2026-09-24T10:00:00+03:00");
     const plan = f.sent.at(-1)!;
-    expect(plan.text).toContain("Напоминания: выключены. Включите — бот напишет за 7, 3 и 1 день до срока в 09:00 МСК");
+    expect(plan.text).toContain("Напоминания: выключены.** Включите — бот напишет за 7, 3 и 1 день до срока в 09:00 МСК");
     expect(texts(plan)[0]).toBe("🔔 Включить напоминания");
     await f.click("reminders"); await f.at("2026-09-24T10:00:00+03:00");
     const on = f.sent.at(-1)!;

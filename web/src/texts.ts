@@ -15,15 +15,22 @@ export type Texts = AppState["texts"];
  * A missing key is a bug in the data, not in the screen: showing the key beats showing nothing,
  * so a forgotten translation is visible instead of silently blanking the interface.
  */
-export const text = (texts: Texts, key: string): string => texts[key] ?? key;
+export const text = (texts: Texts, key: string): string => plain(texts[key] ?? key);
+
+/**
+ * Chat texts mark bold as **…** (#114). Headings, buttons and labels take the words only; a chat
+ * message shown as is goes through `Rich` (ui.tsx), which draws the bold.
+ */
+export const BOLD = /\*\*(.+?)\*\*/gs;
+export const plain = (value: string): string => value.replace(BOLD, "$1");
 
 /**
  * Whether a server message is the given text. Texts may carry placeholders (`{from}`) the server
  * fills in, so only the fixed part before the first one is compared.
  */
 export const isText = (message: string, template: string): boolean => {
-  const fixed = template.split("{")[0]!.trim();
-  return fixed !== "" && message.includes(fixed);
+  const fixed = plain(template).split("{")[0]!.trim();
+  return fixed !== "" && plain(message).includes(fixed);
 };
 
 /** A chat text with its placeholders filled on the screen, from values the app already has (a visit day). */

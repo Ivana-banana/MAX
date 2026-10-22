@@ -25,7 +25,7 @@ function afterDone(lang = "ru") {
 describe("a marked yearly procedure is shown as a repeat", () => {
   it("plan: the label with the period from the data and the date it was done", () => {
     const plan = afterDone().click("plan").text;
-    expect(plan).toContain("• Медицинское освидетельствование, повторно (ежегодно): 24 октября 2027 г.");
+    expect(plan).toContain("• **Медицинское освидетельствование, повторно (ежегодно)**\n  **24 октября 2027 г.**");
     expect(plan).toContain("пройдено вами 24 сентября 2026 г.");
   });
 
@@ -36,7 +36,7 @@ describe("a marked yearly procedure is shown as a repeat", () => {
 
   it("a first round has neither", () => {
     const f = afterDone();
-    const line = f.click("plan").text.split("\n").find(l => l.startsWith("• Дактилоскопия"))!;
+    const line = f.click("plan").text.split("\n").find(l => l.startsWith("• **Дактилоскопия"))!;
     expect(line).not.toContain("овторно");
     expect(f.click("card:fingerprinting").text).not.toContain("овторно");
   });
@@ -83,7 +83,7 @@ describe("a marked yearly procedure is shown as a repeat", () => {
 
   it("Chinese joins the title and the label with its own comma, in the plan", () => {
     const title = rules.rules.find(r => r.id === "medical-examination")!.title.zh!;
-    expect(afterDone("zh").click("plan").text).toContain(`• ${title}，再次办理（每年）`);
+    expect(afterDone("zh").click("plan").text).toContain(`• **${title}，再次办理（每年）**`);
   });
 
   it("a period other than a year is worded from repeat.everyMonths", () => {

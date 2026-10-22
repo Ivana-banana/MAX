@@ -12,7 +12,7 @@ import type { AppSession, AppState } from "../api.js";
 import { closingConfirmation, openLink } from "../bridge.js";
 import { DateField } from "../DateField.js";
 import { isText, text, type Texts } from "../texts.js";
-import { Button, DateNote } from "../ui.js";
+import { Button, DateNote, Rich } from "../ui.js";
 import { Question } from "./Card.js";
 
 interface Props {
@@ -74,7 +74,7 @@ function Scope({ session, texts, universities, copy, pending, onAction }: Pick<P
   return (
     <div className="stack">
       <h1 className="heading in">{t("app.scopeTitle")}</h1>
-      <p className="prose in d1">{session.prompt}</p>
+      <p className="prose in d1"><Rich text={session.prompt} /></p>
       <Button className="in d2" loading={pending === "yes"} disabled={busy} onClick={() => onAction("yes")}>
         {t("btn.yes")}
       </Button>

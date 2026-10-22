@@ -7,6 +7,7 @@
  */
 
 import type { ReactNode } from "react";
+import { BOLD } from "./texts.js";
 
 export function Button({ children, onClick, tone = "red", loading = false, disabled = false, arrow = "→", className = "" }: {
   children: ReactNode;
@@ -67,4 +68,9 @@ export function DateNote({ prompt, error, className }: { prompt: string; error: 
       {error === "" && prompt}
     </p>
   );
+}
+
+/** A chat message as the chat shows it (#114): **…** in bold, no HTML from the text itself. */
+export function Rich({ text }: { text: string }) {
+  return <>{text.split(BOLD).map((part, i) => (i % 2 ? <strong key={i}>{part}</strong> : part))}</>;
 }

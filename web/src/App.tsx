@@ -11,7 +11,7 @@ import { DateField } from "./DateField.js";
 import { calendarTicket, ApiError, type ApiFailure } from "./api.js";
 import { downloadFile, insideMax, onBack, platform, tap } from "./bridge.js";
 import { universityPhoto } from "./photos.js";
-import { Accented, Button, DateNote } from "./ui.js";
+import { Accented, Button, DateNote, Rich } from "./ui.js";
 import { useApp } from "./useApp.js";
 import { isText, text, type Texts } from "./texts.js";
 import { Onboarding } from "./screens/Onboarding.js";
@@ -121,7 +121,7 @@ export function App() {
             <h1 className="display word in"><Accented text={t("app.title")} /></h1>
             <p className="caps uni in d1">{t("app.start.title")}</p>
             <div className="spacer" />
-            <p className="lead prose in d2">{status.message === "" ? t("app.start.body") : isText(status.message, t("deleted")) ? t("app.deleted") : status.message}</p>
+            <p className="lead prose in d2">{status.message === "" ? t("app.start.body") : isText(status.message, t("deleted")) ? t("app.deleted") : <Rich text={status.message} />}</p>
             <Button className="in d3" loading={status.pending !== null} onClick={() => act(start)}>{t("app.start.action")}</Button>
           </div>
         </section>
@@ -131,7 +131,7 @@ export function App() {
       return (
         <div className="stack">
           <h1 className="heading in">{t("btn.delete")}</h1>
-          <p className="prose in d1">{session.prompt}</p>
+          <p className="prose in d1"><Rich text={session.prompt} /></p>
           <Button className="in d2" arrow="×" loading={status.pending === "confirm-delete"}
             disabled={status.pending !== null} onClick={() => act("confirm-delete")}>
             {t("btn.confirmDelete")}
@@ -160,7 +160,7 @@ export function App() {
       return (
         <div className="stack">
           <h1 className="heading in">{t("app.scopeTitle")}</h1>
-          <p className="prose in d1" role="status">{session.prompt}</p>
+          <p className="prose in d1" role="status"><Rich text={session.prompt} /></p>
           <div className="tiles in d2">
             {status.state.universities.map(u => (
               <button key={u.id} type="button" className="tile tile-wide" disabled={status.pending !== null}

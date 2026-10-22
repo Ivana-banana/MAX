@@ -122,11 +122,11 @@ describe("days left and a missed date", () => {
   const s = onboard();
   const home = (today: string, lang = s) => step(lang, { text: "/plan", callback: false }, { ...ctx, today }).reply.text;
   it("shows how many days are left, with Russian plural forms", () => {
-    expect(home("2026-09-24")).toContain("Медицинское освидетельствование: 30 сентября 2026 г. — скоро, осталось 6 дней");
-    expect(home("2026-09-24")).toContain("29 ноября 2026 г. — есть время, осталось 66 дней");
+    expect(home("2026-09-24")).toContain("**Медицинское освидетельствование**\n  **30 сентября 2026 г.** — скоро, осталось 6 дней");
+    expect(home("2026-09-24")).toContain("29 ноября 2026 г.** — есть время, осталось 66 дней");
     expect(home("2026-09-29")).toContain("остался 1 день");
     expect(home("2026-09-28")).toContain("осталось 2 дня");
-    expect(home("2026-09-30")).toContain("30 сентября 2026 г. — сегодня последний день");
+    expect(home("2026-09-30")).toContain("30 сентября 2026 г.** — сегодня последний день");
     expect(home("2026-11-18")).toContain("осталось 11 дней");
     expect(home("2026-11-08")).toContain("остался 21 день");
     expect(home("2026-09-24", onboard("/start", ctx, "en"))).toContain("due soon, 6 days left");
@@ -139,7 +139,7 @@ describe("days left and a missed date", () => {
   });
   it("after the date: says so, points to the university and prepares a question, without legal consequences", () => {
     const c = { ...ctx, today: "2026-10-02" };
-    expect(home("2026-10-02")).toContain("30 сентября 2026 г. — расчётный срок прошёл 2 дня назад");
+    expect(home("2026-10-02")).toContain("30 сентября 2026 г.** — расчётный срок прошёл 2 дня назад");
     const card = click(s, "card:medical-examination", c);
     expect(card.reply.text).toContain("Расчётный срок прошёл. Процедуру всё равно нужно пройти");
     expect(buttons(card).find(b => b.action?.endsWith("|help:medical-examination"))!.text).toBe("Срок прошёл — что делать");

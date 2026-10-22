@@ -1,6 +1,7 @@
 import PDFDocument from "pdfkit";
 import { join } from "node:path";
 import type { Lang } from "../core/types.js";
+import { plain } from "../core/markup.js";
 
 // The plan as a PDF the student forwards to a curator or the university (#92). Layout only:
 // the texts come ready from the dialogue, so the file says what the chat says.
@@ -20,16 +21,17 @@ const fontFor = (lang: Lang) => join(FONTS_DIR, lang === "zh" ? "NotoSansSC-Regu
 
 export function renderPlanPdf(plan: PlanPdf): Promise<Buffer> {
   return new Promise((resolve, reject) => {
-    const doc = new PDFDocument({ size: "A4", margin: 50, lang: plan.lang, font: fontFor(plan.lang), info: { Title: plan.title } });
+    const doc = new PDFDocument({ size: "A4", margin: 50, lang: plan.lang, font: fontFor(plan.lang), info: { Title: plain(plan.title) } });
     const chunks: Buffer[] = [];
     doc.on("data", (chunk: Buffer) => chunks.push(chunk));
     doc.on("end", () => resolve(Buffer.concat(chunks)));
     doc.on("error", reject);
-    doc.fontSize(16).text(plan.title).moveDown(0.5);
+    // Chat emphasis (**…**) is not drawn here: the headings already stand out by size.
+    doc.fontSize(16).text(plain(plan.title)).moveDown(0.5);
     doc.fontSize(10);
-    for (const note of plan.notes) doc.text(note);
-    for (const section of plan.sections) doc.moveDown().fontSize(12).text(section.heading).fontSize(10).text(section.body);
-    doc.moveDown().text(plan.footer);
+    for (const note of plan.notes) doc.text(plain(note));
+    for (const section of plan.sections) doc.moveDown().fontSize(12).text(plain(section.heading)).fontSize(10).text(plain(section.body));
+    doc.moveDown().text(plain(plan.footer));
     doc.end();
   });
 }

@@ -9,6 +9,7 @@ import { format, type Texts } from "../data/loadTexts.js";
 import { CALENDAR_FILE, planToIcs } from "./calendar.js";
 import type { PlanPdf } from "./pdf.js";
 import { longDate, repeatText } from "./repeat.js";
+import { plain } from "../core/markup.js";
 
 // callback buttons come back to the bot; link and clipboard buttons are handled by MAX itself
 export type Button = { text: string; action: string } | { text: string; url: string } | { text: string; copy: string }
@@ -179,7 +180,7 @@ function repeatTitle(s: Session, ctx: DialogueContext, i: PlanItem): { title: st
 }
 function planLine(s: Session, ctx: DialogueContext, i: PlanItem): string {
   const { title, doneOn } = repeatTitle(s, ctx, i);
-  return `• ${title}: ${date(s, i.dueDate)} — ${countdown(s, ctx, i)}${doneOn}`;
+  return `• **${title}**\n  **${date(s, i.dueDate)}** — ${countdown(s, ctx, i)}${doneOn}`;
 }
 /** #93: "Passed 2 of 5" and the one nearest step, for the top of the plan; the app shows both too. Empty without a plan. */
 export function progressParts(s: Session, ctx: DialogueContext, items: PlanItem[]): { done: number; total: number; line: string; text: string; next?: PlanItem } {
@@ -233,8 +234,9 @@ export function shareText(s: Session, ctx: DialogueContext): string {
     const { title, doneOn } = repeatTitle(s, ctx, i);
     return t(s, ctx, i.status === "done" ? "share.done" : "share.item", { title, due: date(s, i.dueDate) }) + doneOn;
   });
-  return (ctx.demo ? t(s, ctx, "banner.demo") : "") + t(s, ctx, "share.plan", { uni: name, lines: lines.join("\n") }) +
-    (items.some(i => i.provisional && i.status !== "done") ? t(s, ctx, "share.provisional", { uni: name }) : "");
+  // A forwarded copy is plain text: the student's chat would show the emphasis markers as is.
+  return plain((ctx.demo ? t(s, ctx, "banner.demo") : "") + t(s, ctx, "share.plan", { uni: name, lines: lines.join("\n") }) +
+    (items.some(i => i.provisional && i.status !== "done") ? t(s, ctx, "share.provisional", { uni: name }) : ""));
 }
 /** "How to get there": a Yandex Maps search for the address — a public link, no API and no location data (D-041). */
 export const mapUrl = (address: string) => `https://yandex.ru/maps/?text=${encodeURIComponent(address)}`;

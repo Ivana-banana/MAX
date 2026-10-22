@@ -384,7 +384,7 @@ describe("review fixes in the dialogue", () => {
     const stamp = `${s.nonce}.${s.revision}|accept`;
     await f.input(stamp, 1, "tap-1", true); await f.input(stamp, 1, "tap-2", true);
     await f.service.flush();
-    expect(f.sent.some(m => m.reply.text.includes("Сценарий:"))).toBe(true);
+    expect(f.sent.some(m => m.reply.text.includes("**Сценарий**"))).toBe(true);
   });
   it("returns to the step the user left when a deletion is cancelled", () => {
     let s: Session = transition(null, { text: "/start", callback: false }, ctx).session!;
@@ -423,7 +423,7 @@ describe("review fixes in the dialogue", () => {
       expect(backAction(no.reply)).toBe("back");
       f.set(no.session!);
       const back = f.click("back");
-      expect(back.reply.text).toContain("Сценарий: вам 18+");
+      expect(back.reply.text).toContain("**Сценарий**\n• вам 18+");
       expect(back.reply.buttons.flat().map(b => b.text)).toContain("Да, совпадает");
     });
     it("a citizenship the rules exclude (BY): says the rules have no deadlines for it", () => {
