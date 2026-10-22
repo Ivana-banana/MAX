@@ -72,3 +72,50 @@
 
 #33 требует три состояния каждого действия: загрузка, результат, ошибка. Ошибки из
 пункта 6 и уведомление «Готовлю PDF…» из пункта 3 тоже стоит снять.
+
+## Выкатка актуального main (#77)
+
+22.10.2026, ~17:41 МСК, Иван / Codex. Релиз —
+`b6ed1e216a079d44dfa53b091d18a55edb2853f2`, предыдущий —
+`f8d9ddd264fe8a8ed9192be8253885c96b1e77df`.
+Заполненные выше строки относятся к состоянию до этой выкатки; ручные проверки
+мобильного и веб-MAX для новой версии пока не выполнены.
+
+| Проверка | Команда | Наблюдаемый результат |
+|---|---|---|
+| Локальный main | `git fetch --prune`, `git pull --ff-only` | Чистая основная копия обновлена с `98a7902` до `b6ed1e2` |
+| Зависимости и тесты (Node 24.15.0) | `npm ci --ignore-scripts`, `npm test` | 40 файлов; 496 passed, 1 skipped; 30,57 с |
+| Типы и сборка бота | `npm run typecheck`, `npm run build` | Оба exit 0 |
+| Демо | `npm run demo:check` | exit 0; `Demo completed: progress saved, reminder delivered, completion recorded, reminders stopped.` Транспорт и часы явно `[MOCKED]` |
+| Мини-приложение | `npm run web:install`, `npm run web:typecheck`, `npm run web:build` | exit 0; JS `index-BPu5KadK.js`, CSS `index-C6-SBJpy.css` |
+| Бэкап | `docker compose exec -T postgres pg_dump -U bot -Fc bot` в файл на ВМ | `~/backup-before-main-2026-10-22-77.dump`, 15114 байт, права 600 |
+| Восстановление | `createdb -U bot restore_check_77`, `pg_restore -U bot -d restore_check_77`, SQL count, `dropdb -U bot restore_check_77` через `docker compose exec -T postgres` | В отдельной БД 25 sessions / 25 outbox; проверочная БД удалена |
+| Архив релиза | `git archive --format=tar b6ed1e2`, SCP, `sha256sum --check` на ВМ | SHA256 `847d08b4aa401ac4e245bb99e86955f94d5b263a36e1385a85e50b0f8877c825`, `OK` |
+| Сборка и запуск на ВМ | `docker compose build bot`; записан `DEPLOYED_COMMIT`; `DEPLOYED_COMMIT=$(cat DEPLOYED_COMMIT) docker compose up -d --wait` | `BUILD_SECONDS=101`; bot и postgres healthy |
+| Публичный health с ВМ и с машины разработчика | `curl -fsS https://81-26-178-75.sslip.io/health`, `Invoke-WebRequest` | HTTP 200; ответ ниже |
+| Подписка MAX | `bash scripts/monitor.sh` с окружением из `.env` на ВМ | `subscriptions: https://81-26-178-75.sslip.io/webhook`, `OK` |
+| Защита endpoint | `curl -sS -o /dev/null -w '%{http_code}' -X POST https://81-26-178-75.sslip.io/webhook`; GET `/api/state` без подписи | Оба HTTP 401 |
+| Мини-приложение снаружи | `Invoke-WebRequest https://81-26-178-75.sslip.io/` | HTTP 200, ссылки на те же JS/CSS, что в сборке |
+| Данные после запуска | SQL `SELECT (SELECT count(*) FROM sessions) AS sessions, (SELECT count(*) FROM outbox) AS outbox;` | 25 sessions / 25 outbox |
+
+Ответ `/health` после запуска и при повторной проверке:
+
+```json
+{"status":"ok","mode":"demo","queue":{"pending":0,"sending":0,"sent":25,"cancelled":0,"failed":0},"commit":"b6ed1e216a079d44dfa53b091d18a55edb2853f2"}
+```
+
+Сборка использовала кеш; чистая сборка без кеша здесь не замерялась.
+На ВМ сохранены `~/max-bot-before-2026-10-22-77.tgz` (права 600, содержит конфигурацию;
+не выносить с ВМ), образ `max-bot-bot:before-2026-10-22-77` и прежний каталог
+`~/src-before-2026-10-22-77`. Подписка, режим demo, WEBAPP_BOT и UptimeRobot не менялись.
+
+Первый запуск monitor.sh упал из-за CRLF, попавших в архив при Windows
+`core.autocrlf=true`. Служебные `scripts`, `.claude/hooks`, `.githooks` повторно
+упакованы из **того же коммита** через `git -c core.autocrlf=false archive`, доставлены
+и распакованы на ВМ. После этого обычный `bash scripts/monitor.sh` завершился `OK`.
+Постоянная защита переносов строк — #116.
+
+`npm audit`: в корневых dev-зависимостях 2 high / 2 moderate, в web 2 high.
+`npm audit --omit=dev` для бота — 0. Обновление lock-файлов — #115, при деплое
+зависимости не обновлялись. #77 остаётся открытой: её пункты про WEBAPP_BOT,
+UptimeRobot и ручной прогон не закрыты этим деплоем.
