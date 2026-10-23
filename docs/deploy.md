@@ -72,10 +72,13 @@ MAX принимает webhook только по HTTPS на 443 с сертиф�
 6. **HTTPS.** `/etc/caddy/Caddyfile`:
    ```
    <домен> {
+       header Strict-Transport-Security "max-age=31536000"
        reverse_proxy 127.0.0.1:3000
    }
    ```
-   `sudo systemctl reload caddy`. Снаружи: `/health` → 200, `POST /webhook` без секрета → 401.
+   `sudo systemctl reload caddy`. Снаружи: `/health` → 200, `POST /webhook` без секрета → 401,
+   `curl -sI https://<домен>/health` показывает `strict-transport-security: max-age=31536000`
+   (Caddy сам этот заголовок не ставит, #59).
 7. **Подписка** — только после записи в таблицу токена в `HANDOFF.md`:
    ```sh
    docker compose run --rm --no-deps bot node dist/subscribe.js
