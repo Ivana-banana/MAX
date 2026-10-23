@@ -75,12 +75,12 @@ describe("university profiles are data", () => {
     const c = { ...ctx, universities: readUniversities(dir, "kfu") };
     let r = step(null, { text: "/start kgmu", callback: false }, c);
     for (const a of ["ru", "accept"]) r = click(r.session!, a, c);
-    expect(r.reply.text).toContain("общежитие КГМУ");
+    expect(r.reply.text).toContain("общежитии КГМУ");
     r = click(r.session!, "yes", c);
     expect(buttons(r).map(b => b.text)).toEqual(["Индия", "Египет", "Беларусь", "Другое"]);
     expect(buttons(r).map(b => b.action!.split("|")[1])).toEqual(["IN", "EG", "BY", "OTHER"]);
     r = click(step(click(r.session!, "IN", c).session, { text: "2026-09-01", callback: false }, c).session!, "help:medical-examination", c);
-    expect(copied(r)).toContain("студент КГМУ");
+    expect(copied(r)).toContain("Я учусь в КГМУ");
     expect(buttons(r).some(b => b.url === "https://example.org/kgmu")).toBe(true);
   });
 });
@@ -97,9 +97,9 @@ describe("deep link ?start= and client language", () => {
     const s = onboard("/start itmo");
     expect(s.university).toBe("itmo");
     const card = click(s, "card:medical-examination");
-    expect(card.reply.text).toContain("уточните у ИТМО: https://int.itmo.ru/ru/important_documents");
+    expect(card.reply.text).toContain("уточните в ИТМО: https://int.itmo.ru/ru/important_documents");
     const help = click(card.session!, "help:medical-examination");
-    expect(copied(help)).toContain("иностранный студент ИТМО");
+    expect(copied(help)).toContain("Я учусь в ИТМО");
     expect(buttons(help).find(b => "url" in b)).toEqual({ text: "Открыть страницу ИТМО", url: "https://int.itmo.ru/ru/important_documents" });
   });
   it("falls back to the default university for unknown links and keeps the choice once the plan exists", () => {
@@ -114,7 +114,7 @@ describe("deep link ?start= and client language", () => {
     expect(r.reply.text).toContain("The bot stores your MAX ID");
     const switched = click(r.session!, "ru");
     expect(switched.session!.lang).toBe("ru");
-    expect(switched.reply.text).toContain("Бот хранит MAX ID");
+    expect(switched.reply.text).toContain("Бот хранит ваш MAX ID");
     expect(step(null, { text: "/start", callback: false, locale: "de" }).session!.step).toBe("language");
   });
 });
@@ -140,13 +140,13 @@ describe("days left and a missed date", () => {
   });
   it("after the date: says so, points to the university and prepares a question, without legal consequences", () => {
     const c = { ...ctx, today: "2026-10-02" };
-    expect(home("2026-10-02")).toContain("30 сентября 2026 г.** — расчётный срок прошёл 2 дня назад");
+    expect(home("2026-10-02")).toContain("30 сентября 2026 г.** — предельный срок прошёл 2 дня назад");
     const card = click(s, "card:medical-examination", c);
-    expect(plain(card.reply.text)).toContain("Расчётный срок прошёл. Процедуру всё равно нужно пройти");
+    expect(plain(card.reply.text)).toContain("Предельный срок прошёл. Процедуру всё равно нужно пройти");
     expect(buttons(card).find(b => b.action?.endsWith("|help:medical-examination"))!.text).toBe("Срок прошёл — что делать");
     const help = click(card.session!, "help:medical-examination", c);
     expect(help.reply.text).toContain("Бот не оценивает последствия пропуска");
-    expect(copied(help)).toContain("расчётный срок был до 30 сентября 2026 г. и уже прошёл");
+    expect(copied(help)).toContain("расчётный предельный срок был до 30 сентября 2026 г. и уже прошёл");
     expect(help.reply.text + card.reply.text).not.toMatch(/штраф|выдвор/i);
     expect(click(s, "card:fingerprinting", c).reply.text).not.toContain("Расчётный срок прошёл");
   });
@@ -167,7 +167,7 @@ describe("a student who has not entered yet (#25)", () => {
     expect(r.reply.text).toContain("Нотариальный перевод паспорта");
     // A card for visa countries is not shown to a citizen of Kazakhstan.
     expect(r.reply.text).not.toContain("Приглашение на учебную визу");
-    expect(r.reply.text).toContain("Факт вуза — страница КФУ: https://kpfu.ru/international/dokumenty/shablony-perevodov");
+    expect(r.reply.text).toContain("Так пишет КФУ на своей странице: https://kpfu.ru/international/dokumenty/shablony-perevodov");
     expect(r.reply.text).toContain("Допущение бота: ваше гражданство отнесено к безвизовым странам");
     const planned = step(r.session, { text: "2026-09-01", callback: false });
     expect(planned.session!.step).toBe("plan");
@@ -197,7 +197,7 @@ describe("a student who has not entered yet (#25)", () => {
   it("says a future entry date is not counted yet and points to the branch (#67)", () => {
     const r = step(toEntry("/start kfu", "KZ"), { text: "15.11.2026", callback: false });
     expect(r.reply.text).toContain("Дата въезда не может быть в будущем");
-    expect(r.reply.text).toContain("Ещё не въехали");
+    expect(r.reply.text).toContain("Если вы ещё не въехали");
   });
   it("says a date before the period is outside the scenario (#67)", () => {
     const r = step(toEntry("/start kfu", "KZ"), { text: "31.08.2026", callback: false });
@@ -205,7 +205,7 @@ describe("a student who has not entered yet (#25)", () => {
   });
   it("says a date it cannot read has a wrong format (#67)", () => {
     for (const text of ["30.02.2026", "вчера", "03.09.26"]) {
-      expect(step(toEntry("/start kfu", "KZ"), { text, callback: false }).reply.text).toContain("Не удалось прочитать дату");
+      expect(step(toEntry("/start kfu", "KZ"), { text, callback: false }).reply.text).toContain("Бот не понял дату");
     }
   });
   it("does not offer the branch when the profile has no cards for the student", () => {

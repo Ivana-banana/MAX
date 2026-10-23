@@ -273,8 +273,8 @@ describe("mini app shows what the chat shows", () => {
     const f = await fixture();
     for (const action of ONBOARDING) await applyAction(f.service, 7, action, false);
     const items = (await readState(f.service, 7, false)).session!.plan;
-    expect(items.find(i => i.ruleId === "medical-examination")?.documentsNote).toContain("Комплект — по странице https://");
-    expect(items.find(i => i.ruleId === "fingerprinting")?.documentsNote).toContain("Комплект — по странице https://www.consultant.ru/");
+    expect(items.find(i => i.ruleId === "medical-examination")?.documentsNote).toContain("Список документов — по странице https://");
+    expect(items.find(i => i.ruleId === "fingerprinting")?.documentsNote).toContain("Список документов — по странице https://www.consultant.ru/");
   });
   it("shows the chat's consequence line until the procedure is done (#75)", async () => {
     const f = await fixture();

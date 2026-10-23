@@ -34,11 +34,11 @@ describe("segment bounds come from the rules, not from the dialogue code", () =>
     const entry = walk(ctx, "entry");
     expect(entry.reply.text).toContain("с 15 января 2027 г. по сегодня");
     entry.type("2027-01-10");
-    expect(entry.reply.text).toContain("Дата раньше 15 января 2027 г.");
+    expect(entry.reply.text).toContain("Эта дата раньше 15 января 2027 г.");
     entry.type("20.01.2027");
     expect(entry.s.entryDate).toBe("2027-01-20");
     const help = walk(ctx, "citizenship");
-    expect(transition(help.s, { text: `${help.s.nonce}.${help.s.revision}|AM`, callback: true }, ctx).reply.text).toContain("Для неподдержанного случая");
+    expect(transition(help.s, { text: `${help.s.nonce}.${help.s.revision}|AM`, callback: true }, ctx).reply.text).toContain("Для вашего случая бот сроки не считает");
   });
 });
 
@@ -64,10 +64,10 @@ describe("where the checklist comes from", () => {
     entry.type("01.09.2026");
     const s = entry.s;
     const card = (id: string) => transition(s, { text: `${s.nonce}.${s.revision}|card:${id}`, callback: true }, base).reply.text;
-    expect(card("medical-examination")).toContain("Комплект — по странице https://kpfu.ru/international/migracionnoe-soprovozhdenie-inostrannyh-grazhdan/daktiloskopiya-i-medicinskoe-osvidetelstvovanie (сверено 24 сентября 2026 г.)");
+    expect(card("medical-examination")).toContain("Список документов — по странице https://kpfu.ru/international/migracionnoe-soprovozhdenie-inostrannyh-grazhdan/daktiloskopiya-i-medicinskoe-osvidetelstvovanie (сверено 24 сентября 2026 г.)");
     expect(card("medical-examination")).toContain("Результаты ранее пройденных обследований — если есть");
     expect(card("medical-examination")).not.toContain("Миграционная карта");
-    expect(card("fingerprinting")).toContain("Комплект — по странице https://www.consultant.ru/document/cons_doc_LAW_479155/297329e0d4d3d3cbcf7c187f5ce3af4795c3ac73/ (сверено 19 октября 2026 г.)");
+    expect(card("fingerprinting")).toContain("Список документов — по странице https://www.consultant.ru/document/cons_doc_LAW_479155/297329e0d4d3d3cbcf7c187f5ce3af4795c3ac73/ (сверено 19 октября 2026 г.)");
     expect(card("fingerprinting")).not.toContain("Миграционная карта");
   });
   it("states the consequence of skipping each procedure with its clause (#75)", () => {

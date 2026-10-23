@@ -111,7 +111,7 @@ test("empty and invalid date: Save stays off or the reason is shown", async ({ p
   await dateField(page).pressSequentially("01012020");
   await expect(save(page)).toBeEnabled(); // a real day; only the server knows the supported period
   await save(page).click();
-  await expect(alert(page)).toContainText("Дата вне сценария");
+  await expect(alert(page)).toContainText("Эта дата не подходит");
   await expect(page.getByRole("heading", { name: "Ваш план" })).toHaveCount(0);
   await page.screenshot({ path: testInfo.outputPath("3-invalid-date.png"), fullPage: true, animations: "disabled" });
 
@@ -126,13 +126,13 @@ test("a server refusal shows again on a repeated Save; a network failure does no
   await expect(page.getByRole("alert")).toHaveText(["", "", ""]); // two banners and the date line, before any reason
   await dateField(page).fill("01.01.2020");
   await save(page).click();
-  await expect(alert(page)).toContainText("Дата вне сценария");
+  await expect(alert(page)).toContainText("Эта дата не подходит");
 
   // The same date again: the old refusal hides on Save, and the server's new answer shows it again.
   const answer = page.waitForResponse("**/api/action");
   await save(page).click();
   await answer;
-  await expect(alert(page)).toContainText("Дата вне сценария");
+  await expect(alert(page)).toContainText("Эта дата не подходит");
 
   // Another date, and the request does not reach the server: the reason is the network, not the date.
   await dateField(page).fill(moscowDate(7));
@@ -253,7 +253,7 @@ test("a saved visit comes back to the card with a confirmation, and a warning wh
   await dateField(page).fill(moscowDate(7)); // the medical examination is due in about three weeks
   await save(page).click();
   await page.getByRole("button", { name: /^Медицинское освидетельствование/ }).click();
-  const late = "позже расчётного срока";
+  const late = "позже предельного срока";
 
   await page.getByRole("button", { name: "Запланировать визит" }).click();
   await page.getByRole("textbox", { name: "Когда пойдёте?" }).fill(moscowDate(-40));

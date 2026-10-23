@@ -38,7 +38,7 @@ describe("scenario traps: what the bot answers", () => {
     const click = (action: string) => transition(s, { text: `${s.nonce}.${s.revision}|${action}`, callback: true }, ctx);
     for (const a of ["ru", "accept"]) s = click(a).session!;
     const no = click("no");
-    expect(no.reply.text).toContain("Для неподдержанного случая расчёт не выполняем");
+    expect(no.reply.text).toContain("Для вашего случая бот сроки не считает");
     expect(no.reply.text).toContain("kpfu.ru/international/migracionnoe-soprovozhdenie-inostrannyh-grazhdan");
     expect(no.session!.step).toBe("scope");
   });
@@ -49,11 +49,11 @@ describe("scenario traps: what the bot answers", () => {
 
   it("day 30 is the last day, day 31 is already past", () => {
     expect(home("01.09.2026", "2026-09-30")).toContain("**Медицинское освидетельствование**\n  **30 сентября 2026 г.** — сегодня последний день");
-    expect(home("01.09.2026", "2026-10-01")).toContain("**Медицинское освидетельствование**\n  **30 сентября 2026 г.** — расчётный срок прошёл 1 день назад");
+    expect(home("01.09.2026", "2026-10-01")).toContain("**Медицинское освидетельствование**\n  **30 сентября 2026 г.** — предельный срок прошёл 1 день назад");
   });
 
   it("day 90 is the last day, day 91 is already past", () => {
     expect(home("01.09.2026", "2026-11-29")).toContain("29 ноября 2026 г.** — сегодня последний день");
-    expect(home("01.09.2026", "2026-11-30")).toContain("29 ноября 2026 г.** — расчётный срок прошёл 1 день назад");
+    expect(home("01.09.2026", "2026-11-30")).toContain("29 ноября 2026 г.** — предельный срок прошёл 1 день назад");
   });
 });

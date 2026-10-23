@@ -46,7 +46,7 @@ describe("a university deadline counted from the visa or registration end date",
     expect(f.session.ends).toEqual({ "visa-end": "2027-01-15" });
     expect(f.session.step).toBe("plan");
     expect(card.text).toContain("Подать документы: с 17 октября 2026 г. по 1 декабря 2026 г.");
-    expect(card.text).toContain("расчёт бота по правилу КФУ");
+    expect(card.text).toContain("Бот посчитал этот срок по правилу КФУ");
     expect(card.text).toContain("15 января 2027 г.");
     expect(procedureDue(f.session, ctx, undated(f.session, ctx).find(n => n.id === "visa-extension")!))
       .toEqual({ end: "2027-01-15", due: "2026-12-01", from: "2026-10-17" });

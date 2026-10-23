@@ -291,7 +291,7 @@ describe("calendar export, MAX link/clipboard buttons and reminder navigation", 
     expect(flat(f.sent.at(-1)?.reply)).toContainEqual({ text:"Открыть норму", url:expect.stringContaining("consultant.ru") as string });
     await f.click("help:medical-examination"); await f.service.flush();
     const copy=flat(f.sent.at(-1)?.reply).find(b=>"copy" in b) as {copy:string}|undefined;
-    expect(copy?.copy).toContain("«Медицинское освидетельствование» (расчётный срок — до 30 сентября 2026 г.), но не получается");
+    expect(copy?.copy).toContain("«Медицинское освидетельствование» (расчётный предельный срок — до 30 сентября 2026 г.), но не получается");
     expect(copy?.copy).toContain("гражданство Казахстан, въезд 1 сентября 2026 г.");
     expect(flat(f.sent.at(-1)?.reply).some(b=>"url" in b && b.url.includes("kpfu.ru"))).toBe(true);
     expect(f.sent.at(-1)?.reply.text).toContain("kpfu.ru");
@@ -384,7 +384,7 @@ describe("review fixes in the dialogue", () => {
     const stamp = `${s.nonce}.${s.revision}|accept`;
     await f.input(stamp, 1, "tap-1", true); await f.input(stamp, 1, "tap-2", true);
     await f.service.flush();
-    expect(f.sent.some(m => m.reply.text.includes("**Сценарий**"))).toBe(true);
+    expect(f.sent.some(m => m.reply.text.includes("**Для кого бот считает сроки**"))).toBe(true);
   });
   it("returns to the step the user left when a deletion is cancelled", () => {
     let s: Session = transition(null, { text: "/start", callback: false }, ctx).session!;
@@ -398,12 +398,12 @@ describe("review fixes in the dialogue", () => {
     let s: Session = transition(null, { text: "/start", callback: false }, ctx).session!;
     const click = (action: string) => transition(s, { text: `${s.nonce}.${s.revision}|${action}`, callback: true }, ctx);
     for (const a of ["ru", "accept", "yes", "KZ"]) s = click(a).session!;
-    expect(click("OTHER").reply.text).toContain("Для неподдержанного случая");
-    expect(click("BY").reply.text).toContain("Для неподдержанного случая");
+    expect(click("OTHER").reply.text).toContain("Для вашего случая бот сроки не считает");
+    expect(click("BY").reply.text).toContain("Для вашего случая бот сроки не считает");
     s = transition(s, { text: "2026-09-01", callback: false }, ctx).session!;
     const help = click("help").reply.text;
-    expect(help).toContain("Подготовьте вопрос");
-    expect(help).not.toContain("Для неподдержанного случая");
+    expect(help).toContain("Готовый вопрос");
+    expect(help).not.toContain("Для вашего случая бот сроки не считает");
   });
   describe("unsupported case (#68)", () => {
     const start = (...path: string[]) => {
@@ -415,7 +415,7 @@ describe("review fixes in the dialogue", () => {
     const backAction = (r: Reply) => (r.buttons.flat().find(b => b.text === "← Назад") as { action: string } | undefined)?.action.split("|")[1];
     it("'no' on the scope question: names the scope conditions, including the entry date", () => {
       const reply = start("ru", "accept").click("no").reply;
-      expect(reply.text).toContain("Причина: условия сценария не совпали");
+      expect(reply.text).toContain("Причина: ваш случай не подходит под условия");
       expect(reply.text).toContain("въезд с 1 сентября 2026 г.");
     });
     it("'no': the back button returns to the scope question", () => {
@@ -423,7 +423,7 @@ describe("review fixes in the dialogue", () => {
       expect(backAction(no.reply)).toBe("back");
       f.set(no.session!);
       const back = f.click("back");
-      expect(back.reply.text).toContain("**Сценарий**\n• вам 18+");
+      expect(back.reply.text).toContain("**Для кого бот считает сроки**\n• вам 18 лет или больше");
       expect(back.reply.buttons.flat().map(b => b.text)).toContain("Да, совпадает");
     });
     it("a citizenship the rules exclude (BY): says the rules have no deadlines for it", () => {
@@ -490,7 +490,7 @@ describe("review fixes in the dialogue", () => {
     s = stopped.session!;
     const back = stopped.reply.buttons.flat()[0]!;
     const resumed = "action" in back ? click(back.action.slice(back.action.indexOf("|") + 1)).reply.text : "";
-    expect(resumed).not.toContain("Не удалось прочитать дату");
+    expect(resumed).not.toContain("Бот не понял дату");
     expect(resumed).toBe(transition(s, { text: "/start", callback: false }, ctx).reply.text);
     expect(s.step).toBe(step);
   });

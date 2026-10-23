@@ -63,7 +63,7 @@ describe("planning a visit in the chat", () => {
   it("warns, without refusing, when the visit is after the calculated deadline", () => {
     const f = planned();
     f.click("card:medical-examination"); f.click("visit:medical-examination");
-    expect(f.type("2026-10-05").text).toContain("позже расчётного срока");
+    expect(f.type("2026-10-05").text).toContain("позже предельного срока");
     expect(f.session.visits?.["medical-examination"]).toBe("2026-10-05");
   });
 

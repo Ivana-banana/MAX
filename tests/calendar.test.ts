@@ -62,11 +62,11 @@ describe("calendar export", () => {
   });
   it("marks demo data, calculated status and the legal source", () => {
     const text = planToIcs(buildPlan(rules, profile, {}, "2026-09-24"), options).replaceAll("\r\n ", "");
-    expect(text).toContain("SUMMARY:[ДЕМО] Крайний срок: Медицинское освидетельствование");
+    expect(text).toContain("SUMMARY:[ДЕМО] Предельный срок: Медицинское освидетельствование");
     expect(text).toContain("не решение МВД");
-    expect(text).not.toContain("Норма ещё не вычитана юристом");
+    expect(text).not.toContain("Юрист ещё не проверил норму");
     const draft = rules.map(r => ({ ...r, legal: { ...r.legal, status: "draft" as const } }));
-    expect(planToIcs(buildPlan(draft, profile, {}, "2026-09-24"), options).replaceAll("\r\n ", "")).toContain("Норма ещё не вычитана юристом");
+    expect(planToIcs(buildPlan(draft, profile, {}, "2026-09-24"), options).replaceAll("\r\n ", "")).toContain("Юрист ещё не проверил норму");
     expect(text).toContain("115-ФЗ\\, ст. 5\\, п. 13");
     expect(planToIcs(buildPlan(rules, profile, {}, "2026-09-24"), { ...options, demo: false })).not.toContain("ДЕМО");
   });

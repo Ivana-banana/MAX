@@ -27,7 +27,7 @@ function atScope() {
 describe("choosing a university without a deep link", () => {
   it("offers the other universities of the catalogue on the scope question", () => {
     const f = atScope();
-    expect(f.reply.text).toContain("общежитие КФУ");
+    expect(f.reply.text).toContain("общежитии КФУ");
     expect(actions(f.reply)).toContain("universities");
     const list = f.click("universities");
     expect(f.session.step).toBe("scope");
@@ -43,7 +43,7 @@ describe("choosing a university without a deep link", () => {
     const scope = f.click("uni:itmo");
     expect(f.session.university).toBe("itmo");
     expect(f.session.step).toBe("scope");
-    expect(scope.text).toContain("общежитие ИТМО");
+    expect(scope.text).toContain("общежитии ИТМО");
     f.click("yes");
     expect(f.session.step).toBe("citizenship");
   });
@@ -52,7 +52,7 @@ describe("choosing a university without a deep link", () => {
     const f = atScope();
     f.click("universities");
     const missing = f.click("uni-missing");
-    expect(missing.text).toContain("международный отдел своего вуза");
+    expect(missing.text).toContain("в международном отделе своего вуза");
     expect(missing.text).not.toContain("КФУ");
     expect(f.session.step).toBe("scope");
     expect(actions(missing)).toContain("universities");
@@ -108,7 +108,7 @@ describe("a session whose university is no longer in the catalogue", () => {
     expect(r.session).toMatchObject({ university: "kfu", step: "scope", reminders: false, completions: {} });
     expect(r.session!.citizenship).toBeUndefined();
     expect(r.session!.entryDate).toBeUndefined();
-    expect(r.reply.text).toContain("общежитие КФУ");
+    expect(r.reply.text).toContain("общежитии КФУ");
   });
 
   it("keeps the old behaviour for a session saved before universities had ids", () => {

@@ -45,7 +45,7 @@ describe("a university deadline earlier than the law (D-043)", () => {
   it("shows ITMO's 30 days for fingerprinting next to the legal 90, with the source", () => {
     const card = planned("/start itmo").click("card:fingerprinting");
     expect(plain(card.text)).toContain("Расчётный предельный срок: 29 ноября 2026 г.");
-    expect(card.text).toContain("ИТМО просит раньше: до 30 сентября 2026 г.");
+    expect(card.text).toContain("Срок ИТМО раньше: до 30 сентября 2026 г.");
     expect(card.text).toContain("по странице ИТМО");
   });
 

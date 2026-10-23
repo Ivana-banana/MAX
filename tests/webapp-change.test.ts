@@ -85,7 +85,7 @@ describe("«Изменились обстоятельства» in the mini app 
     const f = await app(off);
     const state = await (await fetch(`${f.url}/api/state`, { headers: f.headers })).json() as AppStateResponse;
     expect(state.state.session!.changes).toEqual([]);
-    expect(state.state.session!.changeIntro).toContain("пока выключен");
+    expect(state.state.session!.changeIntro).toContain("бот пока не считает");
     expect((await f.act("change:moving")).state.session!.step).toBe("plan");
     expect((await f.store.get(7))!.changes).toBeUndefined();
   });

@@ -122,7 +122,7 @@ describe("deadline after a change of circumstances", () => {
     delete off.changes;
     const f = planned(off);
     expect(actions(f.click("plan"))).not.toContain("change");
-    expect(f.type("/change").text).toContain("пока выключен");
+    expect(f.type("/change").text).toContain("бот пока не считает");
   });
 
   it("does not let a university term be as long as the federal one", () => {

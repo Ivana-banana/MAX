@@ -30,9 +30,9 @@ const actions = (r: Reply) => r.buttons.flat().flatMap(b => "action" in b ? [b.a
 describe("university procedures without a calculated deadline", () => {
   it("lists KFU migration registration apart from the dated plan, with its own card", () => {
     const f = onboard("KZ");
-    expect(f.home.text).toContain("Без расчётного срока");
+    expect(f.home.text).toContain("Срок пока не посчитан");
     expect(f.home.text).toContain("• Миграционный учёт (регистрация)");
-    expect(f.home.text).toContain("Сроки рассчитаны только для двух процедур");
+    expect(f.home.text).toContain("Бот считает сроки только для двух процедур");
     expect(actions(f.home)).toContain("card:migration-registration");
     const card = f.click("card:migration-registration");
     expect(plain(card.text)).toContain("Когда: В течение следующего рабочего дня после заселения в общежитие");
@@ -58,7 +58,7 @@ describe("university procedures without a calculated deadline", () => {
     // A profile with contacts only, as a newly added university starts out.
     const bare = { ...ctx, universities: universities.map(u => u.id === "itmo" ? { ...u, procedures: [] } : u) };
     const f = onboard("IN", "/start itmo", bare);
-    expect(f.home.text).not.toContain("Без расчётного срока");
+    expect(f.home.text).not.toContain("Срок пока не посчитан");
     expect(undated(f.session, bare)).toEqual([]);
     expect(f.click("card:migration-registration").text).toContain("Ваш план подготовки");
   });

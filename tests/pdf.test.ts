@@ -64,14 +64,14 @@ describe("plan as a PDF (#92)", () => {
     expect(text).toContain(squeeze("Пройдено 20 сентября 2026 г. (отметка студента)"));
     expect(text).toContain(squeeze("Федеральный закон"));
     expect(text).toContain(squeeze(universities.find(u => u.id === "kfu")!.contactUrl));
-    expect(text).toContain(squeeze("ДЕМОНСТРАЦИОННЫЕ ДАННЫЕ"));
+    expect(text).toContain(squeeze("УЧЕБНЫЕ ДАННЫЕ"));
     expect(text).not.toContain("Казахстан");
   });
 
   it("has no demo mark outside the demo profile", async () => {
     const text = pdfText(await renderPlanPdf(planPdf(planned(), { ...ctx, demo: false })));
     expect(text).toContain(squeeze("30 сентября 2026 г."));
-    expect(text).not.toContain(squeeze("ДЕМОНСТРАЦИОННЫЕ ДАННЫЕ"));
+    expect(text).not.toContain(squeeze("УЧЕБНЫЕ ДАННЫЕ"));
   });
 
   it("renders every character of the plan in each language, Chinese included", async () => {
@@ -96,7 +96,7 @@ describe("plan as a PDF (#92)", () => {
   it("answers the button with a loading notice and offers a retry when the file cannot be built", () => {
     const outcome = press(planned(), "pdf");
     expect(outcome.reply.text).toContain("PDF с вашим планом");
-    expect(outcome.notice).toBe("Готовлю PDF…");
+    expect(outcome.notice).toBe("PDF готовится…");
     expect(outcome.reply.failed?.text).toContain("Не удалось отправить PDF");
     expect(outcome.reply.failed?.buttons.flat().map(b => b.text)).toEqual(["Повторить", "К плану"]);
   });
@@ -124,7 +124,7 @@ describe("plan as a PDF (#92)", () => {
 
   it("sends the file through the outbox as base64 and returns the loading notice for the button", async () => {
     const f = await service();
-    expect(await f.click("pdf")).toBe("Готовлю PDF…");
+    expect(await f.click("pdf")).toBe("PDF готовится…");
     await f.svc.flush();
     const file = f.sent.at(-1)?.file;
     expect(file?.name).toBe("first-90-days-plan.pdf");
@@ -138,7 +138,7 @@ describe("plan as a PDF (#92)", () => {
     await f.click("pdf"); await f.svc.flush();
     expect(f.sent.at(-1)?.file).toBeUndefined();
     expect(f.sent.at(-1)?.text).toContain("Не удалось отправить PDF");
-    expect(await f.click("pdf")).toBe("Готовлю PDF…");
+    expect(await f.click("pdf")).toBe("PDF готовится…");
     await f.svc.flush();
     expect(f.sent.at(-1)?.file?.name).toBe("first-90-days-plan.pdf");
   });
@@ -159,6 +159,6 @@ describe("plan as a PDF (#92)", () => {
 
   it("answers the calendar button with a loading notice", async () => {
     const f = await service();
-    expect(await f.click("calendar")).toBe("Готовлю файл календаря…");
+    expect(await f.click("calendar")).toBe("Файл календаря готовится…");
   });
 });
