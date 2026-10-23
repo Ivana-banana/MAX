@@ -72,7 +72,7 @@ flowchart LR
 
 | Изменение | Где | Правка кода |
 |---|---|---|
-| Новый вуз | `src/data/universities/<id>.json` + плакат `npm run qr <id>` | нет, тест `tests/university.test.ts` |
+| Новый вуз | `src/data/universities/<id>.json` + плакат `npm run qr <id>` и блок для письма о зачислении `npm run invite <id>` | нет, тест `tests/university.test.ts` |
 | Новый язык | `src/data/i18n/<код>.json` + переводы названий в нормах и вузах | нет, тест `tests/i18n.test.ts` |
 | Новый период въезда, исключённое гражданство | условия `appliesIf` в `src/data/rules/*.json` | нет, тест `tests/segment.test.ts` |
 | Новая процедура со сроком от даты въезда | правило в `src/data/rules/*.json` | нет, движок общий |

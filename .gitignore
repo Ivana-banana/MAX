@@ -12,6 +12,7 @@ build/
 coverage/
 /data/
 /posters/
+/invites/
 
 # Python
 .venv/

@@ -26,6 +26,7 @@
     "funnel": "node --env-file-if-exists=.env dist/report.js",
     "office": "node --env-file-if-exists=.env dist/office.js",
     "qr": "node --env-file-if-exists=.env dist/qr.js",
+    "invite": "node --env-file-if-exists=.env dist/invite.js",
     "university:check": "npm run build --silent && node dist/university-check.js",
     "sources:check": "npm run build --silent && node dist/sources-check.js",
     "demo:export": "npm run build && node scripts/export-demo.mjs",

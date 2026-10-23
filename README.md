@@ -137,6 +137,7 @@ src/data/i18n/<язык>.json (сейчас русский, английский
 npm run build
 npm run qr               # плакаты для всех профилей: posters/kfu.svg, posters/itmo.svg
 npm run qr -- itmo       # только для одного вуза
+npm run invite -- itmo   # блок для письма о зачислении и сайта: invites/invite-itmo.html
 ```
 
 Что внутри:
@@ -197,6 +198,7 @@ BY и въезд до сентября не получают нормативн�
 | SEND_TIMEOUT_MS | 30000 | предел отправки одного сообщения из очереди, 1000–50000 мс (меньше аренды очереди в 60 с); при превышении сообщение остаётся в очереди и уходит повторно, в логе `Send timed out` |
 | BOT_LINK | https://max.ru/t149_hakaton_max_bot | базовая ссылка для QR-плакатов вузов |
 | POSTERS_DIR | ./posters | каталог SVG-плакатов, созданных `npm run qr` |
+| INVITES_DIR | ./invites | каталог блоков для письма о зачислении, созданных `npm run invite` (D-066) |
 
 Для изменения HOST/RULES_PATH в контейнере используйте Compose override.
 DEBUG при max запрещён: SDK-диагностика может содержать персональные сведения.
