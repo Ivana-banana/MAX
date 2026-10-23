@@ -39,7 +39,7 @@ function wrap(text: string, max: number): string[] {
 }
 
 /** QR modules as one path: crisp at any print size, no raster. */
-function qrPath(data: string): { path: string; size: number } {
+export function qrPath(data: string): { path: string; size: number } {
   const qr = qrcode(0, "Q"); // Q: survives a crease, a scratch or a glare on a printed sheet
   qr.addData(data, "Byte");
   qr.make();
