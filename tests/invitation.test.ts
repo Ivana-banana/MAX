@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readUniversities, type University } from "../src/data/loadUniversities.js";
 import { readTexts } from "../src/data/loadTexts.js";
-import { FOREIGN_NUMBER_HELP, invitationHtml } from "../src/invitation.js";
+import { FOREIGN_NUMBER_HELP, FOREIGN_NUMBER_HELP_CHECKED, invitationHtml } from "../src/invitation.js";
 
 const universities = readUniversities("src/data/universities", "kfu");
 const texts = readTexts("src/data/i18n");
@@ -21,6 +21,9 @@ describe("invitation block for the admission email", () => {
     const html = invitationHtml(itmo, texts, { botLink, demo: true });
     expect(html.split(`href="${FOREIGN_NUMBER_HELP}"`).length - 1).toBe(itmo.posterLanguages!.length + 1);
     expect(html).toContain("когда получите российский номер");
+    // Each language shows when the MAX help was checked, so a block pasted months later shows its age.
+    expect(html.split(FOREIGN_NUMBER_HELP_CHECKED).length - 1).toBe(itmo.posterLanguages!.length);
+    expect(html).not.toContain("{checked}");
   });
   it("is marked as demo only in demo mode and carries no chat markers", () => {
     expect(invitationHtml(itmo, texts, { botLink, demo: true })).toContain("ДЕМО · учебные данные.");

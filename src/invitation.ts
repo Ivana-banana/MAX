@@ -12,8 +12,10 @@ import { plain } from "./core/markup.js";
 import { deepLink, qrPath, type PosterOptions } from "./poster.js";
 
 // Official MAX help on registering with a non-Russian number; the list of countries lives there, not here.
-// Checked 23.10.2026: the page exists at this address (the old /help/about/kak-... one returns 404).
+// The page exists at this address (the old /help/about/kak-... one returns 404); the block shows the check date,
+// so a university pasting it months later can see how fresh the claim is.
 export const FOREIGN_NUMBER_HELP = "https://help.max.ru/help/about/ustanovka_i_registraciya_v_max/kak_zaregistrirovatsya_v_max_po_inostrannomu_nomeru";
+export const FOREIGN_NUMBER_HELP_CHECKED = "23.10.2026";
 
 const escape = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
@@ -22,7 +24,7 @@ export function invitationHtml(university: University, texts: Texts, o: PosterOp
   const langs = university.posterLanguages ?? [...texts.keys()];
   const unknown = langs.filter(lang => !texts.has(lang));
   if (unknown.length) throw new Error(`posterLanguages of ${university.id}: no interface texts for ${unknown.join(", ")}`);
-  const tr = (lang: string, key: string) => escape(plain(format(texts, lang, key, { uni: university.name[lang] ?? university.name.ru! })).trim());
+  const tr = (lang: string, key: string) => escape(plain(format(texts, lang, key, { uni: university.name[lang] ?? university.name.ru!, checked: FOREIGN_NUMBER_HELP_CHECKED })).trim());
   const { path, size } = qrPath(link);
   const qr = `<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 ${size + 8} ${size + 8}">` +
     `<rect width="${size + 8}" height="${size + 8}" fill="#ffffff"/><path transform="translate(4 4)" d="${path}" fill="#000000" shape-rendering="crispEdges"/></svg>`;
