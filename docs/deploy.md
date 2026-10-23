@@ -116,6 +116,8 @@ curl -s https://81-26-178-75.sslip.io/health
 SQLite — в томе `bot-data` (нужна только для импорта). **Не запускать
 `docker compose down -v`** — `-v` удаляет тома с профилями пользователей.
 
+Файл `.gitattributes` задаёт LF для shell-скриптов, хуков, Dockerfile и yml, поэтому `git archive` отдаёт LF и при `core.autocrlf=true` на Windows. На Windows всё равно выкатывайте так: `git -c core.autocrlf=false archive <коммит> | ssh ...`. После распаковки на ВМ проверьте: `bash -n ~/max-bot/scripts/monitor.sh` (ошибка `pipefail\r` значит, что файл с CRLF).
+
 ## Бэкап PostgreSQL и проверка восстановления
 
 ```sh
