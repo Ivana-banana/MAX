@@ -30,24 +30,6 @@ function withKazakh(): DialogueContext {
   return { rules: kkRules, universities: kkUniversities, texts: all, version: rules.version, demo: true, today: "2026-09-24" };
 }
 
-// #114, step 2: laid out in Russian first, as the team asked; the other languages follow. A key leaves
-// this list once every language has its layout — then the test above checks it as well.
-const RUSSIAN_ONLY = [
-  "card.visit",
-  "card.deadline", "card.consequence", "card.overdue", "card.when", "card.place", "card.uniTarget", "card.window",
-  "card.byDate", "card.endPassed", "calendar.intro", "help.unsupported", "help.unsupported.scope",
-  "help.unsupported.citizenship", "help.unsupported.other", "help.unsupported.ask", "help.generic", "help.intro",
-  "help.intro.overdue", "help.contacts", "university.gone", "university.choose", "university.missing", "completion",
-  "completion.invalid", "docEnd.visa-end", "docEnd.registration-end", "docEnd.invalid", "home.undatedDue",
-  "procedure.reminder", "visit", "visit.invalid", "visit.saved", "visit.late", "visit.remindOn", "visit.remindOff",
-  "visit.reminder", "delete", "deleted", "expired", "limited", "stopped", "stoppedNoPlan", "rulesChanged", "reminder",
-  "reminder.overdue", "beforeEntry.title", "beforeEntry.next", "pdf.intro", "pdf.failed", "calendar.failed", "change.choose", "change.noPlan",
-  "change.date", "change.invalid", "change.saved", "change.federal", "change.federalWords", "change.law",
-  "change.university", "change.universityWords", "change.due.both", "change.due.one", "change.now", "change.dueWords",
-  "change.handover.university", "change.handover.place", "change.handover.passport", "change.closed", "change.reminder",
-  "change.off", "home.change", "home.changeWords",
-] as const;
-
 describe("interface texts live in data", () => {
   it("has the same keys, placeholders and needed plural forms in every language", () => {
     expect([...texts.keys()]).toEqual(["ru", "en", "tt", "uz", "zh"]);
@@ -58,8 +40,7 @@ describe("interface texts live in data", () => {
     const layout = (v: string) => ({ bold: v.split("**").length - 1, italic: v.replaceAll("**", "").split("*").length - 1,
       items: v.split("•").length - 1, lines: v.split("\n").length - 1 });
     const reference = texts.get("ru")!;
-    const formatted = Object.keys(reference).filter(k => reference[k]!.includes("*") && !(RUSSIAN_ONLY as readonly string[]).includes(k));
-    for (const [lang, table] of texts) for (const key of formatted) expect(layout(table[key]!), `${lang}.${key}`).toEqual(layout(reference[key]!));
+    for (const [lang, table] of texts) for (const key of Object.keys(reference).filter(k => !k.includes("#"))) expect(layout(table[key]!), `${lang}.${key}`).toEqual(layout(reference[key]!));
   });
   it("gives no fixed example date for a day from today on, which would fall in the past (#97)", () => {
     for (const [lang, t] of texts) for (const key of ["visit.invalid", "docEnd.invalid"])
