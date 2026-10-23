@@ -95,9 +95,9 @@ describe("plan as a PDF (#92)", () => {
   it("answers the button with a loading notice and offers a retry when the file cannot be built", () => {
     const outcome = press(planned(), "pdf");
     expect(outcome.reply.text).toContain("PDF с вашим планом");
-    expect(outcome.pdf?.loading).toBe("Готовлю PDF…");
-    expect(outcome.pdf?.failed.text).toContain("Не удалось собрать PDF");
-    expect(outcome.pdf?.failed.buttons.flat().map(b => b.text)).toEqual(["Повторить", "К плану"]);
+    expect(outcome.notice).toBe("Готовлю PDF…");
+    expect(outcome.reply.failed?.text).toContain("Не удалось отправить PDF");
+    expect(outcome.reply.failed?.buttons.flat().map(b => b.text)).toEqual(["Повторить", "К плану"]);
   });
 
   const cleanups: (() => Promise<void>)[] = [];
@@ -106,14 +106,19 @@ describe("plan as a PDF (#92)", () => {
     const schema = await testSchema(); cleanups.push(schema.drop);
     const { store } = await schema.open(); cleanups.push(() => store.close());
     const sent: Reply[] = [];
-    const svc = new Service(store, ctx, { send(_user, reply) { sent.push(reply); return Promise.resolve(); } }, () => Date.parse("2026-09-24T10:00:00+03:00"));
+    // `refuseFiles`: MAX does not take the upload, as with a network failure or attachment.not.ready to the end.
+    const transport = { refuseFiles: false, send(_user: number, reply: Reply) {
+      if (transport.refuseFiles && reply.file) return Promise.reject(new Error("upload failed"));
+      sent.push(reply); return Promise.resolve();
+    } };
+    const svc = new Service(store, ctx, transport, () => Date.parse("2026-09-24T10:00:00+03:00"));
     let n = 0;
     const input = (text: string, callback = false) => svc.receive({ id: String(++n), user: 1, input: { text, callback } });
     const click = async (action: string) => { const s = (await store.get(1))!; return input(`${s.nonce}.${s.revision}|${action}`, true); };
     await input("/start");
     for (const a of ["ru", "accept", "yes", "KZ"]) await click(a);
     await input("2026-09-01");
-    return { svc, sent, click };
+    return { svc, sent, click, transport };
   }
 
   it("sends the file through the outbox as base64 and returns the loading notice for the button", async () => {
@@ -131,9 +136,28 @@ describe("plan as a PDF (#92)", () => {
     vi.mocked(renderPlanPdf).mockRejectedValueOnce(new Error("font missing"));
     await f.click("pdf"); await f.svc.flush();
     expect(f.sent.at(-1)?.file).toBeUndefined();
-    expect(f.sent.at(-1)?.text).toContain("Не удалось собрать PDF");
+    expect(f.sent.at(-1)?.text).toContain("Не удалось отправить PDF");
     expect(await f.click("pdf")).toBe("Готовлю PDF…");
     await f.svc.flush();
     expect(f.sent.at(-1)?.file?.name).toBe("first-90-days-plan.pdf");
+  });
+
+  // #112: a file MAX does not take is said in the chat with a retry, not left in the queue in silence.
+  it.each([["pdf", "Не удалось отправить PDF"], ["calendar", "Не удалось отправить файл календаря"]])(
+    "says in the chat that the %s file was not delivered, with a retry", async (action, text) => {
+      const f = await service();
+      f.transport.refuseFiles = true;
+      await f.click(action); await f.svc.flush();
+      expect(f.sent.at(-1)?.file).toBeUndefined();
+      expect(f.sent.at(-1)?.text).toContain(text);
+      expect(f.sent.at(-1)?.buttons.flat().map(b => b.text)).toEqual(["Повторить", "К плану"]);
+      f.transport.refuseFiles = false;
+      await f.click(action); await f.svc.flush();
+      expect(f.sent.at(-1)?.file).toBeDefined();
+    });
+
+  it("answers the calendar button with a loading notice", async () => {
+    const f = await service();
+    expect(await f.click("calendar")).toBe("Готовлю файл календаря…");
   });
 });

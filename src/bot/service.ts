@@ -79,13 +79,7 @@ export class Service {
       }
       const before = await tx.get(), ctx = this.ctx();
       const outcome = transition(before, update.input, ctx);
-      let reply = outcome.reply;
-      if (outcome.pdf) {
-        notice = outcome.pdf.loading;
-        // A file that cannot be built is said in the chat with a retry, not sent as an empty success.
-        try { reply = { ...reply, file: { name: PLAN_FILE, content: (await renderPlanPdf(outcome.pdf.plan)).toString("base64"), encoding: "base64" } }; }
-        catch (e) { console.error(`Plan PDF failed (${errorInfo(e)}); the user is offered a retry.`); reply = outcome.pdf.failed; }
-      }
+      notice = outcome.notice;
       const university = funnelUniversity(outcome.session ?? before, ctx);
       // A refused stale button (a double tap) changed nothing: it must neither count as a step nor
       // replace the screen the first tap queued, or the user gets only "the button is outdated".
@@ -96,7 +90,7 @@ export class Service {
       await tx.cancelReminders();
       if (outcome.session) await tx.save(outcome.session, now);
       else await tx.remove();
-      await tx.enqueue(update.id, reply, "reply", now, now);
+      await tx.enqueue(update.id, outcome.reply, "reply", now, now);
       await this.scheduleUser(tx, update.user, outcome.session);
     });
     return notice;
@@ -160,6 +154,20 @@ export class Service {
       timer = setTimeout(() => { console.error("Send timed out; the message stays in the outbox for a retry."); reject(new Error("send timeout")); }, this.sendTimeoutMs);
     });
     try { await Promise.race([this.transport.send(user, message), timeout]); } finally { clearTimeout(timer); }
+  }
+  /**
+   * The PDF is built here, after the button has its notice and outside the user lock. A file that cannot
+   * be built or delivered is said in the chat with a retry (#112), not left to the queue in silence.
+   */
+  private async deliverReply(user: number, { pdf, failed, ...reply }: Reply): Promise<void> {
+    try {
+      if (pdf) reply.file = { name: PLAN_FILE, content: (await renderPlanPdf(pdf)).toString("base64"), encoding: "base64" };
+      await this.deliver(user, reply);
+    } catch (e) {
+      if (!failed) throw e;
+      console.error(`File reply failed (${errorInfo(e)}); the user is offered a retry.`);
+      await this.deliver(user, failed);
+    }
   }
   /** One pass of the background loop: maintenance once a minute, then the queue. */
   async tick(): Promise<void> {
@@ -228,7 +236,7 @@ export class Service {
           message = JSON.parse(job.payload) as Reply;
           if (message.ruleVersion !== this.context.version) { await this.store.cancel(job.id, job.lease_token); continue; }
         }
-        try { await this.deliver(job.user_id, message); await this.store.finish(job.id, job.lease_token); }
+        try { await this.deliverReply(job.user_id, message); await this.store.finish(job.id, job.lease_token); }
         catch (e) { await this.failed(job, e); continue; }
         // Outside the send block: a failed counter must not resend the reminder.
         if (job.kind === "reminder") {
