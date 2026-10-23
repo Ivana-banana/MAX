@@ -10,6 +10,7 @@
 
 import { coverage } from "../core/deadlines.js";
 import { isValidDate } from "../core/dates.js";
+import { plain } from "../core/markup.js";
 import type { Lang, PlanItem } from "../core/types.js";
 import {
   beforeEntry, beforeEntryNote, changeCard, changeDue, changeProcedure, changeLine, changeList, changeOff, consequenceText, countdown, documentsNote, mapUrl, pageLabel, placeText, plan, progressParts, repeatParts, targetText, procedureDue, procedureDueText, procedureSource, profile, prompt, shareText, transition, undated, universityLost, type DialogueContext, type Input, type Session,
@@ -100,7 +101,7 @@ function exampleLabel(session: Session, ctx: DialogueContext): { example?: strin
 /** D-041: the university's place for a federal procedure, worded as in the chat card. */
 function placeView(session: Session, ctx: DialogueContext, ruleId: string): { place?: { text: string; mapUrl: string } } {
   const place = (ctx.universities.find(u => u.id === session.university) ?? ctx.universities[0]!).rulePlaces[ruleId];
-  return place ? { place: { text: placeText(session, ctx, ruleId).trim(), mapUrl: mapUrl(place.map) } } : {};
+  return place ? { place: { text: plain(placeText(session, ctx, ruleId)).trim(), mapUrl: mapUrl(place.map) } } : {};
 }
 
 /** The repeat round's label and "marked done on" line, the chat's own wording. */
@@ -119,7 +120,7 @@ function countdownView(session: Session, ctx: DialogueContext, note: ReturnType<
   if (!note.countdown) return {};
   const due = procedureDue(session, ctx, note);
   const label = format(ctx.texts, session.lang, due ? "btn.endChange" : `btn.end.${note.countdown.from}`);
-  return due ? { endLabel: label, end: due.end, due: due.due, ...(due.from ? { from: due.from } : {}), dueText: procedureDueText(session, ctx, note).trim() }
+  return due ? { endLabel: label, end: due.end, due: due.due, ...(due.from ? { from: due.from } : {}), dueText: plain(procedureDueText(session, ctx, note)).trim() }
     : { endLabel: label };
 }
 
@@ -129,10 +130,10 @@ function changesView(session: Session, ctx: DialogueContext): AppChange[] {
     const title = c.title[session.lang]!, d = changeDue(session, ctx, c), procedure = changeProcedure(session, ctx, c);
     return {
       id: c.id, title, dated: c.workdays !== undefined,
-      ...(d ? { event: d.event, line: changeLine(session, ctx, c, d).replace(/^• /, "") } : {}),
+      ...(d ? { event: d.event, line: plain(changeLine(session, ctx, c, d)).replace(/^• /, "").replace(/\n\s*/, " — ") } : {}),
       ...(d?.due ? { due: d.due } : {}),
-      // The card opens with the title; the app shows it as the heading.
-      card: withoutBanner(changeCard(session, ctx, c).text, ctx).slice(title.length).trimStart(),
+      // The card opens with the title in bold; the app shows it as the heading.
+      card: withoutBanner(changeCard(session, ctx, c).text, ctx).slice(`**${title}**`.length).trimStart(),
       lawUrl: c.legal.url,
       ...(procedure ? { procedure: { title: procedure.title[session.lang]!, url: procedure.source.url } } : {}),
     };
@@ -180,10 +181,10 @@ function view(session: Session | null, ctx: DialogueContext, mocked: boolean, hi
         })),
         documentsNote: documentsNote(session, ctx, item),
         legal: { ...item.legal, article: localized(item.legal.article) },
-        ...(item.status === "done" || !consequenceText(session, ctx, item) ? {} : { consequence: consequenceText(session, ctx, item).trim() }),
+        ...(item.status === "done" || !consequenceText(session, ctx, item) ? {} : { consequence: plain(consequenceText(session, ctx, item)).trim() }),
         ...(item.status === "done" || session.visits?.[item.ruleId] === undefined ? {} : { visit: session.visits[item.ruleId] }),
         ...placeView(session, ctx, item.ruleId),
-        ...(targetText(session, ctx, item) ? { target: targetText(session, ctx, item).trim() } : {}),
+        ...(targetText(session, ctx, item) ? { target: plain(targetText(session, ctx, item)).trim() } : {}),
       })) : [],
       progress: progressView(session, ctx, profile(session) && !stale ? plan(session, ctx) : []),
       undated: profile(session) && !stale ? undated(session, ctx).map(note => ({

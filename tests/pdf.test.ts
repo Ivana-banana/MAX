@@ -8,6 +8,7 @@ import { planPdf, transition, type Reply, type Session } from "../src/bot/dialog
 import { renderPlanPdf } from "../src/bot/pdf.js";
 import { Service } from "../src/bot/service.js";
 import { testSchema } from "./pg.js";
+import { plain } from "../src/core/markup.js";
 
 // The real renderer, replaceable in one test to see the failure path.
 vi.mock("../src/bot/pdf.js", async original => {
@@ -77,7 +78,7 @@ describe("plan as a PDF (#92)", () => {
     for (const lang of texts.keys()) {
       const plan = planPdf(planned(lang), ctx);
       const text = pdfText(await renderPlanPdf(plan));
-      expect(text, lang).toBe(squeeze([plan.title, ...plan.notes, ...plan.sections.flatMap(x => [x.heading, x.body]), plan.footer].join("")));
+      expect(text, lang).toBe(squeeze(plain([plan.title, ...plan.notes, ...plan.sections.flatMap(x => [x.heading, x.body]), plan.footer].join(""))));
     }
   });
 
@@ -87,7 +88,7 @@ describe("plan as a PDF (#92)", () => {
       s = transition(s, { text: "2026-09-24", callback: false }, ctx).session!;
       const plan = planPdf(s, ctx);
       const text = pdfText(await renderPlanPdf(plan));
-      expect(text, lang).toBe(squeeze([plan.title, ...plan.notes, ...plan.sections.flatMap(x => [x.heading, x.body]), plan.footer].join("")));
+      expect(text, lang).toBe(squeeze(plain([plan.title, ...plan.notes, ...plan.sections.flatMap(x => [x.heading, x.body]), plan.footer].join(""))));
       if (lang === "ru") expect(text).toContain(squeeze("Повторно (ежегодно). Пройдено вами 24 сентября 2026 г."));
     }
   });

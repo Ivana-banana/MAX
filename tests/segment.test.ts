@@ -5,6 +5,7 @@ import { readUniversities } from "../src/data/loadUniversities.js";
 import { readTexts } from "../src/data/loadTexts.js";
 import { coverage } from "../src/core/deadlines.js";
 import { transition, type DialogueContext, type Session } from "../src/bot/dialog.js";
+import { plain } from "../src/core/markup.js";
 
 const rules = parseRuleSet(raw);
 const base: DialogueContext = { rules: rules.rules, universities: readUniversities("src/data/universities", "kfu"),
@@ -75,7 +76,7 @@ describe("where the checklist comes from", () => {
     entry.type("01.09.2026");
     const s = entry.s;
     for (const id of ["medical-examination", "fingerprinting"]) {
-      expect(transition(s, { text: `${s.nonce}.${s.revision}|card:${id}`, callback: true }, base).reply.text)
+      expect(plain(transition(s, { text: `${s.nonce}.${s.revision}|card:${id}`, callback: true }, base).reply.text))
         .toContain("Если не пройти: срок вашего пребывания в России сокращают — Федеральный закон от 25.07.2002 № 115-ФЗ, ст. 5, п. 23 (сверено 21 октября 2026 г.).");
     }
   });

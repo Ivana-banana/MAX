@@ -8,6 +8,7 @@ import { checkCitizenships, parseUniversity, readUniversities } from "../src/dat
 import { checkTranslated, readTexts } from "../src/data/loadTexts.js";
 import { reminderReply, transition, plan, type DialogueContext, type Input, type Session } from "../src/bot/dialog.js";
 import { parseUpdate } from "../src/bot/service.js";
+import { plain } from "../src/core/markup.js";
 
 const rules = parseRuleSet(raw);
 const universities = readUniversities("src/data/universities", "kfu");
@@ -132,16 +133,16 @@ describe("days left and a missed date", () => {
     expect(home("2026-09-24", onboard("/start", ctx, "en"))).toContain("due soon, 6 days left");
   });
   it("adds the countdown to the card and to the reminder", () => {
-    expect(click(s, "card:medical-examination").reply.text).toContain("Расчётный предельный срок: 30 сентября 2026 г. (скоро, осталось 6 дней)");
+    expect(plain(click(s, "card:medical-examination").reply.text)).toContain("Расчётный предельный срок: 30 сентября 2026 г. (скоро, осталось 6 дней)");
     const c = { ...ctx, today: "2026-09-23" };
     const item = plan(s, c).find(i => i.ruleId === "medical-examination")!;
-    expect(reminderReply(s, c, item).text).toContain("Напоминание: Медицинское освидетельствование — 30 сентября 2026 г. (скоро, осталось 7 дней)");
+    expect(plain(reminderReply(s, c, item).text)).toContain("Напоминание: Медицинское освидетельствование — 30 сентября 2026 г. (скоро, осталось 7 дней)");
   });
   it("after the date: says so, points to the university and prepares a question, without legal consequences", () => {
     const c = { ...ctx, today: "2026-10-02" };
     expect(home("2026-10-02")).toContain("30 сентября 2026 г.** — расчётный срок прошёл 2 дня назад");
     const card = click(s, "card:medical-examination", c);
-    expect(card.reply.text).toContain("Расчётный срок прошёл. Процедуру всё равно нужно пройти");
+    expect(plain(card.reply.text)).toContain("Расчётный срок прошёл. Процедуру всё равно нужно пройти");
     expect(buttons(card).find(b => b.action?.endsWith("|help:medical-examination"))!.text).toBe("Срок прошёл — что делать");
     const help = click(card.session!, "help:medical-examination", c);
     expect(help.reply.text).toContain("Бот не оценивает последствия пропуска");

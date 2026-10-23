@@ -132,7 +132,7 @@ export function beforeEntryNote(s: Session, ctx: DialogueContext, card: BeforeEn
     (card.assumption ? t(s, ctx, "beforeEntry.assumption", { text: card.assumption[s.lang]! }) : "");
 }
 function beforeEntryReply(s: Session, ctx: DialogueContext): Reply {
-  const cards = beforeEntry(s, ctx).map(c => `${c.title[s.lang]}\n${c.text[s.lang]}\n${beforeEntryNote(s, ctx, c)}`);
+  const cards = beforeEntry(s, ctx).map(c => `**${c.title[s.lang]}**\n${c.text[s.lang]}\n${beforeEntryNote(s, ctx, c)}`);
   // The button press made the entry prompt's buttons stale, so the demo example comes again here.
   return reply(s, ctx, t(s, ctx, "beforeEntry.title", { uni: uni(s, ctx).name[s.lang]! }) + cards.join("\n\n") +
     t(s, ctx, "beforeEntry.scope") + t(s, ctx, "beforeEntry.next"), [[link(pageLabel(s, ctx), uni(s, ctx).contactUrl)], ...exampleRow(s, ctx), ...changeRow(s, ctx)]);
@@ -278,10 +278,11 @@ function card(s: Session, ctx: DialogueContext, id: string, prefix = ""): Reply 
   const late = overdue ? t(s, ctx, "card.overdue", { uni: u.name[s.lang]! }) : "";
   const visit = item.status === "done" ? undefined : s.visits?.[id];
   const repeat = repeatParts(s, ctx, item);
-  return reply(s, ctx, prefix + `${item.title[s.lang]}\n${repeat ? repeat.card + "\n" : ""}${item.action[s.lang]}\n` + t(s, ctx, "card.deadline") + date(s, item.dueDate) +
-    (item.status === "done" ? "" : ` (${countdown(s, ctx, item)})`) + target + late +
+  return reply(s, ctx, prefix + `**${item.title[s.lang]}**\n${repeat ? repeat.card + "\n" : ""}${item.action[s.lang]}\n\n` + t(s, ctx, "card.deadline") + `**${date(s, item.dueDate)}**` +
+    // Facts under the deadline first (the university's date, the visit, the place), then the warnings as paragraphs.
+    (item.status === "done" ? "" : ` (${countdown(s, ctx, item)})`) + target +
+    (visit ? t(s, ctx, "card.visit", { date: date(s, visit) }) : "") + placeText(s, ctx, id) + late +
     (item.status === "done" ? "" : consequenceText(s, ctx, item)) +
-    (visit ? t(s, ctx, "card.visit", { date: date(s, visit) }) : "") + placeText(s, ctx, id) +
     "\n\n" + docs.join("\n") + "\n" + documentsNote(s, ctx, item) + "\n\n" + item.legal.act + ", " + item.legal.article[s.lang] +
     "\n" + item.legal.url + t(s, ctx, "card.checked") + date(s, item.legal.checkedAt) +
     t(s, ctx, "card.confirm", { uni: u.name[s.lang]! }) + u.contactUrl,
@@ -321,7 +322,7 @@ function procedureCard(s: Session, ctx: DialogueContext, note: UniversityProcedu
   const checked = (doc: string) => s.documents[`${note.id}:${doc}`] === true;
   const docs = note.documents.map(d => `${checked(d.id) ? "✓" : "□"} ${d.title[s.lang]}`);
   const counted = note.countdown ? procedureDue(s, ctx, note) : undefined;
-  return reply(s, ctx, `${note.title[s.lang]}\n${note.action[s.lang]}\n` + t(s, ctx, "card.when") + note.when[s.lang] +
+  return reply(s, ctx, `**${note.title[s.lang]}**\n${note.action[s.lang]}\n\n` + t(s, ctx, "card.when") + note.when[s.lang] +
     procedureDueText(s, ctx, note) + "\n\n" + docs.join("\n") + "\n\n" + procedureSource(s, ctx, note),
     [...note.documents.map(d => [button((checked(d.id) ? "✓ " : "□ ") + d.title[s.lang], `doc:${note.id}:${d.id}`)]),
       ...(note.countdown ? [[button(t(s, ctx, counted ? "btn.endChange" : `btn.end.${note.countdown.from}`), `end:${note.id}`)]] : []),
@@ -398,12 +399,13 @@ export function changeCard(s: Session, ctx: DialogueContext, c: ChangeSituation,
   const own = !d ? "" : source ? (d.university ? t(s, ctx, "change.university", { ...source, date: date(s, d.university) }) : t(s, ctx, "change.universityWords", source))
     : c.receiver === "university" ? t(s, ctx, "change.universityTbd", { uni: name }) : "";
   const due = !d ? "" : (d.due ? t(s, ctx, d.stricter === "university" ? "change.due.both" : "change.due.one",
-    { date: date(s, d.due), countdown: changeCountdown(s, ctx, d.due), uni: name, who: filer(s, ctx, c) }) + t(s, ctx, "change.now") +
-    t(s, ctx, "change.assumption") + (d.due >= ctx.today ? t(s, ctx, s.reminders ? "change.remindOn" : "change.remindOff") : "") : t(s, ctx, "change.dueWords") + t(s, ctx, "change.now"));
+    { date: date(s, d.due), countdown: changeCountdown(s, ctx, d.due), uni: name, who: filer(s, ctx, c) }) +
+    t(s, ctx, "change.assumption") + (d.due >= ctx.today ? t(s, ctx, s.reminders ? "change.remindOn" : "change.remindOff") : "") + t(s, ctx, "change.now")
+    : t(s, ctx, "change.dueWords") + t(s, ctx, "change.now"));
   const handover = !c.workdays ? t(s, ctx, "change.handover.passport", { uni: name, url: u.contactUrl })
     : t(s, ctx, `change.handover.${c.receiver}`, { uni: name, url: u.contactUrl, act: filing.act, article: filing.article[s.lang]!, law: filing.url }) + t(s, ctx, "change.tornOff");
   const procedure = changeProcedure(s, ctx, c);
-  return reply(s, ctx, prefix + c.title[s.lang]! + federal + assumption + law + own + due + handover +
+  return reply(s, ctx, prefix + `**${c.title[s.lang]!}**` + federal + assumption + law + own + due + handover +
     t(s, ctx, "change.notDecision") + (c.legal.status === "approved" ? "" : t(s, ctx, "change.provisional")),
     [...(d ? [[button(t(s, ctx, "btn.tornOff"), `change-done:${c.id}`)], [button(t(s, ctx, "btn.changeDate"), `change:${c.id}`)]] : []),
       ...(procedure ? [[button(procedure.title[s.lang]!, `card:${procedure.id}`)]] : []),

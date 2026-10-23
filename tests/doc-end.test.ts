@@ -7,6 +7,7 @@ import { procedureDue, transition, undated, type Reply, type Session } from "../
 import { Service } from "../src/bot/service.js";
 import { isAppAction, readState } from "../src/webapp/state.js";
 import { testSchema } from "./pg.js";
+import { plain } from "../src/core/markup.js";
 
 const rules = parseRuleSet(raw);
 const universities = readUniversities("src/data/universities", "kfu");
@@ -57,7 +58,7 @@ describe("a university deadline counted from the visa or registration end date",
   it("lists the counted date in the plan", () => {
     const f = planned("CN");
     f.click("card:visa-extension"); f.click("end:visa-extension"); f.type("30.11.2026");
-    expect(f.click("plan").text).toContain("• Продление визы — до 16 октября 2026 г.");
+    expect(plain(f.click("plan").text)).toContain("• Продление визы — до 16 октября 2026 г.");
   });
 
   it("uses the registration end date for a visa-free student's stay extension", () => {
@@ -147,7 +148,7 @@ describe("reminders before the university deadline", () => {
     await click("card:visa-extension"); await click("end:visa-extension"); await input("30.11.2026");
     const app = (await readState(service, 1, false)).session?.undated.find(i => i.id === "visa-extension");
     expect(app).toMatchObject({ due: "2026-10-16", from: "2026-09-01", end: "2026-11-30" });
-    const university = (sent: Reply[]) => sent.filter(r => r.text.includes("подать документы до 16 октября"));
+    const university = (sent: Reply[]) => sent.filter(r => plain(r.text).includes("подать документы до 16 октября"));
     for (const [day, count] of [["2026-10-08", 0], ["2026-10-09", 1], ["2026-10-13", 2], ["2026-10-15", 3]] as const) {
       now = Date.parse(`${day}T09:00:00+03:00`); await service.flush();
       expect(university(sent), day).toHaveLength(count);

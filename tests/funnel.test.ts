@@ -7,6 +7,7 @@ import type { Reply } from "../src/bot/dialog.js";
 import { Service } from "../src/bot/service.js";
 import { funnelReport, type FunnelCount } from "../src/bot/funnel.js";
 import { testSchema } from "./pg.js";
+import { plain } from "../src/core/markup.js";
 
 const rules = parseRuleSet(raw);
 const universities = readUniversities("src/data/universities", "kfu");
@@ -43,7 +44,7 @@ describe("anonymous funnel counters", () => {
     await f.click("card:fingerprinting", 1);
     await f.input(details.action, 1, true);
     await f.service.flush();
-    expect(f.sent.at(-1)!.text).toContain("Расчётный предельный срок: 30 сентября 2026 г.");
+    expect(plain(f.sent.at(-1)!.text)).toContain("Расчётный предельный срок: 30 сентября 2026 г.");
     for (const doc of ["passport", "passport-translation", "arrival-notification", "previous-results"]) await f.click(`doc:medical-examination:${doc}`, 1);
     await f.click("done:medical-examination", 1); await f.input("/today", 1);
     await f.click("help:fingerprinting", 2);

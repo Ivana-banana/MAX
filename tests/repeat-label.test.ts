@@ -5,6 +5,7 @@ import { readTexts } from "../src/data/loadTexts.js";
 import { readUniversities } from "../src/data/loadUniversities.js";
 import { format } from "../src/data/loadTexts.js";
 import { plan, reminderReply, shareText, transition, type DialogueContext, type Session } from "../src/bot/dialog.js";
+import { plain } from "../src/core/markup.js";
 
 const rules = parseRuleSet(raw);
 const texts = readTexts("src/data/i18n");
@@ -58,7 +59,7 @@ describe("a marked yearly procedure is shown as a repeat", () => {
   it("reminder a year later: says it is a repeat and when the previous round was done", () => {
     const f = afterDone(), c = { ...ctx, today: "2027-10-17" };
     const item = plan(f.session(), c).find(i => i.ruleId === "medical-examination")!;
-    expect(reminderReply(f.session(), c, item).text)
+    expect(plain(reminderReply(f.session(), c, item).text))
       .toContain("Напоминание: Медицинское освидетельствование, повторно (ежегодно) — 24 октября 2027 г. (скоро, осталось 7 дней)\n  пройдено вами 24 сентября 2026 г.");
     const first = plan(f.session(), c).find(i => i.ruleId === "fingerprinting")!;
     expect(reminderReply(f.session(), c, first).text).not.toContain("овторно");

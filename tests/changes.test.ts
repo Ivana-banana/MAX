@@ -9,6 +9,7 @@ import { planToIcs } from "../src/bot/calendar.js";
 import { transition, type DialogueContext, type Reply, type Session } from "../src/bot/dialog.js";
 import { Service } from "../src/bot/service.js";
 import { testSchema } from "./pg.js";
+import { plain } from "../src/core/markup.js";
 
 const rules = parseRuleSet(raw);
 const universities = readUniversities("src/data/universities", "kfu");
@@ -37,17 +38,17 @@ describe("deadline after a change of circumstances", () => {
     expect(f.session.step).toBe("changeDate");
     const card = f.type("29.10.2026");
     expect(f.session.changes).toEqual({ moving: "2026-10-29" });
-    expect(card.text).toContain("Срок подачи уведомления по закону (подаёт КФУ) — не позже 10 ноября 2026 г.");
-    expect(card.text).toContain("Допущение: если вы живёте в общежитии, закон может требовать 1 рабочий день");
-    expect(card.text).toContain("ст. 20 ч. 3");
-    expect(card.text).toContain("Срок КФУ для вас — не позже 30 октября 2026 г.");
-    expect(card.text).toContain("https://kpfu.ru/international/migracionnoe-soprovozhdenie-inostrannyh-grazhdan/bezvizovyi-vjezd");
-    expect(card.text).toContain("Ваш срок по правилам КФУ: 30 октября 2026 г. (есть время, осталось 9 дней) — раньше срока по закону.");
-    expect(card.text).toContain("Ваш шаг — сейчас: сразу после заселения или возвращения передайте паспорт и миграционную карту принимающей стороне.");
-    expect(card.text).toContain("пятидневной неделе");
-    expect(card.text).toContain("Региональные нерабочие дни, если их ввёл субъект РФ, бот не учитывает (TBD)");
-    expect(card.text).toContain("отрывную часть уведомления");
-    expect(card.text).toContain("не решение МВД");
+    expect(plain(card.text)).toContain("Срок подачи уведомления по закону (подаёт КФУ) — не позже 10 ноября 2026 г.");
+    expect(plain(card.text)).toContain("Допущение: если вы живёте в общежитии, закон может требовать 1 рабочий день");
+    expect(plain(card.text)).toContain("ст. 20 ч. 3");
+    expect(plain(card.text)).toContain("Срок КФУ для вас — не позже 30 октября 2026 г.");
+    expect(plain(card.text)).toContain("https://kpfu.ru/international/migracionnoe-soprovozhdenie-inostrannyh-grazhdan/bezvizovyi-vjezd");
+    expect(plain(card.text)).toContain("Ваш срок по правилам КФУ: 30 октября 2026 г. (есть время, осталось 9 дней) — раньше срока по закону.");
+    expect(plain(card.text)).toContain("Ваш шаг — сейчас: сразу после заселения или возвращения передайте паспорт и миграционную карту принимающей стороне.");
+    expect(plain(card.text)).toContain("пятидневной неделе");
+    expect(plain(card.text)).toContain("Региональные нерабочие дни, если их ввёл субъект РФ, бот не учитывает (TBD)");
+    expect(plain(card.text)).toContain("отрывную часть уведомления");
+    expect(plain(card.text)).toContain("не решение МВД");
     expect(actions(card)).toEqual(expect.arrayContaining(["change-done:moving", "card:registration-change"]));
   });
 
@@ -55,12 +56,12 @@ describe("deadline after a change of circumstances", () => {
     const hotel = planned();
     hotel.click("change"); hotel.click("change:hotel");
     const card = hotel.type("03.11.2026");
-    expect(card.text).toContain("Срок подачи уведомления (подаёт гостиница или больница): 5 ноября 2026 г.");
-    expect(card.text).toContain("Это срок принимающей стороны, а не ваш.");
-    expect(card.text).not.toContain("общежитии");
-    expect(card.text).toContain("администрации гостиницы или больницы");
+    expect(plain(card.text)).toContain("Срок подачи уведомления (подаёт гостиница или больница): 5 ноября 2026 г.");
+    expect(plain(card.text)).toContain("Это срок принимающей стороны, а не ваш.");
+    expect(plain(card.text)).not.toContain("общежитии");
+    expect(plain(card.text)).toContain("администрации гостиницы или больницы");
     // The hotel files the notification: no university term is expected there.
-    expect(card.text).not.toContain("TBD). Уточните");
+    expect(plain(card.text)).not.toContain("TBD). Уточните");
     // A university without its own term: the federal 7 days only, and the missing term said as TBD.
     const itmo = planned(ctx, "/start itmo");
     itmo.click("change"); itmo.click("change:moving");
@@ -73,10 +74,10 @@ describe("deadline after a change of circumstances", () => {
     const f = planned({ ...ctx, today: "2027-12-20" });
     f.click("change"); f.click("change:trip");
     const card = f.type("30.12.2027");
-    expect(card.text).toContain("День бот не называет");
-    expect(card.text).toContain("в течение 7 рабочих дней");
-    expect(card.text).toContain("Ваш срок бот не посчитал");
-    expect(card.text).not.toContain("Срок подачи уведомления (");
+    expect(plain(card.text)).toContain("День бот не называет");
+    expect(plain(card.text)).toContain("в течение 7 рабочих дней");
+    expect(plain(card.text)).toContain("Ваш срок бот не посчитал");
+    expect(plain(card.text)).not.toContain("Срок подачи уведомления (");
   });
 
   it("counts a hotel arrival on a non-working day to the first working day after it (ч. 3.1)", () => {
@@ -92,10 +93,10 @@ describe("deadline after a change of circumstances", () => {
     const card = f.click("change:passport");
     expect(f.session.step).toBe("plan");
     expect(f.session.changes).toBeUndefined();
-    expect(card.text).toContain("Числа дней для вас норма не называет");
-    expect(card.text).toContain("п. 42");
-    expect(card.text).toContain("сообщите в КФУ о новом паспорте");
-    expect(card.text).not.toContain("Ваш срок");
+    expect(plain(card.text)).toContain("Числа дней для вас норма не называет");
+    expect(plain(card.text)).toContain("п. 42");
+    expect(plain(card.text)).toContain("сообщите в КФУ о новом паспорте");
+    expect(plain(card.text)).not.toContain("Ваш срок");
     expect(actions(card)).not.toContain("change-done:passport");
   });
 
@@ -151,7 +152,7 @@ describe("reminders and calendar after a change", () => {
     await input("2026-09-01");
     await click("reminders");
     await input("/change"); await click("change:moving"); await input("29.10.2026");
-    const change = () => sent.filter(r => r.text.includes("ваш срок по правилам КФУ: 30 октября 2026 г."));
+    const change = () => sent.filter(r => plain(r.text).includes("ваш срок по правилам КФУ: 30 октября 2026 г."));
     for (const [day, count] of [["2026-10-26", 0], ["2026-10-27", 1], ["2026-10-28", 1], ["2026-10-29", 2]] as const) {
       now = Date.parse(`${day}T09:00:00+03:00`); await service.flush();
       expect(change(), day).toHaveLength(count);

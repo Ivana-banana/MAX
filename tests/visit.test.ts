@@ -46,7 +46,7 @@ describe("planning a visit in the chat", () => {
     const card = f.type("26.09.2026");
     expect(f.session.visits).toEqual({ "medical-examination": "2026-09-26" });
     expect(f.session.step).toBe("plan");
-    expect(card.text).toContain("Визит: 26 сентября 2026 г.");
+    expect(card.text).toContain("**Визит:** 26 сентября 2026 г.");
     expect(card.text).toContain("Включите напоминания");
     expect(card.buttons.flat().map(b => b.text)).toContain("🗓 Изменить день визита");
   });

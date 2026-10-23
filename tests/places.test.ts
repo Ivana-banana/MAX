@@ -4,6 +4,7 @@ import raw from "../src/data/rules/ru-student.json" with { type: "json" };
 import { readTexts } from "../src/data/loadTexts.js";
 import { checkProcedures, parseUniversity, readUniversities } from "../src/data/loadUniversities.js";
 import { mapUrl, transition, type Reply, type Session } from "../src/bot/dialog.js";
+import { plain } from "../src/core/markup.js";
 
 const rules = parseRuleSet(raw);
 const universities = readUniversities("src/data/universities", "kfu");
@@ -34,7 +35,7 @@ describe("where to go", () => {
 
   it("says where KFU sends students for the medical examination, with the source and a map", () => {
     const card = planned("KZ").click("card:medical-examination");
-    expect(card.text).toContain("Где: Медико-санитарная часть КФУ, ул. Вишневского, 2а, 4 этаж");
+    expect(plain(card.text)).toContain("Где: Медико-санитарная часть КФУ, ул. Вишневского, 2а, 4 этаж");
     expect(card.text).toContain("по странице КФУ");
     expect(links(card)).toContainEqual({ text: "🗺 Как добраться", url: mapUrl("Казань, ул. Вишневского, 2а") });
   });

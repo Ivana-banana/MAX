@@ -6,6 +6,7 @@ import { readTexts } from "../src/data/loadTexts.js";
 import type { Reply } from "../src/bot/dialog.js";
 import { Service } from "../src/bot/service.js";
 import { testSchema } from "./pg.js";
+import { plain } from "../src/core/markup.js";
 
 const rules = parseRuleSet(raw);
 const context = { rules: rules.rules, universities: readUniversities("src/data/universities", "kfu"), texts: readTexts("src/data/i18n"),
@@ -51,14 +52,14 @@ describe("one follow-up the day after the calculated date", () => {
     await f.at("2026-09-30T09:00:00+03:00");
     await f.at("2026-10-01T09:00:00+03:00");
     const last = f.sent.at(-1)!;
-    expect(f.reminders().at(-1)).toContain("Медицинское освидетельствование — расчётный срок был до 30 сентября 2026 г., но процедуру всё равно нужно пройти");
+    expect(plain(f.reminders().at(-1)!)).toContain("Медицинское освидетельствование — расчётный срок был до 30 сентября 2026 г., но процедуру всё равно нужно пройти");
     expect(f.reminders().at(-1)).not.toMatch(/штраф|выдвор/i);
     const details = last.buttons.flat().find(b => "action" in b && b.action.endsWith("|card:medical-examination:reminder")) as { action: string };
     expect(details).toBeDefined();
     const count = f.reminders().length;
     await f.at("2026-10-02T09:00:00+03:00"); await f.at("2026-10-05T09:00:00+03:00");
     expect(f.reminders()).toHaveLength(count);
-    expect(f.reminders().filter(r => r.includes("расчётный срок был до 30 сентября 2026 г."))).toHaveLength(1);
+    expect(f.reminders().filter(r => plain(r).includes("расчётный срок был до 30 сентября 2026 г."))).toHaveLength(1);
   });
   it("is not sent late, and not at all once the procedure is marked", async () => {
     const late = await fixture("2026-09-29T10:00:00+03:00"); await late.onboard(); await late.click("reminders");

@@ -5,6 +5,7 @@ import raw from "../src/data/rules/ru-student.json" with { type: "json" };
 import { readTexts } from "../src/data/loadTexts.js";
 import { checkRuleTargets, parseUniversity, readUniversities } from "../src/data/loadUniversities.js";
 import { transition, type Session } from "../src/bot/dialog.js";
+import { plain } from "../src/core/markup.js";
 
 const rules = parseRuleSet(raw);
 const universities = readUniversities("src/data/universities", "kfu");
@@ -43,7 +44,7 @@ describe("a university deadline earlier than the law (D-043)", () => {
 
   it("shows ITMO's 30 days for fingerprinting next to the legal 90, with the source", () => {
     const card = planned("/start itmo").click("card:fingerprinting");
-    expect(card.text).toContain("Расчётный предельный срок: 29 ноября 2026 г.");
+    expect(plain(card.text)).toContain("Расчётный предельный срок: 29 ноября 2026 г.");
     expect(card.text).toContain("ИТМО просит раньше: до 30 сентября 2026 г.");
     expect(card.text).toContain("по странице ИТМО");
   });

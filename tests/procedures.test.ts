@@ -6,6 +6,7 @@ import { checkProcedures, parseUniversity, readUniversities } from "../src/data/
 import { planToIcs } from "../src/bot/calendar.js";
 import { plan, transition, undated, type Reply, type Session } from "../src/bot/dialog.js";
 import { reminderDates } from "../src/core/deadlines.js";
+import { plain } from "../src/core/markup.js";
 
 const rules = parseRuleSet(raw);
 const universities = readUniversities("src/data/universities", "kfu");
@@ -34,7 +35,7 @@ describe("university procedures without a calculated deadline", () => {
     expect(f.home.text).toContain("Сроки рассчитаны только для двух процедур");
     expect(actions(f.home)).toContain("card:migration-registration");
     const card = f.click("card:migration-registration");
-    expect(card.text).toContain("Когда: В течение следующего рабочего дня после заселения в общежитие");
+    expect(plain(card.text)).toContain("Когда: В течение следующего рабочего дня после заселения в общежитие");
     expect(card.text).toContain("ул. Гвардейская, 9");
     expect(card.text).toContain("kpfu.ru/international/migracionnoe-soprovozhdenie-inostrannyh-grazhdan/bezvizovyi-vjezd");
     expect(card.text).toContain("Это правило вуза, а не расчёт бота");
