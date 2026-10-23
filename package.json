@@ -46,7 +46,7 @@
     "qrcode-generator": "2.0.4",
     "typescript": "5.9.2",
     "typescript-eslint": "8.71.2",
-    "vitest": "4.1.11"
+    "vitest": "4.1.12"
   },
   "dependencies": {
     "@maxhub/max-bot-api": "0.3.1",
