@@ -6,7 +6,7 @@ import { createTransport } from "../src/bot/transport.js";
 import type { Config } from "../src/bot/config.js";
 
 const sent = vi.hoisted(() => [] as { text: string; extra: Record<string, unknown> }[]);
-const failures = vi.hoisted(() => [] as unknown[]);
+const failures = vi.hoisted(() => [] as Error[]);
 vi.mock("@maxhub/max-bot-api", async original => {
   const real = await original<typeof import("@maxhub/max-bot-api")>();
   class Bot {

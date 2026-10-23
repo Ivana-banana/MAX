@@ -72,10 +72,13 @@ MAX принимает webhook только по HTTPS на 443 с сертиф�
 6. **HTTPS.** `/etc/caddy/Caddyfile`:
    ```
    <домен> {
+       header Strict-Transport-Security "max-age=31536000"
        reverse_proxy 127.0.0.1:3000
    }
    ```
-   `sudo systemctl reload caddy`. Снаружи: `/health` → 200, `POST /webhook` без секрета → 401.
+   `sudo systemctl reload caddy`. Снаружи: `/health` → 200, `POST /webhook` без секрета → 401,
+   `curl -sI https://<домен>/health` показывает `strict-transport-security: max-age=31536000`
+   (Caddy сам этот заголовок не ставит, #59).
 7. **Подписка** — только после записи в таблицу токена в `HANDOFF.md`:
    ```sh
    docker compose run --rm --no-deps bot node dist/subscribe.js
@@ -112,6 +115,8 @@ curl -s https://81-26-178-75.sslip.io/health
 Подписка и данные переживают пересборку: БД PostgreSQL лежит в томе `pg-data`, старая
 SQLite — в томе `bot-data` (нужна только для импорта). **Не запускать
 `docker compose down -v`** — `-v` удаляет тома с профилями пользователей.
+
+Файл `.gitattributes` задаёт LF для shell-скриптов, хуков, Dockerfile и yml, поэтому `git archive` отдаёт LF и при `core.autocrlf=true` на Windows. На Windows всё равно выкатывайте так: `git -c core.autocrlf=false archive <коммит> | ssh ...`. После распаковки на ВМ проверьте: `bash -n ~/max-bot/scripts/monitor.sh` (ошибка `pipefail\r` значит, что файл с CRLF).
 
 ## Бэкап PostgreSQL и проверка восстановления
 

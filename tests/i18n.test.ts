@@ -41,7 +41,7 @@ const RUSSIAN_ONLY = [
   "completion.invalid", "docEnd.visa-end", "docEnd.registration-end", "docEnd.invalid", "home.undatedDue",
   "procedure.reminder", "visit", "visit.invalid", "visit.saved", "visit.late", "visit.remindOn", "visit.remindOff",
   "visit.reminder", "delete", "deleted", "expired", "limited", "stopped", "stoppedNoPlan", "rulesChanged", "reminder",
-  "reminder.overdue", "beforeEntry.title", "beforeEntry.next", "pdf.intro", "pdf.failed", "change.choose", "change.noPlan",
+  "reminder.overdue", "beforeEntry.title", "beforeEntry.next", "pdf.intro", "pdf.failed", "calendar.failed", "change.choose", "change.noPlan",
   "change.date", "change.invalid", "change.saved", "change.federal", "change.federalWords", "change.law",
   "change.university", "change.universityWords", "change.due.both", "change.due.one", "change.now", "change.dueWords",
   "change.handover.university", "change.handover.place", "change.handover.passport", "change.closed", "change.reminder",
