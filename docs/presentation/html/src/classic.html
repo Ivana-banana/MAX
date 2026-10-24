@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Первые 90 дней — Классика</title>
+<title>Первые 90 дней, классика</title>
 <link rel="stylesheet" href="base.css">
 <style>
-/* Variant «Классика / Плакат»: the mini app's constructivist look — paper, ink, carmine; Tektur + PT Sans. */
+/* Variant «Классика / Плакат»: the mini app look (paper, ink, carmine), Tektur and PT Sans. */
 @font-face { font-family: "Tektur"; font-weight: 400 900; font-stretch: 75% 100%; src: url(../fonts/tektur-cyrillic-wdth-normal.woff2) format("woff2"); unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
 @font-face { font-family: "Tektur"; font-weight: 400 900; font-stretch: 75% 100%; src: url(../fonts/tektur-latin-wdth-normal.woff2) format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
 @font-face { font-family: "PT Sans"; font-weight: 400; src: url(../fonts/pt-sans-cyrillic-400-normal.woff2) format("woff2"); unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
@@ -14,34 +14,34 @@
 @font-face { font-family: "PT Sans"; font-weight: 700; src: url(../fonts/pt-sans-cyrillic-700-normal.woff2) format("woff2"); unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
 @font-face { font-family: "PT Sans"; font-weight: 700; src: url(../fonts/pt-sans-latin-700-normal.woff2) format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
 
-:root { --paper: #f1ece2; --ink: #151515; --red: #b3151b; --muted: #6b675f; --line: #b9b3a8; }
+
+:root { --paper: #f1ece2; --ink: #151515; --red: #b3151b; --muted: #6b675f; }
 .slide { background: var(--paper); color: var(--ink); font: 400 40px/1.3 "PT Sans", sans-serif; }
 .pad { position: absolute; inset: 110px 130px 100px; }
 
-.kicker { font: 800 30px/1 "Tektur", sans-serif; font-stretch: 75%; letter-spacing: .18em; text-transform: uppercase; color: var(--red); margin-bottom: 34px; }
-h1, h2 { font-family: "Tektur", sans-serif; font-weight: 900; font-stretch: 75%; text-transform: uppercase; letter-spacing: -.005em; line-height: .92; }
+h1, h2 { font-family: "Tektur", sans-serif; font-weight: 900; font-stretch: 75%; text-transform: uppercase; line-height: .92; }
 h2 { font-size: 132px; }
-.lead { font-size: 48px; line-height: 1.25; max-width: 1100px; }
+.lead { font-size: 46px; line-height: 1.25; max-width: 1150px; }
 .muted { color: var(--muted); }
-.caps { font: 800 34px/1.1 "Tektur", sans-serif; font-stretch: 75%; letter-spacing: .08em; text-transform: uppercase; }
-.rule { height: 10px; background: var(--ink); }
+.note { position: absolute; left: 130px; bottom: 70px; max-width: 1500px; font-size: 30px; color: var(--muted); }
+.label { font: 800 40px/1.1 "Tektur", sans-serif; font-stretch: 75%; }
+.appx-label { font: 800 34px/1 "Tektur", sans-serif; font-stretch: 75%; color: var(--red); margin-bottom: 30px; }
 
 /* Constructivist shapes */
 .ring { position: absolute; border-radius: 50%; border: 44px solid var(--red); }
-.disc { position: absolute; border-radius: 50%; background: var(--ink); }
 .band { position: absolute; background: var(--red); transform: rotate(-14deg); }
 
 /* Phone frame around a screen */
 .phone { border: 12px solid var(--ink); border-radius: 46px; overflow: hidden; background: var(--ink); }
 .phone.shot::after { bottom: 26px; }
 
-/* Numbered rows */
-.rows { display: grid; gap: 0; }
-.row { display: grid; grid-template-columns: 120px 1fr; align-items: baseline; padding: 28px 0; border-top: 4px solid var(--ink); font-size: 46px; }
-.row > .tag { justify-self: start; }
+/* Rows: ruled lines; .seq rows carry a step number because the content is a sequence */
+.row { display: grid; grid-template-columns: 1fr; align-items: baseline; padding: 28px 0; border-top: 4px solid var(--ink); font-size: 44px; }
 .row:last-child { border-bottom: 4px solid var(--ink); }
-.num { font: 900 64px/1 "Tektur", sans-serif; font-stretch: 75%; color: var(--red); }
-.tag { display: inline-block; padding: 6px 16px 4px; background: var(--ink); color: var(--paper); font: 800 26px/1.2 "Tektur", sans-serif; font-stretch: 75%; letter-spacing: .1em; text-transform: uppercase; }
+.row.seq { grid-template-columns: 90px 1fr; }
+.row.pair { grid-template-columns: 460px 1fr; }
+.num { font: 900 60px/1 "Tektur", sans-serif; font-stretch: 75%; color: var(--red); }
+.tag { justify-self: start; display: inline-block; padding: 6px 18px 5px; background: var(--ink); color: var(--paper); font: 800 30px/1.2 "Tektur", sans-serif; font-stretch: 75%; }
 .tag.red { background: var(--red); }
 .tag.line { background: none; color: var(--ink); box-shadow: inset 0 0 0 3px var(--ink); }
 
@@ -49,8 +49,8 @@ h2 { font-size: 132px; }
 .service { font-size: 34px; line-height: 1.35; }
 .service h2 { font-size: 88px; margin-bottom: 44px; }
 .service .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 90px; }
-.service dl { display: grid; grid-template-columns: 270px 1fr; gap: 18px 24px; }
-.service dt { font: 800 26px/1.4 "Tektur", sans-serif; font-stretch: 75%; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.service dl { display: grid; grid-template-columns: 250px 1fr; gap: 18px 24px; }
+.service dt { font: 800 32px/1.35 "Tektur", sans-serif; font-stretch: 75%; color: var(--muted); }
 .service dd { font-weight: 700; }
 .service ol { list-style: none; counter-reset: s; display: grid; gap: 16px; }
 .service li { counter-increment: s; display: grid; grid-template-columns: 56px 1fr; }
@@ -61,46 +61,72 @@ h2 { font-size: 132px; }
 .cover h1 { position: absolute; left: 130px; top: 610px; font-size: 168px; }
 .cover .sub { position: absolute; left: 130px; top: 800px; font-size: 52px; max-width: 1100px; }
 .cover .team { position: absolute; right: 130px; top: 130px; text-align: right; font-size: 34px; line-height: 1.45; }
-.cover .team b { display: block; font: 900 46px/1.2 "Tektur", sans-serif; font-stretch: 75%; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 10px; }
-.cover .event { position: absolute; left: 130px; bottom: 70px; font-size: 30px; color: var(--muted); }
+.cover .team b { display: block; font: 900 50px/1.2 "Tektur", sans-serif; font-stretch: 75%; margin-bottom: 10px; }
+
+/* 3 · problem: two students on one calendar, September to December 2026 (122 days) */
+.tl { position: absolute; left: 130px; right: 130px; top: 560px; height: 390px; }
+.tl .month { position: absolute; top: 0; bottom: 0; left: calc(var(--d) / 122 * 100%); border-left: 3px solid var(--muted); padding-left: 12px; font: 800 30px/1 "Tektur", sans-serif; font-stretch: 75%; color: var(--muted); }
+.tl .student { position: absolute; left: 0; right: 0; height: 150px; }
+.tl .who { position: absolute; left: calc(var(--in) / 122 * 100%); top: 0; font: 900 40px/1 "Tektur", sans-serif; font-stretch: 75%; white-space: nowrap; }
+.tl .bar { position: absolute; top: 56px; height: 44px; left: calc(var(--in) / 122 * 100%); }
+.tl .bar.med { width: calc(30 / 122 * 100%); background: var(--red); }
+.tl .bar.fp { width: calc(90 / 122 * 100%); box-shadow: inset 0 0 0 5px var(--ink); }
+.tl .due { position: absolute; top: 106px; font-size: 28px; line-height: 1.1; white-space: nowrap; transform: translateX(-100%); text-align: right; }
+.tl .due b { font-size: 34px; }
 
 /* 4 · demo */
 .demo .phones { position: absolute; right: 130px; top: 120px; display: flex; gap: 30px; }
 .demo .phone { width: 330px; height: 716px; }
 
-/* 5 · early */
+/* 5 · before arrival */
 .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; }
 .col { padding: 40px 44px; }
 .col.now { background: var(--red); color: var(--paper); }
 .col.next { box-shadow: inset 0 0 0 6px var(--ink); }
 .col ul { list-style: none; display: grid; gap: 20px; margin-top: 28px; font-size: 42px; }
-.col li::before { content: "— "; }
+.col li { padding-left: 34px; position: relative; }
+.col li::before { content: ""; position: absolute; left: 0; top: .5em; width: 16px; height: 16px; background: currentColor; }
+
+/* 6 · demand: ten students, two of them late */
+.people { display: grid; grid-template-columns: repeat(5, 120px); gap: 28px; }
+.people i { position: relative; height: 170px; color: var(--ink); }
+.people i::before { content: ""; position: absolute; left: 32px; top: 0; width: 56px; height: 56px; border-radius: 50%; background: currentColor; }
+.people i::after { content: ""; position: absolute; left: 6px; right: 6px; top: 70px; bottom: 0; border-radius: 54px 54px 0 0; background: currentColor; }
+.people i.late { color: var(--red); }
 
 /* 7 · benefit */
-.trio { display: grid; grid-template-columns: repeat(3, 1fr); gap: 44px; }
-.cell { border-top: 14px solid var(--ink); padding-top: 30px; }
-.cell .caps { font-size: 72px; margin-bottom: 26px; }
-.cell p { font-size: 46px; margin-bottom: 30px; }
+.who-row { display: grid; grid-template-columns: 220px 1fr; gap: 0 30px; padding: 22px 0; border-top: 4px solid var(--ink); }
+.who-row:last-child { border-bottom: 4px solid var(--ink); }
+.who-row .label { font-size: 56px; }
+.who-row p { font-size: 38px; margin-bottom: 10px; }
 
 /* 8 · scale */
-.core { background: var(--ink); color: var(--paper); padding: 48px 56px; font-size: 44px; }
-.core .caps { color: var(--paper); font-size: 60px; margin-bottom: 18px; }
-.unis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 30px; margin-top: 30px; }
-.uni { box-shadow: inset 0 0 0 5px var(--ink); padding: 40px; font-size: 38px; }
-.uni b { display: block; font: 900 88px/1 "Tektur", sans-serif; font-stretch: 75%; margin-bottom: 14px; }
-.uni.add { box-shadow: inset 0 0 0 5px var(--red); color: var(--red); }
+.big-fact b { display: block; font: 900 210px/.85 "Tektur", sans-serif; font-stretch: 75%; color: var(--red); }
+.big-fact span { display: block; font-size: 42px; margin-top: 18px; max-width: 800px; }
+.bars { display: grid; gap: 10px; }
+.bars div { display: grid; grid-template-columns: 170px 1fr; align-items: center; font-size: 34px; }
+.bars dt { font: 900 40px/1 "Tektur", sans-serif; font-stretch: 75%; }
+.bars dd { display: flex; align-items: center; gap: 16px; }
+.bars dd::before { content: ""; height: 46px; width: calc(var(--v) / 12917 * 420px); background: var(--ink); flex: none; }
+.bars .off dt, .bars .off dd { color: var(--muted); }
+.bars .off dd::before { background: none; box-shadow: inset 0 0 0 4px var(--muted); }
+.core { background: var(--ink); color: var(--paper); padding: 34px 44px; font-size: 38px; }
+.core b { font: 900 46px/1.1 "Tektur", sans-serif; font-stretch: 75%; display: block; margin-bottom: 8px; }
 
 /* 9 · pilot */
 .targets { display: grid; grid-template-columns: repeat(3, 1fr); gap: 50px; margin-top: 50px; }
 .target b { display: block; font: 900 220px/.9 "Tektur", sans-serif; font-stretch: 75%; color: var(--red); }
-.target span { display: block; font-size: 40px; margin-top: 14px; }
+.target span { display: block; font-size: 42px; margin-top: 14px; }
+.flow { display: flex; align-items: center; gap: 26px; margin-top: 60px; font-size: 40px; }
+.flow span { padding: 16px 26px; box-shadow: inset 0 0 0 4px var(--ink); }
+.flow i { font: 900 50px/1 "Tektur", sans-serif; font-style: normal; color: var(--red); }
 
 /* appendix */
 .appx h2 { font-size: 104px; }
-.diagram { display: grid; grid-template-columns: repeat(4, 1fr); gap: 36px; align-items: stretch; }
-.node { box-shadow: inset 0 0 0 5px var(--ink); padding: 40px 36px; font-size: 38px; position: relative; min-height: 400px; }
-.node b { display: block; font: 900 60px/1.05 "Tektur", sans-serif; font-stretch: 75%; text-transform: uppercase; margin-bottom: 14px; }
-.node:not(:last-child)::after { content: "→"; position: absolute; right: -34px; top: 40px; font: 900 44px/1 "Tektur", sans-serif; color: var(--red); }
+.diagram { display: grid; grid-template-columns: repeat(4, 1fr); gap: 50px; }
+.node { box-shadow: inset 0 0 0 5px var(--ink); padding: 40px 36px; font-size: 36px; position: relative; min-height: 420px; }
+.node b { display: block; font: 900 64px/1.05 "Tektur", sans-serif; font-stretch: 75%; text-transform: uppercase; margin-bottom: 20px; }
+.node:not(:last-child)::after { content: "→"; position: absolute; right: -44px; top: 50px; font: 900 48px/1 "Tektur", sans-serif; color: var(--red); }
 .node.dark { background: var(--ink); color: var(--paper); }
 .sources { list-style: none; display: grid; gap: 30px; font-size: 40px; }
 .sources b { display: block; }
@@ -112,25 +138,25 @@ h2 { font-size: 132px; }
 <!-- 1 · Служебный: техническая информация для проверки (Задание, «Формат сдачи», п. 6). Не оценивается. -->
 <section class="slide service">
   <div class="pad">
-    <div class="kicker">Служебный слайд · для технической проверки</div>
+    <p class="appx-label">Служебный слайд для технической проверки</p>
     <h2>Доступ к продукту</h2>
     <div class="grid">
       <dl>
         <dt>Бот в MAX</dt><dd>max.ru/t149_hakaton_max_bot</dd>
         <dt>Репозиторий</dt><dd>github.com/M1hairu/MAX_GOATed_messenger</dd>
-        <dt>Commit</dt><dd>TBD — фиксируем при сдаче</dd>
+        <dt>Commit</dt><dd>TBD, фиксируем при сдаче</dd>
         <dt>Свой API</dt><dd>Нет. Сервер бота и мини-приложения: 81-26-178-75.sslip.io/health</dd>
-        <dt>Логины, ключи</dt><dd>Не нужны: проверка в MAX под своим аккаунтом. Переменные запуска — <span style="font-weight:400">.env.example</span></dd>
+        <dt>Логины и ключи</dt><dd>Не нужны: проверка в MAX под своим аккаунтом. Переменные запуска в <span style="font-weight:400">.env.example</span></dd>
         <dt>Данные</dt><dd>Режим demo, учебные данные. Интеграций с МВД и системами вузов нет</dd>
       </dl>
       <div>
-        <div class="caps" style="margin-bottom:26px">Основной сценарий</div>
+        <p class="label" style="margin-bottom:26px">Основной сценарий</p>
         <ol>
-          <li>Открыть бота → «Начать»</li>
-          <li>Язык → «Продолжить» → «Да, совпадает» → «Казахстан»</li>
+          <li>Открыть бота, нажать «Начать»</li>
+          <li>Язык, «Продолжить», «Да, совпадает», «Казахстан»</li>
           <li>Дата въезда: сегодня минус 22 дня</li>
-          <li>План → «Включить напоминания» → карточка процедуры</li>
-          <li>Мини-приложение — кнопка MAX слева от поля ввода: тот же план</li>
+          <li>План, «Включить напоминания», карточка процедуры</li>
+          <li>Мини-приложение открывается кнопкой MAX слева от поля ввода и показывает тот же план</li>
         </ol>
       </div>
     </div>
@@ -144,152 +170,170 @@ h2 { font-size: 132px; }
   <h1>Первые 90 дней</h1>
   <p class="sub">Личный план иностранного студента в MAX: свои сроки, документы и напоминания</p>
   <div class="team"><b>ИИ в массы</b>Иван Резников<br>Иван Пушкин<br>Александр Чичерин<br>Михаил Анцев</div>
-  <div class="event">Хакатон Минобрнауки × MAX · «Забота о людях» · финал, Казань, 29.10.2026</div>
+  <p class="note">Хакатон Минобрнауки России и MAX, трек «Забота о людях». Финал в Казани, 29 октября 2026</p>
 </section>
 
-<!-- 3 · Проблема -->
+<!-- 3 · Проблема: сроки отсчитываются от своей даты въезда -->
 <section class="slide">
-  <div class="band" style="width:900px;height:120px;right:-160px;top:120px"></div>
+  <div class="band" style="width:760px;height:110px;right:-150px;top:110px"></div>
   <div class="pad">
-    <div class="kicker">Задача студента</div>
     <h2>Когда и с чем<br>приходить?</h2>
-    <p class="lead" style="margin:48px 0 54px">Инструкции общие. Дата въезда у каждого своя.</p>
-    <div class="rows" style="width:1100px">
-      <div class="row"><span class="num">01</span><span>Найти свой случай</span></div>
-      <div class="row"><span class="num">02</span><span>Отсчитать сроки от даты въезда</span></div>
-      <div class="row"><span class="num">03</span><span>Подготовить документы</span></div>
+    <p class="lead" style="margin-top:40px;max-width:1500px">Первокурсник приехал на учёбу и живёт в общежитии. Инструкции вуза общие, а сроки считаются от его дня въезда</p>
+  </div>
+  <div class="tl">
+    <span class="month" style="--d:0">сентябрь</span><span class="month" style="--d:30">октябрь</span><span class="month" style="--d:61">ноябрь</span><span class="month" style="--d:91">декабрь</span>
+    <div class="student" style="top:60px;--in:0">
+      <span class="who" style="left:calc(var(--in) / 122 * 100% + 20px)">Въезд 1 сентября</span>
+      <span class="bar fp"></span><span class="bar med"></span>
+      <span class="due" style="left:calc(30 / 122 * 100%)">медосвидетельствование<br><b>до 30.09</b></span>
+      <span class="due" style="left:calc(90 / 122 * 100%)">дактилоскопия<br><b>до 29.11</b></span>
+    </div>
+    <div class="student" style="top:256px;--in:19">
+      <span class="who" style="left:calc(var(--in) / 122 * 100% + 20px)">Въезд 20 сентября</span>
+      <span class="bar fp"></span><span class="bar med"></span>
+      <span class="due" style="left:calc(49 / 122 * 100%)">медосвидетельствование<br><b>до 19.10</b></span>
+      <span class="due" style="left:calc(109 / 122 * 100%)">дактилоскопия<br><b>до 18.12</b></span>
     </div>
   </div>
-  <div style="position:absolute;right:130px;bottom:110px;width:460px;font-size:32px;line-height:1.35">
-    <span class="tag red">Для кого</span>
-    <p style="margin-top:18px">Иностранный первокурсник после первого въезда на учёбу, живёт в общежитии вуза</p>
-  </div>
+  <p class="note" style="bottom:30px;font-size:26px">30 и 90 дней со дня въезда: 115-ФЗ, ст. 5, в ред. 162-ФЗ с 01.09.2026. Даты посчитал продукт по своим правилам</p>
 </section>
 
 <!-- 4 · Решение и показ -->
 <section class="slide demo">
   <div class="pad" style="right:auto;width:590px">
-    <div class="kicker">Показ в MAX</div>
-    <h2 style="font-size:100px">Своя дата.<br>Следующий шаг.</h2>
-    <div class="rows" style="margin-top:56px">
-      <div class="row" style="grid-template-columns:90px 1fr"><span class="num">01</span><span>План с личными датами</span></div>
-      <div class="row" style="grid-template-columns:90px 1fr"><span class="num">02</span><span>Карточка с документами и основанием</span></div>
-      <div class="row" style="grid-template-columns:90px 1fr"><span class="num">03</span><span>Напоминание в чате</span></div>
+    <h2 style="font-size:104px">План по своей дате</h2>
+    <div style="margin-top:60px">
+      <div class="row seq"><span class="num">1</span><span>Студент вводит дату въезда</span></div>
+      <div class="row seq"><span class="num">2</span><span>Видит личные сроки</span></div>
+      <div class="row seq"><span class="num">3</span><span>Открывает карточку с документами</span></div>
+      <div class="row seq"><span class="num">4</span><span>Получает напоминание в чате</span></div>
     </div>
   </div>
   <div class="phones">
-    <div class="phone shot" data-mark="Рендер из кода — заменить на скрин MAX"><img src="../screens/07-plan.jpg" alt="Мини-приложение: план с личными сроками"></div>
-    <div class="phone shot" data-mark="Рендер из кода — заменить на скрин MAX"><img src="../screens/08-card.jpg" alt="Мини-приложение: карточка процедуры"></div>
-    <div class="phone shot" data-mark="Экран MAX от 27.09 — заменить"><img src="../../screens/chat-plan.jpg" alt="Чат MAX: план и кнопка напоминаний"></div>
+    <div class="phone shot" data-mark="Рендер из кода, заменить на скриншот MAX"><img src="../screens/07-plan.jpg" alt="Мини-приложение: план с личными сроками"></div>
+    <div class="phone shot" data-mark="Рендер из кода, заменить на скриншот MAX"><img src="../screens/08-card.jpg" alt="Мини-приложение: карточка процедуры"></div>
+    <div class="phone shot" data-mark="Скриншот MAX от 27.09, заменить"><img src="../../screens/chat-plan.jpg" alt="Чат MAX: план и кнопка напоминаний"></div>
   </div>
 </section>
 
 <!-- 5 · Помощь раньше (ответ на рекомендацию жюри) -->
 <section class="slide">
   <div class="pad" style="right:640px">
-    <div class="kicker">Ответ на рекомендацию жюри</div>
     <h2>Начать помощь<br>до приезда</h2>
-    <div class="cols" style="margin-top:64px">
-      <div class="col now"><span class="caps">Уже в продукте</span>
+    <p class="lead" style="margin-top:36px">Жюри советовали помогать раньше. Часть этого уже работает</p>
+    <div class="cols" style="margin-top:50px">
+      <div class="col now"><span class="label">Уже в продукте</span>
         <ul><li>Приглашение и виза</li><li>«Госуслуги RuID»</li><li>Перевод паспорта</li><li>Контакты вуза</li></ul></div>
-      <div class="col next"><span class="caps">Исследуем</span>
+      <div class="col next"><span class="label">Исследуем</span>
         <ul><li>Выбор вуза</li><li>Подача документов</li><li>Поддержка и гранты</li></ul></div>
     </div>
   </div>
-  <div class="phone shot" data-mark="Рендер из кода — заменить на скрин MAX" style="position:absolute;right:130px;top:120px;width:410px;height:836px"><img src="../screens/10-pre-arrival.jpg" alt="Мини-приложение: что подготовить до въезда"></div>
+  <div class="phone shot" data-mark="Рендер из кода, заменить на скриншот MAX" style="position:absolute;right:130px;top:120px;width:410px;height:836px"><img src="../screens/10-pre-arrival.jpg" alt="Мини-приложение: что подготовить до въезда"></div>
 </section>
 
-<!-- 6 · Спрос (ответ на рекомендацию жюри) -->
+<!-- 6 · Спрос: первичный сигнал D-072 -->
 <section class="slide">
-  <div class="disc" style="width:300px;height:300px;right:150px;top:110px"></div>
   <div class="pad">
-    <div class="kicker">Обоснование спроса</div>
     <h2>Что известно<br>и что проверим</h2>
-    <div class="rows" style="margin-top:44px;width:1560px;font-size:42px">
-      <div class="row" style="grid-template-columns:420px 1fr;font-size:inherit"><span class="tag">Первый сигнал</span><span>10 бесед со второкурсниками ИТМО: <b>2 из 10</b> просрочили медосвидетельствование, почти все обзванивали инстанции</span></div>
-      <div class="row" style="grid-template-columns:420px 1fr;font-size:inherit"><span class="tag red">Срок стал короче</span><span>Тогда давали 90 дней, с 01.09.2026 — 30 дней</span></div>
-      <div class="row" style="grid-template-columns:420px 1fr;font-size:inherit"><span class="tag line">Проверим</span><span>Один случай: по памятке и с продуктом</span></div>
-    </div>
-    <p class="muted" style="margin-top:40px;font-size:34px">Сигнал, не исследование: знакомые, один вуз, свободный разговор. Эффекта и пилота пока нет</p>
   </div>
+  <div class="people" style="position:absolute;left:130px;top:430px">
+    <i></i><i class="late"></i><i></i><i></i><i></i><i></i><i></i><i class="late"></i><i></i><i></i>
+  </div>
+  <div style="position:absolute;left:960px;right:130px;top:400px">
+    <p style="font-size:46px;line-height:1.2"><b>2 из 10</b> знакомых второкурсников ИТМО просрочили медосвидетельствование. Почти все обзванивали инстанции, чтобы понять, что и когда делать</p>
+    <p style="font-size:38px;margin-top:30px">Они въехали в 2025 году, когда на это давали 90 дней. С 1 сентября 2026 года срок 30 дней</p>
+    <p style="font-size:38px;margin-top:30px"><span class="tag line">Проверим</span> один и тот же случай по памятке вуза и с продуктом</p>
+  </div>
+  <p class="note">Это первый сигнал: беседы со знакомыми участника команды из одного вуза, без анкеты. Эффект не измерен, пилота пока нет</p>
 </section>
 
 <!-- 7 · Польза и канал -->
 <section class="slide">
-  <div class="pad">
-    <div class="kicker">Польза и канал запуска</div>
+  <div class="pad" style="right:620px">
     <h2>План рядом<br>с перепиской</h2>
-    <div class="trio" style="margin-top:130px">
-      <div class="cell"><div class="caps">Студент</div><p>Личные даты, документы и напоминания в MAX</p><span class="tag red">Работает сейчас</span></div>
-      <div class="cell"><div class="caps">Вуз</div><p>Меньше повторных вопросов в международной службе</p><span class="tag line">Гипотеза</span></div>
-      <div class="cell"><div class="caps">MAX</div><p>Студент приходит по ссылке из письма вуза о зачислении — ещё до приезда</p><span class="tag line">Гипотеза</span></div>
+    <div style="margin-top:40px">
+      <div class="who-row"><span class="label">Студент</span><div><p>Личные даты, документы и напоминания в MAX</p><span class="tag red">Работает</span></div></div>
+      <div class="who-row"><span class="label">Вуз</span><div><p>Получает готовый вопрос студента и тратит меньше времени на повторные вопросы</p><span class="tag line">Гипотеза</span></div></div>
+      <div class="who-row"><span class="label">MAX</span><div><p>Студент приходит по ссылке из письма вуза о зачислении, ещё до приезда</p><span class="tag line">Гипотеза</span></div></div>
     </div>
   </div>
+  <div class="phone shot" data-mark="Скриншот MAX от 27.09, заменить" style="position:absolute;right:130px;top:120px;width:410px;height:843px"><img src="../../screens/app-question.jpg" alt="Мини-приложение в MAX: вопрос вузу по процедуре"></div>
 </section>
 
-<!-- 8 · Масштабирование -->
+<!-- 8 · Масштабирование: аудитория (D-071) и перенос данными -->
 <section class="slide">
   <div class="pad">
-    <div class="kicker">Перенос в другой вуз</div>
-    <h2 style="font-size:124px">Одно ядро. Разные данные.</h2>
-    <div class="core" style="margin-top:70px"><div class="caps">Ядро — одно для всех</div>Расчёт сроков по правилам · напоминания · чат и мини-приложение</div>
-    <div class="unis">
-      <div class="uni"><b>КФУ</b>инструкции, контакты, места</div>
-      <div class="uni"><b>ИТМО</b>инструкции, контакты, места</div>
-      <div class="uni"><b>СПбГЭУ</b>инструкции, контакты, места</div>
-      <div class="uni add"><b>+ вуз</b>профиль данных, проверка сотрудником</div>
-    </div>
-    <p class="muted" style="margin-top:26px;font-size:34px">Профили собраны по открытым источникам. Вузы пока не партнёры</p>
+    <h2 style="font-size:124px">Вуз подключается данными</h2>
   </div>
+  <div class="big-fact" style="position:absolute;left:130px;top:310px">
+    <b>422 тыс.</b>
+    <span>иностранных студентов в вузах России, по данным Минобрнауки на 15.09.2026</span>
+  </div>
+  <div class="core" style="position:absolute;left:130px;width:780px;bottom:120px">
+    <b>Ядро одно для всех</b>Расчёт сроков, напоминания, чат и мини-приложение. Вуз добавляет профиль: инструкции, контакты, адреса
+  </div>
+  <div style="position:absolute;left:1010px;right:130px;top:330px">
+    <p style="font-size:32px;margin-bottom:20px">Иностранцы на всех курсах, по таблицам «Сведения» на сайтах вузов</p>
+    <dl class="bars">
+      <div class="off"><dt>РУДН</dt><dd style="--v:12917">12 917</dd></div>
+      <div><dt>КФУ</dt><dd style="--v:6139">6 139</dd></div>
+      <div class="off"><dt>СПбПУ</dt><dd style="--v:5627">5 627</dd></div>
+      <div class="off"><dt>УрФУ</dt><dd style="--v:4052">4 052</dd></div>
+      <div class="off"><dt>ТПУ</dt><dd style="--v:2678">2 678</dd></div>
+      <div><dt>ИТМО</dt><dd style="--v:1282">1 282</dd></div>
+      <div><dt>СПбГЭУ</dt><dd style="--v:499">499</dd></div>
+    </dl>
+    <p style="font-size:30px;margin-top:20px"><span class="tag">профиль в боте</span>&nbsp;&nbsp;<span class="tag line" style="color:var(--muted);box-shadow:inset 0 0 0 3px var(--muted)">профиля пока нет</span></p>
+  </div>
+  <p class="note" style="bottom:50px">Профили собраны по открытым источникам, вузы пока не партнёры. Набор первого курса в таблицах не указан</p>
 </section>
 
 <!-- 9 · Пилот -->
 <section class="slide">
   <div class="pad">
-    <div class="kicker">Первый тест с вузом</div>
     <h2>Цели заданы<br>заранее</h2>
     <div class="targets">
       <div class="target"><b>80%</b><span>завершают план<br>самостоятельно</span></div>
       <div class="target"><b>0</b><span>критичных ошибок<br>в контрольных заданиях</span></div>
       <div class="target"><b>−30%</b><span>времени<br>до корректного плана</span></div>
     </div>
-    <p style="margin-top:56px;font-size:36px"><span class="tag red">Цели, не результаты</span>&nbsp;&nbsp;Специалист проверяет правила → 10–15 наблюдаемых сессий → решение</p>
+    <div class="flow"><span>Специалист вуза проверяет правила</span><i>→</i><span>10–15 наблюдаемых сессий</span><i>→</i><span>Решение о втором вузе</span></div>
   </div>
+  <p class="note">Это цели пилота. Результатов пока нет</p>
 </section>
 
 <!-- 10 · Завершение -->
 <section class="slide cover">
   <div class="ring" style="width:760px;height:760px;right:-200px;top:-220px"></div>
   <div class="pad">
-    <div class="kicker">Следующий шаг</div>
-    <h2 style="font-size:150px">Ищем вуз<br>для пилота</h2>
-    <p class="lead" style="margin-top:56px">Проверить правила вместе со специалистом и провести первый тест с иностранными студентами</p>
-    <p class="caps" style="position:absolute;left:0;bottom:0;font-size:44px">max.ru/t149_hakaton_max_bot</p>
+    <h2 style="font-size:170px">Ищем вуз<br>для пилота</h2>
+    <p class="lead" style="margin-top:56px">Проверим правила вместе со специалистом вуза и проведём первый тест с иностранными студентами</p>
+    <p class="label" style="position:absolute;left:0;bottom:0;font-size:52px">max.ru/t149_hakaton_max_bot</p>
   </div>
 </section>
 
 <!-- 11 · Приложение: изменения после онлайн-этапа -->
 <section class="slide appx">
   <div class="pad">
-    <div class="kicker">Приложение · после онлайн-этапа</div>
+    <p class="appx-label">Приложение</p>
     <h2>Что изменили<br>по отзыву жюри</h2>
-    <div class="rows" style="margin-top:56px">
-      <div class="row" style="grid-template-columns:520px 1fr"><span class="caps">Помочь раньше</span><span>Карточки до въезда уже в продукте. Поступление — направление исследования</span></div>
-      <div class="row" style="grid-template-columns:520px 1fr"><span class="caps">Обосновать спрос</span><span>Отделили источники проблемы от спроса. Задали проверку гипотезы</span></div>
-      <div class="row" style="grid-template-columns:520px 1fr"><span class="caps">Сменить формат</span><span>Крупные тезисы и показ продукта. Технические подробности — в приложении</span></div>
+    <div style="margin-top:56px">
+      <div class="row pair"><span class="label">Помочь раньше</span><span>Карточки до въезда уже в продукте. Поступление исследуем</span></div>
+      <div class="row pair"><span class="label">Обосновать спрос</span><span>Собрали первый сигнал из 10 бесед и задали проверку на пилоте</span></div>
+      <div class="row pair"><span class="label">Сменить формат</span><span>Крупные тезисы и показ продукта, технические подробности здесь, в приложении</span></div>
     </div>
   </div>
 </section>
 
-<!-- 12 · Приложение: дорожная карта -->
+<!-- 12 · Приложение: следующий этап -->
 <section class="slide appx">
   <div class="pad">
-    <div class="kicker">Приложение · следующий этап</div>
-    <h2>Требует<br>исследования</h2>
-    <div class="rows" style="margin-top:56px;width:1300px">
-      <div class="row"><span class="num">01</span><span>Как абитуриент выбирает вуз?</span></div>
-      <div class="row"><span class="num">02</span><span>Где возникает затруднение при подаче документов?</span></div>
-      <div class="row"><span class="num">03</span><span>Как он находит поддержку и гранты?</span></div>
+    <p class="appx-label">Приложение</p>
+    <h2>Что нужно<br>исследовать дальше</h2>
+    <div style="margin-top:56px;width:1400px">
+      <div class="row">Как абитуриент выбирает вуз?</div>
+      <div class="row">Где он застревает при подаче документов?</div>
+      <div class="row">Как находит поддержку и гранты?</div>
     </div>
   </div>
 </section>
@@ -297,27 +341,27 @@ h2 { font-size: 132px; }
 <!-- 13 · Приложение: архитектура -->
 <section class="slide appx">
   <div class="pad">
-    <div class="kicker">Приложение · архитектура</div>
-    <h2>Правила в данных.<br>Состояние на сервере.</h2>
-    <div class="diagram" style="margin-top:90px">
-      <div class="node"><b>Студент</b>чат и мини-приложение в MAX</div>
-      <div class="node"><b>Сервер</b>Node.js, TypeScript: бот и бэкенд мини-приложения</div>
-      <div class="node dark"><b>Ядро</b>явный расчёт сроков, без LLM-решений</div>
-      <div class="node"><b>Данные</b>профили вузов и правила; PostgreSQL — профиль и очередь</div>
+    <p class="appx-label">Приложение</p>
+    <h2>Правила в данных,<br>состояние на сервере</h2>
+    <div class="diagram" style="margin-top:56px">
+      <div class="node"><b>Студент</b>Чат и мини-приложение в MAX</div>
+      <div class="node"><b>Сервер</b>Node.js и TypeScript: бот и бэкенд мини-приложения</div>
+      <div class="node dark"><b>Ядро</b>Явный расчёт сроков по правилам. LLM сроки не решает</div>
+      <div class="node"><b>Данные</b>Нормы и профили вузов в JSON. PostgreSQL хранит профиль студента и очередь напоминаний</div>
     </div>
-    <p class="muted" style="margin-top:44px;font-size:34px">Чат и мини-приложение используют одну сессию: отметка в одном месте видна в другом</p>
+    <p class="muted" style="font-size:32px;margin-top:40px">Чат и мини-приложение работают в одной сессии: отметка в одном месте видна в другом</p>
   </div>
 </section>
 
 <!-- 14 · Приложение: ограничения -->
 <section class="slide appx">
   <div class="pad">
-    <div class="kicker">Приложение · ограничения и допущения</div>
-    <h2>Подготовка<br>к официальному шагу</h2>
-    <div class="rows" style="margin-top:56px;width:1400px">
-      <div class="row"><span class="num">01</span><span>Демонстрационные профили, нормы не вычитаны юристом</span></div>
-      <div class="row"><span class="num">02</span><span>Без сканов паспорта и медицинских документов</span></div>
-      <div class="row"><span class="num">03</span><span>Без подачи заявлений в МВД или системы вузов</span></div>
+    <p class="appx-label">Приложение</p>
+    <h2>Чего продукт<br>не делает</h2>
+    <div style="margin-top:56px;width:1500px">
+      <div class="row">Показ идёт на учебных профилях. Нормы юрист не вычитывал</div>
+      <div class="row">Сканы паспорта и медицинские документы не принимает</div>
+      <div class="row">Заявления в МВД и системы вузов не подаёт</div>
     </div>
   </div>
 </section>
@@ -325,13 +369,13 @@ h2 { font-size: 132px; }
 <!-- 15 · Приложение: источники -->
 <section class="slide appx">
   <div class="pad">
-    <div class="kicker">Приложение · источники</div>
+    <p class="appx-label">Приложение</p>
     <h2 style="margin-bottom:56px">Источники</h2>
     <ul class="sources">
-      <li><b>Федеральный закон от 25.07.2002 № 115-ФЗ, ст. 5, ред. от 26.06.2026</b><span>consultant.ru · сверено 23.09.2026</span></li>
-      <li><b>КФУ: «Дактилоскопия и медицинское освидетельствование», памятка о заселении</b><span>kpfu.ru, students.kpfu.ru · сверено 24.09.2026</span></li>
-      <li><b>СПбГЭУ: отдел по работе с иностранными учащимися</b><span>unecon.ru · сверено 29.09.2026</span></li>
-      <li><b>Профили КФУ, ИТМО, СПбГЭУ: страницы вузов</b><span>даты сверки — в карточках продукта и в репозитории</span></li>
+      <li><b>Федеральный закон от 25.07.2002 № 115-ФЗ, ст. 5, в ред. от 26.06.2026</b><span>consultant.ru, сверено 23.09.2026</span></li>
+      <li><b>КФУ: «Дактилоскопия и медицинское освидетельствование», памятка о заселении</b><span>kpfu.ru и students.kpfu.ru, сверено 24.09.2026</span></li>
+      <li><b>Численность иностранных студентов: Минобрнауки, таблицы «Сведения» семи вузов</b><span>РИА Новости, 15.09.2026; сайты вузов, скачано 24.10.2026</span></li>
+      <li><b>Беседы с 10 второкурсниками ИТМО</b><span>записаны командой 24.10.2026, без персональных данных</span></li>
       <li><b>Отзыв отборочного жюри</b><span>сообщение организаторов, октябрь 2026</span></li>
     </ul>
   </div>
