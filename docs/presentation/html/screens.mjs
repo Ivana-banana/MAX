@@ -21,11 +21,8 @@ async function waitHealth() {
   throw new Error("server did not start");
 }
 
-/** Moscow calendar date `daysAgo` days back, as DD.MM.YYYY. */
-function moscowDate(daysAgo) {
-  const day = new Date(Date.now() - daysAgo * 86_400_000);
-  return new Intl.DateTimeFormat("ru-RU", { timeZone: "Europe/Moscow", day: "2-digit", month: "2-digit", year: "numeric" }).format(day);
-}
+// One entry date on every slide: the deck's worked example is 17.10.2026 (medical by 15.11, fingerprints by 14.01).
+const ENTRY = "17102026";
 
 try {
   await waitHealth();
@@ -54,7 +51,7 @@ try {
   await page.getByRole("button", { name: "Да, совпадает" }).click();
   await shot("05-citizenship");
   await page.getByRole("button", { name: /KZ/ }).click();
-  await page.getByRole("textbox", { name: "Дата въезда" }).pressSequentially(moscowDate(7).replaceAll(".", ""));
+  await page.getByRole("textbox", { name: "Дата въезда" }).pressSequentially(ENTRY);
   await shot("06-entry-date");
   await page.getByRole("button", { name: "Сохранить" }).click();
   await page.getByRole("heading", { name: "Ваш план" }).waitFor();
@@ -67,6 +64,10 @@ try {
   await page.waitForFunction(() => document.querySelector('[role="checkbox"][aria-checked="true"]'));
   await page.mouse.wheel(0, 500);
   await shot("09-card-documents");
+  // The ready question to the university: the student copies it and sends it themselves.
+  await page.getByRole("button", { name: "Не получилось" }).click();
+  await page.getByRole("heading", { name: "Вопрос вузу" }).evaluate(el => el.scrollIntoView({ block: "start" }));
+  await shot("11-question");
 
   // A second training user for the pre-arrival branch: it leaves the entry date screen.
   await page.goto(`http://127.0.0.1:${port}/?demo=${Math.floor(Math.random() * 1_000_000) + 1_000_001}`);
