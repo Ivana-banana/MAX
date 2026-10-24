@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Первые 90 дней, кафедра</title>
+<link rel="stylesheet" href="base.css">
+<style>
+/* Variant «Кафедра»: the talk is addressed to a university's international office; PT Serif headings, PT Sans body. */
+@font-face { font-family: "PT Serif"; font-weight: 400; src: url(../fonts/pt-serif-cyrillic-400-normal.woff2) format("woff2"); unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
+@font-face { font-family: "PT Serif"; font-weight: 700; src: url(../fonts/pt-serif-cyrillic-700-normal.woff2) format("woff2"); unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
+@font-face { font-family: "PT Serif"; font-weight: 400; src: url(../fonts/pt-serif-latin-400-normal.woff2) format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "PT Serif"; font-weight: 700; src: url(../fonts/pt-serif-latin-700-normal.woff2) format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "PT Sans"; font-weight: 400; src: url(../fonts/pt-sans-cyrillic-400-normal.woff2) format("woff2"); unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
+@font-face { font-family: "PT Sans"; font-weight: 700; src: url(../fonts/pt-sans-cyrillic-700-normal.woff2) format("woff2"); unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
+@font-face { font-family: "PT Sans"; font-weight: 400; src: url(../fonts/pt-sans-latin-400-normal.woff2) format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "PT Sans"; font-weight: 700; src: url(../fonts/pt-sans-latin-700-normal.woff2) format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+:root { --green: #1f4d3a; --ivory: #f7f3e8; --ink: #1d2420; --gold: #b5892e; --muted: #5f6a63; --line: #d8d0bc; }
+.slide { background: var(--ivory); color: var(--ink); font: 400 36px/1.36 "PT Sans", sans-serif; }
+.pad { position: absolute; inset: 100px 130px 100px; }
+h1, h2, .serif { font-family: "PT Serif", serif; font-weight: 700; line-height: 1.12; }
+h2 { font-size: 68px; color: var(--green); max-width: 1200px; }
+.lead { font-size: 40px; max-width: 1100px; }
+.muted { color: var(--muted); }
+.small { font-size: 28px; }
+.rule { width: 120px; height: 4px; background: var(--gold); margin: 34px 0; }
+.green { background: var(--green); color: var(--ivory); }
+.green h1, .green h2 { color: var(--ivory); }
+.green .muted { color: rgba(247, 243, 232, .72); }
+.tag { display: inline-block; font-size: 24px; font-weight: 700; color: var(--gold); border: 2px solid var(--gold); border-radius: 30px; padding: 0 16px; margin-left: 12px; vertical-align: .2em; white-space: nowrap; }
+
+.phone { position: absolute; border: 10px solid #111; border-radius: 44px; overflow: hidden; background: #111; }
+
+.list { display: grid; gap: 28px; }
+.list > div { display: grid; grid-template-columns: 26px 1fr; gap: 24px; }
+.list > div::before { content: ""; width: 14px; height: 14px; border-radius: 50%; background: var(--gold); margin-top: .5em; }
+.steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 40px; counter-reset: st; }
+.steps > div { counter-increment: st; border-top: 4px solid var(--green); padding-top: 22px; font-size: 32px; }
+.steps > div::before { content: counter(st); display: block; font-family: "PT Serif", serif; font-weight: 700; font-size: 72px; line-height: 1; color: var(--gold); margin-bottom: 16px; }
+.box { border: 2px solid var(--line); border-radius: 18px; padding: 40px 44px; background: #fbf8f0; }
+.box h3 { font-family: "PT Serif", serif; font-size: 40px; color: var(--green); margin-bottom: 24px; }
+.big { font-family: "PT Serif", serif; font-weight: 700; font-size: 200px; line-height: .95; color: var(--green); }
+
+/* 1: service */
+.service { font-size: 32px; line-height: 1.35; }
+.service .pad { inset: 90px 120px 80px; }
+.service h2 { font-size: 60px; margin: 10px 0 44px; }
+.service .grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 0 80px; }
+.service dl { display: grid; grid-template-columns: 230px 1fr; gap: 16px 24px; }
+.service dt { color: var(--muted); }
+.service dd { font-weight: 700; }
+.service ol { list-style: none; counter-reset: s; display: grid; gap: 14px; }
+.service li { counter-increment: s; display: grid; grid-template-columns: 56px 1fr; }
+.service li::before { content: counter(s); font-family: "PT Serif", serif; font-weight: 700; color: var(--gold); }
+
+.appx h3 { font-family: "PT Serif", serif; font-size: 36px; color: var(--green); margin-bottom: 20px; }
+.appx .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 90px; font-size: 30px; margin-top: 50px; }
+.appx .cols p { margin-bottom: 14px; }
+.appx .cols span { display: block; font-size: 24px; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<!-- 1. Service slide for the technical check (Задание, «Формат сдачи»). Not scored. -->
+<section class="slide service">
+  <div class="pad">
+    <p class="muted" style="font-size:28px">Служебный слайд для технической проверки</p>
+    <h2>Проверка продукта</h2>
+    <div class="grid">
+      <dl>
+        <dt>Бот в MAX</dt><dd>max.ru/t149_hakaton_max_bot</dd>
+        <dt>Репозиторий</dt><dd>github.com/M1hairu/MAX_GOATed_messenger</dd>
+        <dt>Commit</dt><dd>TBD, фиксируем при сдаче</dd>
+        <dt>Свой API</dt><dd>Нет. Сервер бота и мини-приложения: 81-26-178-75.sslip.io/health</dd>
+        <dt>Логины, ключи</dt><dd>Не нужны, вход под своим аккаунтом MAX. Переменные запуска в .env.example</dd>
+        <dt>Данные</dt><dd>Режим demo, учебные данные. Интеграций с МВД и системами вузов нет</dd>
+      </dl>
+      <div>
+        <p style="font-weight:700;margin-bottom:22px">Основной сценарий</p>
+        <ol>
+          <li>Открыть бота, нажать «Начать»</li>
+          <li>Язык, «Продолжить», «Да, совпадает», «Казахстан»</li>
+          <li>Дата въезда: сегодня минус 22 дня</li>
+          <li>План, «Включить напоминания», карточка процедуры</li>
+          <li>Кнопка MAX слева от поля ввода открывает мини-приложение с тем же планом</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 2. Cover -->
+<section class="slide green">
+  <div class="pad">
+    <p class="muted small">Финал хакатона Минобрнауки России и MAX, трек «Забота о людях». Казань, 29.10.2026</p>
+    <h1 style="font-size:130px;margin-top:130px">Первые 90 дней</h1>
+    <div class="rule"></div>
+    <p class="lead">Бот в MAX ведёт иностранных первокурсников вуза по срокам миграционных процедур</p>
+    <p class="muted small" style="position:absolute;bottom:0">Команда «ИИ в массы»: Иван Резников, Иван Пушкин, Александр Чичерин, Михаил Анцев</p>
+  </div>
+</section>
+
+<!-- 3. September in the international office -->
+<section class="slide">
+  <div class="pad">
+    <h2>Сентябрь в международной службе вуза</h2>
+    <div style="display:grid;grid-template-columns:640px 1fr;gap:100px;margin-top:70px">
+      <div>
+        <p class="big">≈1 100</p>
+        <p style="margin-top:20px">иностранных первокурсников в год приезжают в КФУ</p>
+        <p class="muted small" style="margin-top:16px">Расчёт продукта, грубая оценка по таблице «Сведения» КФУ. Без магистратуры и подготовительного факультета</p>
+      </div>
+      <div class="list" style="margin-top:20px">
+        <div><span>У каждого студента свой день въезда, значит и свои сроки</span></div>
+        <div><span>С 01.09.2026 на медосвидетельствование 30 дней со дня въезда, на дактилоскопию 90</span></div>
+        <div><span>Памятка общежития КФУ на 24.09.2026 называет 90 дней на обе процедуры</span></div>
+        <p class="muted small">115-ФЗ, ст. 5, в ред. 162-ФЗ, consultant.ru, сверено 23.09.2026</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4. What the student gets -->
+<section class="slide">
+  <div class="pad">
+    <h2 style="max-width:900px">Что получает студент</h2>
+    <div class="list" style="margin-top:60px;width:820px">
+      <div><span>Личный план по своей дате въезда. Въехал 17.10: медосвидетельствование до 15.11, дактилоскопия до 14.01</span></div>
+      <div><span>Карточку каждой процедуры: документы, адрес, часы работы и норма закона</span></div>
+      <div><span>Напоминания в чат MAX за 7, 3 и 1 день до срока</span></div>
+      <div><span>Пять языков: русский, английский, татарский, узбекский, китайский</span></div>
+    </div>
+  </div>
+  <div class="phone shot" data-mark="Рендер из кода, заменить на скриншот MAX" style="left:1060px;top:150px;width:350px;height:760px"><img src="../screens/07-plan.jpg" alt="Личный план"></div>
+  <div class="phone shot" data-mark="Рендер из кода, заменить на скриншот MAX" style="left:1450px;top:150px;width:350px;height:760px"><img src="../screens/08-card.jpg" alt="Карточка процедуры"></div>
+</section>
+
+<!-- 5. What the office gets -->
+<section class="slide">
+  <div class="pad">
+    <h2 style="max-width:1000px">Что получает служба</h2>
+    <div class="list" style="margin-top:60px;width:1080px">
+      <div><span>Вопрос студента приходит уже с его датами и процедурой<span class="tag">гипотеза</span><br><span class="muted small">Ожидаем меньше повторных вопросов. Это проверит пилот</span></span></div>
+      <div><span>Блок для письма о зачислении: ссылка на бота вашего вуза и QR-код на языках ваших студентов</span></div>
+      <div><span>Плакат с QR-кодом для общежития и стойки службы</span></div>
+      <div><span>Обезличенная воронка: сколько студентов дошли до плана и отметили процедуру</span></div>
+    </div>
+    <p class="muted small" style="margin-top:40px;width:1080px">Блок, плакат и отчёт собираются командами npm run invite, npm run qr и npm run funnel</p>
+  </div>
+  <div class="phone shot" data-mark="Скриншот MAX от 27.09, заменить" style="right:130px;top:120px;width:400px;height:840px"><img src="../../screens/app-question.jpg" alt="Вопрос в вуз"></div>
+</section>
+
+<!-- 6. How a university is connected -->
+<section class="slide">
+  <div class="pad">
+    <h2>Чтобы подключить вуз, нужен только его профиль</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:60px;margin-top:60px">
+      <div class="box">
+        <h3>Общее для всех вузов</h3>
+        <div class="list" style="font-size:32px;gap:18px">
+          <div><span>Нормы закона и расчёт сроков</span></div>
+          <div><span>Напоминания и отметки</span></div>
+          <div><span>Тексты на пяти языках</span></div>
+        </div>
+      </div>
+      <div class="box" style="border-color:var(--green)">
+        <h3>Профиль вашего вуза</h3>
+        <div class="list" style="font-size:32px;gap:18px">
+          <div><span>Адреса, часы работы, контакты службы</span></div>
+          <div><span>Процедуры и памятки вуза</span></div>
+          <div><span>Что подготовить до въезда</span></div>
+        </div>
+      </div>
+    </div>
+    <p style="margin-top:50px">ИТМО и СПбГЭУ подключены именно так: <b>код не менялся</b>, профиль проверяет автоматический тест</p>
+    <p class="muted small" style="margin-top:12px">Профили собраны по открытым страницам вузов. Вузы пока не партнёры</p>
+  </div>
+</section>
+
+<!-- 7. What the bot does not do, what it stores -->
+<section class="slide">
+  <div class="pad">
+    <h2>Что бот не делает и что хранит</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:100px;margin-top:60px">
+      <div>
+        <p class="serif" style="font-size:40px;color:var(--green);margin-bottom:28px">Не делает</p>
+        <div class="list">
+          <div><span>Не подаёт документы в МВД и систему вуза</span></div>
+          <div><span>Не заменяет специалиста службы</span></div>
+          <div><span>Не трактует медицинские результаты</span></div>
+        </div>
+      </div>
+      <div>
+        <p class="serif" style="font-size:40px;color:var(--green);margin-bottom:28px">Хранит</p>
+        <div class="list">
+          <div><span>MAX ID, язык, даты и отметки</span></div>
+          <div><span>Без сканов паспорта и медицинских документов</span></div>
+          <div><span>Удаляет по кнопке или через 400 дней без использования</span></div>
+        </div>
+      </div>
+    </div>
+    <p class="muted small" style="margin-top:56px">Оператора данных и основания обработки определяем вместе с вузом до пилота</p>
+  </div>
+</section>
+
+<!-- 8. Pilot steps -->
+<section class="slide">
+  <div class="pad">
+    <h2>Пилот в вашем вузе</h2>
+    <div class="steps" style="margin-top:70px">
+      <div>Специалист службы проверяет правила и профиль вуза</div>
+      <div>10–15 наблюдаемых сессий с первокурсниками</div>
+      <div>Ссылка на бота в памятке или канале куратора</div>
+      <div>Вместе решаем, продолжать ли</div>
+    </div>
+    <div style="margin-top:80px;border-top:2px solid var(--line);padding-top:36px;display:grid;grid-template-columns:repeat(3,1fr);gap:40px">
+      <p><b class="serif" style="font-size:56px;color:var(--green)">80%</b><br>доходят до плана без подсказки</p>
+      <p><b class="serif" style="font-size:56px;color:var(--green)">0</b><br>критичных ошибок</p>
+      <p><b class="serif" style="font-size:56px;color:var(--green)">−30%</b><br>времени по сравнению с памяткой</p>
+    </div>
+    <p class="muted small" style="margin-top:14px">Цели заданы заранее. Результатов пока нет</p>
+  </div>
+</section>
+
+<!-- 9. Where we are now -->
+<section class="slide">
+  <div class="pad">
+    <h2>Где мы сейчас</h2>
+    <div class="list" style="margin-top:60px;width:1450px">
+      <div><span>19.10.2026 письма ушли в 31 вуз и отдельно в КФУ. Ответов пока нет</span></div>
+      <div><span>Профили КФУ, ИТМО и СПбГЭУ собраны по открытым страницам. Нормы утвердила команда, юрист не привлекался</span></div>
+      <div><span>Из 10 знакомых второкурсников ИТМО двое просрочили медосвидетельствование, ещё когда срок был 90 дней<span class="tag">сигнал</span></span></div>
+      <div><span>В России 422 тыс. иностранных студентов<br><span class="muted small">Минобрнауки, РИА Новости, 15.09.2026</span></span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 10. Ask -->
+<section class="slide green">
+  <div class="pad">
+    <h1 style="font-size:120px;margin-top:150px;max-width:1400px">Станьте первым вузом пилота</h1>
+    <div class="rule"></div>
+    <p class="lead">Профиль вашего вуза соберём сами, нужна проверка специалиста и группа первокурсников</p>
+    <p class="serif" style="font-size:48px;margin-top:80px;color:#e3c37a">max.ru/t149_hakaton_max_bot</p>
+  </div>
+</section>
+
+<!-- 11. Appendix -->
+<section class="slide appx">
+  <div class="pad">
+    <p class="muted small">Приложение</p>
+    <h2 style="margin-top:10px">Устройство и источники</h2>
+    <div class="cols">
+      <div>
+        <h3>Устройство</h3>
+        <p>Бот и мини-приложение в MAX, одна сессия</p>
+        <p>Node.js, TypeScript, официальный SDK MAX, React и MAX UI</p>
+        <p>Явный расчёт сроков по правилам в JSON, без LLM</p>
+        <p>PostgreSQL: профиль студента и очередь напоминаний</p>
+        <p>Запуск: docker compose up --build</p>
+      </div>
+      <div>
+        <h3>Источники</h3>
+        <p>115-ФЗ, ст. 5, в ред. 162-ФЗ<span>consultant.ru, сверено 23.09.2026</span></p>
+        <p>Памятки ИТМО, КФУ, СПбГЭУ<span>сверено 16–29.09.2026, docs/product/problem.md</span></p>
+        <p>Первокурсники КФУ, 7 вузов<span>docs/product/audience.md, D-071</span></p>
+        <p>Беседы со второкурсниками<span>docs/product/demand-interviews.md, D-072</span></p>
+        <p>Пилот и рассылка<span>docs/product/pilot.md</span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script src="deck.js"></script>
+</body>
+</html>
