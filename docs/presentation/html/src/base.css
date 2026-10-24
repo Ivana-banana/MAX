@@ -1,0 +1,62 @@
+/*
+ * Shared stage for every deck variant: 1920×1080 slides scaled to the window, one slide shown,
+ * no transitions. Print gives one slide per 16:9 page — that is how the PDF is made.
+ */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; background: #0d0d0d; }
+body { overflow: hidden; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+img { display: block; }
+
+.slide {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 1920px;
+  height: 1080px;
+  overflow: hidden;
+  transform: translate(-50%, -50%) scale(var(--scale, 1));
+  display: none;
+}
+.slide.on { display: block; }
+
+.page-no {
+  position: absolute;
+  right: 56px;
+  bottom: 40px;
+  font-size: 22px;
+  opacity: .55;
+}
+
+/* Draft marks: a render from code or an old MAX screen that must be replaced before the final. */
+.shot { position: relative; }
+.shot::after {
+  content: attr(data-mark);
+  position: absolute;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: 92%;
+  padding: 6px 14px;
+  background: #ff2bd6;
+  color: #fff;
+  font: 700 20px/1.25 system-ui, sans-serif;
+  text-align: center;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.shot img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
+
+@media print {
+  @page { size: 1920px 1080px; margin: 0; }
+  html, body { height: auto; overflow: visible; background: none; }
+  .slide {
+    display: block;
+    position: relative;
+    left: auto;
+    top: auto;
+    transform: none;
+    break-after: page;
+  }
+  .slide:last-of-type { break-after: auto; }
+}

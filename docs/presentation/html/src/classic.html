@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Первые 90 дней — Классика</title>
+<link rel="stylesheet" href="base.css">
+<style>
+/* Variant «Классика / Плакат»: the mini app's constructivist look — paper, ink, carmine; Tektur + PT Sans. */
+@font-face { font-family: "Tektur"; font-weight: 400 900; font-stretch: 75% 100%; src: url(../fonts/tektur-cyrillic-wdth-normal.woff2) format("woff2"); unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
+@font-face { font-family: "Tektur"; font-weight: 400 900; font-stretch: 75% 100%; src: url(../fonts/tektur-latin-wdth-normal.woff2) format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "PT Sans"; font-weight: 400; src: url(../fonts/pt-sans-cyrillic-400-normal.woff2) format("woff2"); unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
+@font-face { font-family: "PT Sans"; font-weight: 400; src: url(../fonts/pt-sans-latin-400-normal.woff2) format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "PT Sans"; font-weight: 700; src: url(../fonts/pt-sans-cyrillic-700-normal.woff2) format("woff2"); unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
+@font-face { font-family: "PT Sans"; font-weight: 700; src: url(../fonts/pt-sans-latin-700-normal.woff2) format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+
+:root { --paper: #f1ece2; --ink: #151515; --red: #b3151b; --muted: #6b675f; --line: #b9b3a8; }
+.slide { background: var(--paper); color: var(--ink); font: 400 40px/1.3 "PT Sans", sans-serif; }
+.pad { position: absolute; inset: 110px 130px 100px; }
+
+.kicker { font: 800 30px/1 "Tektur", sans-serif; font-stretch: 75%; letter-spacing: .18em; text-transform: uppercase; color: var(--red); margin-bottom: 34px; }
+h1, h2 { font-family: "Tektur", sans-serif; font-weight: 900; font-stretch: 75%; text-transform: uppercase; letter-spacing: -.005em; line-height: .92; }
+h2 { font-size: 132px; }
+.lead { font-size: 48px; line-height: 1.25; max-width: 1100px; }
+.muted { color: var(--muted); }
+.caps { font: 800 34px/1.1 "Tektur", sans-serif; font-stretch: 75%; letter-spacing: .08em; text-transform: uppercase; }
+.rule { height: 10px; background: var(--ink); }
+
+/* Constructivist shapes */
+.ring { position: absolute; border-radius: 50%; border: 44px solid var(--red); }
+.disc { position: absolute; border-radius: 50%; background: var(--ink); }
+.band { position: absolute; background: var(--red); transform: rotate(-14deg); }
+
+/* Phone frame around a screen */
+.phone { border: 12px solid var(--ink); border-radius: 46px; overflow: hidden; background: var(--ink); }
+.phone.shot::after { bottom: 26px; }
+
+/* Numbered rows */
+.rows { display: grid; gap: 0; }
+.row { display: grid; grid-template-columns: 120px 1fr; align-items: baseline; padding: 28px 0; border-top: 4px solid var(--ink); font-size: 46px; }
+.row > .tag { justify-self: start; }
+.row:last-child { border-bottom: 4px solid var(--ink); }
+.num { font: 900 64px/1 "Tektur", sans-serif; font-stretch: 75%; color: var(--red); }
+.tag { display: inline-block; padding: 6px 16px 4px; background: var(--ink); color: var(--paper); font: 800 26px/1.2 "Tektur", sans-serif; font-stretch: 75%; letter-spacing: .1em; text-transform: uppercase; }
+.tag.red { background: var(--red); }
+.tag.line { background: none; color: var(--ink); box-shadow: inset 0 0 0 3px var(--ink); }
+
+/* 1 · service */
+.service { font-size: 34px; line-height: 1.35; }
+.service h2 { font-size: 88px; margin-bottom: 44px; }
+.service .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 90px; }
+.service dl { display: grid; grid-template-columns: 270px 1fr; gap: 18px 24px; }
+.service dt { font: 800 26px/1.4 "Tektur", sans-serif; font-stretch: 75%; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.service dd { font-weight: 700; }
+.service ol { list-style: none; counter-reset: s; display: grid; gap: 16px; }
+.service li { counter-increment: s; display: grid; grid-template-columns: 56px 1fr; }
+.service li::before { content: counter(s); font: 900 40px/1 "Tektur", sans-serif; color: var(--red); }
+
+/* 2 · cover */
+.cover .big { position: absolute; left: 112px; top: 120px; font: 900 600px/.78 "Tektur", sans-serif; font-stretch: 75%; color: var(--red); letter-spacing: -.03em; }
+.cover h1 { position: absolute; left: 130px; top: 610px; font-size: 168px; }
+.cover .sub { position: absolute; left: 130px; top: 800px; font-size: 52px; max-width: 1100px; }
+.cover .team { position: absolute; right: 130px; top: 130px; text-align: right; font-size: 34px; line-height: 1.45; }
+.cover .team b { display: block; font: 900 46px/1.2 "Tektur", sans-serif; font-stretch: 75%; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 10px; }
+.cover .event { position: absolute; left: 130px; bottom: 70px; font-size: 30px; color: var(--muted); }
+
+/* 4 · demo */
+.demo .phones { position: absolute; right: 130px; top: 120px; display: flex; gap: 30px; }
+.demo .phone { width: 330px; height: 716px; }
+
+/* 5 · early */
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; }
+.col { padding: 40px 44px; }
+.col.now { background: var(--red); color: var(--paper); }
+.col.next { box-shadow: inset 0 0 0 6px var(--ink); }
+.col ul { list-style: none; display: grid; gap: 20px; margin-top: 28px; font-size: 42px; }
+.col li::before { content: "— "; }
+
+/* 7 · benefit */
+.trio { display: grid; grid-template-columns: repeat(3, 1fr); gap: 44px; }
+.cell { border-top: 14px solid var(--ink); padding-top: 30px; }
+.cell .caps { font-size: 72px; margin-bottom: 26px; }
+.cell p { font-size: 46px; margin-bottom: 30px; }
+
+/* 8 · scale */
+.core { background: var(--ink); color: var(--paper); padding: 48px 56px; font-size: 44px; }
+.core .caps { color: var(--paper); font-size: 60px; margin-bottom: 18px; }
+.unis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 30px; margin-top: 30px; }
+.uni { box-shadow: inset 0 0 0 5px var(--ink); padding: 40px; font-size: 38px; }
+.uni b { display: block; font: 900 88px/1 "Tektur", sans-serif; font-stretch: 75%; margin-bottom: 14px; }
+.uni.add { box-shadow: inset 0 0 0 5px var(--red); color: var(--red); }
+
+/* 9 · pilot */
+.targets { display: grid; grid-template-columns: repeat(3, 1fr); gap: 50px; margin-top: 50px; }
+.target b { display: block; font: 900 220px/.9 "Tektur", sans-serif; font-stretch: 75%; color: var(--red); }
+.target span { display: block; font-size: 40px; margin-top: 14px; }
+
+/* appendix */
+.appx h2 { font-size: 104px; }
+.diagram { display: grid; grid-template-columns: repeat(4, 1fr); gap: 36px; align-items: stretch; }
+.node { box-shadow: inset 0 0 0 5px var(--ink); padding: 40px 36px; font-size: 38px; position: relative; min-height: 400px; }
+.node b { display: block; font: 900 60px/1.05 "Tektur", sans-serif; font-stretch: 75%; text-transform: uppercase; margin-bottom: 14px; }
+.node:not(:last-child)::after { content: "→"; position: absolute; right: -34px; top: 40px; font: 900 44px/1 "Tektur", sans-serif; color: var(--red); }
+.node.dark { background: var(--ink); color: var(--paper); }
+.sources { list-style: none; display: grid; gap: 30px; font-size: 40px; }
+.sources b { display: block; }
+.sources span { color: var(--muted); font-size: 30px; }
+</style>
+</head>
+<body>
+
+<!-- 1 · Служебный: техническая информация для проверки (Задание, «Формат сдачи», п. 6). Не оценивается. -->
+<section class="slide service">
+  <div class="pad">
+    <div class="kicker">Служебный слайд · для технической проверки</div>
+    <h2>Доступ к продукту</h2>
+    <div class="grid">
+      <dl>
+        <dt>Бот в MAX</dt><dd>max.ru/t149_hakaton_max_bot</dd>
+        <dt>Репозиторий</dt><dd>github.com/M1hairu/MAX_GOATed_messenger</dd>
+        <dt>Commit</dt><dd>TBD — фиксируем при сдаче</dd>
+        <dt>Свой API</dt><dd>Нет. Сервер бота и мини-приложения: 81-26-178-75.sslip.io/health</dd>
+        <dt>Логины, ключи</dt><dd>Не нужны: проверка в MAX под своим аккаунтом. Переменные запуска — <span style="font-weight:400">.env.example</span></dd>
+        <dt>Данные</dt><dd>Режим demo, учебные данные. Интеграций с МВД и системами вузов нет</dd>
+      </dl>
+      <div>
+        <div class="caps" style="margin-bottom:26px">Основной сценарий</div>
+        <ol>
+          <li>Открыть бота → «Начать»</li>
+          <li>Язык → «Продолжить» → «Да, совпадает» → «Казахстан»</li>
+          <li>Дата въезда: сегодня минус 22 дня</li>
+          <li>План → «Включить напоминания» → карточка процедуры</li>
+          <li>Мини-приложение — кнопка MAX слева от поля ввода: тот же план</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 2 · Титул -->
+<section class="slide cover">
+  <div class="ring" style="width:620px;height:620px;right:-160px;bottom:-260px"></div>
+  <div class="big">90</div>
+  <h1>Первые 90 дней</h1>
+  <p class="sub">Личный план иностранного студента в MAX: свои сроки, документы и напоминания</p>
+  <div class="team"><b>ИИ в массы</b>Иван Резников<br>Иван Пушкин<br>Александр Чичерин<br>Михаил Анцев</div>
+  <div class="event">Хакатон Минобрнауки × MAX · «Забота о людях» · финал, Казань, 29.10.2026</div>
+</section>
+
+<!-- 3 · Проблема -->
+<section class="slide">
+  <div class="band" style="width:900px;height:120px;right:-160px;top:120px"></div>
+  <div class="pad">
+    <div class="kicker">Задача студента</div>
+    <h2>Когда и с чем<br>приходить?</h2>
+    <p class="lead" style="margin:48px 0 54px">Инструкции общие. Дата въезда у каждого своя.</p>
+    <div class="rows" style="width:1100px">
+      <div class="row"><span class="num">01</span><span>Найти свой случай</span></div>
+      <div class="row"><span class="num">02</span><span>Отсчитать сроки от даты въезда</span></div>
+      <div class="row"><span class="num">03</span><span>Подготовить документы</span></div>
+    </div>
+  </div>
+  <div style="position:absolute;right:130px;bottom:110px;width:460px;font-size:32px;line-height:1.35">
+    <span class="tag red">Для кого</span>
+    <p style="margin-top:18px">Иностранный первокурсник после первого въезда на учёбу, живёт в общежитии вуза</p>
+  </div>
+</section>
+
+<!-- 4 · Решение и показ -->
+<section class="slide demo">
+  <div class="pad" style="right:auto;width:590px">
+    <div class="kicker">Показ в MAX</div>
+    <h2 style="font-size:100px">Своя дата.<br>Следующий шаг.</h2>
+    <div class="rows" style="margin-top:56px">
+      <div class="row" style="grid-template-columns:90px 1fr"><span class="num">01</span><span>План с личными датами</span></div>
+      <div class="row" style="grid-template-columns:90px 1fr"><span class="num">02</span><span>Карточка с документами и основанием</span></div>
+      <div class="row" style="grid-template-columns:90px 1fr"><span class="num">03</span><span>Напоминание в чате</span></div>
+    </div>
+  </div>
+  <div class="phones">
+    <div class="phone shot" data-mark="Рендер из кода — заменить на скрин MAX"><img src="../screens/07-plan.jpg" alt="Мини-приложение: план с личными сроками"></div>
+    <div class="phone shot" data-mark="Рендер из кода — заменить на скрин MAX"><img src="../screens/08-card.jpg" alt="Мини-приложение: карточка процедуры"></div>
+    <div class="phone shot" data-mark="Экран MAX от 27.09 — заменить"><img src="../../screens/chat-plan.jpg" alt="Чат MAX: план и кнопка напоминаний"></div>
+  </div>
+</section>
+
+<!-- 5 · Помощь раньше (ответ на рекомендацию жюри) -->
+<section class="slide">
+  <div class="pad" style="right:640px">
+    <div class="kicker">Ответ на рекомендацию жюри</div>
+    <h2>Начать помощь<br>до приезда</h2>
+    <div class="cols" style="margin-top:64px">
+      <div class="col now"><span class="caps">Уже в продукте</span>
+        <ul><li>Приглашение и виза</li><li>«Госуслуги RuID»</li><li>Перевод паспорта</li><li>Контакты вуза</li></ul></div>
+      <div class="col next"><span class="caps">Исследуем</span>
+        <ul><li>Выбор вуза</li><li>Подача документов</li><li>Поддержка и гранты</li></ul></div>
+    </div>
+  </div>
+  <div class="phone shot" data-mark="Рендер из кода — заменить на скрин MAX" style="position:absolute;right:130px;top:120px;width:410px;height:836px"><img src="../screens/10-pre-arrival.jpg" alt="Мини-приложение: что подготовить до въезда"></div>
+</section>
+
+<!-- 6 · Спрос (ответ на рекомендацию жюри) -->
+<section class="slide">
+  <div class="disc" style="width:300px;height:300px;right:150px;top:110px"></div>
+  <div class="pad">
+    <div class="kicker">Обоснование спроса</div>
+    <h2>Что известно<br>и что проверим</h2>
+    <div class="rows" style="margin-top:44px;width:1560px;font-size:42px">
+      <div class="row" style="grid-template-columns:420px 1fr;font-size:inherit"><span class="tag">Первый сигнал</span><span>10 бесед со второкурсниками ИТМО: <b>2 из 10</b> просрочили медосвидетельствование, почти все обзванивали инстанции</span></div>
+      <div class="row" style="grid-template-columns:420px 1fr;font-size:inherit"><span class="tag red">Срок стал короче</span><span>Тогда давали 90 дней, с 01.09.2026 — 30 дней</span></div>
+      <div class="row" style="grid-template-columns:420px 1fr;font-size:inherit"><span class="tag line">Проверим</span><span>Один случай: по памятке и с продуктом</span></div>
+    </div>
+    <p class="muted" style="margin-top:40px;font-size:34px">Сигнал, не исследование: знакомые, один вуз, свободный разговор. Эффекта и пилота пока нет</p>
+  </div>
+</section>
+
+<!-- 7 · Польза и канал -->
+<section class="slide">
+  <div class="pad">
+    <div class="kicker">Польза и канал запуска</div>
+    <h2>План рядом<br>с перепиской</h2>
+    <div class="trio" style="margin-top:130px">
+      <div class="cell"><div class="caps">Студент</div><p>Личные даты, документы и напоминания в MAX</p><span class="tag red">Работает сейчас</span></div>
+      <div class="cell"><div class="caps">Вуз</div><p>Меньше повторных вопросов в международной службе</p><span class="tag line">Гипотеза</span></div>
+      <div class="cell"><div class="caps">MAX</div><p>Студент приходит по ссылке из письма вуза о зачислении — ещё до приезда</p><span class="tag line">Гипотеза</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 8 · Масштабирование -->
+<section class="slide">
+  <div class="pad">
+    <div class="kicker">Перенос в другой вуз</div>
+    <h2 style="font-size:124px">Одно ядро. Разные данные.</h2>
+    <div class="core" style="margin-top:70px"><div class="caps">Ядро — одно для всех</div>Расчёт сроков по правилам · напоминания · чат и мини-приложение</div>
+    <div class="unis">
+      <div class="uni"><b>КФУ</b>инструкции, контакты, места</div>
+      <div class="uni"><b>ИТМО</b>инструкции, контакты, места</div>
+      <div class="uni"><b>СПбГЭУ</b>инструкции, контакты, места</div>
+      <div class="uni add"><b>+ вуз</b>профиль данных, проверка сотрудником</div>
+    </div>
+    <p class="muted" style="margin-top:26px;font-size:34px">Профили собраны по открытым источникам. Вузы пока не партнёры</p>
+  </div>
+</section>
+
+<!-- 9 · Пилот -->
+<section class="slide">
+  <div class="pad">
+    <div class="kicker">Первый тест с вузом</div>
+    <h2>Цели заданы<br>заранее</h2>
+    <div class="targets">
+      <div class="target"><b>80%</b><span>завершают план<br>самостоятельно</span></div>
+      <div class="target"><b>0</b><span>критичных ошибок<br>в контрольных заданиях</span></div>
+      <div class="target"><b>−30%</b><span>времени<br>до корректного плана</span></div>
+    </div>
+    <p style="margin-top:56px;font-size:36px"><span class="tag red">Цели, не результаты</span>&nbsp;&nbsp;Специалист проверяет правила → 10–15 наблюдаемых сессий → решение</p>
+  </div>
+</section>
+
+<!-- 10 · Завершение -->
+<section class="slide cover">
+  <div class="ring" style="width:760px;height:760px;right:-200px;top:-220px"></div>
+  <div class="pad">
+    <div class="kicker">Следующий шаг</div>
+    <h2 style="font-size:150px">Ищем вуз<br>для пилота</h2>
+    <p class="lead" style="margin-top:56px">Проверить правила вместе со специалистом и провести первый тест с иностранными студентами</p>
+    <p class="caps" style="position:absolute;left:0;bottom:0;font-size:44px">max.ru/t149_hakaton_max_bot</p>
+  </div>
+</section>
+
+<!-- 11 · Приложение: изменения после онлайн-этапа -->
+<section class="slide appx">
+  <div class="pad">
+    <div class="kicker">Приложение · после онлайн-этапа</div>
+    <h2>Что изменили<br>по отзыву жюри</h2>
+    <div class="rows" style="margin-top:56px">
+      <div class="row" style="grid-template-columns:520px 1fr"><span class="caps">Помочь раньше</span><span>Карточки до въезда уже в продукте. Поступление — направление исследования</span></div>
+      <div class="row" style="grid-template-columns:520px 1fr"><span class="caps">Обосновать спрос</span><span>Отделили источники проблемы от спроса. Задали проверку гипотезы</span></div>
+      <div class="row" style="grid-template-columns:520px 1fr"><span class="caps">Сменить формат</span><span>Крупные тезисы и показ продукта. Технические подробности — в приложении</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 12 · Приложение: дорожная карта -->
+<section class="slide appx">
+  <div class="pad">
+    <div class="kicker">Приложение · следующий этап</div>
+    <h2>Требует<br>исследования</h2>
+    <div class="rows" style="margin-top:56px;width:1300px">
+      <div class="row"><span class="num">01</span><span>Как абитуриент выбирает вуз?</span></div>
+      <div class="row"><span class="num">02</span><span>Где возникает затруднение при подаче документов?</span></div>
+      <div class="row"><span class="num">03</span><span>Как он находит поддержку и гранты?</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 13 · Приложение: архитектура -->
+<section class="slide appx">
+  <div class="pad">
+    <div class="kicker">Приложение · архитектура</div>
+    <h2>Правила в данных.<br>Состояние на сервере.</h2>
+    <div class="diagram" style="margin-top:90px">
+      <div class="node"><b>Студент</b>чат и мини-приложение в MAX</div>
+      <div class="node"><b>Сервер</b>Node.js, TypeScript: бот и бэкенд мини-приложения</div>
+      <div class="node dark"><b>Ядро</b>явный расчёт сроков, без LLM-решений</div>
+      <div class="node"><b>Данные</b>профили вузов и правила; PostgreSQL — профиль и очередь</div>
+    </div>
+    <p class="muted" style="margin-top:44px;font-size:34px">Чат и мини-приложение используют одну сессию: отметка в одном месте видна в другом</p>
+  </div>
+</section>
+
+<!-- 14 · Приложение: ограничения -->
+<section class="slide appx">
+  <div class="pad">
+    <div class="kicker">Приложение · ограничения и допущения</div>
+    <h2>Подготовка<br>к официальному шагу</h2>
+    <div class="rows" style="margin-top:56px;width:1400px">
+      <div class="row"><span class="num">01</span><span>Демонстрационные профили, нормы не вычитаны юристом</span></div>
+      <div class="row"><span class="num">02</span><span>Без сканов паспорта и медицинских документов</span></div>
+      <div class="row"><span class="num">03</span><span>Без подачи заявлений в МВД или системы вузов</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 15 · Приложение: источники -->
+<section class="slide appx">
+  <div class="pad">
+    <div class="kicker">Приложение · источники</div>
+    <h2 style="margin-bottom:56px">Источники</h2>
+    <ul class="sources">
+      <li><b>Федеральный закон от 25.07.2002 № 115-ФЗ, ст. 5, ред. от 26.06.2026</b><span>consultant.ru · сверено 23.09.2026</span></li>
+      <li><b>КФУ: «Дактилоскопия и медицинское освидетельствование», памятка о заселении</b><span>kpfu.ru, students.kpfu.ru · сверено 24.09.2026</span></li>
+      <li><b>СПбГЭУ: отдел по работе с иностранными учащимися</b><span>unecon.ru · сверено 29.09.2026</span></li>
+      <li><b>Профили КФУ, ИТМО, СПбГЭУ: страницы вузов</b><span>даты сверки — в карточках продукта и в репозитории</span></li>
+      <li><b>Отзыв отборочного жюри</b><span>сообщение организаторов, октябрь 2026</span></li>
+    </ul>
+  </div>
+</section>
+
+<script src="deck.js"></script>
+</body>
+</html>
