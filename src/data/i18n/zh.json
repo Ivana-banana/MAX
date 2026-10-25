@@ -194,6 +194,7 @@
   "share.item": "• {title} — {due}前",
   "share.done": "• {title} — 已完成",
   "share.provisional": "\n期限按入境日期计算，仅供参考：相关规定尚未经律师审核。请向{uni}核实。",
+  "share.link": "\n\n在 MAX 中获取你自己的计划：{url}",
   "app.share": "分享计划",
   "app.deleteTitle": "删除我的数据",
   "app.completionTitle": "您何时办理了该手续？",

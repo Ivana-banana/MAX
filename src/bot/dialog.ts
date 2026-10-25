@@ -10,6 +10,7 @@ import { CALENDAR_FILE, planToIcs } from "./calendar.js";
 import type { PlanPdf } from "./pdf.js";
 import { longDate, repeatText } from "./repeat.js";
 import { plain } from "../core/markup.js";
+import { deepLink } from "../poster.js";
 
 // callback buttons come back to the bot; link and clipboard buttons are handled by MAX itself
 export type Button = { text: string; action: string } | { text: string; url: string } | { text: string; copy: string }
@@ -46,6 +47,8 @@ export interface DialogueContext {
   rules: DeadlineRule[]; universities: University[]; texts: Texts; version: string; today: string; demo: boolean;
   /** Bot whose mini app the plan opens (`open_app`); unset until the app URL is registered with MAX. */
   webApp?: string;
+  /** Public bot link; the shared plan ends with it and the student's university code (#129). Without it the text has no link. */
+  botLink?: string;
   /** "Circumstances changed" (#41, D-061); without it the bot does not offer /change. */
   changes?: Changes;
 }
@@ -239,7 +242,8 @@ export function shareText(s: Session, ctx: DialogueContext): string {
   });
   // A forwarded copy is plain text: the student's chat would show the emphasis markers as is.
   return plain((ctx.demo ? t(s, ctx, "banner.demo") : "") + t(s, ctx, "share.plan", { uni: name, lines: lines.join("\n") }) +
-    (items.some(i => i.provisional && i.status !== "done") ? t(s, ctx, "share.provisional", { uni: name }) : ""));
+    (items.some(i => i.provisional && i.status !== "done") ? t(s, ctx, "share.provisional", { uni: name }) : "") +
+    (ctx.botLink ? t(s, ctx, "share.link", { url: deepLink(ctx.botLink, uni(s, ctx)) }) : ""));
 }
 /** "How to get there": a Yandex Maps search for the address — a public link, no API and no location data (D-041). */
 export const mapUrl = (address: string) => `https://yandex.ru/maps/?text=${encodeURIComponent(address)}`;

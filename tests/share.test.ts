@@ -41,6 +41,17 @@ describe("sharing the plan from the mini app (shareMaxContent)", () => {
     expect(text).not.toMatch(/\bKZ\b/);
   });
 
+  it("ends with the bot link carrying only the university code (#129)", () => {
+    const linked = { ...ctx, botLink: "https://max.ru/t149_hakaton_max_bot" };
+    for (const [id, start] of [["kfu", "/start"], ["itmo", "/start itmo"]] as const) {
+      const text = shareText(planned("ru", start), linked);
+      expect(text.endsWith(`Свой план в MAX: https://max.ru/t149_hakaton_max_bot?start=${id}`)).toBe(true);
+      expect(text).not.toContain("Казахстан");
+      expect(text).not.toContain("1 сентября");
+    }
+    expect(shareText(planned(), ctx)).not.toContain("max.ru");
+  });
+
   it("is written in the student's language, without placeholders", () => {
     for (const lang of texts.keys()) {
       const text = shareText(planned(lang, "/start itmo"), ctx);

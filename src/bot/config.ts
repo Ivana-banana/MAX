@@ -18,6 +18,8 @@ export interface Config {
   webappDevOrigin: string;
   /** Bot name for the plan's `open_app` button; empty keeps the button off until MAX knows the app URL. */
   webappBot: string;
+  /** Public link of the bot; the forwarded plan ends with it plus the university code (#129). */
+  botLink: string;
   deployedCommit: string;
   /** Chat updates plus mini app actions per user per minute (#59). */
   rateLimit: number;
@@ -56,6 +58,9 @@ export function readConfig(env: NodeJS.ProcessEnv = process.env): Config {
   }
   const webappBot = env.WEBAPP_BOT ?? "";
   if (webappBot && !/^[A-Za-z0-9_]{1,64}$/.test(webappBot)) throw new Error("WEBAPP_BOT must be the bot name, e.g. t149_hakaton_max_bot");
+  const botLink = env.BOT_LINK ?? "https://max.ru/t149_hakaton_max_bot";
+  const link = URL.canParse(botLink) ? new URL(botLink) : undefined;
+  if (!link || link.protocol !== "https:" || link.search || link.hash) throw new Error("BOT_LINK must be https://max.ru/<bot> without parameters");
   // Diagnostics only: a malformed value is dropped rather than keeping the bot from starting.
   const deployedCommit = /^[a-fA-F0-9]{7,40}$/.test(env.DEPLOYED_COMMIT ?? "") ? env.DEPLOYED_COMMIT! : "";
   const rateLimit = Number(env.RATE_LIMIT_PER_MINUTE ?? 30);
@@ -64,7 +69,7 @@ export function readConfig(env: NodeJS.ProcessEnv = process.env): Config {
   const sendTimeoutMs = Number(env.SEND_TIMEOUT_MS ?? 30000);
   if (!Number.isInteger(sendTimeoutMs) || sendTimeoutMs < 1000 || sendTimeoutMs > 50000) throw new Error("SEND_TIMEOUT_MS must be an integer from 1000 to 50000");
   return { mode, transport, token, secret, port, rateLimit, sendTimeoutMs, host: env.HOST ?? "127.0.0.1", databaseUrl,
-    webappDir: env.WEBAPP_DIR ?? "./web/dist", webappDevOrigin, webappBot, deployedCommit,
+    webappDir: env.WEBAPP_DIR ?? "./web/dist", webappDevOrigin, webappBot, botLink, deployedCommit,
     rulesPath: env.RULES_PATH ?? "./src/data/rules/ru-student.json",
     universitiesPath: env.UNIVERSITIES_PATH ?? "./src/data/universities", defaultUniversity: env.DEFAULT_UNIVERSITY ?? "kfu",
     textsPath: env.TEXTS_PATH ?? "./src/data/i18n",
