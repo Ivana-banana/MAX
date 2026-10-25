@@ -171,7 +171,7 @@ h2 small { display: block; font-size: 40px; font-weight: 500; color: var(--teal)
   <h1>Первые 90 дней</h1>
   <p class="sub">Ведём иностранного первокурсника от подготовки к приезду до последнего срока. Всё в MAX</p>
   <div class="big-route" style="grid-template-columns:repeat(6,1fr)">
-    <span><b>До приезда</b>виза, RuID, перевод паспорта</span>
+    <span><b>До приезда</b>виза или RuID, перевод паспорта</span>
     <span><b>День 1</b>въезд и личный план</span>
     <span><b>День 23</b>первое напоминание</span>
     <span><b>День 30</b>срок медосвиде&shy;тельствования</span>
@@ -230,10 +230,10 @@ h2 small { display: block; font-size: 40px; font-weight: 500; color: var(--teal)
     <h2><small>Пример: первокурсник из Казахстана едет в КФУ</small>Ещё дома</h2>
     <p class="lead" style="margin-top:34px">Кнопка «Ещё не в России» показывает, что подготовить до въезда</p>
     <ul class="list" style="margin-top:40px">
-      <li>Приглашение и виза</li>
       <li>«Госуслуги RuID»</li>
       <li>Нотариальный перевод паспорта</li>
-      <li>Контакты международной службы</li>
+      <li>Где заверить перевод</li>
+      <li>Визовым странам — приглашение на визу</li>
     </ul>
   </div>
   <div class="phone shot" data-mark="Рендер из кода, заменить на скриншот MAX" style="position:absolute;right:130px;top:200px;width:390px;height:796px"><img src="../screens/10-pre-arrival.jpg" alt="Мини-приложение: что подготовить до въезда"></div>
@@ -323,12 +323,12 @@ h2 small { display: block; font-size: 40px; font-weight: 500; color: var(--teal)
           <li>«Изменились обстоятельства»: переезд, поездка, больница</li>
           <li>План в PDF для куратора</li>
           <li>«Пройдено X из N» и ближайший шаг</li>
-          <li>Ссылка и QR для письма о зачислении</li>
+          <li>Блок со ссылкой для письма о зачислении</li>
         </ul>
       </div>
     </div>
   </div>
-  <p class="note" style="font-size:30px;color:var(--ink)">Всё в правой колонке сделано после сдачи 30.09.2026 и работает в боте</p>
+  <p class="note" style="font-size:30px;color:var(--ink)">Всё в правой колонке сделано после сдачи 30.09.2026. Блок для письма собирает команда, остальное работает в боте</p>
 </section>
 
 <!-- 11. Alternatives: what already exists -->
@@ -341,7 +341,7 @@ h2 small { display: block; font-size: 40px; font-weight: 500; color: var(--teal)
       <div><b>«Госуслуги»</b><span>Электронный миграционный учёт</span><span>Нужна подтверждённая учётная запись</span></div>
       <div><b>HSE App X</b><span>Документы, статусы, напоминания</span><span>Только для студентов ВШЭ</span></div>
       <div><b>Бот КФУ</b><span>Анонсирован, про миграционный учёт</span><span>Как работает, мы не проверили</span></div>
-      <div class="ours"><b>Первые 90 дней</b><span>Свои даты и напоминания в MAX</span><span>Любой вуз подключается профилем</span></div>
+      <div class="ours"><b>Первые 90 дней</b><span>Свои даты и напоминания в MAX</span><span>Интеграций нет, спрос не доказан</span></div>
     </div>
   </div>
   <p class="note">Аналоги искали 22.09.2026 по открытым описаниям. Кабинеты и чаты вузов не изучали</p>
@@ -373,11 +373,11 @@ h2 small { display: block; font-size: 40px; font-weight: 500; color: var(--teal)
           <div><dt><b>СПбГЭУ</b></dt><dd style="--v:499"><span>499</span></dd></div>
         </dl>
         <p style="margin-top:18px"><span class="tag" style="background:var(--teal);color:#fff">профиль в боте</span>&nbsp;&nbsp;<span class="tag line">профиля пока нет</span></p>
-        <p style="font-size:30px;margin-top:24px"><b>Риски:</b> закон меняется, поэтому у каждого правила дата сверки. Переводы на tt, uz и zh машинные</p>
+        <p style="font-size:30px;margin-top:24px"><b>Риски:</b> закон меняется, поэтому у каждого правила дата сверки. Переводы на tt, uz и zh машинные. Вход в MAX с иностранным номером до въезда не проверен</p>
       </div>
     </div>
   </div>
-  <p class="note">Профили собраны по открытым страницам вузов. Вузы пока не партнёры: 19.10.2026 письма ушли в 31 вуз, ответов нет</p>
+  <p class="note">ИТМО и СПбГЭУ подключены профилями, код не менялся. Профили собраны по открытым страницам вузов. Вузы пока не партнёры: 19.10.2026 письма ушли в 31 вуз, ответов нет</p>
 </section>
 
 <!-- 13. Pilot: first university, channel, owners, targets -->
@@ -396,7 +396,7 @@ h2 small { display: block; font-size: 40px; font-weight: 500; color: var(--teal)
     </div>
     <div class="flow"><span>10–15 сессий</span><i>→</i><span>30–50 студентов</span><i>→</i><span>второй вуз: ИТМО или СПбГЭУ</span></div>
   </div>
-  <p class="note" style="font-size:30px;color:var(--ink);bottom:36px">Это цели пилота, результатов пока нет. КФУ не партнёр</p>
+  <p class="note" style="font-size:30px;color:var(--ink);bottom:36px">Это цели пилота, результатов пока нет. КФУ не партнёр. Не ответит — проведём наблюдаемый тест по публичной памятке</p>
 </section>
 
 <!-- 14. Closing and team roles -->

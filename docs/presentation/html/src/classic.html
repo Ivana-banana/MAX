@@ -71,7 +71,7 @@ h2 { font-size: 132px; }
 .tl .bar { position: absolute; top: 56px; height: 44px; left: calc(var(--in) / 122 * 100%); }
 .tl .bar.med { width: calc(30 / 122 * 100%); background: var(--red); }
 .tl .bar.fp { width: calc(90 / 122 * 100%); box-shadow: inset 0 0 0 5px var(--ink); }
-.tl .due { position: absolute; top: 106px; font-size: 28px; line-height: 1.1; white-space: nowrap; transform: translateX(-100%); text-align: right; }
+.tl .due { position: absolute; top: 106px; font-size: 28px; line-height: 1.1; white-space: nowrap; transform: translateX(-100%); text-align: right; background: var(--paper); padding: 0 0 4px 10px; }
 .tl .due b { font-size: 34px; }
 
 /* 4 · demo */
@@ -305,7 +305,7 @@ h2 { font-size: 132px; }
     <p class="lead" style="margin-top:36px">Кнопка «Ещё не в России» ведёт по шагам до въезда</p>
     <div class="cols" style="margin-top:50px">
       <div class="col now"><span class="label">Уже в продукте</span>
-        <ul><li>Приглашение и виза</li><li>«Госуслуги RuID»</li><li>Перевод паспорта</li><li>Контакты вуза</li></ul></div>
+        <ul><li>«Госуслуги RuID»</li><li>Перевод паспорта</li><li>Где заверить перевод</li><li>Виза — визовым странам</li></ul></div>
       <div class="col next"><span class="label">Исследуем</span>
         <ul><li>Выбор вуза</li><li>Подача документов</li><li>Поддержка и гранты</li></ul></div>
     </div>
@@ -337,7 +337,7 @@ h2 { font-size: 132px; }
       </div>
     </div>
   </div>
-  <p class="note">Всё в правой колонке сделано после сдачи 30.09 и работает в боте</p>
+  <p class="note">Всё в правой колонке сделано после сдачи 30.09. Блок для письма собирает команда, остальное работает в боте</p>
 </section>
 
 <!-- 9 · Спрос: что известно и чего не знаем (D-072) -->
@@ -368,7 +368,7 @@ h2 { font-size: 132px; }
       <div><b>«Госуслуги»</b><span>Электронный миграционный учёт</span><span>Нужна подтверждённая учётная запись</span></div>
       <div><b>HSE App X</b><span>Документы, статусы, напоминания</span><span>Только для студентов ВШЭ</span></div>
       <div><b>Бот КФУ</b><span>Анонсирован, про миграционный учёт</span><span>Как работает, мы не проверили</span></div>
-      <div class="ours"><b>Первые 90 дней</b><span>Свои даты и напоминания в MAX</span><span>Любой вуз подключается профилем</span></div>
+      <div class="ours"><b>Первые 90 дней</b><span>Свои даты и напоминания в MAX</span><span>Интеграций нет, спрос не доказан</span></div>
     </div>
   </div>
   <p class="note">Аналоги искали 22.09.2026 по открытым описаниям. Кабинеты и чаты вузов не изучали</p>
@@ -384,14 +384,14 @@ h2 { font-size: 132px; }
     <b>422 тыс.</b>
     <span>иностранных студентов в вузах России, Минобрнауки, 15.09.2026</span>
   </div>
-  <div class="core" style="position:absolute;left:130px;width:390px;top:650px;padding:24px 30px;font-size:34px">
+  <div class="core" style="position:absolute;left:130px;width:390px;top:630px;padding:22px 28px;font-size:30px">
     <b>Одинаково для всех</b>Расчёт сроков по закону, напоминания, чат и мини-приложение
   </div>
-  <div class="core" style="position:absolute;left:545px;width:390px;top:650px;padding:24px 30px;font-size:34px;background:none;color:var(--ink);box-shadow:inset 0 0 0 5px var(--ink)">
+  <div class="core" style="position:absolute;left:545px;width:390px;top:630px;padding:22px 28px;font-size:30px;background:none;color:var(--ink);box-shadow:inset 0 0 0 5px var(--ink)">
     <b>Своё у вуза</b>Профиль: адреса, контакты, памятка, языки
   </div>
-  <div style="position:absolute;left:1010px;right:130px;top:330px">
-    <p style="font-size:32px;margin-bottom:20px">Иностранцы на всех курсах, по таблицам «Сведения» на сайтах вузов</p>
+  <div style="position:absolute;left:1010px;right:130px;top:290px">
+    <p style="font-size:28px;margin-bottom:12px">Иностранцы на всех курсах, по таблицам «Сведения» на сайтах вузов</p>
     <dl class="bars">
       <div class="off"><dt>РУДН</dt><dd style="--v:12917">12 917</dd></div>
       <div><dt>КФУ</dt><dd style="--v:6139">6 139</dd></div>
@@ -401,10 +401,10 @@ h2 { font-size: 132px; }
       <div><dt>ИТМО</dt><dd style="--v:1282">1 282</dd></div>
       <div><dt>СПбГЭУ</dt><dd style="--v:499">499</dd></div>
     </dl>
-    <p style="font-size:30px;margin-top:20px"><span class="tag">профиль в боте</span>&nbsp;&nbsp;<span class="tag line" style="color:var(--muted);box-shadow:inset 0 0 0 3px var(--muted)">профиля пока нет</span></p>
-    <p style="font-size:32px;margin-top:30px"><b>Риски:</b> закон меняется, поэтому у каждой даты есть дата сверки. Переводы на tt, uz и zh машинные</p>
+    <p style="font-size:30px;margin-top:14px"><span class="tag">профиль в боте</span>&nbsp;&nbsp;<span class="tag line" style="color:var(--muted);box-shadow:inset 0 0 0 3px var(--muted)">профиля пока нет</span></p>
+    <p style="font-size:28px;margin-top:18px"><b>Риски:</b> закон меняется — у правил дата сверки. Переводы tt, uz, zh машинные. Вход в MAX с иностранным номером не проверен</p>
   </div>
-  <p class="note" style="bottom:40px">Профили собраны по открытым страницам, вузы пока не партнёры</p>
+  <p class="note" style="bottom:40px">ИТМО и СПбГЭУ подключены профилями, код не менялся. Вузы пока не партнёры</p>
 </section>
 
 <!-- 12 · Пилот: первый вуз, канал, владельцы, метрики -->
@@ -416,14 +416,14 @@ h2 { font-size: 132px; }
       <div><p class="label">Канал</p><p>Ссылка и QR в письме о зачислении или в чате куратора. Блок для письма готов</p></div>
       <div><p class="label">Кто</p><p>Специалист вуза проверяет правила, куратор зовёт студентов, команда ведёт тест</p></div>
     </div>
-    <div class="targets small" style="margin-top:40px">
+    <div class="targets small" style="margin-top:28px">
       <div class="target"><b>80%</b><span>доходят до плана<br>без подсказки</span></div>
       <div class="target"><b>0</b><span>критичных ошибок<br>в датах</span></div>
       <div class="target"><b>−30%</b><span>времени по сравнению<br>с памяткой</span></div>
     </div>
     <div class="flow"><span>10–15 сессий</span><i>→</i><span>30–50 студентов</span><i>→</i><span>второй вуз: ИТМО или СПбГЭУ</span></div>
   </div>
-  <p class="note" style="bottom:30px">Это цели пилота, результатов пока нет. КФУ не партнёр</p>
+  <p class="note" style="bottom:30px">Цели пилота, результатов нет. КФУ не партнёр; не ответит — наблюдаемый тест по публичной памятке</p>
 </section>
 
 <!-- 13 · Завершение и роли команды -->
