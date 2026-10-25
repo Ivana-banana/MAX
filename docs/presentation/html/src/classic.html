@@ -175,6 +175,9 @@ h2 { font-size: 132px; }
 /* 6 · real MAX screenshots, no draft mark */
 .real { position: relative; }
 .real img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
+/* 5–6 · screenshots from MAX taken on 25.10: a flat frame, not a phone, since some are web or cropped */
+.frame { border: 6px solid var(--ink); border-radius: 14px; overflow: hidden; background: var(--ink); }
+.frame img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; }
 
 /* 7 · before and after for the student */
 .ba > div { display: grid; grid-template-columns: 330px 1fr 1fr; gap: 40px; padding: 20px 0; border-top: 4px solid var(--ink); font-size: 36px; align-items: baseline; }
@@ -294,31 +297,32 @@ h2 { font-size: 132px; }
       <p>Дактилоскопия <b>до 14.01</b></p>
     </div>
   </div>
-  <p style="position:absolute;left:830px;right:130px;top:800px;font-size:32px">Карточка: документы, адрес, норма. Не выходит — вопрос вузу</p>
+  <p style="position:absolute;left:800px;right:130px;top:660px;font-size:32px">Карточка: документы, адрес, норма. Не выходит — вопрос вузу</p>
+  <p class="note" style="left:800px;right:130px;top:720px;bottom:auto">Скриншоты MAX, веб-версия, 25.10.2026 — версия 1761443</p>
   <p class="label" style="position:absolute;left:130px;bottom:140px;font-size:30px">От /start до плана: всё кнопками, кроме даты въезда</p>
   <div class="flow route"><span>Язык</span><i>→</i><span>Согласие</span><i>→</i><span>«Всё совпадает?»</span><i>→</i><span>Гражданство</span><i>→</i><span>Дата въезда</span><i>→</i><span class="end">План</span></div>
-  <div class="phones">
-    <div class="phone shot" data-mark="Рендер из кода, демо-данные"><img src="../screens/07-plan.jpg" alt="Мини-приложение: план с личными сроками"></div>
-    <div class="phone shot" data-mark="Рендер из кода, демо-данные"><img src="../screens/08-card.jpg" alt="Мини-приложение: карточка процедуры"></div>
-    <div class="phone shot" data-mark="Рендер из кода, демо-данные"><img src="../screens/11-question.jpg" alt="Мини-приложение: готовый вопрос вузу"></div>
+  <div class="phones" style="gap:20px;align-items:flex-start">
+    <div class="frame" style="width:290px;height:509px"><img src="../../../../images/max-check/web-app-01-plan.jpg" alt="Мини-приложение в веб-версии MAX: план с личными сроками"></div>
+    <div class="frame" style="width:330px;height:397px"><img src="../../../../images/max-check/web-app-02-card-documents.jpg" alt="Мини-приложение в веб-версии MAX: карточка медосвидетельствования"></div>
+    <div class="frame" style="width:330px;height:397px"><img src="../../../../images/max-check/web-app-05-copied.jpg" alt="Мини-приложение в веб-версии MAX: готовый вопрос вузу скопирован"></div>
   </div>
 </section>
 
-<!-- 6 · Настоящие экраны MAX: план и состояние ошибки (версия онлайн-этапа) -->
+<!-- 6 · Настоящие экраны MAX: план и состояние ошибки, мобильная версия -->
 <section class="slide demo">
   <div class="pad" style="right:auto;width:960px">
     <h2 style="font-size:104px">Так это выглядит<br>в MAX</h2>
     <div class="memo" style="margin-top:44px">
-      <div class="row pair" style="grid-template-columns:220px 1fr;font-size:38px;padding:22px 0"><span class="label">План</span><span>Въезд 01.09 — медосвидетельствование до 30.09, дактилоскопия до 29.11 — 30 и 90 дней по закону</span></div>
+      <div class="row pair" style="grid-template-columns:220px 1fr;font-size:38px;padding:22px 0"><span class="label">План</span><span>Въезд 17.10 — медосвидетельствование до 15.11, дактилоскопия до 14.01 — 30 и 90 дней по закону</span></div>
       <div class="row pair" style="grid-template-columns:220px 1fr;font-size:38px;padding:22px 0"><span class="label">Ошибка</span><span>Неверная дата: бот объясняет формат и ждёт новую, анкета не сбрасывается</span></div>
       <div class="row pair" style="grid-template-columns:220px 1fr;font-size:38px;padding:22px 0"><span class="label">Сбой</span><span>Сообщение не доставлено — очередь повторит до 8 раз, ответы студента сохранены</span></div>
     </div>
   </div>
-  <div class="phones" style="align-items:flex-start">
-    <div class="phone real" style="width:330px;height:678px"><img src="../../screens/chat-plan.jpg" alt="Чат бота в MAX: план с двумя сроками"></div>
-    <div class="phone real" style="width:330px;height:360px"><img src="../../screens/chat-date-error.jpg" alt="Чат бота в MAX: ответ на неверную дату"></div>
+  <div class="phones" style="flex-direction:column;gap:20px">
+    <div class="frame" style="width:460px;height:544px"><img src="../../../../images/max-check/mobile-chat-14-plan-top.jpg" alt="Чат бота в MAX на телефоне: план от въезда 17.10.2026"></div>
+    <div class="frame" style="width:460px;height:305px"><img src="../../../../images/max-check/mobile-chat-11-entry-format.jpg" alt="Чат бота в MAX на телефоне: ответ на неверную дату"></div>
   </div>
-  <p class="note" style="bottom:40px">Скриншоты MAX, мобильная версия, 27.09.2026 — версия онлайн-этапа</p>
+  <p class="note" style="bottom:40px">Скриншоты MAX, мобильная версия, 25.10.2026 — версия 1761443</p>
 </section>
 
 <!-- 7 · Ценность: что меняется для студента -->
