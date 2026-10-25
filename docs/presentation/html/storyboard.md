@@ -15,7 +15,7 @@
 **сигнал** — первичные данные без исследования.
 
 Общие источники: сроки — 115-ФЗ, ст. 5, в ред. 162-ФЗ; памятки — `docs/product/problem.md`;
-сигнал — `docs/product/demand-interviews.md`, D-072; аудитория — `docs/product/audience.md`,
+сигнал — `docs/product/demand-chat-poll.md` (опрос 188/234, D-078) и `docs/product/demand-interviews.md`, D-072; аудитория — `docs/product/audience.md`,
 D-071, 422 тыс. — РИА Новости 15.09.2026; пилот — `docs/product/pilot.md`,
 `docs/product/hypothesis.md`; изменения — `jury-feedback.md`; аналоги — поиск 22.09.2026.
 
