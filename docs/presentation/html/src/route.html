@@ -77,6 +77,63 @@ h2 small { display: block; font-size: 40px; font-weight: 500; color: var(--teal)
 .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; }
 .sources { list-style: none; display: grid; gap: 22px; font-size: 30px; }
 .sources span { display: block; color: var(--muted); font-size: 24px; }
+
+/* Rows: memo table, comparison, unknowns */
+.rows > div { display: grid; grid-template-columns: 260px 1fr; gap: 30px; padding: 18px 0; border-top: 3px solid var(--pale); font-size: 34px; }
+.rows > div:last-child { border-bottom: 3px solid var(--pale); }
+.rows b { font-weight: 700; }
+.rows .law { color: var(--teal); font-weight: 700; }
+.cmp > div { grid-template-columns: 330px 1fr 1fr; font-size: 32px; padding: 20px 0; }
+.cmp .head { font-size: 26px; color: var(--muted); border-top: none; padding-bottom: 6px; }
+.cmp .ours { background: var(--teal); color: #fff; border-radius: 20px; padding: 20px 24px; margin: 10px -24px 0; border: none; }
+.cost { padding: 30px 36px; border-radius: 28px; background: var(--amber); color: #fff; font-size: 34px; }
+.cost b { display: block; font-size: 40px; margin-bottom: 8px; }
+
+/* Big dates beside screens */
+.dates { display: grid; gap: 22px; margin-top: 40px; }
+.dates p { font-size: 30px; color: var(--muted); }
+.dates b { display: block; font-size: 88px; font-weight: 800; line-height: 1; letter-spacing: -.02em; color: var(--ink); }
+.dates .hot b { color: var(--teal); }
+
+/* Reminder schedule */
+.remind { position: relative; display: grid; grid-template-columns: repeat(5, 1fr); margin-top: 60px; }
+.remind::before { content: ""; position: absolute; left: 13px; right: 13px; top: 13px; height: 6px; background: var(--pale); }
+.remind div { position: relative; padding-top: 52px; font-size: 30px; color: var(--muted); }
+.remind div::before { content: ""; position: absolute; left: 0; top: 0; width: 32px; height: 32px; border-radius: 50%; background: var(--teal); }
+.remind b { display: block; font-size: 72px; line-height: 1; font-weight: 800; letter-spacing: -.02em; color: var(--ink); margin-bottom: 8px; }
+.remind .due::before { background: var(--amber); box-shadow: 0 0 0 10px rgba(224, 150, 42, .25); }
+.remind .due b { color: var(--amber); }
+.remind .after::before { background: var(--bg); box-shadow: inset 0 0 0 5px var(--teal); }
+
+/* Changes after the online stage */
+.changes { display: grid; grid-template-columns: 1fr 1.25fr; gap: 80px; margin-top: 50px; }
+.changes h3 { font-size: 34px; font-weight: 700; color: var(--teal); margin-bottom: 18px; }
+.changes .rows > div { grid-template-columns: 180px 1fr; font-size: 36px; padding: 24px 0; }
+
+/* Scale: shared core and per-university data */
+.split2 { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+.split2 .term { padding: 26px 30px; font-size: 32px; }
+.split2 .term strong { display: block; font-size: 36px; margin-bottom: 6px; }
+.bars { display: grid; gap: 10px; font-size: 28px; }
+.bars div { display: grid; grid-template-columns: 150px 1fr; align-items: center; }
+.bars dd { position: relative; height: 34px; }
+.bars dd::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: calc(var(--v) / 12917 * 380px); border-radius: 8px; background: var(--teal); }
+.bars dd span { position: absolute; left: calc(var(--v) / 12917 * 380px + 14px); top: 0; line-height: 34px; color: var(--ink); }
+.bars .off dt { color: var(--muted); }
+.bars .off dd::before { background: none; box-shadow: inset 0 0 0 3px var(--muted); }
+
+/* Pilot */
+.pilot { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; margin-top: 44px; font-size: 32px; }
+.pilot h3 { font-size: 34px; font-weight: 700; color: var(--teal); margin-bottom: 10px; }
+.flow { display: flex; gap: 20px; align-items: center; margin-top: 40px; font-size: 32px; }
+.flow span { padding: 10px 26px; border-radius: 40px; background: var(--pale); }
+.flow i { font-style: normal; color: var(--teal); font-weight: 800; }
+
+/* Team roles are not assigned yet: the dashed pink frame is a reminder for the authors */
+.roles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 30px; font-size: 32px; padding: 22px 26px 64px; position: relative; }
+.roles b { display: block; font-weight: 700; }
+.todo { outline: 6px dashed #ff2bd6; outline-offset: 6px; }
+.todo::after { content: attr(data-mark); position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%); padding: 6px 14px; background: #ff2bd6; color: #fff; font: 700 22px/1.25 system-ui, sans-serif; white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -100,7 +157,7 @@ h2 small { display: block; font-size: 40px; font-weight: 500; color: var(--teal)
         <ol>
           <li>Открыть бота, нажать «Начать»</li>
           <li>Язык, «Продолжить», «Да, совпадает», «Казахстан»</li>
-          <li>Дата въезда: сегодня минус 22 дня</li>
+          <li>Дата въезда 17.10.2026, как в примере на слайдах</li>
           <li>План, «Включить напоминания», карточка процедуры</li>
           <li>Кнопка MAX слева от поля ввода открывает мини-приложение с тем же планом</li>
         </ol>
@@ -112,25 +169,66 @@ h2 small { display: block; font-size: 40px; font-weight: 500; color: var(--teal)
 <!-- 2. Cover: the route of one student -->
 <section class="slide cover">
   <h1>Первые 90 дней</h1>
-  <p class="sub">Проводим иностранного первокурсника от подготовки к приезду до последнего срока. Всё в MAX</p>
-  <div class="big-route">
+  <p class="sub">Ведём иностранного первокурсника от подготовки к приезду до последнего срока. Всё в MAX</p>
+  <div class="big-route" style="grid-template-columns:repeat(6,1fr)">
     <span><b>До приезда</b>виза, RuID, перевод паспорта</span>
-    <span><b>День 1</b>въезд</span>
-    <span><b>День 3</b>личный план</span>
-    <span><b>День 23</b>напоминание</span>
-    <span><b>День 27</b>документы собраны</span>
-    <span><b>День 90</b>последний срок</span>
+    <span><b>День 1</b>въезд и личный план</span>
+    <span><b>День 23</b>первое напоминание</span>
+    <span><b>День 30</b>срок медосвиде&shy;тельствования</span>
+    <span><b>День 90</b>срок дактилоскопии</span>
     <span><b>Через год</b>повтор</span>
   </div>
-  <p class="team">Команда «ИИ в массы»: Иван Резников, Иван Пушкин, Александр Чичерин, Михаил Анцев. Хакатон Минобрнауки России и MAX, финал, Казань, 29.10.2026</p>
+  <p class="team">Команда «ИИ в массы»: Иван Резников, Иван Пушкин, Александр Чичерин, Михаил Анцев. Минобрнауки России × MAX, «Забота о людях», финал, Казань, 29.10.2026</p>
 </section>
 
-<!-- 3. Before arrival -->
+<!-- 3. Problem and segment: where the route breaks today -->
 <section class="slide">
-  <div class="route"><span class="now">До приезда</span><span>День 1</span><span>День 3</span><span>День 23</span><span>День 27</span><span>День 90</span><span>Через год</span></div>
+  <div class="pad" style="inset:110px 130px 90px">
+    <h2>Где маршрут обрывается сегодня</h2>
+    <p class="lead" style="margin-top:30px;max-width:1660px">Первокурсник 18+ впервые въехал учиться после 31.08.2026, ВНЖ нет. Два срока идут от его дня въезда, а памятки вузов называют разные</p>
+    <div style="display:grid;grid-template-columns:1fr 520px;gap:70px;margin-top:44px">
+      <div class="rows">
+        <div><b>ИТМО</b><span>30 дней на обе процедуры</span></div>
+        <div><b>СПбГЭУ</b><span>90 дней на обе процедуры</span></div>
+        <div><b>КФУ</b><span>памятка общежития: 90 на обе, страница процедур: 30 и 90</span></div>
+        <div class="law"><b>Закон</b><span>30 на медосвидетельствование, 90 на дактилоскопию</span></div>
+      </div>
+      <div class="cost"><b>Цена ошибки</b>Пропустил срок, и срок пребывания в России могут сократить</div>
+    </div>
+  </div>
+  <p class="note">115-ФЗ, ст. 5, в ред. 162-ФЗ, с 01.09.2026; последствие — там же, п. 23. Памятки сверены 16–29.09.2026</p>
+</section>
+
+<!-- 4. Demand: what is known and what is not (D-072) -->
+<section class="slide">
+  <div class="pad" style="inset:110px 130px 90px">
+    <h2>Что знаем и чего не знаем</h2>
+    <div class="cols" style="margin-top:60px;grid-template-columns:1fr 1fr">
+      <div>
+        <p style="font-size:150px;font-weight:800;line-height:1;color:var(--amber)">2 из 10</p>
+        <p class="lead" style="margin-top:16px">знакомых второкурсников ИТМО просрочили медосвидетельствование. Почти все обзванивали инстанции, чтобы понять порядок</p>
+        <p style="margin-top:20px" class="muted">Они въехали в 2025 году, тогда давали 90 дней. Сейчас 30</p>
+      </div>
+      <div>
+        <p style="font-size:34px;font-weight:700;color:var(--teal);margin-bottom:10px">Пока не знаем</p>
+        <div class="rows">
+          <div style="grid-template-columns:1fr">Как часто опаздывают первокурсники 2026 года</div>
+          <div style="grid-template-columns:1fr">Станет ли с ботом быстрее и точнее, чем по памятке</div>
+          <div style="grid-template-columns:1fr">Возьмёт ли вуз ссылку в письмо о зачислении</div>
+        </div>
+        <p style="margin-top:24px">Это и проверит пилот</p>
+      </div>
+    </div>
+  </div>
+  <p class="note" style="font-size:30px;color:var(--ink)">Беседы со знакомыми участника команды, один вуз, без анкеты. Это сигнал, а не доказательство спроса</p>
+</section>
+
+<!-- 5. Before arrival (answer to the qualifying jury: help earlier) -->
+<section class="slide">
+  <div class="route"><span class="now">До приезда</span><span>День 1</span><span>День 23</span><span>День 30</span><span>День 90</span><span>Через год</span></div>
   <div class="pad" style="right:640px">
     <h2><small>Пример: первокурсник из Казахстана едет в КФУ</small>Ещё дома</h2>
-    <p class="lead" style="margin-top:34px">Вуз присылает ссылку на бота. Студент видит, что подготовить до въезда</p>
+    <p class="lead" style="margin-top:34px">Кнопка «Ещё не в России» показывает, что подготовить до въезда</p>
     <ul class="list" style="margin-top:40px">
       <li>Приглашение и виза</li>
       <li>«Госуслуги RuID»</li>
@@ -139,140 +237,179 @@ h2 small { display: block; font-size: 40px; font-weight: 500; color: var(--teal)
     </ul>
   </div>
   <div class="phone shot" data-mark="Рендер из кода, заменить на скриншот MAX" style="position:absolute;right:130px;top:200px;width:390px;height:796px"><img src="../screens/10-pre-arrival.jpg" alt="Мини-приложение: что подготовить до въезда"></div>
-  <p class="note" style="max-width:1080px">Ссылку для письма о зачислении готовит команда <code>npm run invite</code>. Ни один вуз её пока не рассылает. Пример собирательный, данные учебные</p>
+  <p class="note" style="max-width:1080px;font-size:30px;color:var(--ink)">Текст со ссылкой для письма о зачислении готов, ни один вуз его пока не рассылает. Выбор вуза и подачу документов исследуем, в продукте их нет</p>
 </section>
 
-<!-- 4. Day 1: entry, two deadlines start -->
+<!-- 6. Day 1: entry and a plan from the student's own date -->
 <section class="slide">
-  <div class="route"><span class="past">До приезда</span><span class="now">День 1</span><span>День 3</span><span>День 23</span><span>День 27</span><span>День 90</span><span>Через год</span></div>
-  <div class="pad" style="right:860px">
-    <h2><small>17 октября 2026</small>Въезд, и пошли два срока</h2>
-    <div class="terms">
-      <div class="term hot">Медосвидетельствование<b>15.11</b>30 дней</div>
-      <div class="term">Дактилоскопия<b>14.01</b>90 дней</div>
+  <div class="route"><span class="past">До приезда</span><span class="now">День 1</span><span>День 23</span><span>День 30</span><span>День 90</span><span>Через год</span></div>
+  <div class="pad" style="right:auto;width:600px">
+    <h2 style="font-size:84px"><small>17 октября 2026</small>Въезд, и план по своей дате</h2>
+    <div class="dates">
+      <div class="hot"><p>Медосвидетельствование, 30 дней</p><b>до 15.11</b></div>
+      <div><p>Дактилоскопия, 90 дней</p><b>до 14.01</b></div>
     </div>
-  </div>
-  <div style="position:absolute;left:1160px;right:130px;top:290px">
-    <p style="font-size:36px;font-weight:700;margin-bottom:20px">А в памятках вузов сроки другие</p>
-    <div class="memos">
-      <div><b>ИТМО</b><span>30 дней на обе процедуры</span></div>
-      <div><b>КФУ</b><span>памятка общежития: 90 на обе, страница процедур: 30 и 90</span></div>
-      <div><b>СПбГЭУ</b><span>90 дней на обе процедуры</span></div>
-      <div><b>Закон</b><span>30 на медосвидетельствование, 90 на дактилоскопию</span></div>
-    </div>
-  </div>
-  <p class="note">115-ФЗ, ст. 5, в ред. 162-ФЗ, с 01.09.2026. Памятки сверены 16–29.09.2026 (<code>docs/product/problem.md</code>). Даты посчитал продукт</p>
-</section>
-
-<!-- 5. Day 3: the plan -->
-<section class="slide">
-  <div class="route"><span class="past">До приезда</span><span class="past">День 1</span><span class="now">День 3</span><span>День 23</span><span>День 27</span><span>День 90</span><span>Через год</span></div>
-  <div class="pad" style="right:auto;width:560px">
-    <h2>Три ответа, и план готов</h2>
-    <p class="lead" style="margin-top:40px">Гражданство, дата въезда, совпадает ли случай. Бот считает сроки по правилам и показывает, сколько дней осталось</p>
   </div>
   <div style="position:absolute;right:130px;top:200px;display:flex;gap:36px">
-    <div><div class="phone shot" data-mark="Рендер из кода, заменить на скриншот MAX" style="width:330px;height:690px"><img src="../screens/05-citizenship.jpg" alt="Выбор гражданства"></div><p class="cap">Гражданство</p></div>
-    <div><div class="phone shot" data-mark="Рендер из кода, заменить на скриншот MAX" style="width:330px;height:690px"><img src="../screens/06-entry-date.jpg" alt="Дата въезда"></div><p class="cap">Дата въезда</p></div>
-    <div><div class="phone shot" data-mark="Рендер из кода, заменить на скриншот MAX" style="width:330px;height:690px"><img src="../screens/07-plan.jpg" alt="Личный план"></div><p class="cap">План</p></div>
+    <div><div class="phone shot" data-mark="Рендер из кода, заменить на скриншот MAX" style="width:340px;height:700px"><img src="../screens/06-entry-date.jpg" alt="Дата въезда"></div><p class="cap">Дата въезда</p></div>
+    <div><div class="phone shot" data-mark="Рендер из кода, заменить на скриншот MAX" style="width:340px;height:700px"><img src="../screens/07-plan.jpg" alt="Личный план"></div><p class="cap">План со сроками</p></div>
   </div>
+  <p class="note" style="max-width:1000px">Бот спрашивает язык, вуз, гражданство и дату въезда. Сроки считает по правилам из закона, без LLM</p>
 </section>
 
-<!-- 6. Day 23: reminder -->
+<!-- 7. Day 23: reminders on the student's dates -->
 <section class="slide">
-  <div class="route"><span class="past">До приезда</span><span class="past">День 1</span><span class="past">День 3</span><span class="now">День 23</span><span>День 27</span><span>День 90</span><span>Через год</span></div>
-  <div class="pad" style="right:700px">
-    <h2><small>8 ноября, за неделю до срока</small>Бот напоминает сам</h2>
-    <p class="lead" style="margin-top:40px">Напоминания приходят в чат MAX за 7, 3 и 1 день до срока. Если процедура не отмечена, бот напишет и на следующий день после него</p>
-    <p class="lead" style="margin-top:30px">Сообщение открывает нужную карточку</p>
+  <div class="route"><span class="past">До приезда</span><span class="past">День 1</span><span class="now">День 23</span><span>День 30</span><span>День 90</span><span>Через год</span></div>
+  <div class="pad">
+    <h2><small>Тот же пример, въезд 17.10</small>Бот напоминает сам</h2>
+    <div class="remind">
+      <div><b>08.11</b>за 7 дней</div>
+      <div><b>12.11</b>за 3 дня</div>
+      <div><b>14.11</b>за 1 день</div>
+      <div class="due"><b>15.11</b>срок</div>
+      <div class="after"><b>16.11</b>если не отмечено</div>
+    </div>
+    <p class="lead" style="margin-top:56px;max-width:1600px">Сообщение приходит в чат MAX в 9:00 по Москве. Кнопка «Подробнее» открывает карточку процедуры</p>
   </div>
-  <div class="phone shot" data-mark="Скриншот MAX от 27.09, заменить" style="position:absolute;right:130px;top:200px;width:390px;height:802px"><img src="../../screens/chat-plan.jpg" alt="Чат MAX: план и кнопка напоминаний"></div>
+  <p class="note">Напоминания студент включает кнопкой в плане. Накануне запланированного визита бот вечером пишет, каких документов не хватает</p>
 </section>
 
-<!-- 7. Day 27: documents and a question to the university -->
+<!-- 8. Card and a question to the university -->
 <section class="slide">
-  <div class="route"><span class="past">До приезда</span><span class="past">День 1</span><span class="past">День 3</span><span class="past">День 23</span><span class="now">День 27</span><span>День 90</span><span>Через год</span></div>
+  <div class="route"><span class="past">До приезда</span><span class="past">День 1</span><span class="now">День 23</span><span>День 30</span><span>День 90</span><span>Через год</span></div>
   <div class="pad" style="right:auto;width:700px">
     <h2>С чем идти и кого спросить</h2>
-    <p class="lead" style="margin-top:40px">Карточка процедуры: документы с отметками, адрес и часы работы, норма закона</p>
-    <p class="lead" style="margin-top:30px">Если что-то неясно, бот собирает вопрос в международную службу с датами студента. Его остаётся скопировать</p>
+    <p class="lead" style="margin-top:40px">Карточка: документы с отметками, адрес и как добраться, норма закона</p>
+    <p class="lead" style="margin-top:30px">Не получилось? Бот собирает вопрос в международную службу с датами студента. Студент копирует и отправляет сам</p>
   </div>
   <div style="position:absolute;right:130px;top:200px;display:flex;gap:36px">
     <div><div class="phone shot" data-mark="Рендер из кода, заменить на скриншот MAX" style="width:370px;height:740px"><img src="../screens/09-card-documents.jpg" alt="Карточка процедуры: документы и адрес"></div><p class="cap">Карточка</p></div>
-    <div><div class="phone shot" data-mark="Скриншот MAX от 27.09, заменить" style="width:370px;height:740px"><img src="../../screens/app-question.jpg" alt="Вопрос в вуз"></div><p class="cap">Вопрос в вуз</p></div>
+    <div><div class="phone shot" data-mark="Рендер из кода, заменить на скриншот MAX" style="width:370px;height:740px"><img src="../screens/11-question.jpg" alt="Готовый вопрос вузу"></div><p class="cap">Вопрос вузу</p></div>
   </div>
 </section>
 
-<!-- 8. Day 90 and a year later -->
+<!-- 9. Day 30, day 90 and a year later -->
 <section class="slide">
-  <div class="route"><span class="past">До приезда</span><span class="past">День 1</span><span class="past">День 3</span><span class="past">День 23</span><span class="past">День 27</span><span class="now">День 90</span><span class="now">Через год</span></div>
+  <div class="route"><span class="past">До приезда</span><span class="past">День 1</span><span class="past">День 23</span><span class="now">День 30</span><span class="now">День 90</span><span class="now">Через год</span></div>
   <div class="pad">
-    <h2>Последний срок и повтор</h2>
-    <div class="cols" style="margin-top:60px">
-      <div class="term"><span class="muted">14 января 2027</span><b style="font-size:64px">Дактилоскопия</b><p style="margin-top:20px">Бот ведёт её так же: обратный отсчёт, документы, напоминания</p></div>
-      <div class="term hot"><span>Через год после прохождения</span><b style="font-size:64px">Медосвидетельствование снова</b><p style="margin-top:20px">Новый срок появляется в плане, когда студент отмечает процедуру пройденной</p></div>
+    <h2>Срок, последний срок и повтор</h2>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:36px;margin-top:56px">
+      <div class="term hot"><span>День 30 · 15.11</span><b style="font-size:56px">Медосвиде&shy;тельствование</b><p style="margin-top:18px;font-size:32px">Отметил пройденным, и в плане «Пройдено 1 из 2» и следующий шаг</p></div>
+      <div class="term"><span class="muted">День 90 · 14.01.2027</span><b style="font-size:56px">Дакти&shy;лоскопия</b><p style="margin-top:18px;font-size:32px">Те же карточка, напоминания и вопрос вузу</p></div>
+      <div class="term"><span class="muted">Через год</span><b style="font-size:56px">Повтор медосвиде&shy;тельствования</b><p style="margin-top:18px;font-size:32px">Новый срок встаёт в план сам</p></div>
     </div>
   </div>
-  <p class="note">Повтор через 12 месяцев задан в правилах <code>src/data/rules/ru-student.json</code>. Правила сверила команда 19.10.2026, юрист их не проверял</p>
+  <p class="note">Переезд, поездка или больница меняют сроки: для этого кнопка «Изменились обстоятельства». Правила сверила команда 19.10.2026, юрист их не проверял</p>
 </section>
 
-<!-- 9. Why: what is known about demand -->
+<!-- 10. What changed after the online stage (required by the final brief) -->
 <section class="slide">
   <div class="pad" style="inset:110px 130px 90px">
-    <h2>Где этот маршрут обрывается сегодня</h2>
-    <div class="cols" style="margin-top:60px;grid-template-columns:1.1fr 1fr">
+    <h2>Что изменилось после онлайн-этапа</h2>
+    <div class="changes">
       <div>
-        <p style="font-size:120px;font-weight:800;line-height:1;color:var(--amber)">2 из 10</p>
-        <p class="lead" style="margin-top:16px">знакомых второкурсников ИТМО просрочили медосвидетельствование. Почти все обзванивали инстанции, чтобы понять порядок</p>
-        <p style="margin-top:24px" class="muted">Они въехали в 2025 году, тогда давали 90 дней. Сейчас 30</p>
+        <h3>По отзыву жюри</h3>
+        <div class="rows">
+          <div><b>Раньше</b><span>Шаги «Ещё не в России»</span></div>
+          <div><b>Спрос</b><span>10 бесед, первый сигнал</span></div>
+          <div><b>Формат</b><span>Маршрут и экраны вместо текста</span></div>
+        </div>
       </div>
       <div>
-        <p style="font-size:120px;font-weight:800;line-height:1;color:var(--teal)">422 тыс.</p>
-        <p class="lead" style="margin-top:16px">иностранных студентов учатся в вузах России</p>
-        <p style="margin-top:24px" class="muted">Минобрнауки, РИА Новости, 15.09.2026</p>
+        <h3>В продукте</h3>
+        <ul class="list" style="font-size:36px;gap:20px">
+          <li>Где пройти и как добраться</li>
+          <li>Чем грозит пропуск, со ссылкой на закон</li>
+          <li>«Изменились обстоятельства»: переезд, поездка, больница</li>
+          <li>План в PDF для куратора</li>
+          <li>«Пройдено X из N» и ближайший шаг</li>
+          <li>Ссылка и QR для письма о зачислении</li>
+        </ul>
       </div>
     </div>
   </div>
-  <p class="note">Беседы — первый сигнал: знакомые участника команды, один вуз, без анкеты. Сколько студентов в целом просрочивают сроки, не измерено</p>
+  <p class="note" style="font-size:30px;color:var(--ink)">Всё в правой колонке сделано после сдачи 30.09.2026 и работает в боте</p>
 </section>
 
-<!-- 10. Next university: the same route, other data -->
+<!-- 11. Alternatives: what already exists -->
+<section class="slide">
+  <div class="pad" style="inset:110px 130px 90px">
+    <h2>Что уже есть</h2>
+    <div class="rows cmp" style="margin-top:44px">
+      <div class="head"><span></span><span>Что даёт</span><span>Чего не хватает</span></div>
+      <div><b>Памятка вуза</b><span>Общий список шагов</span><span>Не считает дату, не напоминает</span></div>
+      <div><b>«Госуслуги»</b><span>Электронный миграционный учёт</span><span>Нужна подтверждённая учётная запись</span></div>
+      <div><b>HSE App X</b><span>Документы, статусы, напоминания</span><span>Только для студентов ВШЭ</span></div>
+      <div><b>Бот КФУ</b><span>Анонсирован, про миграционный учёт</span><span>Как работает, мы не проверили</span></div>
+      <div class="ours"><b>Первые 90 дней</b><span>Свои даты и напоминания в MAX</span><span>Любой вуз подключается профилем</span></div>
+    </div>
+  </div>
+  <p class="note">Аналоги искали 22.09.2026 по открытым описаниям. Кабинеты и чаты вузов не изучали</p>
+</section>
+
+<!-- 12. Scale: the same route, other data (D-071) -->
 <section class="slide">
   <div class="pad" style="inset:110px 130px 90px">
     <h2>Маршрут для другого вуза</h2>
-    <p class="lead" style="margin-top:34px;max-width:1500px">Сроки и напоминания общие. У каждого вуза свои адреса, контакты и памятки, они лежат в файле профиля</p>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:40px;margin-top:60px">
-      <div class="term hot"><b style="font-size:72px">КФУ</b>первый профиль</div>
-      <div class="term"><b style="font-size:72px">ИТМО</b>профиль добавлен файлом, код не менялся</div>
-      <div class="term"><b style="font-size:72px">СПбГЭУ</b>профиль добавлен файлом, код не менялся</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:80px;margin-top:40px">
+      <div>
+        <p style="font-size:32px;color:var(--muted)">более</p>
+        <p style="font-size:130px;font-weight:800;line-height:.95;color:var(--teal);letter-spacing:-.03em">422 тыс.</p>
+        <p style="font-size:32px;margin-top:10px">иностранных студентов в вузах России. Минобрнауки, 15.09.2026</p>
+        <div class="split2" style="margin-top:36px">
+          <div class="term hot"><strong>Одинаково</strong>расчёт по закону, напоминания, чат и мини-приложение</div>
+          <div class="term"><strong>Своё у вуза</strong>файл профиля: адреса, контакты, памятка, языки</div>
+        </div>
+      </div>
+      <div>
+        <p style="font-size:28px;margin-bottom:16px" class="muted">Иностранцы на всех курсах, таблицы «Сведения» на сайтах вузов</p>
+        <dl class="bars">
+          <div class="off"><dt>РУДН</dt><dd style="--v:12917"><span>12 917</span></dd></div>
+          <div><dt><b>КФУ</b></dt><dd style="--v:6139"><span>6 139</span></dd></div>
+          <div class="off"><dt>СПбПУ</dt><dd style="--v:5627"><span>5 627</span></dd></div>
+          <div class="off"><dt>УрФУ</dt><dd style="--v:4052"><span>4 052</span></dd></div>
+          <div class="off"><dt>ТПУ</dt><dd style="--v:2678"><span>2 678</span></dd></div>
+          <div><dt><b>ИТМО</b></dt><dd style="--v:1282"><span>1 282</span></dd></div>
+          <div><dt><b>СПбГЭУ</b></dt><dd style="--v:499"><span>499</span></dd></div>
+        </dl>
+        <p style="margin-top:18px"><span class="tag" style="background:var(--teal);color:#fff">профиль в боте</span>&nbsp;&nbsp;<span class="tag line">профиля пока нет</span></p>
+        <p style="font-size:30px;margin-top:24px"><b>Риски:</b> закон меняется, поэтому у каждого правила дата сверки. Переводы на tt, uz и zh машинные</p>
+      </div>
     </div>
-    <p style="margin-top:44px">Новый профиль проверяют тесты: каждое гражданство, каждая дата, все языки интерфейса</p>
   </div>
   <p class="note">Профили собраны по открытым страницам вузов. Вузы пока не партнёры: 19.10.2026 письма ушли в 31 вуз, ответов нет</p>
 </section>
 
-<!-- 11. Pilot -->
+<!-- 13. Pilot: first university, channel, owners, targets -->
 <section class="slide">
   <div class="pad" style="inset:110px 130px 90px">
-    <h2>Проверим маршрут на пилоте</h2>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:40px;margin-top:60px">
-      <div class="term"><b>80%</b>доходят до плана без подсказки</div>
-      <div class="term"><b>0</b>критичных ошибок в контрольных случаях</div>
-      <div class="term"><b>−30%</b>времени до корректного плана по сравнению с памяткой</div>
+    <h2>Пилот: начнём с КФУ</h2>
+    <div class="pilot">
+      <div><h3>Где</h3>Одна группа первокурсников КФУ. Письмо в международную службу ушло 19.10, ответа пока нет</div>
+      <div><h3>Канал</h3>Ссылка и QR в письме о зачислении или в чате куратора</div>
+      <div><h3>Кто</h3>Специалист вуза проверяет правила, куратор зовёт студентов, команда ведёт тест</div>
     </div>
-    <p class="lead" style="margin-top:50px;max-width:1600px">Порядок: специалист вуза проверяет правила, затем 10–15 наблюдаемых сессий, затем решение о втором вузе</p>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:40px;margin-top:40px">
+      <div class="term"><b>80%</b>доходят до плана без подсказки</div>
+      <div class="term"><b>0</b>критичных ошибок в датах</div>
+      <div class="term"><b>−30%</b>времени до верного плана по сравнению с памяткой</div>
+    </div>
+    <div class="flow"><span>10–15 сессий</span><i>→</i><span>30–50 студентов</span><i>→</i><span>второй вуз: ИТМО или СПбГЭУ</span></div>
   </div>
-  <p class="note">Это цели пилота, заданные до измерений (<code>docs/product/hypothesis.md</code>). Результатов пока нет</p>
+  <p class="note" style="font-size:30px;color:var(--ink);bottom:36px">Это цели пилота, результатов пока нет. КФУ не партнёр</p>
 </section>
 
-<!-- 12. Closing -->
+<!-- 14. Closing and team roles -->
 <section class="slide cover">
-  <h1 style="font-size:140px;top:170px;max-width:1500px">Пройдём этот маршрут с вашим вузом</h1>
-  <p class="sub" style="top:660px">Ищем вуз для пилота: проверим правила со специалистом и проведём первый тест со студентами</p>
-  <p style="position:absolute;left:130px;top:890px;font-size:56px;font-weight:800;color:var(--teal)">max.ru/t149_hakaton_max_bot</p>
+  <h1 style="font-size:130px;top:150px;max-width:1600px">Пройдём этот маршрут с первым вузом</h1>
+  <p class="sub" style="top:480px">Нужны специалист, который проверит правила, и одна группа первокурсников</p>
+  <p style="position:absolute;left:130px;top:650px;font-size:56px;font-weight:800;color:var(--teal)">max.ru/t149_hakaton_max_bot</p>
+  <div class="roles todo" data-mark="Роли — заполнить до сдачи (#56)" style="position:absolute;left:130px;right:130px;bottom:80px">
+    <div><b>Рассказ</b>TBD</div><div><b>Показ в MAX</b>TBD</div><div><b>Пилот и масштаб</b>TBD</div><div><b>Архитектура</b>TBD</div>
+  </div>
 </section>
 
-<!-- 13. Appendix: architecture and limits -->
+<!-- 15. Appendix: architecture and limits -->
 <section class="slide appx">
   <div class="pad">
     <p class="muted" style="margin-bottom:12px">Приложение</p>
@@ -294,7 +431,7 @@ h2 small { display: block; font-size: 40px; font-weight: 500; color: var(--teal)
   </div>
 </section>
 
-<!-- 14. Appendix: sources -->
+<!-- 16. Appendix: sources -->
 <section class="slide appx">
   <div class="pad">
     <p class="muted" style="margin-bottom:12px">Приложение</p>
@@ -302,8 +439,9 @@ h2 small { display: block; font-size: 40px; font-weight: 500; color: var(--teal)
     <ul class="sources">
       <li>Федеральный закон № 115-ФЗ, ст. 5, в ред. 162-ФЗ<span>consultant.ru, сверено 23.09.2026</span></li>
       <li>Памятки ИТМО, КФУ, СПбГЭУ о дактилоскопии и медосвидетельствовании<span>int.itmo.ru, students.kpfu.ru, unecon.ru, сверено 16–29.09.2026</span></li>
-      <li>Число иностранных студентов<span>Минобрнауки, РИА Новости, 15.09.2026</span></li>
-      <li>Беседы с 10 второкурсниками ИТМО<span>записаны командой 24.10.2026, без персональных данных (<code>docs/product/demand-interviews.md</code>)</span></li>
+      <li>Число иностранных студентов<span>Минобрнауки, РИА Новости, 15.09.2026; по вузам — таблицы «Сведения об образовательной организации»</span></li>
+      <li>Беседы с 10 второкурсниками ИТМО<span>записаны командой 24.10.2026, без персональных данных</span></li>
+      <li>Аналоги: «Госуслуги», HSE App X, бот КФУ<span>открытые описания, 22.09.2026</span></li>
       <li>Отзыв отборочного жюри<span>сообщение организаторов, октябрь 2026</span></li>
     </ul>
   </div>

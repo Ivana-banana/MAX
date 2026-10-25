@@ -6,7 +6,7 @@
 <title>Первые 90 дней, протокол</title>
 <link rel="stylesheet" href="base.css">
 <style>
-/* Variant «Протокол»: the talk answers the qualifying jury point by point, dense document layout; Golos Text only. */
+/* Variant «Протокол»: a dense document — problem, product, changes after the online stage, evidence, pilot; Golos Text only. */
 @font-face { font-family: "Golos Text"; font-weight: 400 900; src: url(../fonts/golos-text-cyrillic-wght-normal.woff2) format("woff2"); unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
 @font-face { font-family: "Golos Text"; font-weight: 400 900; src: url(../fonts/golos-text-latin-wght-normal.woff2) format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
 :root { --navy: #13254a; --paper: #fbfbf8; --yellow: #f3c623; --rule: #c9cdd6; --muted: #5d6475; --soft: #eef0f4; }
@@ -55,6 +55,13 @@ ul.dash { list-style: none; display: grid; gap: 10px; }
 ul.dash li { padding-left: 30px; position: relative; }
 ul.dash li::before { content: ""; position: absolute; left: 0; top: .62em; width: 16px; height: 3px; background: var(--navy); }
 .big { font-size: 96px; font-weight: 700; line-height: 1; letter-spacing: -.03em; }
+.todo { outline: 6px dashed #ff2bd6; outline-offset: 6px; position: relative; }
+.todo::after { content: attr(data-mark); position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%); padding: 6px 14px; background: #ff2bd6; color: #fff; font: 700 22px/1.25 system-ui, sans-serif; white-space: nowrap; }
+.roles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 30px; font-size: 28px; padding: 20px 24px 60px; }
+.roles b { display: block; }
+.loud { font-size: 28px; font-weight: 600; }
+.date b { display: block; font-size: 84px; font-weight: 700; line-height: 1; letter-spacing: -.03em; }
+.date span { font-size: 24px; color: var(--muted); }
 </style>
 </head>
 <body>
@@ -78,7 +85,7 @@ ul.dash li::before { content: ""; position: absolute; left: 0; top: .62em; width
         <ol>
           <li>Открыть бота, нажать «Начать»</li>
           <li>Язык, «Продолжить», «Да, совпадает», «Казахстан»</li>
-          <li>Дата въезда: сегодня минус 22 дня</li>
+          <li>Дата въезда 17.10.2026, как в примере на слайдах</li>
           <li>План, «Включить напоминания», карточка процедуры</li>
           <li>Кнопка MAX слева от поля ввода открывает мини-приложение с тем же планом</li>
         </ol>
@@ -90,76 +97,122 @@ ul.dash li::before { content: ""; position: absolute; left: 0; top: .62em; width
 <!-- 2. Cover -->
 <section class="slide cover">
   <div class="pad">
-    <div class="doc"><b>«Первые 90 дней»</b><span>Финал хакатона Минобрнауки России и MAX, трек «Забота о людях». Казань, 29.10.2026</span></div>
-    <h1 style="font-size:104px;margin-top:150px;max-width:1500px">Ответ на отзыв отборочного жюри</h1>
-    <p style="font-size:40px;margin-top:44px;max-width:1300px">Личные сроки, документы и напоминания иностранного первокурсника в MAX. Что изменили после онлайн-этапа и что ещё не знаем</p>
+    <div class="doc"><b>«Первые 90 дней»</b><span>Минобрнауки России × MAX, «Забота о людях». Финал, Казань, 29.10.2026</span></div>
+    <h1 style="font-size:120px;margin-top:150px;max-width:1500px">Первые 90 дней</h1>
+    <p style="font-size:44px;margin-top:44px;max-width:1300px">Личные сроки, документы и напоминания иностранного первокурсника в MAX</p>
     <p style="font-size:28px;position:absolute;bottom:0;color:rgba(251,251,248,.7)">Команда «ИИ в массы»: Иван Резников, Иван Пушкин, Александр Чичерин, Михаил Анцев</p>
   </div>
 </section>
 
-<!-- 3. Jury quotes -->
+<!-- 3. Problem and segment -->
 <section class="slide">
   <div class="pad">
-    <div class="doc"><b>Отзыв</b><span>Текст экспертов отборочного тура, получен 24.10.2026</span></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:80px">
-      <div>
-        <h2 style="font-size:44px;margin-bottom:34px">Оценили</h2>
-        <div style="display:grid;gap:30px">
-          <p class="quote">«Решение цельное, ограничения объяснены, метрики и пороги заданы заранее»</p>
-          <p class="quote">«Проблема подтверждена источниками»</p>
-          <p class="quote">«Расчётное ядро отделено от данных»</p>
-        </div>
-        <p class="muted small" style="margin-top:40px">Это сохранили без изменений: слайды 7 и 8</p>
+    <div class="doc"><b>Проблема</b><span>Кто, что и чем рискует</span></div>
+    <h2>Первокурсник считает два срока сам, а памятки вузов называют разные</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:80px;margin-top:44px">
+      <div class="tbl">
+        <div style="grid-template-columns:220px 1fr"><b>Кто</b><span>Первокурсник 18+, впервые въехал учиться после 31.08.2026, ВНЖ нет</span></div>
+        <div style="grid-template-columns:220px 1fr"><b>Что</b><span>От дня въезда: 30 дней на медосвидетельствование, 90 на дактилоскопию</span></div>
+        <div style="grid-template-columns:220px 1fr"><b>Цена ошибки</b><span class="mark">Срок пребывания в России могут сократить</span></div>
       </div>
-      <div>
-        <h2 style="font-size:44px;margin-bottom:34px">Просили усилить</h2>
-        <div class="tbl">
-          <div style="grid-template-columns:50px 1fr"><b>1</b><span>Помочь до поступления: выбор вуза, подача документов, поддержка и гранты</span></div>
-          <div style="grid-template-columns:50px 1fr"><b>2</b><span>Обосновать спрос</span></div>
-          <div style="grid-template-columns:50px 1fr"><b>3</b><span>Меньше плотного текста и инженерных деталей, другой формат защиты</span></div>
-        </div>
-        <p class="muted small" style="margin-top:30px">Ниже по каждому пункту: что сделано, что нет и как проверим</p>
+      <div class="tbl">
+        <div class="th" style="grid-template-columns:200px 1fr"><span>Источник</span><span>Что пишет</span></div>
+        <div style="grid-template-columns:200px 1fr"><b>ИТМО</b><span>30 дней на обе процедуры</span></div>
+        <div style="grid-template-columns:200px 1fr"><b>СПбГЭУ</b><span>90 дней на обе процедуры</span></div>
+        <div style="grid-template-columns:200px 1fr"><b>КФУ</b><span>памятка общежития: 90 на обе; страница процедур: 30 и 90</span></div>
+        <div style="grid-template-columns:200px 1fr"><b>Закон</b><span><b>30 и 90 дней</b></span></div>
       </div>
     </div>
+    <p class="muted small" style="margin-top:30px">115-ФЗ, ст. 5, в ред. 162-ФЗ с 01.09.2026; последствие — там же, п. 23. Памятки сверены 16–29.09.2026</p>
   </div>
 </section>
 
-<!-- 4. Point 1: before admission -->
+<!-- 4. Product: plan from the student's date -->
 <section class="slide">
   <div class="pad">
-    <div class="doc"><b>Замечание 1 из 3</b><span>Помочь до поступления</span></div>
-    <h2 style="max-width:1050px">Путь студента теперь начинается дома, до въезда. Поступление мы пока исследуем</h2>
-    <div class="tbl" style="width:1080px;margin-top:44px">
-      <div class="th" style="grid-template-columns:200px 1fr"><span>Статус</span><span>Что именно</span></div>
-      <div style="grid-template-columns:200px 1fr"><span><span class="tag done">Сделано</span></span><span>Кнопка «Ещё не в России — что подготовить» на шаге даты въезда. Карточки: приглашение и виза, «Госуслуги RuID», перевод паспорта, контакты вуза</span></div>
-      <div style="grid-template-columns:200px 1fr"><span><span class="tag done">Сделано</span></span><span>Под каждой карточкой страница вуза и дата сверки. Где источник молчит, бот пишет «Допущение бота»</span></div>
-      <div style="grid-template-columns:200px 1fr"><span><span class="tag open">Исследуем</span></span><span>Как абитуриент выбирает вуз, где застревает при подаче документов, как находит поддержку и гранты</span></div>
-      <div style="grid-template-columns:200px 1fr"><span><span class="tag">Не обещаем</span></span><span>Подавать документы или заявку на грант за студента</span></div>
+    <div class="doc"><b>Решение</b><span>Пример: Казахстан, КФУ, въезд 17.10.2026</span></div>
+    <h2 style="max-width:620px">Бот спрашивает дату въезда и строит личный план</h2>
+    <div style="display:grid;gap:26px;margin-top:40px;width:600px">
+      <div class="date"><span>Медосвидетельствование, 30 дней</span><b class="mark">до 15.11</b></div>
+      <div class="date"><span>Дактилоскопия, 90 дней</span><b>до 14.01</b></div>
     </div>
-    <p class="muted small" style="margin-top:26px;width:1080px">Решение D-045, источники карточек в docs/product/pre-arrival-sources.md</p>
+    <p class="muted small" style="margin-top:30px;width:600px">Расчёт по правилам из закона, без LLM. В карточке документы, адрес и как добраться, ссылка на норму</p>
+  </div>
+  <div class="phone shot" data-mark="Рендер из кода, заменить на скриншот MAX" style="left:810px;top:230px;width:330px;height:690px"><img src="../screens/06-entry-date.jpg" alt="Ввод даты въезда"></div>
+  <div class="phone shot" data-mark="Рендер из кода, заменить на скриншот MAX" style="left:1170px;top:230px;width:330px;height:690px"><img src="../screens/07-plan.jpg" alt="Личный план"></div>
+  <div class="phone shot" data-mark="Рендер из кода, заменить на скриншот MAX" style="left:1530px;top:230px;width:330px;height:690px"><img src="../screens/08-card.jpg" alt="Карточка процедуры"></div>
+</section>
+
+<!-- 5. Product: reminders and a question to the university -->
+<section class="slide">
+  <div class="pad">
+    <div class="doc"><b>Решение</b><span>Сопровождение до срока</span></div>
+    <h2 style="max-width:1150px">Бот напоминает сам, а если не получилось — готовит вопрос вузу</h2>
+    <div class="tbl" style="width:1080px;margin-top:44px">
+      <div class="th" style="grid-template-columns:200px 1fr"><span>Когда, 9:00 МСК</span><span>Что приходит в чат MAX</span></div>
+      <div style="grid-template-columns:200px 1fr"><b>08.11</b><span>За 7 дней до срока</span></div>
+      <div style="grid-template-columns:200px 1fr"><b>12.11</b><span>За 3 дня</span></div>
+      <div style="grid-template-columns:200px 1fr"><b>14.11</b><span>За 1 день</span></div>
+      <div style="grid-template-columns:200px 1fr"><b class="mark">15.11</b><span>Срок медосвидетельствования</span></div>
+      <div style="grid-template-columns:200px 1fr"><b>16.11</b><span>Спокойное напоминание, если процедура не отмечена</span></div>
+    </div>
+    <p class="small" style="margin-top:26px;width:1080px">Напоминания студент включает кнопкой в плане. Кнопка «Не получилось» собирает текст с датами студента; он копирует его и отправляет в международную службу сам</p>
+  </div>
+  <div class="phone shot" data-mark="Рендер из кода, заменить на скриншот MAX" style="right:120px;top:150px;width:400px;height:840px"><img src="../screens/11-question.jpg" alt="Готовый вопрос вузу"></div>
+</section>
+
+<!-- 6. Changes after the online stage: the jury's three points -->
+<section class="slide">
+  <div class="pad">
+    <div class="doc"><b>После онлайн-этапа</b><span>Что просило отборочное жюри и что сделано</span></div>
+    <h2 style="max-width:1050px">Три замечания жюри и наш ответ</h2>
+    <div class="tbl" style="width:1080px;margin-top:44px">
+      <div class="th" style="grid-template-columns:260px 1fr 190px"><span>Замечание</span><span>Что сделали</span><span>Статус</span></div>
+      <div style="grid-template-columns:260px 1fr 190px"><b>Помочь раньше</b><span>Кнопка «Ещё не в России»: приглашение и виза, «Госуслуги RuID», перевод паспорта, контакты вуза</span><span><span class="tag done">Сделано</span></span></div>
+      <div style="grid-template-columns:260px 1fr 190px"><b></b><span>Выбор вуза, подача документов, поддержка и гранты</span><span><span class="tag open">Исследуем</span></span></div>
+      <div style="grid-template-columns:260px 1fr 190px"><b>Обосновать спрос</b><span>10 бесед со второкурсниками ИТМО — первый сигнал. Остальное проверит пилот</span><span><span class="tag done">Сделано</span></span></div>
+      <div style="grid-template-columns:260px 1fr 190px"><b>Другой формат</b><span>Экраны и даты вместо плотного текста, инженерные детали в приложении</span><span><span class="tag done">Сделано</span></span></div>
+    </div>
   </div>
   <div class="phone shot" data-mark="Рендер из кода, заменить на скриншот MAX" style="right:120px;top:150px;width:400px;height:840px"><img src="../screens/10-pre-arrival.jpg" alt="Что подготовить до въезда"></div>
 </section>
 
-<!-- 5. Point 2: demand -->
+<!-- 7. Changes after the online stage: product -->
 <section class="slide">
   <div class="pad">
-    <div class="doc"><b>Замечание 2 из 3</b><span>Обосновать спрос</span></div>
+    <div class="doc"><b>После онлайн-этапа</b><span>Что появилось в боте после сдачи 30.09.2026</span></div>
+    <h2>Шесть изменений в продукте</h2>
+    <div class="tbl" style="margin-top:40px">
+      <div class="th" style="grid-template-columns:620px 1fr 190px"><span>Изменение</span><span>Зачем студенту</span><span>Статус</span></div>
+      <div style="grid-template-columns:620px 1fr 190px"><b>Где пройти и как добраться</b><span>Адрес и маршрут в карточке процедуры</span><span><span class="tag done">Работает</span></span></div>
+      <div style="grid-template-columns:620px 1fr 190px"><b>Чем грозит пропуск</b><span>Последствие со ссылкой на закон</span><span><span class="tag done">Работает</span></span></div>
+      <div style="grid-template-columns:620px 1fr 190px"><b>«Изменились обстоятельства»</b><span>Переезд, поездка, больница: новые сроки</span><span><span class="tag done">Работает</span></span></div>
+      <div style="grid-template-columns:620px 1fr 190px"><b>План в PDF</b><span>Показать куратору или в общежитии</span><span><span class="tag done">Работает</span></span></div>
+      <div style="grid-template-columns:620px 1fr 190px"><b>«Пройдено X из N» и ближайший шаг</b><span>Сразу видно, что делать дальше</span><span><span class="tag done">Работает</span></span></div>
+      <div style="grid-template-columns:620px 1fr 190px"><b>Ссылка и QR для письма о зачислении</b><span>Вуз может дать бота до приезда</span><span><span class="tag done">Работает</span></span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 8. Demand: what is known and what is not -->
+<section class="slide">
+  <div class="pad">
+    <div class="doc"><b>Спрос</b><span>Что знаем и чего не знаем</span></div>
     <h2>Спрос не доказан. Вот что есть, чего нет и как проверим</h2>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:56px;margin-top:50px">
       <div>
-        <p style="font-weight:700;font-size:34px;margin-bottom:20px">Есть</p>
+        <p style="font-weight:700;font-size:34px;margin-bottom:20px">Знаем</p>
         <div class="tbl">
-          <div><span><b class="mark">2 из 10</b> знакомых второкурсников ИТМО просрочили медосвидетельствование. Почти все обзванивали инстанции</span><span class="muted small">Сигнал: один вуз, беседы без анкеты, въезд 2025 года при сроке 90 дней. D-072</span></div>
-          <div><span>Памятки ИТМО, КФУ и СПбГЭУ называют разные сроки, и не все совпадают с законом</span><span class="muted small">Факт, сверено 16–29.09.2026</span></div>
+          <div><span><b class="mark">2 из 10</b> знакомых второкурсников ИТМО просрочили медосвидетельствование. Почти все обзванивали инстанции</span><span class="muted small">Сигнал: один вуз, беседы без анкеты, въезд 2025 года при сроке 90 дней</span></div>
+          <div><span>Памятки ИТМО, КФУ и СПбГЭУ называют разные сроки</span><span class="muted small">Факт, сверено 16–29.09.2026</span></div>
         </div>
       </div>
       <div>
-        <p style="font-weight:700;font-size:34px;margin-bottom:20px">Нет</p>
+        <p style="font-weight:700;font-size:34px;margin-bottom:20px">Не знаем</p>
         <div class="tbl">
-          <div><span>Измеренной доли просрочек среди первокурсников</span></div>
-          <div><span>Ответа вузов. 19.10.2026 письма ушли в 31 вуз, ответов пока нет</span></div>
-          <div><span>Договорённости о пилоте</span></div>
+          <div><span>Как часто опаздывают первокурсники 2026 года</span></div>
+          <div><span>Станет ли с ботом быстрее и точнее, чем по памятке</span></div>
+          <div><span>Возьмёт ли вуз ссылку в письмо о зачислении</span></div>
         </div>
       </div>
       <div>
@@ -171,76 +224,100 @@ ul.dash li::before { content: ""; position: absolute; left: 0; top: .62em; width
         </div>
       </div>
     </div>
-    <p class="small muted" style="margin-top:34px">Объём аудитории: более 422 тыс. иностранных студентов в России (Минобрнауки, РИА Новости, 15.09.2026); 33 194 в семи вузах по таблицам «Сведения», D-071. Это размер аудитории, а не спрос</p>
+    <p class="loud" style="margin-top:34px">Беседы — сигнал, а не доказательство спроса</p>
   </div>
 </section>
 
-<!-- 6. Point 3: format -->
+<!-- 9. Alternatives -->
 <section class="slide">
   <div class="pad">
-    <div class="doc"><b>Замечание 3 из 3</b><span>Меньше текста, другой формат</span></div>
-    <h2 style="max-width:620px">Показываем продукт, а не пересказываем</h2>
-    <p style="margin-top:34px;width:600px">Две минуты защиты отданы живому показу в MAX. Студент въехал 17.10: гражданство, дата въезда, и план готов</p>
-    <ul class="dash" style="margin-top:34px;width:600px">
-      <li>Дата въезда</li>
-      <li>План: медосвидетельствование до 15.11, дактилоскопия до 14.01</li>
-      <li>Карточка процедуры: документы, адрес, норма</li>
-    </ul>
-    <p class="muted small" style="margin-top:34px;width:600px">Архитектура и источники ушли в приложение, слайды 11 и 12</p>
+    <div class="doc"><b>Аналоги</b><span>Открытые описания, 22.09.2026. Кабинеты и чаты вузов не изучали</span></div>
+    <h2>Что уже есть и чего в нём не хватает</h2>
+    <div class="tbl" style="margin-top:44px">
+      <div class="th" style="grid-template-columns:380px 1fr 1fr"><span>Решение</span><span>Что даёт</span><span>Чего не хватает</span></div>
+      <div style="grid-template-columns:380px 1fr 1fr"><b>Памятка вуза</b><span>Общий список шагов</span><span>Не считает дату, не напоминает</span></div>
+      <div style="grid-template-columns:380px 1fr 1fr"><b>«Госуслуги»</b><span>Электронный миграционный учёт</span><span>Нужна подтверждённая учётная запись</span></div>
+      <div style="grid-template-columns:380px 1fr 1fr"><b>HSE App X</b><span>Документы, статусы, напоминания</span><span>Только для студентов ВШЭ</span></div>
+      <div style="grid-template-columns:380px 1fr 1fr"><b>Бот КФУ</b><span>Анонсирован, про миграционный учёт</span><span>Как работает, мы не проверили</span></div>
+      <div style="grid-template-columns:380px 1fr 1fr;background:var(--soft)"><b>Первые 90 дней</b><span>Свои даты и напоминания в MAX</span><span class="mark">Любой вуз подключается профилем</span></div>
+    </div>
   </div>
-  <div class="phone shot" data-mark="Рендер из кода, заменить на скриншот MAX" style="left:810px;top:230px;width:330px;height:690px"><img src="../screens/06-entry-date.jpg" alt="Ввод даты въезда"></div>
-  <div class="phone shot" data-mark="Рендер из кода, заменить на скриншот MAX" style="left:1170px;top:230px;width:330px;height:690px"><img src="../screens/07-plan.jpg" alt="Личный план"></div>
-  <div class="phone shot" data-mark="Рендер из кода, заменить на скриншот MAX" style="left:1530px;top:230px;width:330px;height:690px"><img src="../screens/08-card.jpg" alt="Карточка процедуры"></div>
 </section>
 
-<!-- 7. What stayed: core and data -->
+<!-- 10. Scale -->
 <section class="slide">
   <div class="pad">
-    <div class="doc"><b>Сохранили</b><span>Расчётное ядро отделено от данных</span></div>
+    <div class="doc"><b>Масштаб</b><span>Ядро общее, данные у каждого вуза свои</span></div>
     <h2>Новый вуз подключается файлом профиля, код не меняется</h2>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:80px;margin-top:50px">
-      <div class="tbl">
-        <div class="th" style="grid-template-columns:260px 1fr"><span>Часть</span><span>Где живёт</span></div>
-        <div style="grid-template-columns:260px 1fr"><b>Нормы закона</b><span>src/data/rules/ru-student.json: 30 дней на медосвидетельствование, повтор через 12 месяцев</span></div>
-        <div style="grid-template-columns:260px 1fr"><b>Профиль вуза</b><span>src/data/universities/&lt;id&gt;.json: адреса, контакты, процедуры, карточки до въезда</span></div>
-        <div style="grid-template-columns:260px 1fr"><b>Тексты</b><span>src/data/i18n: ru, en, tt, uz, zh</span></div>
-        <div style="grid-template-columns:260px 1fr"><b>Ядро</b><span>Явный расчёт дат и очередь напоминаний. LLM сроки не решает</span></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:80px;margin-top:44px">
+      <div>
+        <div class="tbl">
+          <div style="grid-template-columns:260px 1fr"><b>Одинаково</b><span>Расчёт сроков по закону, напоминания, чат и мини-приложение</span></div>
+          <div style="grid-template-columns:260px 1fr"><b>Своё у вуза</b><span>Адреса, контакты, памятка, карточки до въезда, языки</span></div>
+          <div style="grid-template-columns:260px 1fr"><b>Риски</b><span>Закон меняется: у каждого правила дата сверки. Переводы на tt, uz и zh машинные</span></div>
+        </div>
+        <div style="display:grid;grid-template-columns:auto 1fr;gap:20px 30px;align-items:baseline;margin-top:30px">
+          <span class="big">0</span><span>изменённых файлов кода, когда подключали ИТМО и СПбГЭУ</span>
+        </div>
       </div>
       <div>
-        <div style="display:grid;grid-template-columns:auto 1fr;gap:20px 36px;align-items:baseline">
-          <span class="big">0</span><span>изменённых файлов кода, когда подключали ИТМО и СПбГЭУ</span>
-          <span class="big">9</span><span>минут работы ИИ-агента на оба профиля, по времени коммитов. Это нижняя граница</span>
+        <p><span class="small muted">более</span> <b class="big" style="font-size:80px">422 тыс.</b></p>
+        <p class="small muted" style="margin-bottom:20px">иностранных студентов в вузах России, Минобрнауки, 15.09.2026</p>
+        <div class="tbl">
+          <div class="th" style="grid-template-columns:200px 160px 1fr"><span>Вуз</span><span>Иностранцы</span><span>Профиль</span></div>
+          <div style="grid-template-columns:200px 160px 1fr;padding:8px 0"><b>КФУ</b><span>6 139</span><span><span class="tag done">в боте</span></span></div>
+          <div style="grid-template-columns:200px 160px 1fr;padding:8px 0"><b>ИТМО</b><span>1 282</span><span><span class="tag done">в боте</span></span></div>
+          <div style="grid-template-columns:200px 160px 1fr;padding:8px 0"><b>СПбГЭУ</b><span>499</span><span><span class="tag done">в боте</span></span></div>
+          <div style="grid-template-columns:200px 160px 1fr;padding:8px 0"><b>РУДН</b><span>12 917</span><span><span class="tag">нет</span></span></div>
+          <div style="grid-template-columns:200px 160px 1fr;padding:8px 0"><b>СПбПУ, УрФУ, ТПУ</b><span>12 357</span><span><span class="tag">нет</span></span></div>
         </div>
-        <p class="muted small" style="margin-top:36px">Тест tests/university.test.ts проверяет, что вуз добавляется одним JSON. Профили собраны по открытым страницам, вузы не партнёры. Нормы утверждены командой 19.10.2026, юрист не привлекался (D-044)</p>
       </div>
     </div>
+    <p class="muted small" style="margin-top:22px">По вузам — все курсы, таблицы «Сведения». Профили собраны по открытым страницам, вузы не партнёры: письма в 31 вуз 19.10.2026, ответов нет</p>
   </div>
 </section>
 
-<!-- 8. Metrics table -->
+<!-- 11. Pilot -->
 <section class="slide">
   <div class="pad">
-    <div class="doc"><b>Сохранили</b><span>Метрики и пороги заданы до измерений, docs/product/hypothesis.md</span></div>
-    <h2>Результатов пока нет. Пороги зафиксированы</h2>
-    <div class="tbl" style="margin-top:44px">
-      <div class="th" style="grid-template-columns:520px 360px 1fr 170px"><span>Метрика</span><span>Цель пилота</span><span>Как меряем</span><span>Сейчас</span></div>
-      <div style="grid-template-columns:520px 360px 1fr 170px"><b>Самостоятельное завершение</b><span>Не меньше 80% без подсказки</span><span>10–15 наблюдаемых сессий, итог сверяет специалист</span><span class="muted">Не измерено</span></div>
-      <div style="grid-template-columns:520px 360px 1fr 170px"><b>Критичные ошибки в подсказке</b><span>0</span><span>Контрольные случаи с эталоном владельца процесса</span><span class="muted">Не измерено</span></div>
-      <div style="grid-template-columns:520px 360px 1fr 170px"><b>Время до корректного плана</b><span>Медиана на 30% ниже</span><span>Памятка вуза против бота, порядок чередуется</span><span class="muted">Не измерено</span></div>
-      <div style="grid-template-columns:520px 360px 1fr 170px"><b>Возврат после напоминания</b><span>Сначала измерить базу</span><span>Счётчики в боте, отчёт npm run funnel</span><span class="muted">Счётчики есть</span></div>
+    <div class="doc"><b>Пилот</b><span>Первый кандидат — КФУ. Это цели, результатов пока нет</span></div>
+    <h2>Пилот: одна группа первокурсников КФУ</h2>
+    <div class="tbl" style="margin-top:36px">
+      <div style="grid-template-columns:200px 1fr"><b>Канал</b><span>Ссылка и QR в письме о зачислении или в чате куратора</span></div>
+      <div style="grid-template-columns:200px 1fr"><b>Кто</b><span>Специалист вуза проверяет правила, куратор зовёт студентов, команда ведёт тест</span></div>
+      <div style="grid-template-columns:200px 1fr"><b>Статус</b><span>Письмо в международную службу КФУ ушло 19.10, ответа нет. КФУ не партнёр</span></div>
     </div>
-    <p class="small muted" style="margin-top:30px">Если студенты строят план, но не возвращаются по напоминаниям, барьер не в информации, и гипотезу пересматриваем. Выводы на 10 сессиях на всех студентов не переносим</p>
+    <div class="tbl" style="margin-top:30px">
+      <div class="th" style="grid-template-columns:520px 360px 1fr 190px"><span>Метрика</span><span>Цель пилота</span><span>Как меряем</span><span>Сейчас</span></div>
+      <div style="grid-template-columns:520px 360px 1fr 190px"><b>Доходят до плана сами</b><span>Не меньше 80%</span><span>Наблюдаемые сессии, итог сверяет специалист</span><span class="muted">Не измерено</span></div>
+      <div style="grid-template-columns:520px 360px 1fr 190px"><b>Критичные ошибки в датах</b><span>0</span><span>Контрольные случаи с эталоном</span><span class="muted">Не измерено</span></div>
+      <div style="grid-template-columns:520px 360px 1fr 190px"><b>Время до верного плана</b><span>Медиана на 30% ниже</span><span>Памятка против бота</span><span class="muted">Не измерено</span></div>
+    </div>
+    <p class="loud" style="margin-top:26px">Шаги: 10–15 наблюдаемых сессий → 30–50 студентов → решение о втором вузе (ИТМО или СПбГЭУ)</p>
   </div>
 </section>
 
-<!-- 9. Limits -->
+<!-- 12. Ask and team roles -->
+<section class="slide cover">
+  <div class="pad">
+    <div class="doc"><b>Следующий шаг</b><span>Пилот в одном вузе, затем решение о втором</span></div>
+    <h1 style="font-size:104px;margin-top:80px">Проверим план с первым вузом</h1>
+    <p style="font-size:38px;margin-top:34px;max-width:1350px">Нужны специалист международной службы, который проверит правила, и одна группа первокурсников</p>
+    <p style="font-size:44px;font-weight:700;margin-top:50px;color:var(--yellow)">max.ru/t149_hakaton_max_bot</p>
+    <div class="roles todo" data-mark="Роли — заполнить до сдачи (#56)" style="position:absolute;left:0;right:0;bottom:0">
+      <div><b>Рассказ</b>TBD</div><div><b>Показ в MAX</b>TBD</div><div><b>Пилот и масштаб</b>TBD</div><div><b>Архитектура</b>TBD</div>
+    </div>
+  </div>
+</section>
+
+<!-- 13. Appendix: limits -->
 <section class="slide">
   <div class="pad">
-    <div class="doc"><b>Ограничения</b><span>Что продукт не делает</span></div>
+    <div class="doc"><b>Приложение</b><span>Что продукт не делает</span></div>
     <h2>Границы, которые мы держим сознательно</h2>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:80px;margin-top:50px">
       <div class="tbl">
-        <div><b>Не подаёт документы</b><span class="muted small">Интеграций с МВД и системами вузов нет. Отметка «пройдено» ставится самим студентом</span></div>
+        <div><b>Не подаёт документы</b><span class="muted small">Интеграций с МВД и системами вузов нет. Отметку «пройдено» ставит сам студент</span></div>
         <div><b>Не заменяет специалиста</b><span class="muted small">Ответ бота не решение ведомства. Нормы юрист не вычитывал, это задача пилота</span></div>
         <div><b>Не трактует медицину</b><span class="muted small">Только сроки и документы. Без диагнозов и результатов анализов</span></div>
       </div>
@@ -253,17 +330,7 @@ ul.dash li::before { content: ""; position: absolute; left: 0; top: .62em; width
   </div>
 </section>
 
-<!-- 10. Ask -->
-<section class="slide cover">
-  <div class="pad">
-    <div class="doc"><b>Следующий шаг</b><span>Пилот в одном вузе, затем решение о втором</span></div>
-    <h1 style="font-size:110px;margin-top:120px">Ищем вуз для пилота</h1>
-    <p style="font-size:40px;margin-top:40px;max-width:1350px">Проверим правила со специалистом международной службы и проведём первый тест с иностранными студентами</p>
-    <p style="font-size:44px;font-weight:700;margin-top:110px;color:var(--yellow)">max.ru/t149_hakaton_max_bot</p>
-  </div>
-</section>
-
-<!-- 11. Appendix: architecture -->
+<!-- 14. Appendix: architecture -->
 <section class="slide">
   <div class="pad">
     <div class="doc"><b>Приложение</b><span>Устройство</span></div>
@@ -272,13 +339,14 @@ ul.dash li::before { content: ""; position: absolute; left: 0; top: .62em; width
       <div style="grid-template-columns:260px 1fr"><b>Студент</b><span>Чат и мини-приложение в MAX, одна сессия: отметка в одном месте видна в другом</span></div>
       <div style="grid-template-columns:260px 1fr"><b>Сервер</b><span>Node.js и TypeScript, официальный SDK @maxhub/max-bot-api, мини-приложение на React и @maxhub/max-ui</span></div>
       <div style="grid-template-columns:260px 1fr"><b>Ядро</b><span>Явный расчёт сроков по правилам в JSON, без LLM</span></div>
-      <div style="grid-template-columns:260px 1fr"><b>Хранение</b><span>PostgreSQL: профиль студента и очередь напоминаний за 7, 3 и 1 день и на следующий день после срока</span></div>
+      <div style="grid-template-columns:260px 1fr"><b>Данные</b><span>Нормы закона, профили вузов и тексты на пяти языках лежат в JSON, а не в коде</span></div>
+      <div style="grid-template-columns:260px 1fr"><b>Хранение</b><span>PostgreSQL: профиль студента и очередь напоминаний</span></div>
       <div style="grid-template-columns:260px 1fr"><b>Запуск</b><span>docker compose up --build, переменные в .env.example</span></div>
     </div>
   </div>
 </section>
 
-<!-- 12. Appendix: sources -->
+<!-- 15. Appendix: sources -->
 <section class="slide">
   <div class="pad">
     <div class="doc"><b>Приложение</b><span>Источники</span></div>
@@ -286,10 +354,10 @@ ul.dash li::before { content: ""; position: absolute; left: 0; top: .62em; width
     <div class="tbl" style="margin-top:44px">
       <div style="grid-template-columns:700px 1fr"><b>115-ФЗ, ст. 5, в ред. 162-ФЗ</b><span class="muted">consultant.ru, сверено 23.09.2026</span></div>
       <div style="grid-template-columns:700px 1fr"><b>Памятки ИТМО, КФУ, СПбГЭУ</b><span class="muted">int.itmo.ru, students.kpfu.ru, unecon.ru, сверено 16–29.09.2026</span></div>
-      <div style="grid-template-columns:700px 1fr"><b>Иностранные студенты: 422 тыс.</b><span class="muted">Минобрнауки, РИА Новости, 15.09.2026</span></div>
-      <div style="grid-template-columns:700px 1fr"><b>Таблицы «Сведения» семи вузов</b><span class="muted">docs/product/audience.md, D-071</span></div>
-      <div style="grid-template-columns:700px 1fr"><b>Беседы с 10 второкурсниками ИТМО</b><span class="muted">docs/product/demand-interviews.md, D-072</span></div>
-      <div style="grid-template-columns:700px 1fr"><b>Гипотеза, метрики, пилот</b><span class="muted">docs/product/hypothesis.md, docs/product/pilot.md</span></div>
+      <div style="grid-template-columns:700px 1fr"><b>Более 422 тыс. иностранных студентов</b><span class="muted">Минобрнауки, РИА Новости, 15.09.2026</span></div>
+      <div style="grid-template-columns:700px 1fr"><b>Таблицы «Сведения» семи вузов</b><span class="muted">сайты вузов, октябрь 2026</span></div>
+      <div style="grid-template-columns:700px 1fr"><b>Беседы с 10 второкурсниками ИТМО</b><span class="muted">записаны командой 24.10.2026, без персональных данных</span></div>
+      <div style="grid-template-columns:700px 1fr"><b>Аналоги: «Госуслуги», HSE App X, бот КФУ</b><span class="muted">открытые описания, 22.09.2026</span></div>
     </div>
   </div>
 </section>

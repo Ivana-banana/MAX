@@ -51,6 +51,61 @@ h1, h2 { font-weight: 700; letter-spacing: -.025em; line-height: 1.04; }
 .cols ul { list-style: none; display: grid; gap: 16px; }
 .cols li { padding-left: 30px; position: relative; color: #cfd3da; }
 .cols li::before { content: ""; position: absolute; left: 0; top: .55em; width: 12px; height: 12px; background: var(--lime); }
+
+/* Big dates in the left column of a demo slide */
+.dates { display: flex; gap: 70px; margin-top: 44px; }
+.dates span { display: block; font-size: 28px; color: var(--dim); }
+.dates b { display: block; font-size: 96px; font-weight: 700; line-height: 1; letter-spacing: -.03em; }
+.dates .hot b { color: var(--lime); }
+
+/* Reminder schedule across the dark stage */
+.remind { position: absolute; left: 140px; right: 140px; top: 520px; display: grid; grid-template-columns: repeat(5, 1fr); }
+.remind::before { content: ""; position: absolute; left: 14px; right: 14px; top: 14px; height: 4px; background: var(--line); }
+.remind div { position: relative; padding-top: 60px; font-size: 32px; color: var(--dim); }
+.remind div::before { content: ""; position: absolute; left: 0; top: 0; width: 32px; height: 32px; border-radius: 50%; background: var(--fg); }
+.remind b { display: block; font-size: 96px; font-weight: 700; line-height: 1; letter-spacing: -.03em; color: var(--fg); margin-bottom: 10px; }
+.remind .due::before { background: var(--lime); box-shadow: 0 0 0 12px rgba(200, 240, 60, .2); }
+.remind .due b { color: var(--lime); }
+.remind .after::before { background: var(--bg); box-shadow: inset 0 0 0 4px var(--fg); }
+
+/* Tables: changes, alternatives */
+.rows { display: grid; }
+.rows > div { display: grid; gap: 40px; padding: 22px 0; border-top: 2px solid var(--line); font-size: 34px; }
+.rows > div:last-child { border-bottom: 2px solid var(--line); }
+.rows b { font-weight: 600; }
+.rows .head { font-size: 26px; color: var(--dim); border-top: none; padding-bottom: 8px; }
+.rows .ours { color: var(--bg); background: var(--lime); border: none; padding: 22px 24px; margin: 8px -24px 0; border-radius: 14px; font-weight: 500; }
+.ticks { list-style: none; display: grid; gap: 18px; font-size: 36px; }
+.ticks li { padding-left: 34px; position: relative; }
+.ticks li::before { content: ""; position: absolute; left: 0; top: .5em; width: 14px; height: 14px; background: var(--lime); }
+.label { font-size: 30px; font-weight: 500; color: var(--lime); margin-bottom: 18px; }
+
+/* Scale */
+.bars { display: grid; gap: 12px; font-size: 30px; }
+.bars div { display: grid; grid-template-columns: 160px 1fr; align-items: center; }
+.bars dd { position: relative; height: 36px; }
+.bars dd::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: calc(var(--v) / 12917 * 420px); background: var(--lime); }
+.bars dd span { position: absolute; left: calc(var(--v) / 12917 * 420px + 16px); line-height: 36px; }
+.bars .off { color: var(--dim); }
+.bars .off dd::before { background: none; box-shadow: inset 0 0 0 2px var(--dim); }
+.box { padding: 26px 30px; border: 2px solid var(--line); border-radius: 18px; font-size: 32px; }
+.box.on { background: var(--lime); color: var(--bg); border-color: var(--lime); font-weight: 400; }
+.box b { display: block; font-weight: 600; margin-bottom: 6px; }
+
+/* Pilot */
+.targets { display: grid; grid-template-columns: repeat(3, 1fr); gap: 60px; }
+.targets b { display: block; font-size: 120px; font-weight: 700; line-height: 1; letter-spacing: -.03em; color: var(--lime); }
+.targets span { font-size: 32px; color: #cfd3da; }
+.flow { display: flex; gap: 20px; align-items: center; font-size: 32px; }
+.flow span { padding: 12px 28px; border: 2px solid var(--line); border-radius: 40px; }
+.flow i { font-style: normal; color: var(--lime); }
+
+/* Team roles are not assigned yet: the dashed pink frame is a reminder for the authors */
+.roles { position: absolute; left: 140px; right: 140px; bottom: 90px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 30px; font-size: 32px; padding: 22px 26px 64px; }
+.roles b { display: block; font-weight: 600; }
+.todo { outline: 6px dashed #ff2bd6; outline-offset: 6px; }
+.todo::after { content: attr(data-mark); position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%); padding: 6px 14px; background: #ff2bd6; color: #fff; font: 700 22px/1.25 system-ui, sans-serif; white-space: nowrap; }
+.note.loud { font-size: 32px; color: var(--fg); }
 </style>
 </head>
 <body>
@@ -74,7 +129,7 @@ h1, h2 { font-weight: 700; letter-spacing: -.025em; line-height: 1.04; }
         <ol>
           <li>Открыть бота, нажать «Начать»</li>
           <li>Язык, «Продолжить», «Да, совпадает», «Казахстан»</li>
-          <li>Дата въезда: сегодня минус 22 дня</li>
+          <li>Дата въезда 17.10.2026, как в примере на слайдах</li>
           <li>План, «Включить напоминания», карточка процедуры</li>
           <li>Кнопка MAX слева от поля ввода открывает мини-приложение с тем же планом</li>
         </ol>
@@ -87,81 +142,174 @@ h1, h2 { font-weight: 700; letter-spacing: -.025em; line-height: 1.04; }
 <section class="slide">
   <div class="say">
     <h2 style="font-size:150px">Первые<br>90 дней</h2>
-    <p>Личный план иностранного студента в MAX</p>
-    <p style="font-size:28px;margin-top:80px">«ИИ в массы»: Иван Резников, Иван Пушкин, Александр Чичерин, Михаил Анцев<br>Хакатон Минобрнауки России и MAX, финал, Казань, 29.10.2026</p>
+    <p>Личный план иностранного первокурсника в MAX: свои сроки, документы и напоминания</p>
+    <p style="font-size:28px;margin-top:80px">«ИИ в массы»: Иван Резников, Иван Пушкин, Александр Чичерин, Михаил Анцев<br>Минобрнауки России × MAX, «Забота о людях». Казань, 29.10.2026</p>
   </div>
   <div class="phone big shot" data-mark="Рендер из кода, заменить на скриншот MAX"><img src="../screens/01-start.jpg" alt="Стартовый экран мини-приложения"></div>
 </section>
 
-<!-- 3. Problem in one phrase -->
+<!-- 3. Problem and segment in one phrase -->
 <section class="slide">
-  <div class="say" style="width:1600px">
-    <h2 style="font-size:120px"><span class="lime">30 дней</span> со дня въезда на медосвидетельствование. Дату студент считает сам</h2>
-    <p style="max-width:1300px">Памятки вузов при этом называют разные сроки: ИТМО 30 дней на всё, СПбГЭУ 90, а две страницы КФУ противоречат друг другу</p>
+  <div class="say" style="width:1640px">
+    <span class="step">Первокурсник 18+, впервые въехал учиться после 31.08.2026, ВНЖ нет</span>
+    <h2 style="font-size:116px"><span class="lime">30 дней</span> со дня въезда на медосвидетельствование. Дату студент считает сам</h2>
+    <p style="max-width:1400px">А памятки называют разное: ИТМО 30 дней на всё, СПбГЭУ 90, две страницы КФУ противоречат друг другу. Пропуск — повод сократить срок пребывания</p>
   </div>
-  <p class="note">115-ФЗ, ст. 5, в ред. 162-ФЗ с 01.09.2026. Памятки сверены 16–29.09.2026</p>
+  <p class="note">115-ФЗ, ст. 5, в ред. 162-ФЗ с 01.09.2026; последствие — там же, п. 23. Памятки сверены 16–29.09.2026</p>
 </section>
 
-<!-- 4–9. The demo: one screen per slide -->
+<!-- 4–9. The demo: one screen per slide, example entry 17.10.2026 -->
 <section class="slide">
-  <div class="say"><span class="step">Показ, шаг 1</span><h2>Студент вводит дату въезда</h2><p>И отвечает на два вопроса: гражданство и совпадает ли его случай</p></div>
+  <div class="say"><span class="step">Показ, шаг 1 · пример: Казахстан, КФУ</span><h2>Студент вводит дату въезда</h2>
+    <div class="dates"><div class="hot"><span>Въезд</span><b>17.10</b></div></div>
+    <p>До этого — язык, вуз и гражданство</p></div>
   <div class="phone big shot" data-mark="Рендер из кода, заменить на скриншот MAX"><img src="../screens/06-entry-date.jpg" alt="Ввод даты въезда"></div>
 </section>
 
 <section class="slide">
-  <div class="say"><span class="step">Показ, шаг 2</span><h2>Видит свои сроки</h2><p>Даты посчитаны по правилам, рядом сколько дней осталось</p></div>
+  <div class="say"><span class="step">Показ, шаг 2</span><h2>Видит свои сроки</h2>
+    <div class="dates"><div class="hot"><span>Медосвидетельствование</span><b>до 15.11</b></div><div><span>Дактилоскопия</span><b>до 14.01</b></div></div>
+    <p>Тот же план в чате и в мини-приложении. Сроки считает расчёт по правилам, не LLM</p></div>
   <div class="phone big shot" data-mark="Рендер из кода, заменить на скриншот MAX"><img src="../screens/07-plan.jpg" alt="Личный план"></div>
 </section>
 
 <section class="slide">
-  <div class="say"><span class="step">Показ, шаг 3</span><h2>Знает, с чем идти</h2><p>Документы с отметками, адрес и часы работы, норма закона</p></div>
-  <div class="phone big shot" data-mark="Рендер из кода, заменить на скриншот MAX"><img src="../screens/09-card-documents.jpg" alt="Карточка процедуры"></div>
+  <div class="say"><span class="step">Показ, шаг 3</span><h2>Знает, с чем идти</h2><p>Документы с отметками, адрес и как добраться, чем грозит пропуск со ссылкой на закон</p></div>
+  <div class="phone big shot" data-mark="Рендер из кода, заменить на скриншот MAX"><img src="../screens/08-card.jpg" alt="Карточка процедуры"></div>
 </section>
 
 <section class="slide">
-  <div class="say"><span class="step">Показ, шаг 4</span><h2>Получает напоминания</h2><p>В чате MAX за 7, 3 и 1 день до срока и на следующий день, если процедура не отмечена</p></div>
-  <div class="phone big shot" data-mark="Скриншот MAX от 27.09, заменить"><img src="../../screens/chat-plan.jpg" alt="Чат MAX с планом"></div>
+  <div style="position:absolute;left:140px;top:150px"><span class="step" style="display:block;font-size:34px;font-weight:500;color:var(--lime);margin-bottom:26px">Показ, шаг 4</span><h2 style="font-size:104px">Бот напоминает сам</h2></div>
+  <div class="remind">
+    <div><b>08.11</b>за 7 дней</div>
+    <div><b>12.11</b>за 3 дня</div>
+    <div><b>14.11</b>за 1 день</div>
+    <div class="due"><b>15.11</b>срок</div>
+    <div class="after"><b>16.11</b>если не отмечено</div>
+  </div>
+  <p style="position:absolute;left:140px;top:820px;font-size:42px;color:var(--dim)">В чат MAX в 9:00 по Москве. Кнопка «Подробнее» открывает карточку</p>
+  <p class="note">Пример: въезд 17.10, медосвидетельствование. Напоминания студент включает кнопкой в плане</p>
 </section>
 
 <section class="slide">
-  <div class="say"><span class="step">Показ, шаг 5</span><h2>Спрашивает вуз готовым текстом</h2><p>Бот собирает вопрос в международную службу с датами студента</p></div>
-  <div class="phone big shot" data-mark="Скриншот MAX от 27.09, заменить"><img src="../../screens/app-question.jpg" alt="Вопрос в вуз"></div>
+  <div class="say"><span class="step">Показ, шаг 5</span><h2>Не получилось — готовый вопрос вузу</h2><p>Бот собирает текст с датами студента. Студент копирует и отправляет в международную службу сам</p></div>
+  <div class="phone big shot" data-mark="Рендер из кода, заменить на скриншот MAX"><img src="../screens/11-question.jpg" alt="Готовый вопрос вузу"></div>
 </section>
 
 <section class="slide">
-  <div class="say"><span class="step">И ещё до приезда</span><h2>Знает, что подготовить дома</h2><p>Приглашение и виза, «Госуслуги RuID», перевод паспорта, контакты вуза. Выбор вуза и гранты мы только исследуем</p></div>
+  <div class="say"><span class="step">И ещё до приезда</span><h2>Знает, что подготовить дома</h2><p>Кнопка «Ещё не в России»: приглашение и виза, «Госуслуги RuID», перевод паспорта, контакты вуза. Выбор вуза и подачу документов пока исследуем</p></div>
   <div class="phone big shot" data-mark="Рендер из кода, заменить на скриншот MAX"><img src="../screens/10-pre-arrival.jpg" alt="Что подготовить до въезда"></div>
 </section>
 
-<!-- 10. Same plan in chat and mini app -->
+<!-- 10. What changed after the online stage (required by the final brief) -->
 <section class="slide">
-  <div class="say" style="width:700px"><h2 style="font-size:92px">Чат и мини-приложение показывают один план</h2><p>Отметка в одном месте видна в другом</p></div>
-  <div class="phone shot" data-mark="Скриншот MAX от 27.09, заменить" style="right:640px;top:110px;width:390px;height:810px"><img src="../../screens/chat-plan.jpg" alt="План в чате"></div>
-  <div class="phone shot" data-mark="Скриншот MAX от 27.09, заменить" style="right:180px;top:170px;width:390px;height:810px"><img src="../../screens/app-card.jpg" alt="План в мини-приложении"></div>
+  <h2 style="position:absolute;left:140px;top:100px;font-size:84px">Что изменилось после онлайн-этапа</h2>
+  <div style="position:absolute;left:140px;right:140px;top:290px;display:grid;grid-template-columns:1fr 1.2fr;gap:100px">
+    <div><p class="label">По отзыву жюри</p>
+      <div class="rows">
+        <div style="grid-template-columns:170px 1fr"><b>Раньше</b><span>Шаги «Ещё не в России»</span></div>
+        <div style="grid-template-columns:170px 1fr"><b>Спрос</b><span>10 бесед, первый сигнал</span></div>
+        <div style="grid-template-columns:170px 1fr"><b>Формат</b><span>Один экран — одна мысль</span></div>
+      </div></div>
+    <div><p class="label">В продукте</p>
+      <ul class="ticks">
+        <li>Где пройти и как добраться</li>
+        <li>Чем грозит пропуск, со ссылкой на закон</li>
+        <li>«Изменились обстоятельства»: переезд, поездка, больница</li>
+        <li>План в PDF для куратора</li>
+        <li>«Пройдено X из N» и ближайший шаг</li>
+        <li>Ссылка и QR для письма о зачислении</li>
+      </ul></div>
+  </div>
+  <p class="note loud">Всё справа сделано после сдачи 30.09.2026 и работает в боте</p>
 </section>
 
-<!-- 11. Numbers, each labelled with its kind -->
+<!-- 11. Alternatives -->
 <section class="slide">
-  <h2 style="position:absolute;left:140px;top:100px;font-size:84px">Что знаем и что проверим</h2>
+  <h2 style="position:absolute;left:140px;top:100px;font-size:84px">Что уже есть</h2>
+  <div class="rows" style="position:absolute;left:140px;right:140px;top:270px">
+    <div class="head" style="grid-template-columns:340px 1fr 1fr"><span></span><span>Что даёт</span><span>Чего не хватает</span></div>
+    <div style="grid-template-columns:340px 1fr 1fr"><b>Памятка вуза</b><span>Общий список шагов</span><span>Не считает дату, не напоминает</span></div>
+    <div style="grid-template-columns:340px 1fr 1fr"><b>«Госуслуги»</b><span>Электронный миграционный учёт</span><span>Нужна подтверждённая учётная запись</span></div>
+    <div style="grid-template-columns:340px 1fr 1fr"><b>HSE App X</b><span>Документы, статусы, напоминания</span><span>Только для студентов ВШЭ</span></div>
+    <div style="grid-template-columns:340px 1fr 1fr"><b>Бот КФУ</b><span>Анонсирован, про миграционный учёт</span><span>Как работает, мы не проверили</span></div>
+    <div class="ours" style="grid-template-columns:340px 1fr 1fr"><b>Первые 90 дней</b><span>Свои даты и напоминания в MAX</span><span>Любой вуз подключается профилем</span></div>
+  </div>
+  <p class="note">Аналоги искали 22.09.2026 по открытым описаниям. Кабинеты и чаты вузов не изучали</p>
+</section>
+
+<!-- 12. Evidence, each line labelled with its kind -->
+<section class="slide">
+  <h2 style="position:absolute;left:140px;top:100px;font-size:84px">Что знаем и чего не знаем</h2>
   <dl class="facts">
     <div><dt>Факт</dt><dd>Более 422 тыс. иностранных студентов в вузах России<small>Минобрнауки, РИА Новости, 15.09.2026</small></dd></div>
-    <div><dt>Сигнал</dt><dd>2 из 10 знакомых второкурсников ИТМО просрочили медосвидетельствование<small>Беседы без анкеты, один вуз. Тогда срок был 90 дней</small></dd></div>
-    <div><dt>Замер</dt><dd>ИТМО и СПбГЭУ подключены файлами профиля, код не менялся<small>Профили по открытым страницам, вузы не партнёры</small></dd></div>
-    <div><dt>Цель пилота</dt><dd>80% доходят до плана сами, 0 критичных ошибок, на 30% быстрее памятки<small>Задано до измерений, результатов пока нет</small></dd></div>
+    <div><dt>Сигнал</dt><dd>2 из 10 знакомых второкурсников ИТМО просрочили медосвидетельствование<small>Беседы со знакомыми участника команды, один вуз, без анкеты. Тогда срок был 90 дней</small></dd></div>
+    <div><dt>Не знаем</dt><dd>Как часто опаздывают первокурсники 2026 года</dd></div>
+    <div><dt>Не знаем</dt><dd>Станет ли с ботом быстрее и точнее, чем по памятке</dd></div>
+    <div><dt>Не знаем</dt><dd>Возьмёт ли вуз ссылку в письмо о зачислении</dd></div>
   </dl>
+  <p class="note loud">Это сигнал, а не доказательство спроса. Неизвестное проверит пилот</p>
 </section>
 
-<!-- 12. Closing -->
+<!-- 13. Scale: same core, university data (D-071) -->
 <section class="slide">
-  <div class="say" style="width:1100px">
-    <h2 style="font-size:130px">Ищем вуз<br>для пилота</h2>
-    <p>Проверим правила со специалистом вуза и проведём первый тест со студентами</p>
-    <p style="color:var(--lime);font-size:52px;font-weight:600;margin-top:60px">max.ru/t149_hakaton_max_bot</p>
+  <h2 style="position:absolute;left:140px;top:100px;font-size:84px">Вуз подключается данными</h2>
+  <div style="position:absolute;left:140px;width:760px;top:250px">
+    <p style="font-size:30px;color:var(--dim)">более</p>
+    <p style="font-size:150px;font-weight:700;line-height:.95;letter-spacing:-.03em;color:var(--lime)">422 тыс.</p>
+    <p style="font-size:32px;margin-top:10px">иностранных студентов в вузах России, Минобрнауки, 15.09.2026</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:40px">
+      <div class="box on"><b>Одинаково</b>расчёт по закону, напоминания, чат и мини-приложение</div>
+      <div class="box"><b>Своё у вуза</b>файл профиля: адреса, контакты, памятка, языки</div>
+    </div>
   </div>
-  <div class="phone big shot" data-mark="Рендер из кода, заменить на скриншот MAX"><img src="../screens/07-plan.jpg" alt="Личный план"></div>
+  <div style="position:absolute;left:1000px;right:140px;top:270px">
+    <p style="font-size:28px;color:var(--dim);margin-bottom:18px">Иностранцы на всех курсах, таблицы «Сведения» на сайтах вузов</p>
+    <dl class="bars">
+      <div class="off"><dt>РУДН</dt><dd style="--v:12917"><span>12 917</span></dd></div>
+      <div><dt>КФУ</dt><dd style="--v:6139"><span>6 139</span></dd></div>
+      <div class="off"><dt>СПбПУ</dt><dd style="--v:5627"><span>5 627</span></dd></div>
+      <div class="off"><dt>УрФУ</dt><dd style="--v:4052"><span>4 052</span></dd></div>
+      <div class="off"><dt>ТПУ</dt><dd style="--v:2678"><span>2 678</span></dd></div>
+      <div><dt>ИТМО</dt><dd style="--v:1282"><span>1 282</span></dd></div>
+      <div><dt>СПбГЭУ</dt><dd style="--v:499"><span>499</span></dd></div>
+    </dl>
+    <p style="font-size:28px;margin-top:18px"><span class="lime">■</span> профиль в боте &nbsp; <span style="color:var(--dim)">□ профиля пока нет</span></p>
+    <p style="font-size:30px;margin-top:24px;color:#cfd3da"><b style="color:var(--fg);font-weight:600">Риски:</b> закон меняется, поэтому у каждого правила дата сверки. Переводы на tt, uz и zh машинные</p>
+  </div>
+  <p class="note">Профили собраны по открытым страницам. Вузы пока не партнёры: 19.10.2026 письма ушли в 31 вуз, ответов нет</p>
 </section>
 
-<!-- 13. Appendix: how it works and limits -->
+<!-- 14. Pilot: KFU first -->
+<section class="slide">
+  <h2 style="position:absolute;left:140px;top:100px;font-size:84px">Пилот: начнём с КФУ</h2>
+  <div style="position:absolute;left:140px;right:140px;top:250px;display:grid;grid-template-columns:repeat(3,1fr);gap:60px;font-size:32px;color:#cfd3da">
+    <div><p class="label">Где</p>Одна группа первокурсников КФУ. Письмо в международную службу ушло 19.10, ответа пока нет</div>
+    <div><p class="label">Канал</p>Ссылка и QR в письме о зачислении или в чате куратора</div>
+    <div><p class="label">Кто</p>Специалист вуза проверяет правила, куратор зовёт студентов, команда ведёт тест</div>
+  </div>
+  <div class="targets" style="position:absolute;left:140px;right:140px;top:560px">
+    <div><b>80%</b><span>доходят до плана без подсказки</span></div>
+    <div><b>0</b><span>критичных ошибок в датах</span></div>
+    <div><b>−30%</b><span>времени по сравнению с памяткой</span></div>
+  </div>
+  <div class="flow" style="position:absolute;left:140px;top:840px"><span>10–15 сессий</span><i>→</i><span>30–50 студентов</span><i>→</i><span>второй вуз: ИТМО или СПбГЭУ</span></div>
+  <p class="note loud">Это цели пилота, результатов пока нет. КФУ не партнёр</p>
+</section>
+
+<!-- 15. Closing and team roles -->
+<section class="slide">
+  <div style="position:absolute;left:140px;top:120px;width:1100px">
+    <h2 style="font-size:120px">Проверим план<br>с первым вузом</h2>
+    <p style="font-size:42px;color:var(--dim);margin-top:30px">Нужны специалист, который проверит правила, и одна группа первокурсников</p>
+    <p style="color:var(--lime);font-size:52px;font-weight:600;margin-top:40px">max.ru/t149_hakaton_max_bot</p>
+  </div>
+  <div class="roles todo" data-mark="Роли — заполнить до сдачи (#56)">
+    <div><b>Рассказ</b>TBD</div><div><b>Показ в MAX</b>TBD</div><div><b>Пилот и масштаб</b>TBD</div><div><b>Архитектура</b>TBD</div>
+  </div>
+</section>
+
+<!-- 16. Appendix: how it works and limits -->
 <section class="slide appx">
   <div class="pad">
     <p style="color:var(--dim);font-size:28px">Приложение</p>
@@ -184,24 +332,19 @@ h1, h2 { font-weight: 700; letter-spacing: -.025em; line-height: 1.04; }
   </div>
 </section>
 
-<!-- 14. Appendix: jury feedback and sources -->
+<!-- 17. Appendix: sources -->
 <section class="slide appx">
   <div class="pad">
     <p style="color:var(--dim);font-size:28px">Приложение</p>
-    <h2>Отзыв жюри и источники</h2>
-    <div class="cols">
-      <div><h3>Что изменили после отборочного этапа</h3><ul>
-        <li>Помочь раньше: карточки до въезда уже есть, поступление исследуем</li>
-        <li>Обосновать спрос: 10 бесед как первый сигнал и проверка на пилоте</li>
-        <li>Сменить формат: показ продукта вместо плотного текста</li>
-      </ul></div>
-      <div><h3>Источники</h3><ul>
-        <li>115-ФЗ, ст. 5, в ред. 162-ФЗ: consultant.ru, 23.09.2026</li>
-        <li>Памятки ИТМО, КФУ, СПбГЭУ: сверено 16–29.09.2026</li>
-        <li>422 тыс.: Минобрнауки, РИА Новости, 15.09.2026</li>
-        <li>Беседы: <span style="font-size:28px">docs/product/demand-interviews.md</span></li>
-      </ul></div>
-    </div>
+    <h2>Источники</h2>
+    <div class="cols" style="grid-template-columns:1fr"><ul>
+      <li>115-ФЗ, ст. 5, в ред. 162-ФЗ: consultant.ru, сверено 23.09.2026</li>
+      <li>Памятки ИТМО, КФУ, СПбГЭУ: int.itmo.ru, students.kpfu.ru, unecon.ru, сверено 16–29.09.2026</li>
+      <li>Более 422 тыс. студентов: Минобрнауки, РИА Новости, 15.09.2026; по вузам — таблицы «Сведения»</li>
+      <li>Беседы с 10 второкурсниками ИТМО: записаны командой 24.10.2026, без персональных данных</li>
+      <li>Аналоги: открытые описания, 22.09.2026</li>
+      <li>Отзыв отборочного жюри: сообщение организаторов, октябрь 2026</li>
+    </ul></div>
   </div>
 </section>
 
