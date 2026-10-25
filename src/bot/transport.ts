@@ -39,10 +39,9 @@ export function createTransport(config: Config): Transport {
   }
   return {
     async send(user, reply) {
-      const attachments = [
-        ...(reply.file ? [await upload(reply.file)] : []),
-        ...(reply.buttons.length ? [Keyboard.inlineKeyboard(reply.buttons.map(row => row.map(toButton)))] : []),
-      ];
+      const file = reply.file ? [await upload(reply.file)] : [];
+      const attach = (rows: Button[][]) => [...file, ...(rows.length ? [Keyboard.inlineKeyboard(rows.map(row => row.map(toButton)))] : [])];
+      let rows = reply.buttons, attachments = attach(rows);
       // Bold and links go as MAX HTML (#114). Should MAX refuse the markup, the same words go once
       // without it: a plain message is better than none.
       let html = true;
@@ -57,6 +56,13 @@ export function createTransport(config: Config): Transport {
           if (html && e instanceof MaxError && e.status === 400 && e.code !== "attachment.not.ready") {
             console.error(`MAX refused the HTML markup (${errorInfo(e)}); sending the text without it.`);
             html = false;
+            continue;
+          }
+          // Should MAX also refuse the mini-app button, the plan and the reminder go without it (#127).
+          if (e instanceof MaxError && e.status === 400 && e.code !== "attachment.not.ready" && rows.flat().some(b => "app" in b)) {
+            console.error(`MAX refused the mini-app button (${errorInfo(e)}); sending the message without it.`);
+            rows = rows.map(row => row.filter(b => !("app" in b))).filter(row => row.length);
+            attachments = attach(rows);
             continue;
           }
           if (!(e instanceof MaxError && e.code === "attachment.not.ready") || attempt >= 5) throw e;
