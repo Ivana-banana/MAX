@@ -175,7 +175,11 @@ h2 { font-size: 132px; }
 /* 6 · real MAX screenshots, no draft mark */
 .real { position: relative; }
 .real img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
-/* 5–6 · screenshots from MAX taken on 25.10: a flat frame, not a phone, since some are web or cropped */
+/* 5 · cropped renders: a flat frame, not a phone.
+   classic-*.jpg are cut from the screens.mjs renders (1236 px wide): plan = 07-plan y 230–2237,
+   card = 08-card y 196–1610, question = 11-question y 1520–2050, card-docs = 09-card-documents from y 70;
+   entry and pre-arrival (06-entry-date, 10-pre-arrival up to y 1840) drop y 130–200, the local-launch
+   warning that MAX itself never shows, and keep the demo chip. */
 .frame { border: 6px solid var(--ink); border-radius: 14px; overflow: hidden; background: var(--ink); }
 .frame img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; }
 
@@ -297,26 +301,26 @@ h2 { font-size: 132px; }
   <p class="label" style="position:absolute;left:130px;bottom:140px;font-size:30px">От /start до плана: всё кнопками, кроме даты въезда</p>
   <div class="flow route"><span>Язык</span><i>→</i><span>Согласие</span><i>→</i><span>«Всё совпадает?»</span><i>→</i><span>Гражданство</span><i>→</i><span>Дата въезда</span><i>→</i><span class="end">План</span></div>
   <div class="phones" style="top:68px;gap:24px;align-items:flex-start">
-    <div class="frame" style="width:500px;height:812px"><img src="../screens/max-web-plan.jpg" alt="Мини-приложение в веб-версии MAX: план с личными сроками"></div>
+    <div class="frame" style="width:500px;height:812px"><img src="../screens/classic-plan.jpg" alt="Мини-приложение: план с личными сроками"></div>
     <div style="display:flex;flex-direction:column;gap:24px">
-      <div class="frame" style="width:506px;height:535px"><img src="../screens/max-web-card.jpg" alt="Мини-приложение в веб-версии MAX: карточка медосвидетельствования"></div>
-      <div class="frame" style="width:506px;height:253px"><img src="../screens/max-web-question.jpg" alt="Мини-приложение в веб-версии MAX: готовый вопрос вузу скопирован"></div>
+      <div class="frame" style="width:506px;height:564px"><img src="../screens/classic-card.jpg" alt="Мини-приложение: карточка медосвидетельствования"></div>
+      <div class="frame" style="width:506px;height:224px"><img src="../screens/classic-question.jpg" alt="Мини-приложение: готовый вопрос вузу"></div>
     </div>
   </div>
 </section>
 
-<!-- 6 · Настоящие экраны MAX: план и состояние ошибки, мобильная версия -->
+<!-- 6 · Экраны мини-приложения: дата въезда и карточка с отметками (рендеры из кода, 3x) -->
 <section class="slide demo">
-  <div class="pad" style="right:auto;width:960px">
+  <div class="pad" style="right:auto;width:900px">
     <h2 style="font-size:104px">Так это выглядит<br>в MAX</h2>
-    <div class="memo" style="margin-top:44px">
-      <div class="row pair" style="grid-template-columns:220px 1fr;font-size:38px;padding:22px 0"><span class="label">План</span><span>Въезд 17.10: медосвидетельствование до 15.11, дактилоскопия до 14.01</span></div>
-      <div class="row pair" style="grid-template-columns:220px 1fr;font-size:38px;padding:22px 0"><span class="label">Отметки</span><span>Чат и мини-приложение в одной сессии: отметка в одном месте видна в другом</span></div>
+    <div class="memo" style="margin-top:44px;width:800px">
+      <div class="row pair" style="grid-template-columns:180px 1fr;font-size:38px;padding:22px 0"><span class="label">План</span><span>Въезд 17.10: медосвидетельствование до 15.11, дактилоскопия до 14.01</span></div>
+      <div class="row pair" style="grid-template-columns:180px 1fr;font-size:38px;padding:22px 0"><span class="label">Отметки</span><span>Чат и мини-приложение в одной сессии: отметка в одном месте видна в другом</span></div>
     </div>
   </div>
-  <div class="phones" style="flex-direction:column;gap:20px">
-    <div class="frame" style="width:460px;height:544px"><img src="../../../../images/max-check/mobile-chat-14-plan-top.jpg" alt="Чат бота в MAX на телефоне: план от въезда 17.10.2026"></div>
-    <div class="frame" style="width:460px;height:305px"><img src="../../../../images/max-check/mobile-chat-11-entry-format.jpg" alt="Чат бота в MAX на телефоне: ответ на неверную дату"></div>
+  <div class="phones" style="top:150px;align-items:center">
+    <div class="phone real" style="width:380px;height:690px"><img src="../screens/classic-entry.jpg" alt="Мини-приложение: дата въезда 17.10.2026"></div>
+    <div class="phone real" style="width:380px;height:776px"><img src="../screens/classic-card-docs.jpg" alt="Мини-приложение: карточка, кнопка «Процедура пройдена»"></div>
   </div>
 </section>
 
@@ -351,7 +355,7 @@ h2 { font-size: 132px; }
 
 <!-- 9 · Помощь раньше (ответ на рекомендацию жюри) -->
 <section class="slide">
-  <div class="pad" style="right:640px">
+  <div class="pad" style="right:700px">
     <h2>Начать помощь<br>до приезда</h2>
     <p class="lead" style="margin-top:36px">Кнопка «Ещё не в России» ведёт по шагам до въезда</p>
     <div class="cols" style="margin-top:50px">
@@ -361,7 +365,7 @@ h2 { font-size: 132px; }
         <ul><li>Выбор вуза</li><li>Подача документов</li><li>Поддержка и гранты</li></ul></div>
     </div>
   </div>
-  <div class="phone real" style="position:absolute;right:130px;top:120px;width:410px;height:836px"><img src="../screens/10-pre-arrival.jpg" alt="Мини-приложение: что подготовить до въезда"></div>
+  <div class="phone real" style="position:absolute;right:130px;top:170px;width:520px;height:734px"><img src="../screens/classic-pre-arrival.jpg" alt="Мини-приложение: что подготовить до въезда"></div>
 </section>
 
 <!-- 10 · Что изменилось после онлайн-этапа (требование Задания к финалу) -->
