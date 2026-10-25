@@ -152,7 +152,7 @@ h2 { font-size: 132px; }
 /* 8 · changes after the online stage */
 .changes { display: grid; grid-template-columns: 1fr 1fr; gap: 90px; margin-top: 50px; }
 .changes .label { margin-bottom: 22px; color: var(--red); }
-.changes .row.pair { grid-template-columns: 200px 1fr; font-size: 40px; padding: 22px 0; }
+.changes .row.pair { grid-template-columns: 250px 1fr; font-size: 40px; padding: 22px 0; }
 .changes .row .label { color: var(--ink); margin: 0; }
 .changes ul { list-style: none; display: grid; gap: 18px; font-size: 40px; }
 .changes li { padding-left: 36px; position: relative; }
@@ -310,16 +310,14 @@ h2 { font-size: 132px; }
   <div class="pad" style="right:auto;width:960px">
     <h2 style="font-size:104px">Так это выглядит<br>в MAX</h2>
     <div class="memo" style="margin-top:44px">
-      <div class="row pair" style="grid-template-columns:220px 1fr;font-size:38px;padding:22px 0"><span class="label">План</span><span>Въезд 17.10: медосвидетельствование до 15.11, дактилоскопия до 14.01 (30 и 90 дней по закону)</span></div>
-      <div class="row pair" style="grid-template-columns:220px 1fr;font-size:38px;padding:22px 0"><span class="label">Ошибка</span><span>Неверная дата: бот объясняет формат и ждёт новую, анкета не сбрасывается</span></div>
-      <div class="row pair" style="grid-template-columns:220px 1fr;font-size:38px;padding:22px 0"><span class="label">Сбой</span><span>Сообщение не дошло: очередь повторит отправку до 8 раз, ответы студента сохранены</span></div>
+      <div class="row pair" style="grid-template-columns:220px 1fr;font-size:38px;padding:22px 0"><span class="label">План</span><span>Въезд 17.10: медосвидетельствование до 15.11, дактилоскопия до 14.01</span></div>
+      <div class="row pair" style="grid-template-columns:220px 1fr;font-size:38px;padding:22px 0"><span class="label">Отметки</span><span>Чат и мини-приложение в одной сессии: отметка в одном месте видна в другом</span></div>
     </div>
   </div>
   <div class="phones" style="flex-direction:column;gap:20px">
     <div class="frame" style="width:460px;height:544px"><img src="../../../../images/max-check/mobile-chat-14-plan-top.jpg" alt="Чат бота в MAX на телефоне: план от въезда 17.10.2026"></div>
     <div class="frame" style="width:460px;height:305px"><img src="../../../../images/max-check/mobile-chat-11-entry-format.jpg" alt="Чат бота в MAX на телефоне: ответ на неверную дату"></div>
   </div>
-  <p class="note" style="bottom:40px">Скриншоты мобильной версии MAX от 25.10.2026, версия бота 1761443</p>
 </section>
 
 <!-- 7 · Ценность: что меняется для студента -->
@@ -329,19 +327,18 @@ h2 { font-size: 132px; }
     <div class="ba" style="margin-top:46px">
       <div class="head"><span></span><span>Было</span><span>С ботом</span></div>
       <div><b>Срок</b><span>Считает сам по общей памятке, а памятки расходятся</span><span>Две свои даты по закону, с основанием и датой сверки</span></div>
-      <div><b>Документы</b><span>Уточняет у инстанций, как почти все 10 собеседников</span><span>Комплект, адрес и маршрут в карточке</span></div>
-      <div><b>Напоминание</b><span>Помнит сам</span><span>Сообщение в MAX за 7, 3 и 1 день</span></div>
-      <div><b>Не успевает</b><span>Ищет, кому писать</span><span>Готовый вопрос в службу вуза</span></div>
+      <div><b>Документы</b><span>Разные версии, неизвестно, какая верная</span><span>Комплект, адрес и маршрут в карточке</span></div>
+      <div><b>Напоминание</b><span>Легко забыть</span><span>Сообщение в MAX за 7, 3 и 1 день</span></div>
+      <div><b>Не успевает</b><span>Непонятно, к кому обратиться</span><span>Готовый вопрос в службу вуза</span></div>
     </div>
   </div>
-  <p class="note" style="bottom:40px">«Было» — по опросу 234 студентов, 10 беседам и памяткам. Быстрее ли с ботом, покажет пилот</p>
 </section>
 
 <!-- 8 · Напоминания: расписание для примера 17.10 -->
 <section class="slide">
   <div class="pad">
     <h2>Бот напоминает сам</h2>
-    <p class="lead" style="margin-top:36px;max-width:1500px">Сообщение приходит в чат MAX в 9:00 по Москве. Повторное медосвидетельствование через год встаёт в план само</p>
+    <p class="lead" style="margin-top:36px;max-width:1500px">Сообщение приходит в чат MAX в 9:00 по Москве. Через год бот опять напомнит о медосвидетельствовании</p>
   </div>
   <div class="remind">
     <div><b>08.11</b><span>за 7 дней</span></div>
@@ -350,7 +347,6 @@ h2 { font-size: 132px; }
     <div class="due"><b>15.11</b><span>срок</span></div>
     <div><b>16.11</b><span>если не отмечено</span></div>
   </div>
-  <p class="note">Пример: въезд 17.10, медосвидетельствование. Напоминания студент включает кнопкой в плане</p>
 </section>
 
 <!-- 9 · Помощь раньше (ответ на рекомендацию жюри) -->
@@ -365,7 +361,7 @@ h2 { font-size: 132px; }
         <ul><li>Выбор вуза</li><li>Подача документов</li><li>Поддержка и гранты</li></ul></div>
     </div>
   </div>
-  <div class="phone shot" data-mark="Рендер из кода, демо-данные" style="position:absolute;right:130px;top:120px;width:410px;height:836px"><img src="../screens/10-pre-arrival.jpg" alt="Мини-приложение: что подготовить до въезда"></div>
+  <div class="phone real" style="position:absolute;right:130px;top:120px;width:410px;height:836px"><img src="../screens/10-pre-arrival.jpg" alt="Мини-приложение: что подготовить до въезда"></div>
 </section>
 
 <!-- 10 · Что изменилось после онлайн-этапа (требование Задания к финалу) -->
@@ -376,8 +372,8 @@ h2 { font-size: 132px; }
       <div>
         <p class="label">Отвечаем на отзыв жюри</p>
         <div class="row pair"><span class="label">До въезда</span><span>Карточки «Ещё не в России»</span></div>
-        <div class="row pair"><span class="label">Спрос</span><span>Первый сигнал: опрос 234 студентов и 10 бесед</span></div>
-        <div class="row pair"><span class="label">Формат</span><span>Меньше текста, больше экранов</span></div>
+        <div class="row pair"><span class="label">Спрос</span><span>Первый сигнал: опрос 234 студентов</span></div>
+        <div class="row pair"><span class="label">Поступление</span><span>Исследуем выбор вуза, подачу и гранты</span></div>
       </div>
       <div>
         <p class="label">В продукте</p>
@@ -392,32 +388,12 @@ h2 { font-size: 132px; }
       </div>
     </div>
   </div>
-  <p class="note">«Как добраться» и «Пройдено X из N» покажем вживую. Блок для письма собирает команда</p>
 </section>
 
-<!-- 11 · Спрос: что известно и чего не знаем (D-072, D-078) -->
+<!-- 11 · Альтернативы: что уже есть -->
 <section class="slide">
   <div class="pad">
-    <h2>Что знаем<br>и чего не знаем</h2>
-  </div>
-  <div style="position:absolute;left:130px;top:380px;width:760px">
-    <p class="label" style="margin-bottom:20px">Знаем</p>
-    <div class="row" style="font-size:36px"><b style="color:var(--red)">188 из 234</b> иностранных второкурсников было трудно со сроками, документами и адресами (опрос в чате)</div>
-    <div class="row" style="font-size:36px"><b style="color:var(--red)">2 из 10</b> знакомых второкурсников ИТМО просрочили медосвидетельствование</div>
-  </div>
-  <div class="unknown" style="position:absolute;left:960px;right:130px;top:380px">
-    <p class="label" style="margin-bottom:20px">Не знаем</p>
-    <div class="row">Как часто опаздывают первокурсники 2026 года: оба сигнала собраны при сроке 90 дней, теперь он 30</div>
-    <div class="row">Станет ли с ботом быстрее и точнее, чем по памятке</div>
-    <div class="row">Возьмёт ли вуз ссылку в письмо о зачислении</div>
-  </div>
-  <p class="note">Удобная выборка, ответы со слов студентов, выгрузки нет. Частоту ошибок по этим данным не посчитать</p>
-</section>
-
-<!-- 12 · Альтернативы: что уже есть -->
-<section class="slide">
-  <div class="pad">
-    <h2>Что уже есть</h2>
+    <h2>Наши конкуренты</h2>
     <div class="cmp">
       <div class="cmp-head"><span></span><span>Что даёт</span><span>Чего не хватает</span></div>
       <div><b>Памятка вуза</b><span>Общий список шагов</span><span>Не считает дату, не напоминает</span></div>
@@ -427,10 +403,9 @@ h2 { font-size: 132px; }
       <div class="ours"><b>Компас</b><span>Свои даты и напоминания в MAX</span><span>Интеграций нет, спрос не доказан</span></div>
     </div>
   </div>
-  <p class="note">Аналоги искали 22.09.2026 по открытым описаниям. Кабинеты и чаты вузов не изучали</p>
 </section>
 
-<!-- 13 · Масштабирование: аудитория (D-071) и перенос данными -->
+<!-- 12 · Масштабирование: аудитория (D-071) и перенос данными -->
 <section class="slide">
   <div class="pad">
     <h2 style="font-size:124px">Вуз подключается данными</h2>
@@ -458,12 +433,11 @@ h2 { font-size: 132px; }
       <div><dt>СПбГЭУ</dt><dd style="--v:499">499</dd></div>
     </dl>
     <p style="font-size:30px;margin-top:14px"><span class="tag">профиль в боте</span>&nbsp;&nbsp;<span class="tag line" style="color:var(--muted);box-shadow:inset 0 0 0 3px var(--muted)">профиля пока нет</span></p>
-    <p style="font-size:28px;margin-top:18px"><b>Риски:</b> без ответственного в вузе профиль устареет. Закон меняется, поэтому у каждой нормы дата сверки. Переводы tt, uz, zh машинные. Иностранный номер в MAX подходит не всем странам, есть запасной путь</p>
   </div>
   <p class="note" style="bottom:40px">ИТМО и СПбГЭУ подключены профилями, код не менялся. Вузы пока не партнёры</p>
 </section>
 
-<!-- 14 · Путь тиражирования: этапы, кто делает, условие перехода -->
+<!-- 13 · Путь тиражирования: этапы, кто делает, условие перехода -->
 <section class="slide">
   <div class="pad">
     <h2 style="font-size:116px">От КФУ к другим вузам</h2>
@@ -476,32 +450,31 @@ h2 { font-size: 132px; }
     </div>
   </div>
   <div class="scale-res">
-    <div class="row pair"><span class="label">На один вуз</span><span>Профиль собирает команда (ИТМО и СПбГЭУ: 9 минут работы ИИ-агента, без вычитки), проверяет специалист вуза; сколько часов уйдёт, покажет пилот. Сервер один на все вузы</span></div>
+    <div class="row pair"><span class="label">На один вуз</span><span>Профиль собирает команда (ИТМО и СПбГЭУ: час работы человека, без вычитки), проверяет специалист вуза; сколько часов уйдёт, покажет пилот. Сервер один на все вузы</span></div>
     <div class="row pair"><span class="label">Интеграции</span><span>На пилоте не нужны: этапы отмечает студент. К системе вуза и записи в МВД подключимся только с допуска владельца</span></div>
   </div>
 </section>
 
-<!-- 15 · Пилот: первый вуз, канал, владельцы, метрики -->
+<!-- 14 · Пилот: первый вуз, канал, владельцы, метрики -->
 <section class="slide">
   <div class="pad">
     <h2>Пилот: начнём с КФУ</h2>
     <div class="pilot" style="grid-template-columns:repeat(4,1fr);gap:40px">
-      <div style="font-size:32px"><p class="label">Где</p><p>Иностранные первокурсники КФУ в общежитии. Письмо в службу ушло 19.10, ответа нет</p></div>
+      <div style="font-size:32px"><p class="label">Где</p><p>Иностранные первокурсники КФУ в общежитии. Письмо в службу ушло 19.10</p></div>
       <div style="font-size:32px"><p class="label">Канал</p><p>Сейчас через чат куратора, с набора 2027 — в письме о зачислении. Команда шлёт службе сводку сроков на неделю</p></div>
-      <div style="font-size:32px"><p class="label">Кто отвечает</p><p>Правила — специалист службы. Набор — куратор. Бот и сводка — команда</p></div>
+      <div style="font-size:32px"><p class="label">Кто ответственен</p><p>Правила — специалист службы. Набор — куратор. Бот и сводка — команда</p></div>
       <div style="font-size:32px"><p class="label">Когда</p><p>Ноябрь–декабрь: у приехавших осенью впереди дактилоскопия. Срок в 30 дней проверим с заездом 2027</p></div>
     </div>
     <div class="targets small tight" style="margin-top:24px">
       <div class="target"><b>80%</b><span>доходят до плана<br>без подсказки</span></div>
-      <div class="target"><b>0</b><span>критичных ошибок<br>в датах</span></div>
+      <div class="target"><b>0</b><span>ошибок<br>в датах</span></div>
       <div class="target"><b>−30%</b><span>времени по сравнению<br>с памяткой</span></div>
     </div>
     <div class="flow"><span>10–15 сессий</span><i>→</i><span>30–50 студентов</span><i>→</i><span>второй вуз: ИТМО или СПбГЭУ</span></div>
   </div>
-  <p class="note" style="bottom:30px">Это цели, результатов пока нет. КФУ не партнёр; без ответа — наблюдаемый тест по памятке</p>
 </section>
 
-<!-- 16 · Завершение -->
+<!-- 15 · Завершение -->
 <section class="slide cover">
   <div class="ring" style="width:760px;height:760px;right:-200px;top:-220px"></div>
   <div class="pad">
@@ -511,7 +484,7 @@ h2 { font-size: 132px; }
   </div>
 </section>
 
-<!-- 17 · Приложение: сроки отсчитываются от своей даты въезда -->
+<!-- 16 · Приложение: сроки отсчитываются от своей даты въезда -->
 <section class="slide appx">
   <div class="pad">
     <p class="appx-label">Приложение</p>
@@ -533,10 +506,9 @@ h2 { font-size: 132px; }
       <span class="due" style="left:calc(109 / 122 * 100%)">дактилоскопия<br><b>до 18.12</b></span>
     </div>
   </div>
-  <p class="note" style="bottom:30px">Сроки: 115-ФЗ, ст. 5, в ред. 162-ФЗ; даты посчитал продукт</p>
 </section>
 
-<!-- 18 · Приложение: следующий этап -->
+<!-- 17 · Приложение: следующий этап -->
 <section class="slide appx">
   <div class="pad">
     <p class="appx-label">Приложение</p>
@@ -549,7 +521,7 @@ h2 { font-size: 132px; }
   </div>
 </section>
 
-<!-- 19 · Приложение: архитектура -->
+<!-- 18 · Приложение: архитектура -->
 <section class="slide appx">
   <div class="pad">
     <p class="appx-label">Приложение</p>
@@ -564,7 +536,7 @@ h2 { font-size: 132px; }
   </div>
 </section>
 
-<!-- 20 · Приложение: ограничения -->
+<!-- 19 · Приложение: ограничения -->
 <section class="slide appx">
   <div class="pad">
     <p class="appx-label">Приложение</p>
@@ -578,7 +550,7 @@ h2 { font-size: 132px; }
   </div>
 </section>
 
-<!-- 21 · Приложение: источники -->
+<!-- 20 · Приложение: источники -->
 <section class="slide appx">
   <div class="pad">
     <p class="appx-label">Приложение</p>
