@@ -132,6 +132,9 @@ h2 { font-size: 132px; }
 .targets.small .target b { font-size: 150px; }
 .targets.small .target span { font-size: 38px; }
 .targets.small + .flow { margin-top: 36px; }
+.targets.tight .target b { font-size: 120px; }
+.targets.tight .target span { font-size: 34px; }
+.targets.tight + .flow { margin-top: 28px; }
 
 /* 6 · reminder schedule */
 .remind { position: absolute; left: 130px; right: 130px; top: 560px; display: grid; grid-template-columns: repeat(5, 1fr); border-top: 8px solid var(--ink); }
@@ -189,6 +192,9 @@ h2 { font-size: 132px; }
 .path .head { border-top: 0; padding-bottom: 10px; font: 800 30px/1 "Tektur", sans-serif; font-stretch: 75%; color: var(--muted); }
 .path b { font: 900 40px/1.05 "Tektur", sans-serif; font-stretch: 75%; }
 .path .num { font-size: 52px; }
+
+/* renders stay labelled, but in a neutral caption instead of the draft mark */
+.shot::after { background: rgba(17,17,17,.82); font-weight: 600; font-size: 18px; white-space: nowrap; }
 
 /* appendix */
 .appx h2 { font-size: 104px; }
@@ -296,9 +302,9 @@ h2 { font-size: 132px; }
     <p style="margin-top:40px;font-size:36px;border-top:4px solid var(--ink);padding-top:24px">В карточке документы, адрес и норма. Не выходит — готовый вопрос вузу</p>
   </div>
   <div class="phones">
-    <div class="phone shot" data-mark="Рендер из кода, заменить на скриншот MAX"><img src="../screens/07-plan.jpg" alt="Мини-приложение: план с личными сроками"></div>
-    <div class="phone shot" data-mark="Рендер из кода, заменить на скриншот MAX"><img src="../screens/08-card.jpg" alt="Мини-приложение: карточка процедуры"></div>
-    <div class="phone shot" data-mark="Рендер из кода, заменить на скриншот MAX"><img src="../screens/11-question.jpg" alt="Мини-приложение: готовый вопрос вузу"></div>
+    <div class="phone shot" data-mark="Рендер из кода, демо-данные"><img src="../screens/07-plan.jpg" alt="Мини-приложение: план с личными сроками"></div>
+    <div class="phone shot" data-mark="Рендер из кода, демо-данные"><img src="../screens/08-card.jpg" alt="Мини-приложение: карточка процедуры"></div>
+    <div class="phone shot" data-mark="Рендер из кода, демо-данные"><img src="../screens/11-question.jpg" alt="Мини-приложение: готовый вопрос вузу"></div>
   </div>
 </section>
 
@@ -362,7 +368,7 @@ h2 { font-size: 132px; }
         <ul><li>Выбор вуза</li><li>Подача документов</li><li>Поддержка и гранты</li></ul></div>
     </div>
   </div>
-  <div class="phone shot" data-mark="Рендер из кода, заменить на скриншот MAX" style="position:absolute;right:130px;top:120px;width:410px;height:836px"><img src="../screens/10-pre-arrival.jpg" alt="Мини-приложение: что подготовить до въезда"></div>
+  <div class="phone shot" data-mark="Рендер из кода, демо-данные" style="position:absolute;right:130px;top:120px;width:410px;height:836px"><img src="../screens/10-pre-arrival.jpg" alt="Мини-приложение: что подготовить до въезда"></div>
 </section>
 
 <!-- 10 · Что изменилось после онлайн-этапа (требование Задания к финалу) -->
@@ -454,7 +460,7 @@ h2 { font-size: 132px; }
       <div><dt>СПбГЭУ</dt><dd style="--v:499">499</dd></div>
     </dl>
     <p style="font-size:30px;margin-top:14px"><span class="tag">профиль в боте</span>&nbsp;&nbsp;<span class="tag line" style="color:var(--muted);box-shadow:inset 0 0 0 3px var(--muted)">профиля пока нет</span></p>
-    <p style="font-size:28px;margin-top:18px"><b>Риски:</b> закон меняется — у правил дата сверки. Переводы tt, uz, zh машинные. Вход в MAX с иностранным номером не проверен</p>
+    <p style="font-size:28px;margin-top:18px"><b>Риски:</b> закон меняется — у каждой нормы дата сверки, проверка сверяет цитаты со страницами. Переводы tt, uz, zh машинные. Иностранный номер в MAX подходит не для всех стран — в блоке для письма есть запасной путь</p>
   </div>
   <p class="note" style="bottom:40px">ИТМО и СПбГЭУ подключены профилями, код не менялся. Вузы пока не партнёры</p>
 </section>
@@ -480,11 +486,11 @@ h2 { font-size: 132px; }
     <h2>Пилот: начнём с КФУ</h2>
     <div class="pilot" style="grid-template-columns:repeat(4,1fr);gap:40px">
       <div style="font-size:32px"><p class="label">Где</p><p>Группа первокурсников КФУ. Письмо в службу ушло 19.10, ответа нет</p></div>
-      <div style="font-size:32px"><p class="label">Канал</p><p>Ссылка в письме о зачислении и чате куратора. Служба видит сводку: у скольких срок на этой неделе</p></div>
-      <div style="font-size:32px"><p class="label">Кто</p><p>Специалист проверяет правила, куратор зовёт студентов, команда ведёт тест</p></div>
-      <div style="font-size:32px"><p class="label">Когда</p><p>Ноябрь–декабрь: приехавшие осенью, дактилоскопия у них впереди. Лето 2027 — письмо к заезду</p></div>
+      <div style="font-size:32px"><p class="label">Канал</p><p>Ссылка в письме о зачислении и чате куратора. Команда шлёт службе сводку сроков на неделю</p></div>
+      <div style="font-size:32px"><p class="label">Кто</p><p>Сначала специалист проверяет правила, без этого — только тест удобства. Куратор зовёт студентов</p></div>
+      <div style="font-size:32px"><p class="label">Когда</p><p>Ноябрь–декабрь: у приехавших осенью впереди дактилоскопия. Срок в 30 дней проверим с заездом 2027</p></div>
     </div>
-    <div class="targets small" style="margin-top:28px">
+    <div class="targets small tight" style="margin-top:24px">
       <div class="target"><b>80%</b><span>доходят до плана<br>без подсказки</span></div>
       <div class="target"><b>0</b><span>критичных ошибок<br>в датах</span></div>
       <div class="target"><b>−30%</b><span>времени по сравнению<br>с памяткой</span></div>
@@ -544,7 +550,7 @@ h2 { font-size: 132px; }
       <div class="row">Показ идёт на учебных профилях. Нормы юрист не вычитывал</div>
       <div class="row">Сканы паспорта и медицинские документы не принимает</div>
       <div class="row">Заявления в МВД и системы вузов не подаёт</div>
-      <div class="row">Хранит только MAX ID, язык, даты и отметки студента. /delete стирает профиль</div>
+      <div class="row">Хранит MAX ID, язык, гражданство, вуз, даты и отметки студента. /delete стирает профиль</div>
     </div>
   </div>
 </section>
