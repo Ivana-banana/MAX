@@ -183,6 +183,7 @@
   "share.item": "• {title} — by {due}",
   "share.done": "• {title} — done",
   "share.provisional": "\nThe deadlines are counted from the entry date and are preliminary: the rules have not yet been reviewed by a lawyer. Please check with {uni}.",
+  "share.link": "\n\nGet your own plan in MAX: {url}",
   "app.share": "Share the plan",
   "app.deleteTitle": "Delete my data",
   "app.completionTitle": "When did you complete it?",

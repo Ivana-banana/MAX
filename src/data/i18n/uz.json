@@ -197,6 +197,7 @@
   "share.item": "• {title} — {due} gacha",
   "share.done": "• {title} — oʻtildi",
   "share.provisional": "\nMuddatlar kirish sanasidan hisoblangan va dastlabki: qoidalar hali yurist tomonidan tekshirilmagan. {uni} bilan aniqlashtiring.",
+  "share.link": "\n\nMAX’da oʻz rejangizni oling: {url}",
   "app.share": "Reja bilan boʻlishish",
   "app.deleteTitle": "Maʼlumotlarimni oʻchirish",
   "app.completionTitle": "Tartibdan qachon oʻtdingiz?",

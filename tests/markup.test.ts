@@ -82,6 +82,20 @@ describe("sending to MAX (#114)", () => {
     errors.mockRestore();
   });
 
+  it("when MAX refuses the mini-app button too, the message goes once more without it (#127)", async () => {
+    sent.length = 0;
+    const app = { ...reply, buttons: [[{ text: "Открыть план", app: "bot_name", payload: "plan" }, { text: "Скопировать", copy: "Вопрос" }]] };
+    failures.push(new MaxError(400, { code: "proto.payload", message: "bad web_app" }), new MaxError(400, { code: "proto.payload", message: "bad web_app" }));
+    const errors = vi.spyOn(console, "error").mockImplementation(() => {});
+    await transport().send(1, app);
+    expect(sent).toHaveLength(3);
+    expect(JSON.stringify(sent[1]!.extra.attachments)).toContain("open_app");
+    expect(JSON.stringify(sent[2]!.extra.attachments)).not.toContain("open_app");
+    expect(JSON.stringify(sent[2]!.extra.attachments)).toContain("Скопировать");
+    expect(errors.mock.calls[1]![0]).toContain("MAX refused the mini-app button");
+    errors.mockRestore();
+  });
+
   it("another failure is not retried without markup: the outbox retries it", async () => {
     sent.length = 0;
     failures.push(new MaxError(500, { code: "internal", message: "down" }));

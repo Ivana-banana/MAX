@@ -189,6 +189,7 @@
   "share.item": "• {title} — до {due}",
   "share.done": "• {title} — пройдено",
   "share.provisional": "\nСроки посчитаны от даты въезда и предварительные: юрист ещё не проверил нормы. Уточните в {uni}.",
+  "share.link": "\n\nСвой план в MAX: {url}",
   "app.share": "Поделиться планом",
   "app.deleteTitle": "Удалить мои данные",
   "app.completionTitle": "Когда вы прошли процедуру?",

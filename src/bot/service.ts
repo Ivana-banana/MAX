@@ -229,8 +229,10 @@ export class Service {
             continue;
           }
           // Before the date a late reminder is still useful; the follow-up after it goes only on its own day.
+          // After downtime only the latest missed day goes out, not 7, 3 and 1 days in a row (#128).
           const today = this.ctx().today, followUp = ref.day !== undefined && ref.day > ref.dueDate;
-          if (!state || !item || (followUp ? ref.day !== today : item.dueDate < today)) { await this.store.cancel(job.id, job.lease_token); continue; }
+          const newer = ref.day !== undefined && !followUp && REMINDER_OFFSETS.some(o => { const d = addDays(ref.dueDate, -o); return d > ref.day! && d <= today; });
+          if (!state || !item || newer || (followUp ? ref.day !== today : item.dueDate < today)) { await this.store.cancel(job.id, job.lease_token); continue; }
           message = reminderReply(state, this.ctx(), item);
         } else {
           message = JSON.parse(job.payload) as Reply;

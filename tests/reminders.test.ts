@@ -73,6 +73,17 @@ describe("one follow-up the day after the calculated date", () => {
   });
 });
 
+describe("after downtime (#128)", () => {
+  it("sends only the latest missed reminder of a deadline, not 7, 3 and 1 days in a row", async () => {
+    const f = await fixture("2026-09-22T10:00:00+03:00"); await f.onboard(); await f.click("reminders");
+    await f.at("2026-09-22T10:00:00+03:00");
+    await f.at("2026-09-29T10:00:00+03:00");
+    const medical = f.reminders().filter(r => plain(r).includes("Медицинское освидетельствование"));
+    expect(medical).toHaveLength(1);
+    expect(plain(medical[0]!)).toContain("30 сентября 2026 г.");
+  });
+});
+
 describe("the background loop", () => {
   it("keeps delivering replies when maintenance fails on one unreadable profile", async () => {
     const schema = await testSchema(); cleanups.push(schema.drop);
