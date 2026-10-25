@@ -1,6 +1,8 @@
 // Builds each deck variant into one self-contained HTML file: stylesheets, the script, fonts and
 // screens are inlined, so the file opens offline by double click.
-// node docs/presentation/html/build.mjs [variant…]   (no arguments — every src/*.html)
+// node docs/presentation/html/build.mjs [variant…]   (no arguments — every src/*.html and skin)
+// A skin is src/skins/<variant>-<skin>.css: the same slides with another look, built as `<variant>+<skin>`
+// into <variant>-<skin>.html. Its stylesheet goes last, so it overrides the variant's own <style>.
 import { readFile, readdir, writeFile } from "node:fs/promises";
 import { dirname, extname, join, resolve } from "node:path";
 
@@ -29,8 +31,11 @@ async function replaceAsync(text, pattern, replace) {
 const inlineUrls = (css, dir) =>
   replaceAsync(css, /url\((["']?)([^)"':]+)\1\)/g, async (_, __, path) => `url(${await dataUri(resolve(dir, path))})`);
 
-async function build(name) {
-  let html = await readFile(join(src, `${name}.html`), "utf8");
+async function build(target) {
+  const [variant, skin] = target.split("+");
+  const name = skin ? `${variant}-${skin}` : variant;
+  let html = await readFile(join(src, `${variant}.html`), "utf8");
+  if (skin) html = html.replace("</head>", `<link rel="stylesheet" href="skins/${name}.css">\n</head>`);
   html = await replaceAsync(html, /<link rel="stylesheet" href="([^"]+)">/g, async (_, path) => {
     const file = resolve(src, path);
     return `<style>\n${await inlineUrls(await readFile(file, "utf8"), dirname(file))}</style>`;
@@ -45,5 +50,8 @@ async function build(name) {
 }
 
 const names = process.argv.slice(2);
-const all = (await readdir(src)).filter(f => f.endsWith(".html")).map(f => f.slice(0, -5));
+const all = [
+  ...(await readdir(src)).filter(f => f.endsWith(".html")).map(f => f.slice(0, -5)),
+  ...(await readdir(join(src, "skins")).catch(() => [])).filter(f => f.endsWith(".css")).map(f => f.slice(0, -4).replace("-", "+")),
+];
 for (const name of names.length ? names : all) await build(name);
