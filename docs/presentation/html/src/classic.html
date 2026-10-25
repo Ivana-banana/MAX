@@ -119,6 +119,10 @@ h2 { font-size: 132px; }
 .target span { display: block; font-size: 42px; margin-top: 14px; }
 .flow { display: flex; align-items: center; gap: 26px; margin-top: 60px; font-size: 40px; }
 .flow span { padding: 16px 26px; box-shadow: inset 0 0 0 4px var(--ink); }
+.flow.route { position: absolute; left: 130px; right: 130px; bottom: 60px; margin: 0; gap: 18px; font-size: 30px; }
+.flow.route span { padding: 12px 20px; }
+.flow.route span.end { background: var(--red); color: var(--paper); box-shadow: none; }
+.flow.route i { font-size: 36px; }
 .flow i { font: 900 50px/1 "Tektur", sans-serif; font-style: normal; color: var(--red); }
 
 /* 5 · dates beside the phones, readable from the hall */
@@ -294,8 +298,10 @@ h2 { font-size: 132px; }
       <p>Медосвидетельствование <b class="red">до 15.11</b></p>
       <p>Дактилоскопия <b>до 14.01</b></p>
     </div>
-    <p style="margin-top:40px;font-size:36px;border-top:4px solid var(--ink);padding-top:24px">В карточке документы, адрес и норма. Не выходит — готовый вопрос вузу</p>
   </div>
+  <p style="position:absolute;left:830px;right:130px;top:800px;font-size:32px">Карточка: документы, адрес, норма. Не выходит — вопрос вузу</p>
+  <p class="label" style="position:absolute;left:130px;bottom:140px;font-size:30px">От /start до плана: всё кнопками, кроме даты въезда</p>
+  <div class="flow route"><span>Язык</span><i>→</i><span>Согласие</span><i>→</i><span>«Всё совпадает?»</span><i>→</i><span>Гражданство</span><i>→</i><span>Дата въезда</span><i>→</i><span class="end">План</span></div>
   <div class="phones">
     <div class="phone shot" data-mark="Рендер из кода, демо-данные"><img src="../screens/07-plan.jpg" alt="Мини-приложение: план с личными сроками"></div>
     <div class="phone shot" data-mark="Рендер из кода, демо-данные"><img src="../screens/08-card.jpg" alt="Мини-приложение: карточка процедуры"></div>
