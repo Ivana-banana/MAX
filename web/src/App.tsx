@@ -228,16 +228,18 @@ export function App() {
     return t("app.error.server");
   };
 
+  const actionError = status.error !== null && status.error !== "no_launch" && status.state !== null ? failure(status.error) : "";
+  const calendarText = calendarError === null ? "" : failure(calendarError);
+
   return (
     <MaxUI platform={appearance()} className="app">
       <main className="page">
-        <div className="banners">
+        {/* #131: while an error is shown the banners stick to the top, so a failure deep in a scrolled card is seen. */}
+        <div className={actionError === "" && calendarText === "" ? "banners" : "banners banners-alert"}>
           {status.state?.demo === true && <Banner tone="demo">{t("banner.demo").trim()}</Banner>}
           {status.state?.mocked === true && <Banner tone="mocked">{t("app.banner.mocked")}</Banner>}
-          <Banner tone="error" onDismiss={dismiss}>
-            {status.error !== null && status.error !== "no_launch" && status.state !== null ? failure(status.error) : ""}
-          </Banner>
-          <Banner tone="error" onDismiss={() => setCalendarError(null)}>{calendarError === null ? "" : failure(calendarError)}</Banner>
+          <Banner tone="error" onDismiss={dismiss}>{actionError}</Banner>
+          <Banner tone="error" onDismiss={() => setCalendarError(null)}>{calendarText}</Banner>
         </div>
         {body()}
       </main>
