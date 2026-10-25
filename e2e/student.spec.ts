@@ -92,6 +92,28 @@ test("API failure → clear message, retry works without a restart", async ({ pa
   await expect(bannerAlerts(page)).toHaveText(["", ""]); // the failure is gone, the regions stay
 });
 
+test("#131: a failure at the bottom of a scrolled card shows the error banner on screen", async ({ page }, testInfo) => {
+  await toEntryDate(page);
+  await dateField(page).fill(moscowDate(7));
+  await save(page).click();
+  await page.getByRole("button", { name: /^Медицинское освидетельствование/ }).click();
+  const done = page.getByRole("button", { name: "Процедура пройдена" });
+  await done.scrollIntoViewIfNeeded();
+  await expect(page.locator(".banners")).not.toBeInViewport(); // the card is long enough to hide the top of the page
+
+  await page.route("**/api/action", route => route.abort("connectionrefused"));
+  await done.click();
+  await expect(bannerAlerts(page).first()).toHaveText(/Нет связи с сервером/);
+  await expect(bannerAlerts(page).first()).toBeInViewport();
+  await expect(done).toBeInViewport(); // the student keeps their place in the card
+  await page.screenshot({ path: testInfo.outputPath("2a-api-error-scrolled.png"), animations: "disabled" });
+
+  await page.unroute("**/api/action");
+  await done.click();
+  await expect(page.getByRole("heading", { name: "Когда вы прошли процедуру?" })).toBeVisible();
+  await expect(alert(page)).toHaveCount(0);
+});
+
 test("empty and invalid date: Save stays off or the reason is shown", async ({ page }, testInfo) => {
   await toEntryDate(page);
   await expect(save(page)).toBeDisabled(); // empty
