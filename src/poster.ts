@@ -9,16 +9,11 @@ import qrcode from "qrcode-generator";
 import { format, type Texts } from "./data/loadTexts.js";
 import type { University } from "./data/loadUniversities.js";
 import { plain } from "./core/markup.js";
+import { deepLink } from "./deep-link.js";
 
 export interface PosterOptions { botLink: string; demo: boolean }
 
-/** The deep link the QR code encodes; MAX passes `start` to the bot as the bot_started payload. */
-export function deepLink(botLink: string, university: University): string {
-  const url = new URL(botLink);
-  if (url.protocol !== "https:" || url.search || url.hash) throw new Error("BOT_LINK must be https://max.ru/<bot> without parameters");
-  url.searchParams.set("start", university.id);
-  return url.href;
-}
+export { deepLink };
 
 const escape = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 

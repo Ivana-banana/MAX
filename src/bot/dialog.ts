@@ -10,7 +10,7 @@ import { CALENDAR_FILE, planToIcs } from "./calendar.js";
 import type { PlanPdf } from "./pdf.js";
 import { longDate, repeatText } from "./repeat.js";
 import { plain } from "../core/markup.js";
-import { deepLink } from "../poster.js";
+import { deepLink } from "../deep-link.js";
 
 // callback buttons come back to the bot; link and clipboard buttons are handled by MAX itself
 export type Button = { text: string; action: string } | { text: string; url: string } | { text: string; copy: string }
