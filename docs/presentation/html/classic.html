@@ -234,11 +234,6 @@ h2 { font-size: 132px; }
 .pilot div { border-top: 8px solid var(--ink); padding-top: 22px; font-size: 38px; }
 .pilot .label { color: var(--red); margin-bottom: 14px; font-size: 48px; }
 
-/* 13 · roles, a draft mark until the team fills them */
-.roles { position: absolute; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 30px; font-size: 34px; padding: 22px 0 70px; }
-.roles b { display: block; font: 800 36px/1.2 "Tektur", sans-serif; font-stretch: 75%; }
-.todo { outline: 6px dashed #ff2bd6; outline-offset: 10px; }
-.todo::after { content: attr(data-mark); position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%); padding: 6px 14px; background: #ff2bd6; color: #fff; font: 700 22px/1.25 system-ui, sans-serif; white-space: nowrap; }
 
 /* 6 · real MAX screenshots, no draft mark */
 .real { position: relative; }
@@ -568,16 +563,13 @@ h2 { font-size: 132px; }
   <p class="note" style="bottom:30px">Цели пилота, результатов нет. КФУ не партнёр; не ответит — наблюдаемый тест по публичной памятке</p>
 </section>
 
-<!-- 16 · Завершение и роли команды -->
+<!-- 16 · Завершение -->
 <section class="slide cover">
   <div class="ring" style="width:760px;height:760px;right:-200px;top:-220px"></div>
   <div class="pad">
     <h2 style="font-size:150px">Проверим план<br>с первым вузом</h2>
     <p class="lead" style="margin-top:44px">Нужны специалист, который проверит правила, и одна группа первокурсников</p>
     <p class="label" style="margin-top:44px;font-size:52px">max.ru/t149_hakaton_max_bot</p>
-    <div class="roles todo" data-mark="Роли — заполнить до сдачи (#56)">
-      <div><b>Рассказ</b>TBD</div><div><b>Показ в MAX</b>TBD</div><div><b>Пилот и масштаб</b>TBD</div><div><b>Архитектура</b>TBD</div>
-    </div>
   </div>
 </section>
 
