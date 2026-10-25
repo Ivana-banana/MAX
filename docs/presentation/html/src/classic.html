@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Первые 90 дней, классика</title>
+<title>Компас иностранного студента</title>
 <link rel="stylesheet" href="base.css">
 <style>
 /* Variant «Классика / Плакат»: the mini app look (paper, ink, carmine), Tektur and PT Sans. */
@@ -226,10 +226,8 @@ h2 { font-size: 132px; }
       <dl>
         <dt>Бот в MAX</dt><dd>max.ru/t149_hakaton_max_bot</dd>
         <dt>Репозиторий</dt><dd>github.com/M1hairu/MAX_GOATed_messenger</dd>
-        <dt>Commit</dt><dd>40b5825: эта версия бота сейчас на сервере (поле commit в /health)</dd>
-        <dt>Свой API</dt><dd>Нет. Сервер бота и мини-приложения: 81-26-178-75.sslip.io/health</dd>
         <dt>Логины и ключи</dt><dd>Не нужны: проверка в MAX под своим аккаунтом. Переменные запуска в <span style="font-weight:400">.env.example</span></dd>
-        <dt>Данные</dt><dd>Режим demo, учебные данные. Интеграций с МВД и системами вузов нет</dd>
+        <dt>Данные</dt><dd>Режим demo, учебные данные</dd>
       </dl>
       <div>
         <p class="label" style="margin-bottom:26px">Основной сценарий</p>
@@ -248,8 +246,8 @@ h2 { font-size: 132px; }
 <!-- 2 · Титул -->
 <section class="slide cover">
   <div class="ring" style="width:620px;height:620px;right:-160px;bottom:-260px"></div>
-  <div class="big">90</div>
-  <h1>Первые 90 дней</h1>
+  <div class="big" style="font-size:400px">90</div>
+  <h1 style="top:450px;font-size:150px;line-height:.92">Компас<br>иностранного студента</h1>
   <p class="sub">Личный план иностранного первокурсника в MAX: свои сроки, документы и напоминания</p>
   <div class="team"><b>ИИ в массы</b>Иван Резников<br>Иван Пушкин<br>Александр Чичерин<br>Михаил Анцев</div>
   <p class="note">Минобрнауки России × MAX, «Забота о людях». Казань, 29.10.2026</p>
@@ -266,8 +264,7 @@ h2 { font-size: 132px; }
     <b style="font-size:260px">188</b>
     <span style="font-size:40px">из 234 иностранных второкурсников было трудно не пропустить сроки, найти документы и адреса</span>
   </div>
-  <div class="row pair" style="position:absolute;left:130px;right:130px;top:830px;grid-template-columns:220px 1fr;font-size:36px;padding:20px 0;border-bottom:4px solid var(--ink)"><span class="label">Для кого</span><span>Первокурсник 18+, впервые въехал учиться после 31.08.2026. Начинаем с КФУ: ≈1 100 таких в год</span></div>
-  <p class="note" style="bottom:30px">Опрос команды в чате иностранных студентов о первом годе, выгрузки нет. ≈1 100 — расчёт</p>
+  <div class="row pair" style="position:absolute;left:130px;right:130px;top:830px;grid-template-columns:220px 1fr;font-size:36px;padding:20px 0;border-bottom:4px solid var(--ink)"><span class="label">Для кого</span><span>Иностранный первокурсник. Начинаем с КФУ: ≈1 100 первокурсников в год</span></div>
 </section>
 
 <!-- 4 · Причина и последствие: памятки расходятся с законом -->
@@ -297,14 +294,14 @@ h2 { font-size: 132px; }
       <p>Дактилоскопия <b>до 14.01</b></p>
     </div>
   </div>
-  <p style="position:absolute;left:800px;right:130px;top:660px;font-size:32px">В карточке документы, адрес, норма и вопрос вузу</p>
-  <p class="note" style="left:800px;right:130px;top:720px;bottom:auto">Скриншоты веб-версии MAX от 25.10.2026, версия бота 1761443</p>
   <p class="label" style="position:absolute;left:130px;bottom:140px;font-size:30px">От /start до плана: всё кнопками, кроме даты въезда</p>
   <div class="flow route"><span>Язык</span><i>→</i><span>Согласие</span><i>→</i><span>«Всё совпадает?»</span><i>→</i><span>Гражданство</span><i>→</i><span>Дата въезда</span><i>→</i><span class="end">План</span></div>
-  <div class="phones" style="gap:20px;align-items:flex-start">
-    <div class="frame" style="width:290px;height:509px"><img src="../../../../images/max-check/web-app-01-plan.jpg" alt="Мини-приложение в веб-версии MAX: план с личными сроками"></div>
-    <div class="frame" style="width:330px;height:397px"><img src="../../../../images/max-check/web-app-02-card-documents.jpg" alt="Мини-приложение в веб-версии MAX: карточка медосвидетельствования"></div>
-    <div class="frame" style="width:330px;height:397px"><img src="../../../../images/max-check/web-app-05-copied.jpg" alt="Мини-приложение в веб-версии MAX: готовый вопрос вузу скопирован"></div>
+  <div class="phones" style="top:68px;gap:24px;align-items:flex-start">
+    <div class="frame" style="width:500px;height:812px"><img src="../screens/max-web-plan.jpg" alt="Мини-приложение в веб-версии MAX: план с личными сроками"></div>
+    <div style="display:flex;flex-direction:column;gap:24px">
+      <div class="frame" style="width:506px;height:535px"><img src="../screens/max-web-card.jpg" alt="Мини-приложение в веб-версии MAX: карточка медосвидетельствования"></div>
+      <div class="frame" style="width:506px;height:253px"><img src="../screens/max-web-question.jpg" alt="Мини-приложение в веб-версии MAX: готовый вопрос вузу скопирован"></div>
+    </div>
   </div>
 </section>
 
@@ -427,7 +424,7 @@ h2 { font-size: 132px; }
       <div><b>«Госуслуги»</b><span>Электронный миграционный учёт</span><span>Нужна подтверждённая учётная запись</span></div>
       <div><b>HSE App X</b><span>Документы, статусы, напоминания</span><span>Только для студентов ВШЭ</span></div>
       <div><b>Бот КФУ</b><span>Анонсирован, про миграционный учёт</span><span>Как работает, мы не проверили</span></div>
-      <div class="ours"><b>Первые 90 дней</b><span>Свои даты и напоминания в MAX</span><span>Интеграций нет, спрос не доказан</span></div>
+      <div class="ours"><b>Компас</b><span>Свои даты и напоминания в MAX</span><span>Интеграций нет, спрос не доказан</span></div>
     </div>
   </div>
   <p class="note">Аналоги искали 22.09.2026 по открытым описаниям. Кабинеты и чаты вузов не изучали</p>
@@ -519,7 +516,7 @@ h2 { font-size: 132px; }
   <div class="pad">
     <p class="appx-label">Приложение</p>
     <h2 style="font-size:110px">Сроки — от своей даты</h2>
-    <p class="lead" style="margin-top:24px;max-width:1500px">Первокурсник 18+ впервые въехал учиться после 31.08.2026. Сроки идут от его дня въезда, а памятка одна на всех</p>
+    <p class="lead" style="margin-top:24px;max-width:1500px">Сроки идут от дня въезда каждого студента, а памятка одна на всех</p>
   </div>
   <div class="tl">
     <span class="month" style="--d:0">сентябрь</span><span class="month" style="--d:30">октябрь</span><span class="month" style="--d:61">ноябрь</span><span class="month" style="--d:91">декабрь</span>
