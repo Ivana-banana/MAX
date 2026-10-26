@@ -119,10 +119,10 @@ h2 { font-size: 132px; }
 .target span { display: block; font-size: 42px; margin-top: 14px; }
 .flow { display: flex; align-items: center; gap: 26px; margin-top: 60px; font-size: 40px; }
 .flow span { padding: 16px 26px; box-shadow: inset 0 0 0 4px var(--ink); }
-.flow.route { position: absolute; left: 130px; right: 130px; bottom: 60px; margin: 0; gap: 18px; font-size: 30px; }
-.flow.route span { padding: 12px 20px; }
+.flow.route { position: absolute; left: 130px; right: 130px; bottom: 60px; margin: 0; gap: 18px; font-size: 36px; }
+.flow.route span { padding: 16px 24px; }
 .flow.route span.end { background: var(--red); color: var(--paper); box-shadow: none; }
-.flow.route i { font-size: 36px; }
+.flow.route i { font-size: 42px; }
 .flow i { font: 900 50px/1 "Tektur", sans-serif; font-style: normal; color: var(--red); }
 
 /* 5 · dates beside the phones, readable from the hall */
@@ -176,8 +176,8 @@ h2 { font-size: 132px; }
 .real { position: relative; }
 .real img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
 /* 5 · cropped renders: a flat frame, not a phone.
-   classic-*.jpg are cut from the screens.mjs renders (1236 px wide): plan = 07-plan y 230–2237,
-   card = 08-card y 196–1610, question = 11-question y 1520–2050, card-docs = 09-card-documents from y 70;
+   classic-*.jpg are cut from the screens.mjs renders (1236 px wide): plan = 07-plan y 230–2030,
+   card = 08-card y 196–840, question = 11-question y 1520–2095, card-docs = 09-card-documents from y 70;
    entry and pre-arrival (06-entry-date, 10-pre-arrival up to y 1840) drop y 130–200, the local-launch
    warning that MAX itself never shows, and keep the demo chip. */
 .frame { border: 6px solid var(--ink); border-radius: 14px; overflow: hidden; background: var(--ink); }
@@ -311,13 +311,13 @@ h2 { font-size: 132px; }
       <p>Дактилоскопия <b>до 14.01</b></p>
     </div>
   </div>
-  <p class="label" style="position:absolute;left:130px;bottom:140px;font-size:30px">От /start до плана: всё кнопками, кроме даты въезда</p>
+  <p class="label" style="position:absolute;left:130px;bottom:160px;font-size:40px">Путь от открытия бота до полного плана</p>
   <div class="flow route"><span>Язык</span><i>→</i><span>Согласие</span><i>→</i><span>«Всё совпадает?»</span><i>→</i><span>Гражданство</span><i>→</i><span>Дата въезда</span><i>→</i><span class="end">План</span></div>
   <div class="phones" style="top:68px;gap:24px;align-items:flex-start">
-    <div class="frame" style="width:500px;height:812px"><img src="../screens/classic-plan.jpg" alt="Мини-приложение: план с личными сроками"></div>
+    <div class="frame" style="width:500px;height:723px"><img src="../screens/classic-plan.jpg" alt="Мини-приложение: план с личными сроками"></div>
     <div style="display:flex;flex-direction:column;gap:24px">
-      <div class="frame" style="width:506px;height:564px"><img src="../screens/classic-card.jpg" alt="Мини-приложение: карточка медосвидетельствования"></div>
-      <div class="frame" style="width:506px;height:224px"><img src="../screens/classic-question.jpg" alt="Мини-приложение: готовый вопрос вузу"></div>
+      <div class="frame" style="width:506px;height:269px"><img src="../screens/classic-card.jpg" alt="Мини-приложение: карточка медосвидетельствования"></div>
+      <div class="frame" style="width:506px;height:242px"><img src="../screens/classic-question.jpg" alt="Мини-приложение: готовый вопрос вузу"></div>
     </div>
   </div>
 </section>
@@ -343,7 +343,7 @@ h2 { font-size: 132px; }
     <h2>Что меняется<br>для студента</h2>
     <div class="ba" style="margin-top:46px">
       <div class="head"><span></span><span>Было</span><span>С ботом</span></div>
-      <div><b>Срок</b><span>Считает сам по общей памятке, а памятки расходятся</span><span>Две свои даты по закону, с основанием и датой сверки</span></div>
+      <div><b>Срок</b><span>Считает сам по общим памяткам на незнакомом языке, памятки расходятся</span><span>Две свои даты по закону, с основанием и датой сверки</span></div>
       <div><b>Документы</b><span>Разные версии, неизвестно, какая верная</span><span>Комплект, адрес и маршрут в карточке</span></div>
       <div><b>Напоминание</b><span>Легко забыть</span><span>Сообщение в MAX за 7, 3 и 1 день</span></div>
       <div><b>Не успевает</b><span>Непонятно, к кому обратиться</span><span>Готовый вопрос в службу вуза</span></div>
@@ -548,7 +548,7 @@ h2 { font-size: 132px; }
     <div class="diagram" style="margin-top:56px">
       <div class="node"><b>Студент</b>Чат и мини-приложение в MAX</div>
       <div class="node"><b>Сервер</b>Node.js и TypeScript: бот и бэкенд мини-приложения</div>
-      <div class="node dark"><b>Ядро</b>Явный расчёт сроков по правилам. LLM сроки не решает</div>
+      <div class="node dark"><b>Ядро</b>Явный расчёт сроков по правилам</div>
       <div class="node"><b>Данные</b>Нормы и профили вузов в JSON. PostgreSQL хранит профиль студента и очередь напоминаний</div>
     </div>
     <p class="muted" style="font-size:32px;margin-top:40px">Чат и мини-приложение работают в одной сессии: отметка в одном месте видна в другом</p>
