@@ -257,9 +257,23 @@ h2 { font-size: 132px; }
   <p class="note">Минобрнауки России × MAX, «Забота о людях». Казань, 29.10.2026</p>
 </section>
 
+<!-- 2а · Команда: аватарки в дуотоне, как фото вузов -->
+<section class="slide crew">
+  <div class="pad">
+    <h2>Команда <span style="color:var(--red)">«ИИ в массы»</span></h2>
+    <div class="crew-row">
+      <div><div class="ava"><div class="photo"><img src="team/reznikov.webp" alt="Иван Резников"></div></div><b>Иван<br>Резников</b></div>
+      <div><div class="ava empty"><span>ИП</span><i>Фото — добавить</i></div><b>Иван<br>Пушкин</b></div>
+      <div><div class="ava"><div class="photo"><img src="team/chicherin.webp" alt="Александр Чичерин"></div></div><b>Александр<br>Чичерин</b></div>
+      <div><div class="ava"><div class="photo"><img src="team/antsev.webp" alt="Михаил Анцев"></div></div><b>Михаил<br>Анцев</b></div>
+    </div>
+    <div class="crew-roles" data-mark="Роли — заполнить до сдачи (#56)"></div>
+  </div>
+</section>
+
 <!-- 3 · Проблема и сегмент: студент разбирается сам; опрос команды (D-078) -->
 <section class="slide">
-  <div class="band" style="width:760px;height:110px;right:-150px;top:110px"></div>
+  <div class="photo map"><img src="img/kazan-map.webp" alt="Карта центра Казани"><span>© участники OpenStreetMap</span></div>
   <div class="pad" style="right:auto;width:1000px">
     <h2 style="font-size:124px">Разбирается сам<br>в чужой стране</h2>
     <p class="lead" style="margin-top:40px">Какие нужны документы, куда идти и к какому сроку, первокурсник выясняет сам и на чужом языке. У каждого вуза своя памятка. Одного места, которое проведёт по всем шагам с его личными сроками, нет</p>
@@ -339,7 +353,8 @@ h2 { font-size: 132px; }
 </section>
 
 <!-- 8 · Напоминания: расписание для примера 17.10 -->
-<section class="slide">
+<section class="slide clock">
+  <div class="photo"><img src="img/spasskaya.webp" alt=""></div>
   <div class="pad">
     <h2>Бот напоминает сам</h2>
     <p class="lead" style="margin-top:36px;max-width:1500px">Сообщение приходит в чат MAX в 9:00 по Москве. Через год бот опять напомнит о медосвидетельствовании</p>
@@ -427,14 +442,14 @@ h2 { font-size: 132px; }
   </div>
   <div style="position:absolute;left:1010px;right:130px;top:290px">
     <p style="font-size:28px;margin-bottom:12px">Иностранцы на всех курсах, по таблицам «Сведения» на сайтах вузов</p>
-    <dl class="bars">
-      <div class="off"><dt>РУДН</dt><dd style="--v:12917">12 917</dd></div>
-      <div><dt>КФУ</dt><dd style="--v:6139">6 139</dd></div>
-      <div class="off"><dt>СПбПУ</dt><dd style="--v:5627">5 627</dd></div>
-      <div class="off"><dt>УрФУ</dt><dd style="--v:4052">4 052</dd></div>
-      <div class="off"><dt>ТПУ</dt><dd style="--v:2678">2 678</dd></div>
-      <div><dt>ИТМО</dt><dd style="--v:1282">1 282</dd></div>
-      <div><dt>СПбГЭУ</dt><dd style="--v:499">499</dd></div>
+    <dl class="bars pics">
+      <div class="off"><dt><span class="photo"><img src="img/rudn.webp" alt=""></span>РУДН</dt><dd style="--v:12917">12 917</dd></div>
+      <div><dt><span class="photo"><img src="../../../../web/src/photos/kfu.webp" alt=""></span>КФУ</dt><dd style="--v:6139">6 139</dd></div>
+      <div class="off"><dt><span class="photo"><img src="img/spbpu.webp" alt=""></span>СПбПУ</dt><dd style="--v:5627">5 627</dd></div>
+      <div class="off"><dt><span class="photo"><img src="img/urfu.webp" alt=""></span>УрФУ</dt><dd style="--v:4052">4 052</dd></div>
+      <div class="off"><dt><span class="photo"><img src="img/tpu.webp" alt=""></span>ТПУ</dt><dd style="--v:2678">2 678</dd></div>
+      <div><dt><span class="photo"><img src="../../../../web/src/photos/itmo.webp" alt=""></span>ИТМО</dt><dd style="--v:1282">1 282</dd></div>
+      <div><dt><span class="photo"><img src="img/unecon.webp" alt=""></span>СПбГЭУ</dt><dd style="--v:499">499</dd></div>
     </dl>
     <p style="font-size:30px;margin-top:14px"><span class="tag">профиль в боте</span>&nbsp;&nbsp;<span class="tag line" style="color:var(--muted);box-shadow:inset 0 0 0 3px var(--muted)">профиля пока нет</span></p>
   </div>
@@ -460,7 +475,8 @@ h2 { font-size: 132px; }
 </section>
 
 <!-- 14 · Пилот: первый вуз, канал, владельцы, метрики -->
-<section class="slide">
+<section class="slide dorm">
+  <div class="city"><div class="photo"><img src="img/village.webp" alt=""></div><span>Деревня Универсиады</span></div>
   <div class="pad">
     <h2>Пилот: начнём с КФУ</h2>
     <div class="pilot" style="grid-template-columns:repeat(4,1fr);gap:40px">
@@ -566,6 +582,7 @@ h2 { font-size: 132px; }
       <li><b>Опрос в чате иностранных студентов: 188 из 234 второкурсников</b><span>проведён командой среди второкурсников о первом годе</span></li>
       <li><b>Беседы с 10 второкурсниками ИТМО</b><span>записаны командой 24.10.2026, без персональных данных</span></li>
       <li><b>Отзыв отборочного жюри</b><span>сообщение организаторов, октябрь 2026</span></li>
+      <li><b>Фото: Wikimedia Commons, Public Domain и CC0. Карта Казани: © участники OpenStreetMap</b><span>commons.wikimedia.org; openstreetmap.org/copyright, лицензия ODbL. Файлы и ссылки — src/img/SOURCES.md</span></li>
     </ul>
   </div>
 </section>

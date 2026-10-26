@@ -23,6 +23,8 @@ h2::first-line { color: var(--ink); }
 }
 .page-no { opacity: 1; right: 46px; bottom: 34px; font: 900 44px/1 "Tektur", sans-serif; font-stretch: 75%; color: var(--red); }
 .cover::after { display: none; }
+/* No caption over a photo in the top right corner: the map and the Kremlin clock. */
+.slide:has(> .map)::after, .clock::after { display: none; }
 
 /* Title: Kazan under a diagonal across the bottom, the lead on a paper plate, as on the start screen. */
 .hero .photo { left: 0; right: 0; top: auto; bottom: 0; width: auto; height: 330px; clip-path: polygon(0 26%, 100% 0, 100% 100%, 0 100%); }
