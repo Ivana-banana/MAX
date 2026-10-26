@@ -168,7 +168,7 @@ h2 { font-size: 132px; }
 
 /* 12 · pilot */
 /* A timeline: stages as dots on one line, the pilot targets as a red gate the line passes through. */
-.road { position: relative; display: grid; grid-template-columns: 1fr 470px 1fr 1fr 0.8fr; gap: 44px; margin-top: 150px; }
+.road { position: relative; display: grid; grid-template-columns: 1fr 470px 1fr 1fr 0.8fr; gap: 44px; margin-top: 230px; }
 .road::before { content: ""; position: absolute; left: 0; right: 0; top: 76px; height: 8px; background: var(--ink); }
 .road .st { position: relative; padding-top: 128px; font-size: 34px; line-height: 1.25; }
 .road .st::before { content: ""; position: absolute; left: 0; top: 62px; width: 36px; height: 36px; border-radius: 50%; background: var(--red); box-shadow: 0 0 0 8px var(--paper); }
@@ -178,7 +178,7 @@ h2 { font-size: 132px; }
 .road .gate .when { position: static; margin-bottom: 18px; color: #f7f2e8; }
 .road .gate p:not(.when) { display: grid; grid-template-columns: 150px 1fr; align-items: baseline; margin-top: 14px; }
 .road .gate b { margin: 0; font-size: 56px; }
-.owners { display: flex; gap: 24px; margin-top: 110px; }
+.owners { display: flex; gap: 24px; margin-top: 80px; }
 .owners .tag { font-size: 36px; padding: 12px 26px 11px; }
 
 
@@ -491,8 +491,8 @@ h2 { font-size: 132px; }
     <div class="road">
       <div class="st"><p class="when">Ноябрь</p><b>10–15 сессий</b>под наблюдением, в общежитии КФУ</div>
       <div class="gate"><p class="when">Дальше, если</p><p><b>80%</b>доходят до плана без подсказки</p><p><b>0</b>ошибок в датах</p><p><b>−30%</b>времени против памятки</p></div>
-      <div class="st"><p class="when">Декабрь</p><b>30–50 студентов</b>приехали осенью, впереди дактилоскопия</div>
-      <div class="st"><p class="when">Набор 2027</p><b>Письмо о зачислении</b>со ссылкой на бота; проверим срок в 30 дней</div>
+      <div class="st"><div class="pic"><div class="photo"><img src="img/kazan-winter.webp" alt=""></div></div><p class="when">Декабрь</p><b>30–50 студентов</b>приехали осенью, впереди дактилоскопия</div>
+      <div class="st"><div class="pic"><div class="photo"><img src="img/airport.webp" alt=""></div></div><p class="when">Набор 2027</p><b>Письмо о зачислении</b>со ссылкой на бота; проверим срок в 30 дней</div>
       <div class="st"><p class="when">Дальше</p><b>Второй вуз</b>ИТМО или СПбГЭУ</div>
     </div>
     <div class="owners"><span class="tag">Правила — служба вуза</span><span class="tag">Набор — куратор</span><span class="tag">Бот и сводка — команда</span></div>
