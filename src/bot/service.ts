@@ -80,6 +80,8 @@ export class Service {
       const before = await tx.get(), ctx = this.ctx();
       const outcome = transition(before, update.input, ctx);
       notice = outcome.notice;
+      // #134: a repeat of the tap just applied changes nothing and is not answered in the chat.
+      if (outcome.repeat) return;
       const university = funnelUniversity(outcome.session ?? before, ctx);
       // A refused stale button (a double tap) changed nothing: it must neither count as a step nor
       // replace the screen the first tap queued, or the user gets only "the button is outdated".

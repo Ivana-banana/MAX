@@ -40,6 +40,8 @@ export interface Session {
   ends?: Partial<Record<ProcedureCountdown["from"], string>>;
   /** Changes of circumstances the student reported (situation id → day of the event, #41): the deadline is counted from it. */
   changes?: Record<string, string>;
+  /** The last button press applied, stamp and action as sent: its repeats from an offline burst get no reply (#134). */
+  lastTap?: string;
   reminders: boolean;
   ruleVersion: string;
 }
@@ -57,11 +59,11 @@ export type Changes = ChangeSet & { calendar: WorkCalendar };
 // locale comes only with bot_started (MAX client language); a ?start= payload arrives as "/start <payload>"
 export interface Input { text: string; callback: boolean; locale?: string }
 /**
- * `expired`: a stale button was refused and nothing changed.
+ * `expired`: a stale button was refused and nothing changed. `repeat`: it was the tap just applied, sent again (#134): no reply.
  * `notice`: the notification on the pressed button while a file reply is on its way.
  * `progress`: the same wait said in the chat, sent before the reply: MAX shows no button notification (#132).
  */
-export interface Transition { session: Session | null; reply: Reply; expired?: true; notice?: string; progress?: Reply }
+export interface Transition { session: Session | null; reply: Reply; expired?: true; repeat?: true; notice?: string; progress?: Reply }
 /** A plain chat line while a file is being built and uploaded (#132): no buttons, nothing to press yet. */
 const progress = (ctx: DialogueContext, text: string): Reply => ({ text, buttons: [], ruleVersion: ctx.version });
 // Every user-facing text comes from src/data/i18n/<lang>.json.
@@ -541,9 +543,12 @@ export function transition(previous: Session | null, input: Input, ctx: Dialogue
     // After /delete there is no session: the "Start" button of the last reply still begins a new one.
     if (!previous && action === "/start") return transition(null, { ...input, text: action, callback: false }, ctx);
     if (!previous || !(current || (stamp.startsWith(`${s.nonce}.`) && navigation(action) && profile(s)))) {
+      // #134: MAX delivers offline taps together; a repeat of the tap just applied is dropped without a reply.
+      if (previous && input.text.trim() === s.lastTap) return { session: previous, reply: reply(s, ctx, ""), expired: true, repeat: true };
       return { session: previous, reply: reply(s, ctx, t(s, ctx, "expired")), expired: true };
     }
     if (!current) { s.step = "plan"; delete s.selected; }
+    s.lastTap = input.text.trim();
   }
   s.revision++;
   if (action === "/delete" || action === "delete") {

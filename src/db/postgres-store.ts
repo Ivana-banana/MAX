@@ -398,6 +398,7 @@ function readSession(value: unknown): Session {
       ("citizenship" in value && typeof value.citizenship !== "string") ||
       ("entryDate" in value && typeof value.entryDate !== "string") ||
       ("selected" in value && typeof value.selected !== "string") ||
+      ("lastTap" in value && typeof value.lastTap !== "string") ||
       ("back" in value && (typeof value.back !== "string" || !sessionSteps.has(value.back)))) {
     throw invalidValue("sessions.data");
   }
