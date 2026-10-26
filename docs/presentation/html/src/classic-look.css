@@ -72,12 +72,7 @@
 .ava { position: relative; width: 280px; height: 280px; }
 .ava .photo { inset: 0; border-radius: 50%; }
 .ava::after { content: ""; position: absolute; inset: 0; z-index: 4; border-radius: 50%; border: 6px solid var(--ink); transform: translate(14px, -12px); }
-.crew-roles::after {
-  position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 5; white-space: nowrap;
-  padding: 6px 14px; background: #ff2bd6; color: #fff; font: 700 22px/1.25 system-ui, sans-serif; font-style: normal;
-}
-.crew-roles { position: relative; height: 120px; margin-top: 50px; outline: 6px dashed #ff2bd6; outline-offset: -6px; }
-.crew-roles::after { content: attr(data-mark); bottom: auto; top: 50%; transform: translate(-50%, -50%); }
+.crew-row p { margin-top: 18px; font-size: 34px; line-height: 1.2; }
 
 /* Problem: a strip of the Kazan map where the red band was — the city the student has to find his way in. */
 .map { right: 0; top: 0; width: 780px; height: 290px; clip-path: polygon(0 0, 100% 0, 100% 100%, 9% 100%); }
