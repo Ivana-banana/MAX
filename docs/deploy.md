@@ -14,7 +14,7 @@
 | ВМ | Yandex Cloud, Ubuntu 24.04, 2 vCPU (50%), 4 ГБ, SSD 30 ГБ, не прерываемая, статический IP `81.26.178.75` |
 | Доступ | `ssh deploy@81.26.178.75`, вход только по ключу |
 | Код | `~/max-bot`, задеплоенный коммит — `~/max-bot/DEPLOYED_COMMIT` |
-| Мониторинг | Основной — UptimeRobot, keyword-монитор `/health` раз в 5 минут с письмом команде (D-049; включает человек, см. «Мониторинг»). Второй слой — GitHub Actions [`monitor.yml`](../.github/workflows/monitor.yml) → [`scripts/monitor.sh`](../scripts/monitor.sh): `/health` без `failed` и, при секрете `MAX_BOT_TOKEN`, наличие webhook-подписки (D-032). Сейчас не стартует (#50) |
+| Мониторинг | Внешнего монитора нет: UptimeRobot (D-049) не включаем, решение человека 26.10 (D-081); падение видно по `bash scripts/monitor.sh` руками и по ответу бота. Второй слой — GitHub Actions [`monitor.yml`](../.github/workflows/monitor.yml) → [`scripts/monitor.sh`](../scripts/monitor.sh): `/health` без `failed` и, при секрете `MAX_BOT_TOKEN`, наличие webhook-подписки (D-032). Сейчас не стартует (#50) |
 
 Имя `81-26-178-75.sslip.io` — бесплатный DNS [sslip.io](https://sslip.io): имя само
 указывает на IP, в нём записанный. Поэтому IP должен оставаться статическим.
@@ -185,7 +185,7 @@ SQLite-том импорт не меняет, но всё, что пользов
 
 | Слой | Что проверяет | Частота | Оповещение | Состояние 19.10.2026 |
 |---|---|---|---|---|
-| UptimeRobot, keyword-монитор | `GET /health`: код 200 и строка `"failed":0}` в ответе | 5 мин | письмо на адреса команды | **не включён**: нужен аккаунт, это делает человек |
+| UptimeRobot, keyword-монитор | `GET /health`: код 200 и строка `"failed":0}` в ответе | 5 мин | письмо на адреса команды | **не включён** по решению человека 26.10 (D-081, #34); инструкция ниже — если решение пересмотрят |
 | GitHub Actions `monitor.yml` | `scripts/monitor.sh`: `/health` (`status: ok`, `queue.failed == 0`) и webhook-подписка | cron `*/15`, фактически раз в 3–6 ч | красный запуск, письмо тому, кто менял cron | **выключен**: GitHub Actions не используем (D-062); `scripts/monitor.sh` — руками |
 
 Строка `"failed":0}` есть в ответе, только если `/health` ответил 200 (хранилище живо)
