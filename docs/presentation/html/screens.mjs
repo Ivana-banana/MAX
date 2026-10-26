@@ -28,8 +28,8 @@ try {
   await waitHealth();
   await mkdir(out, { recursive: true });
   const browser = await chromium.launch();
-  // Scale 2 instead of Pixel 7's 2.625: sharp at slide size, lighter once inlined into the deck.
-  const context = await browser.newContext({ ...devices["Pixel 7"], deviceScaleFactor: 2, locale: "ru-RU", colorScheme: "light" });
+  // Scale 3: slide 5 crops parts of a screen and enlarges them, so they must stay sharp.
+  const context = await browser.newContext({ ...devices["Pixel 7"], deviceScaleFactor: 3, locale: "ru-RU", colorScheme: "light" });
   const page = await context.newPage();
   await page.route("https://st.max.ru/**", route => route.fulfill({ contentType: "text/javascript", body: "" }));
   await page.addInitScript(() => {
@@ -37,7 +37,7 @@ try {
   });
   const shot = async name => {
     await page.waitForTimeout(400);
-    await page.screenshot({ path: `${out}${name}.jpg`, type: "jpeg", quality: 82, animations: "disabled" });
+    await page.screenshot({ path: `${out}${name}.jpg`, type: "jpeg", quality: 88, animations: "disabled" });
   };
 
   await page.goto(`http://127.0.0.1:${port}/?demo=${Math.floor(Math.random() * 1_000_000) + 1}`);
