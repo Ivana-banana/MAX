@@ -1,0 +1,67 @@
+/*
+ * The mini app poster look on top of «Классика» (web/src/app.css): paper grain on every slide, the
+ * university photo in carmine duotone with halftone dots, a circle with a ring and a vertical city word.
+ * Kept apart from classic.html so content edits there and look edits here do not collide.
+ * Photos are the app's own files (web/src/photos, PD/CC0, see SOURCES.md), stored in grayscale.
+ */
+
+/* Paper grain, like a printed poster; above the content, as in the app. A PNG tile, not the app's SVG
+   filter: the filter is rasterised on every printed page and makes the PDF four times larger. */
+.slide::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  opacity: .13;
+  background: url(grain.png) 0 0 / 200px 200px;
+}
+
+/* Duotone: grayscale photo multiplied over carmine; halftone dots on top. */
+.photo { position: absolute; overflow: hidden; background: var(--red); }
+.photo img {
+  width: 100%; height: 100%; object-fit: cover;
+  filter: grayscale(1) contrast(1.35) brightness(1.08);
+  mix-blend-mode: multiply;
+}
+.photo::after {
+  content: ""; position: absolute; inset: 0; opacity: .55; mix-blend-mode: multiply;
+  background: radial-gradient(circle, rgba(0, 0, 0, .4) 1.6px, transparent 2.4px) 0 0 / 8px 8px;
+}
+.vert {
+  position: absolute; z-index: 3;
+  writing-mode: vertical-rl; transform: rotate(180deg);
+  font: 900 92px/1 "Tektur", sans-serif; font-stretch: 75%; letter-spacing: .08em; text-transform: uppercase; color: #f7f2e8;
+}
+.disc, .hoop { position: absolute; border-radius: 50%; z-index: 3; }
+.disc { background: var(--red); }
+.hoop { border: 6px solid var(--ink); z-index: 4; }
+
+/* Title: Kazan in the top right corner, the team on the photo. */
+.hero .photo { right: 0; top: 0; width: 860px; height: 440px; clip-path: polygon(0 0, 100% 0, 100% 100%, 0 80%); }
+.hero .photo img { object-position: 50% 62%; }
+.hero .vert { left: 1086px; top: 34px; font-size: 64px; }
+.hero .team { z-index: 3; color: #f7f2e8; }
+.hero .disc { width: 200px; height: 200px; left: 1180px; top: 300px; }
+.hero .hoop { width: 200px; height: 200px; left: 1216px; top: 270px; }
+
+/* From KFU to other universities: two slanted tiles, Kazan → Petersburg. */
+/* The heading steps down from 116px so the tiles fit beside it. */
+.campuses h2 { font-size: 100px !important; }
+.campuses .cities { position: absolute; right: 130px; top: 92px; display: flex; align-items: center; gap: 18px; }
+.campuses .city { position: relative; width: 240px; height: 132px; clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%); }
+.campuses .city .photo { inset: 0; }
+.campuses .city span {
+  position: absolute; left: 30px; bottom: 12px; z-index: 3;
+  font: 900 36px/1 "Tektur", sans-serif; font-stretch: 75%; letter-spacing: .06em; text-transform: uppercase; color: #f7f2e8;
+}
+.campuses .cities i { font: 900 50px/1 "Tektur", sans-serif; font-style: normal; color: var(--red); }
+.campuses .kazan img { object-position: 50% 62%; }
+.campuses .spb img { object-position: 50% 52%; transform: scale(1.7); transform-origin: 50% 52%; }
+
+/* Closing: a band of Kazan over the heading, like the finale screen. */
+.finale .photo { left: 0; right: 0; top: 0; height: 380px; clip-path: polygon(0 0, 100% 0, 100% 70%, 0 100%); }
+.finale .photo img { object-position: 50% 58%; }
+.finale .disc { width: 260px; height: 260px; right: 230px; top: 150px; }
+.finale .hoop { width: 260px; height: 260px; right: 190px; top: 120px; }
+.finale .pad { top: 420px; }

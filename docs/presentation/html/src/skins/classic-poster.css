@@ -1,0 +1,42 @@
+/*
+ * Skin «Плакат» over «Классика»: the mini app plan screen on every slide — heading with the second
+ * line in carmine and a red bar above it, a vertical caption on the right, large slide numbers. The
+ * title follows the start screen (photo below a diagonal, the lead on a paper plate), the closing slide
+ * gives Kazan the right part of the slide. Same slides and text as classic.html.
+ */
+
+/* Heading: first line ink, the rest carmine, like «Ваш / план». */
+h2 { position: relative; color: var(--red); }
+h2::first-line { color: var(--ink); }
+.pad > h2::before, .pad > div > h2::before {
+  content: ""; position: absolute; left: 0; top: -44px; width: 150px; height: 16px; background: var(--red);
+}
+.appx-label { display: inline-block; padding: 6px 16px 5px; background: var(--ink); color: var(--paper); }
+.appx .pad > h2::before { display: none; }
+
+/* Vertical caption and the slide number, like «КФУ · въезд 01.09» on the plan screen. */
+.slide::after {
+  content: "Компас иностранного студента · Казань · 29.10.2026";
+  position: absolute; right: 52px; top: 110px;
+  writing-mode: vertical-rl;
+  font: 800 22px/1 "Tektur", sans-serif; font-stretch: 75%; letter-spacing: .2em; text-transform: uppercase; color: var(--muted);
+}
+.page-no { opacity: 1; right: 46px; bottom: 34px; font: 900 44px/1 "Tektur", sans-serif; font-stretch: 75%; color: var(--red); }
+.cover::after { display: none; }
+
+/* Title: Kazan under a diagonal across the bottom, the lead on a paper plate, as on the start screen. */
+.hero .photo { left: 0; right: 0; top: auto; bottom: 0; width: auto; height: 330px; clip-path: polygon(0 26%, 100% 0, 100% 100%, 0 100%); }
+.hero .photo img { object-position: 50% 58%; }
+.hero .ring { display: none; }
+.hero .vert { left: 34px; top: auto; bottom: 30px; font-size: 60px; }
+.hero .team { color: var(--ink); }
+.hero .disc { left: auto; right: 150px; top: 770px; width: 210px; height: 210px; }
+.hero .hoop { left: auto; right: 116px; top: 744px; width: 210px; height: 210px; }
+.hero .sub { z-index: 3; top: 812px; padding: 18px 26px; margin-left: -26px; background: var(--paper); max-width: 1180px; }
+.hero .note { z-index: 3; bottom: 40px; color: #f7f2e8; }
+
+/* Closing: Kazan on the right part, cut on a slant, the circle on the cut. */
+.finale .photo { left: auto; right: 0; top: 0; bottom: 0; width: 700px; height: auto; clip-path: polygon(24% 0, 100% 0, 100% 100%, 0 100%); }
+.finale .pad { top: 230px; }
+.finale .disc { right: auto; left: 1180px; top: 690px; width: 240px; height: 240px; }
+.finale .hoop { right: auto; left: 1216px; top: 656px; width: 240px; height: 240px; }

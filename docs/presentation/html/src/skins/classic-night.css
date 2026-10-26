@@ -1,0 +1,49 @@
+/*
+ * Skin «Ночь» over «Классика»: the mini app dark theme — near-black paper, warm light ink, the same
+ * carmine. A red rail with a vertical caption runs down the left edge of every slide; Kazan fills the
+ * whole title slide and closes the deck along the bottom. Same slides and text as classic.html.
+ */
+
+:root { --paper: #141414; --ink: #efe9dd; --red: #d4261f; --muted: #9a958c; }
+.note { color: var(--muted); }
+
+/* Grain stays visible on dark paper: the black tile inverted to light specks. */
+.slide::before { filter: invert(1); opacity: .06; }
+
+/* Surfaces that put paper-coloured text on ink or red keep it light. */
+.phone { border-color: #000; background: #000; }
+.core { background: #262626; color: var(--ink); }
+.col.now, .flow.route span.end, .tag.red { color: #f7f2e8; }
+.tag { color: #141414; }
+
+/* Red rail on the left, like the app's side caption. */
+.slide::after {
+  content: "Компас иностранного студента · Казань · 29.10.2026";
+  position: absolute; left: 0; top: 0; bottom: 0; width: 64px; padding-top: 110px;
+  background: var(--red); writing-mode: vertical-rl; transform: rotate(180deg);
+  display: flex; align-items: center; justify-content: flex-end; padding-bottom: 110px;
+  font: 800 22px/1 "Tektur", sans-serif; font-stretch: 75%; letter-spacing: .22em; text-transform: uppercase; color: #f7f2e8;
+}
+.cover::after { display: none; }
+.page-no { opacity: 1; color: var(--red); font: 900 40px/1 "Tektur", sans-serif; font-stretch: 75%; }
+
+/* Title: Kazan across the whole slide, darkened towards the text. */
+.hero .photo { inset: 0; width: auto; height: auto; clip-path: none; }
+.hero .photo img { object-position: 50% 60%; }
+.hero .photo::before {
+  content: ""; position: absolute; inset: 0; z-index: 1;
+  background: linear-gradient(90deg, rgba(10, 10, 10, .92) 0%, rgba(10, 10, 10, .7) 45%, rgba(10, 10, 10, 0) 80%);
+}
+.hero .ring { display: none; }
+.hero .big { z-index: 2; color: var(--red); }
+.hero h1, .hero .sub, .hero .note, .hero .team { z-index: 2; color: #f7f2e8; }
+.hero .vert { left: auto; right: 60px; top: auto; bottom: 120px; font-size: 96px; }
+.hero .disc { left: 1180px; top: 110px; width: 230px; height: 230px; }
+.hero .hoop { left: 1216px; top: 76px; width: 230px; height: 230px; border-color: #f7f2e8; }
+
+/* Closing: Kazan along the bottom under a slant, the circle on the cut. */
+.finale .photo { left: 0; right: 0; top: auto; bottom: 0; height: 400px; clip-path: polygon(0 34%, 100% 0, 100% 100%, 0 100%); }
+.finale .pad { top: 120px; }
+.finale .page-no { z-index: 3; color: #f7f2e8; }
+.finale .disc { right: 200px; top: 560px; width: 220px; height: 220px; }
+.finale .hoop { right: 160px; top: 530px; width: 220px; height: 220px; }
