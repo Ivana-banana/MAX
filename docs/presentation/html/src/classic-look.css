@@ -71,11 +71,8 @@
 .crew-row b { display: block; margin-top: 40px; font: 900 52px/1 "Tektur", sans-serif; font-stretch: 75%; text-transform: uppercase; }
 .ava { position: relative; width: 280px; height: 280px; }
 .ava .photo { inset: 0; border-radius: 50%; }
-.ava::after { content: ""; position: absolute; inset: 0; z-index: 4; border-radius: 50%; border: 6px solid var(--ink); transform: translate(30px, -24px); }
-/* No photo yet: initials in a dashed circle with a draft mark. */
-.ava.empty { display: grid; place-items: center; border-radius: 50%; outline: 6px dashed #ff2bd6; outline-offset: -6px; }
-.ava.empty span { font: 900 110px/1 "Tektur", sans-serif; font-stretch: 75%; color: var(--red); }
-.ava.empty i, .crew-roles::after {
+.ava::after { content: ""; position: absolute; inset: 0; z-index: 4; border-radius: 50%; border: 6px solid var(--ink); transform: translate(14px, -12px); }
+.crew-roles::after {
   position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 5; white-space: nowrap;
   padding: 6px 14px; background: #ff2bd6; color: #fff; font: 700 22px/1.25 system-ui, sans-serif; font-style: normal;
 }
