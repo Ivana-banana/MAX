@@ -321,13 +321,14 @@ h2 { font-size: 132px; }
 .remind .due::before { background: var(--red); box-shadow: none; }
 
 /* 8 · changes after the online stage */
-.changes { display: grid; grid-template-columns: 1fr 1fr; gap: 90px; margin-top: 50px; }
-.changes .label { margin-bottom: 22px; color: var(--red); }
-.changes .row.pair { grid-template-columns: 250px 1fr; font-size: 40px; padding: 22px 0; }
-.changes .row .label { color: var(--ink); margin: 0; }
-.changes ul { list-style: none; display: grid; gap: 18px; font-size: 40px; }
-.changes li { padding-left: 36px; position: relative; }
-.changes li::before { content: ""; position: absolute; left: 0; top: .45em; width: 18px; height: 18px; background: var(--red); }
+.changes { margin-top: 24px; }
+.changes .label { margin-bottom: 12px; color: var(--red); }
+.changes .jury, .changes .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.changes .jury { margin-bottom: 30px; }
+.changes .jury > div { border-top: 4px solid var(--ink); padding-top: 14px; font-size: 32px; line-height: 1.25; }
+.changes b { display: block; margin-bottom: 8px; font: 900 36px/1.05 "Tektur", sans-serif; font-stretch: 75%; }
+.changes .cards > div { box-shadow: inset 0 0 0 4px var(--ink); padding: 16px 24px 18px; font-size: 30px; line-height: 1.25; }
+.changes .cards i { margin-right: 14px; font-style: normal; color: var(--red); }
 
 /* 10 · alternatives */
 .cmp { margin-top: 36px; display: grid; }
@@ -616,22 +617,20 @@ h2::first-line { color: var(--ink); }
   <div class="pad">
     <h2>Что изменилось<br>после онлайн-этапа</h2>
     <div class="changes">
-      <div>
-        <p class="label">Отвечаем на отзыв жюри</p>
-        <div class="row pair"><span class="label">До въезда</span><span>Карточки «Ещё не в России»</span></div>
-        <div class="row pair"><span class="label">Спрос</span><span>Первый сигнал: опрос 234 студентов</span></div>
-        <div class="row pair"><span class="label">Поступление</span><span>Исследуем выбор вуза, подачу и гранты</span></div>
+      <p class="label">Отвечаем на отзыв жюри</p>
+      <div class="jury">
+        <div><b>До въезда</b>Карточки «Ещё не в России»</div>
+        <div><b>Спрос</b>Первый сигнал: опрос 234 студентов</div>
+        <div><b>Поступление</b>Исследуем выбор вуза, подачу и гранты</div>
       </div>
-      <div>
-        <p class="label">В продукте</p>
-        <ul>
-          <li>Где пройти и как добраться</li>
-          <li>Чем грозит пропуск, со ссылкой на закон</li>
-          <li>«Изменились обстоятельства»: переезд, поездка, больница</li>
-          <li>План в PDF для куратора</li>
-          <li>«Пройдено X из N» и ближайший шаг</li>
-          <li>Блок со ссылкой для письма о зачислении</li>
-        </ul>
+      <p class="label">В продукте</p>
+      <div class="cards">
+        <div><b><i>01</i>Адрес и маршрут</b>Где пройти и как добраться</div>
+        <div><b><i>02</i>Цена пропуска</b>Со ссылкой на закон</div>
+        <div><b><i>03</i>«Изменились обстоятельства»</b>Переезд, поездка, больница</div>
+        <div><b><i>04</i>План в PDF</b>Для куратора</div>
+        <div><b><i>05</i>Прогресс</b>«Пройдено X из N» и ближайший шаг</div>
+        <div><b><i>06</i>Письмо о зачислении</b>Блок со ссылкой на бота</div>
       </div>
     </div>
   </div>
@@ -781,7 +780,6 @@ h2::first-line { color: var(--ink); }
       <div class="node dark"><b>Ядро</b>Явный расчёт сроков по правилам</div>
       <div class="node"><b>Данные</b>Нормы и профили вузов в JSON. PostgreSQL хранит профиль студента и очередь напоминаний</div>
     </div>
-    <p class="muted" style="font-size:32px;margin-top:40px">Чат и мини-приложение работают в одной сессии: отметка в одном месте видна в другом</p>
   </div>
 </section>
 
