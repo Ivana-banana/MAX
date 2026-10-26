@@ -102,6 +102,6 @@
 /* Sources: one more line for the photos and the map, so the list sets a size smaller. */
 .appx .sources { font-size: 34px; }
 .appx .sources span { font-size: 26px; }
-/* Pilot timeline: winter Kazan over December, the airport train platform over the 2027 intake. */
-.road .pic { position: absolute; left: 0; right: 0; top: -170px; height: 140px; clip-path: polygon(8% 0, 100% 0, 92% 100%, 0 100%); }
-.road .pic .photo { inset: 0; }
+/* Route: the next stops get a photo too, faded under the outline — no profile in the bot yet. */
+.stop .tile.next .photo { opacity: .45; }
+.stop .tile.next span { z-index: 5; }
