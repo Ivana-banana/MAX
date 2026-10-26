@@ -503,7 +503,16 @@ h2 { font-size: 132px; }
   </div>
 </section>
 
-<!-- 16 · Приложение: сроки отсчитываются от своей даты въезда -->
+<!-- 16 · Спасибо за внимание: QR ведёт на бота (screens/bot-qr.svg, qrcode-generator, уровень Q) -->
+<section class="slide cover">
+  <div class="pad" style="top:300px;right:auto">
+    <h2 style="font-size:150px">Спасибо<br>за внимание</h2>
+    <p class="label" style="margin-top:60px;font-size:52px">max.ru/t149_hakaton_max_bot</p>
+  </div>
+  <img src="../screens/bot-qr.svg" alt="QR-код: max.ru/t149_hakaton_max_bot" style="position:absolute;right:170px;top:270px;width:540px;height:540px;box-shadow:0 0 0 8px var(--ink)">
+</section>
+
+<!-- 17 · Приложение: сроки отсчитываются от своей даты въезда -->
 <section class="slide appx">
   <div class="pad">
     <p class="appx-label">Приложение</p>
@@ -527,7 +536,7 @@ h2 { font-size: 132px; }
   </div>
 </section>
 
-<!-- 17 · Приложение: следующий этап -->
+<!-- 18 · Приложение: следующий этап -->
 <section class="slide appx">
   <div class="pad">
     <p class="appx-label">Приложение</p>
@@ -540,7 +549,7 @@ h2 { font-size: 132px; }
   </div>
 </section>
 
-<!-- 18 · Приложение: архитектура -->
+<!-- 19 · Приложение: архитектура -->
 <section class="slide appx">
   <div class="pad">
     <p class="appx-label">Приложение</p>
@@ -552,20 +561,6 @@ h2 { font-size: 132px; }
       <div class="node"><b>Данные</b>Нормы и профили вузов в JSON. PostgreSQL хранит профиль студента и очередь напоминаний</div>
     </div>
     <p class="muted" style="font-size:32px;margin-top:40px">Чат и мини-приложение работают в одной сессии: отметка в одном месте видна в другом</p>
-  </div>
-</section>
-
-<!-- 19 · Приложение: ограничения -->
-<section class="slide appx">
-  <div class="pad">
-    <p class="appx-label">Приложение</p>
-    <h2>Границы<br>продукта</h2>
-    <div style="margin-top:56px;width:1500px">
-      <div class="row">Показ идёт на учебных профилях. Нормы юрист не вычитывал</div>
-      <div class="row">Сканы паспорта и медицинские документы не принимает</div>
-      <div class="row">Заявления в МВД и системы вузов не подаёт</div>
-      <div class="row">Хранит MAX ID, язык, гражданство, вуз, даты и отметки студента. /delete стирает профиль</div>
-    </div>
   </div>
 </section>
 
