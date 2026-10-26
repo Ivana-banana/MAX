@@ -167,9 +167,19 @@ h2 { font-size: 132px; }
 .cmp .ours { background: var(--red); color: var(--paper); padding-left: 24px; padding-right: 24px; margin: 0 -24px; }
 
 /* 12 · pilot */
-.pilot { display: grid; grid-template-columns: repeat(3, 1fr); gap: 50px; margin-top: 46px; }
-.pilot div { border-top: 8px solid var(--ink); padding-top: 22px; font-size: 38px; }
-.pilot .label { color: var(--red); margin-bottom: 14px; font-size: 48px; }
+/* A timeline: stages as dots on one line, the pilot targets as a red gate the line passes through. */
+.road { position: relative; display: grid; grid-template-columns: 1fr 470px 1fr 1fr 0.8fr; gap: 44px; margin-top: 150px; }
+.road::before { content: ""; position: absolute; left: 0; right: 0; top: 76px; height: 8px; background: var(--ink); }
+.road .st { position: relative; padding-top: 128px; font-size: 34px; line-height: 1.25; }
+.road .st::before { content: ""; position: absolute; left: 0; top: 62px; width: 36px; height: 36px; border-radius: 50%; background: var(--red); box-shadow: 0 0 0 8px var(--paper); }
+.road .when { position: absolute; top: 0; font: 800 34px/1 "Tektur", sans-serif; font-stretch: 75%; text-transform: uppercase; color: var(--red); }
+.road b { display: block; margin-bottom: 10px; font: 900 50px/1 "Tektur", sans-serif; font-stretch: 75%; }
+.road .gate { position: relative; z-index: 1; padding: 24px 30px 30px; background: var(--red); color: #f7f2e8; font-size: 30px; line-height: 1.2; }
+.road .gate .when { position: static; margin-bottom: 18px; color: #f7f2e8; }
+.road .gate p:not(.when) { display: grid; grid-template-columns: 150px 1fr; align-items: baseline; margin-top: 14px; }
+.road .gate b { margin: 0; font-size: 56px; }
+.owners { display: flex; gap: 24px; margin-top: 110px; }
+.owners .tag { font-size: 36px; padding: 12px 26px 11px; }
 
 
 /* 6 · real MAX screenshots, no draft mark */
@@ -473,23 +483,19 @@ h2 { font-size: 132px; }
   </div>
 </section>
 
-<!-- 14 · Пилот: первый вуз, канал, владельцы, метрики -->
+<!-- 14 · Пилот: шкала времени, метрики — ворота перед расширением, владельцы -->
 <section class="slide dorm">
   <div class="city"><div class="photo"><img src="img/village.webp" alt=""></div><span>Деревня Универсиады</span></div>
   <div class="pad">
     <h2>Пилот: начнём с КФУ</h2>
-    <div class="pilot" style="grid-template-columns:repeat(4,1fr);gap:40px">
-      <div style="font-size:32px"><p class="label">Где</p><p>Иностранные первокурсники КФУ в общежитии. Письмо в службу ушло 19.10</p></div>
-      <div style="font-size:32px"><p class="label">Канал</p><p>Сейчас через чат куратора, с набора 2027 — в письме о зачислении. Команда шлёт службе сводку сроков на неделю</p></div>
-      <div style="font-size:32px"><p class="label">Кто ответственен</p><p>Правила — специалист службы. Набор — куратор. Бот и сводка — команда</p></div>
-      <div style="font-size:32px"><p class="label">Когда</p><p>Ноябрь–декабрь: у приехавших осенью впереди дактилоскопия. Срок в 30 дней проверим с заездом 2027</p></div>
+    <div class="road">
+      <div class="st"><p class="when">Ноябрь</p><b>10–15 сессий</b>под наблюдением, в общежитии КФУ</div>
+      <div class="gate"><p class="when">Дальше, если</p><p><b>80%</b>доходят до плана без подсказки</p><p><b>0</b>ошибок в датах</p><p><b>−30%</b>времени против памятки</p></div>
+      <div class="st"><p class="when">Декабрь</p><b>30–50 студентов</b>приехали осенью, впереди дактилоскопия</div>
+      <div class="st"><p class="when">Набор 2027</p><b>Письмо о зачислении</b>со ссылкой на бота; проверим срок в 30 дней</div>
+      <div class="st"><p class="when">Дальше</p><b>Второй вуз</b>ИТМО или СПбГЭУ</div>
     </div>
-    <div class="targets small tight" style="margin-top:24px">
-      <div class="target"><b>80%</b><span>доходят до плана<br>без подсказки</span></div>
-      <div class="target"><b>0</b><span>ошибок<br>в датах</span></div>
-      <div class="target"><b>−30%</b><span>времени по сравнению<br>с памяткой</span></div>
-    </div>
-    <div class="flow"><span>10–15 сессий</span><i>→</i><span>30–50 студентов</span><i>→</i><span>второй вуз: ИТМО или СПбГЭУ</span></div>
+    <div class="owners"><span class="tag">Правила — служба вуза</span><span class="tag">Набор — куратор</span><span class="tag">Бот и сводка — команда</span></div>
   </div>
 </section>
 
