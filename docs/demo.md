@@ -1,7 +1,7 @@
 # Демонстрация и защита
 
-Файл относится к презентации `classic`, выбранной для финала 25.10.2026:
-[`presentation/html/classic.html`](presentation/html/classic.html), раскадровка — раздел
+Файл относится к презентации `classic`, выбранной для финала 25.10.2026; показываем её в скине
+«Плакат» (D-083): [`presentation/html/classic-poster.html`](presentation/html/classic-poster.html), раскадровка — раздел
 «Классика» в [`presentation/html/storyboard.md`](presentation/html/storyboard.md). Номера
 слайдов ниже — по ней.
 
@@ -77,7 +77,7 @@ N». Руками в MAX пройдены версии 24.09 и 25–27.09 (`doc
 | Время вышло на показе | Пропустить мини-приложение, сразу к слайду 6 |
 
 Видео и скриншоты MAX версии `1761443` пока не созданы (#33). PDF презентации —
-печатью `classic.html` из браузера ([инструкция](presentation/html/README.md)).
+печатью `classic-poster.html` из браузера ([инструкция](presentation/html/README.md)).
 
 ## Вопросы жюри
 
