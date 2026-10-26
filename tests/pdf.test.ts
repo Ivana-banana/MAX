@@ -161,4 +161,15 @@ describe("plan as a PDF (#92)", () => {
     const f = await service();
     expect(await f.click("calendar")).toBe("Файл календаря готовится…");
   });
+
+  // #132: MAX shows no button notification (D-056), so the wait is said in the chat, before the file.
+  it.each([["pdf", "PDF готовится…", "first-90-days-plan.pdf"], ["calendar", "Файл календаря готовится…", "first-90-days.ics"]])(
+    "says in the chat that the %s is on its way, then sends the file", async (action, loading, name) => {
+      const f = await service();
+      const before = f.sent.length;
+      await f.click(action); await f.svc.flush();
+      const replies = f.sent.slice(before);
+      expect(replies.map(r => r.file?.name ?? r.text)).toEqual([loading, name]);
+      expect(replies[0]!.buttons).toEqual([]);
+    });
 });

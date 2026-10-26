@@ -59,8 +59,11 @@ export interface Input { text: string; callback: boolean; locale?: string }
 /**
  * `expired`: a stale button was refused and nothing changed.
  * `notice`: the notification on the pressed button while a file reply is on its way.
+ * `progress`: the same wait said in the chat, sent before the reply: MAX shows no button notification (#132).
  */
-export interface Transition { session: Session | null; reply: Reply; expired?: true; notice?: string }
+export interface Transition { session: Session | null; reply: Reply; expired?: true; notice?: string; progress?: Reply }
+/** A plain chat line while a file is being built and uploaded (#132): no buttons, nothing to press yet. */
+const progress = (ctx: DialogueContext, text: string): Reply => ({ text, buttons: [], ruleVersion: ctx.version });
 // Every user-facing text comes from src/data/i18n/<lang>.json.
 const t = (s: Session, ctx: DialogueContext, key: string, vars?: Record<string, string | number>) => format(ctx.texts, s.lang, key, vars);
 // Only sessions created before university profiles existed (no id) fall back to the default one.
@@ -433,7 +436,7 @@ function calendar(s: Session, ctx: DialogueContext): Transition {
   const items = plan(s, ctx);
   if (!items.some(i => i.status !== "done") && !countedChanges(s, ctx).length) return { session: s, reply: home(s, ctx) };
   const back = [button(t(s, ctx, "btn.plan"), "plan")];
-  return { session: s, notice: t(s, ctx, "calendar.loading"), reply: { ...reply(s, ctx, t(s, ctx, "calendar.intro"), [back]),
+  return { session: s, notice: t(s, ctx, "calendar.loading"), progress: progress(ctx, t(s, ctx, "calendar.loading")), reply: { ...reply(s, ctx, t(s, ctx, "calendar.intro"), [back]),
     failed: reply(s, ctx, t(s, ctx, "calendar.failed"), [[button(t(s, ctx, "btn.retry"), "calendar")], back]),
     file: { name: CALENDAR_FILE, content: planToIcs(items,
       { lang: s.lang, texts: ctx.texts, demo: ctx.demo, uid: s.nonce, today: ctx.today, sequence: s.revision, ...(s.visits ? { visits: s.visits } : {}),
@@ -462,7 +465,7 @@ export function planPdf(s: Session, ctx: DialogueContext): PlanPdf {
 function pdf(s: Session, ctx: DialogueContext): Transition {
   if (!plan(s, ctx).length) return { session: s, reply: home(s, ctx) };
   const back = [button(t(s, ctx, "btn.plan"), "plan")];
-  return { session: s, notice: t(s, ctx, "pdf.loading"), reply: { ...reply(s, ctx, t(s, ctx, "pdf.intro"), [back]), pdf: planPdf(s, ctx),
+  return { session: s, notice: t(s, ctx, "pdf.loading"), progress: progress(ctx, t(s, ctx, "pdf.loading")), reply: { ...reply(s, ctx, t(s, ctx, "pdf.intro"), [back]), pdf: planPdf(s, ctx),
     failed: reply(s, ctx, t(s, ctx, "pdf.failed"), [[button(t(s, ctx, "btn.retry"), "pdf")], back]) } };
 }
 /** University deadlines already counted from an entered end date, for the calendar file (D-040). */

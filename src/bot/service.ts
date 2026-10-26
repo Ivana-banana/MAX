@@ -90,6 +90,10 @@ export class Service {
       await tx.cancelReminders();
       if (outcome.session) await tx.save(outcome.session, now);
       else await tx.remove();
+      // #132: the queue goes by next_attempt, then created_at, so the wait line goes out first and the file right after it.
+      if (outcome.progress) {
+        await tx.enqueue(createHash("sha256").update(JSON.stringify(["progress", update.id])).digest("hex"), outcome.progress, "reply", now, now - 1);
+      }
       await tx.enqueue(update.id, outcome.reply, "reply", now, now);
       await this.scheduleUser(tx, update.user, outcome.session);
     });
