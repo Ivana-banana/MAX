@@ -336,6 +336,8 @@ h2 { font-size: 132px; }
 .cmp > div:last-child { border-bottom: 4px solid var(--ink); }
 .cmp b { font: 900 46px/1.05 "Tektur", sans-serif; font-stretch: 75%; }
 .cmp .cmp-head { border-top: 0; font: 800 32px/1 "Tektur", sans-serif; font-stretch: 75%; color: var(--muted); padding-bottom: 14px; }
+/* what each competitor lacks is the point of the slide: red and bold, like the header above it */
+.cmp > div:not(.ours) > span:last-child { color: var(--red); font-weight: 700; }
 .cmp .ours { background: var(--red); color: var(--paper); padding-left: 24px; padding-right: 24px; margin: 0 -24px; }
 
 /* 12 · pilot */
@@ -626,10 +628,10 @@ h2::first-line { color: var(--ink); }
       <p class="label">В продукте</p>
       <div class="cards">
         <div><b><i>01</i>Адрес и маршрут</b>Где пройти и как добраться</div>
-        <div><b><i>02</i>Цена пропуска</b>Со ссылкой на закон</div>
+        <div><b><i>02</i>Последствия пропуска</b>Со ссылкой на закон</div>
         <div><b><i>03</i>«Изменились обстоятельства»</b>Переезд, поездка, больница</div>
         <div><b><i>04</i>План в PDF</b>Для куратора</div>
-        <div><b><i>05</i>Прогресс</b>«Пройдено X из N» и ближайший шаг</div>
+        <div><b><i>05</i>Прогресс</b>Сколько этапов уже пройдено, и сколько осталось</div>
         <div><b><i>06</i>Письмо о зачислении</b>Блок со ссылкой на бота</div>
       </div>
     </div>
